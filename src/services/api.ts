@@ -1,0 +1,185 @@
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK ;
+const BASE_URL = import.meta.env.BASE_URL;
+import {type Shipment}  from "../types/logistica";
+export interface ShipmentStat {
+    label: string;
+    value: string | number; // Can be "12" or 12
+    color: string;
+}
+
+
+export const authService = {
+  login: async (userData: any) => {
+    // --- MOCK LOGIC ---
+    if (USE_MOCK) {
+      console.log("🛠️ Using Mock Auth Service");
+      // Simulate a small network delay
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      if (userData.email === "admin@test.com" && userData.password === "1234") {
+        return {
+          token: "mock-jwt-token-123",
+          user: { email: userData.email, name: "Admin User" },
+        };
+      } else {
+        throw new Error("Credenciales inválidas (Mock)");
+      }
+    }
+
+    // --- REAL BACKEND LOGIC ---
+    const response = await fetch(`${BASE_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Error en el servidor");
+    return data;
+  },
+
+  logout: () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  },
+};
+
+export const getShipemntData ={
+  getShipment : async(): Promise<Shipment[]>=>{
+    if (USE_MOCK){
+      console.log("Fetchin Mock Stats");
+      await new Promise((resolve)=> setTimeout(resolve,600))
+
+return [
+        {
+          id: "1",
+          my_reference:"TFSQ12345",
+          cliente_reference: "92B1354079",
+          truck: "52886S",
+          client: "PALOS GARZA",
+          vehicleType: "TRAILER",
+          trailer: "141238849",
+          scac: "TFBB",
+          orgien:"FEMA",
+          destino:"Bodega LRD",
+          status: "Deliver",
+          events: [
+            {
+              category: "PICK UP",
+              date: "02/27/26",
+              time: "13:35",
+              notes: "TSI"
+            },
+            {
+              category: "DEPARTURE",
+              date: "02/27/26",
+              time: "14:39"
+            },{
+              category:"CLEAR MEX",
+              date:"02/27/26",
+              time:"14:00",
+              notes:"Modulando USA"
+            },{
+              category:"CLEAR USA",
+              date:"02/27/26",
+              time:"14:30",
+              notes:"Modulando USA"
+            },{
+              category:"DELIVERY",
+              date:"02/27/26",
+              time:"13:30",
+              notes:"JUAN FERNANDO"
+            }
+          ]
+        },
+        {
+          id: "2",
+          my_reference:"TFSQ3215",
+          cliente_reference: "92B1355348",
+          truck: "1259",
+          client: "EXPEDITORS",
+          vehicleType: "TRAILER",
+          trailer: "DAÑADA / PTE ACTUALIZAR",
+          scac: "TFSQ",
+          orgien:"MOGA",
+          destino:"Vocar",
+          status: "DELAYED",
+          events: [
+            {
+              category: "PICK UP",
+              date: "02/27/26",
+              time: "13:20",
+              notes: "REVISAR DAÑO"
+            }
+          ]
+    }];
+
+  }
+  try{
+    console.log(BASE_URL)
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${BASE_URL}/stats`, {
+      headers:{
+        "Authorization" : `Bearer ${token}`,
+        "Content-Type":"application/json"
+      }
+    });
+    if (!response) throw new Error("Error en el servidor");
+    return await response.json()
+  }catch(error){
+    console.log("Dashboard Service Error:" , error);
+    throw new Error("No se pudo Cargar los Embarques")
+  }
+
+}
+}
+
+export const dashboardService = {
+    getStats: async (): Promise<ShipmentStat[]> => {
+        // 1. MOCK LOGIC
+        if (USE_MOCK) {
+            console.log("📊 Fetching Mock Dashboard Stats");
+            await new Promise((resolve) => setTimeout(resolve, 600)); // Simulates network lag
+            
+            return [
+                { 
+                    label: 'Embarques Activos', 
+                    value: Math.floor(Math.random() * 20) + 5, // Random number between 5-25
+                    color: '#2563eb' 
+                },
+                { 
+                    label: 'En Espera', 
+                    value: Math.floor(Math.random() * 10), 
+                    color: '#ca8a04' 
+                },
+                { 
+                    label: 'Completados', 
+                    value: 48, 
+                    color: '#16a34a' 
+                },
+            ];
+        }
+        
+        // 2. REAL BACKEND LOGIC
+        try {
+            console.log(BASE_URL)
+            const token = localStorage.getItem("token");
+            const response = await fetch(`${BASE_URL}/stats`, {
+                headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!response.ok) throw new Error("Error en el servidor");
+      return await response.json();
+      
+    } catch (error) {
+      console.error("Dashboard Service Error:", error);
+      throw new Error("No se pudieron cargar las estadísticas.");
+    }
+  }
+};
+
+
