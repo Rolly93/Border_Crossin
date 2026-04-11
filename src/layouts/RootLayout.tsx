@@ -20,8 +20,7 @@ const RootLayout: React.FC = () => {
               Dashboard
             </Link>
           </li>
-           <button onClick={handleLogout} style={{ marginTop: '20px' }}>Logout</button>
-
+        
         </ul>
 
         <button onClick={handleLogout} className={styles.logoutButton}>

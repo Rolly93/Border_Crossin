@@ -2,8 +2,8 @@ export interface Shipment{
     id : string;
     my_reference : string;
     cliente_reference : string;
+    cliente:string;
     truck:string;
-    client: string;
     vehicleType : string;
     trailer : string;
     scac: string;
@@ -11,6 +11,7 @@ export interface Shipment{
     destino:string
     status:string;
     events: ShipmentEvent[];
+
 
 }
 
@@ -23,8 +24,10 @@ export interface ShipmentEvent{
 export type EventCategory = 
   | "PICK UP" 
   | "DEPARTURE" 
+  | "DELAY"
   | "CLEAR MEX" 
   | "MEX INSPECCION" 
   | "USA INSPECCION" 
-  | "CLEAR USA" 
+  | "CLEAR USA"
+  |"SAFETY_YARD" 
   | "DELIVERY";

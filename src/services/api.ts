@@ -2,6 +2,7 @@
 const USE_MOCK = import.meta.env.VITE_USE_MOCK ;
 const BASE_URL = import.meta.env.BASE_URL;
 import {type Shipment}  from "../types/logistica";
+import { apiRequest } from "../utility/api";
 export interface ShipmentStat {
     label: string;
     value: string | number; // Can be "12" or 12
@@ -56,8 +57,8 @@ return [
           id: "1",
           my_reference:"TFSQ12345",
           cliente_reference: "92B1354079",
-          truck: "52886S",
-          client: "PALOS GARZA",
+          truck: "truck -52886S",
+          cliente: "PALOS GARZA",
           vehicleType: "TRAILER",
           trailer: "141238849",
           scac: "TFBB",
@@ -76,16 +77,30 @@ return [
               date: "02/27/26",
               time: "14:39"
             },{
+              category:"MEX INSPECCION",
+              date:"02/27/26",
+              time:"14:30",
+              notes:"12658"
+            },
+            {
               category:"CLEAR MEX",
               date:"02/27/26",
               time:"14:00",
               notes:"Modulando USA"
-            },{
+            },
+            {
+              category:"USA INSPECCION",
+              date:"02/27/26",
+              time:"14:30",
+              notes:"USA 1351"
+            },
+            {
               category:"CLEAR USA",
               date:"02/27/26",
               time:"14:30",
               notes:"Modulando USA"
-            },{
+            },
+            {
               category:"DELIVERY",
               date:"02/27/26",
               time:"13:30",
@@ -97,10 +112,10 @@ return [
           id: "2",
           my_reference:"TFSQ3215",
           cliente_reference: "92B1355348",
-          truck: "1259",
-          client: "EXPEDITORS",
+          truck: "truck -1259",
+          cliente: "EXPEDITORS",
           vehicleType: "TRAILER",
-          trailer: "DAÑADA / PTE ACTUALIZAR",
+          trailer: "TRail- ta651654",
           scac: "TFSQ",
           orgien:"MOGA",
           destino:"Vocar",
@@ -117,16 +132,10 @@ return [
 
   }
   try{
-    console.log(BASE_URL)
-    const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/stats`, {
-      headers:{
-        "Authorization" : `Bearer ${token}`,
-        "Content-Type":"application/json"
-      }
-    });
-    if (!response) throw new Error("Error en el servidor");
-    return await response.json()
+    const data = await apiRequest<Shipment[]>("/stats");
+    
+    console.log(data); // ✅ TypeScript te ayuda aquí
+    return data;
   }catch(error){
     console.log("Dashboard Service Error:" , error);
     throw new Error("No se pudo Cargar los Embarques")
@@ -163,17 +172,10 @@ export const dashboardService = {
         
         // 2. REAL BACKEND LOGIC
         try {
-            console.log(BASE_URL)
-            const token = localStorage.getItem("token");
-            const response = await fetch(`${BASE_URL}/stats`, {
-                headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        }
-      });
-
-      if (!response.ok) throw new Error("Error en el servidor");
-      return await response.json();
+          const data = await apiRequest<ShipmentStat[]>("/stats");
+    
+          console.log(data.values); 
+          return data;
       
     } catch (error) {
       console.error("Dashboard Service Error:", error);

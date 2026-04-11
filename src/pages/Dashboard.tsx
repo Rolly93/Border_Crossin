@@ -2,32 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { dashboardService, getShipemntData, type ShipmentStat } from '../services/api';
 import styles from '../modules/Dashboard.module.css'; 
 import { Table } from '../components/Table';
+import { Header } from '../components/Header';
+import { ShipmentRow } from '../components/ShipmentRow'; // Nuevo componente
 import { type Shipment } from '../types/logistica';
 
+const SHIPMENT_COLUMNS = [
+  "Track Number", "Referencia Cliente", "Tractor", "Cliente", "Tipo Vehículo", 
+  "Trailer", "SCAC", "Origen", "Destino", "Estatus", "Llegada Patio", 
+  "Salida Patio", "Inspección MEX", "Sello Mex", "Verde Mex", "Inspección USA", 
+  "Sello Usa", "Verde USA", "Entregado", "Recibe"
+];
 
-const shipmentColumns =["Track Number","Referencia Cliente",
-                        "tractor","Cliente","tipo Vehiculo","trailer",
-                        "scac","Origen","estatus","Llegada Patio","Destino",
-                        "Salida del Patio", "Verde Mex","inspeccion MEX",
-                        "Sello Mex", "Verde USA","Inspeccion USA","Sello Usa","Entregado","recive"]
 const Dashboard: React.FC = () => {
-
-  const getTime = (s: Shipment, cat: string) => 
-    s.events.find(e => e.category === cat)?.time || '--';
   const [stats, setStats] = useState<ShipmentStat[]>([]);
+  const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [shipments , setSipments]=useState<Shipment[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [statsData,shipmentData] = await Promise.all([
+        const [statsData, shipmentData] = await Promise.all([
           dashboardService.getStats(),
           getShipemntData.getShipment()
         ]);
-        
         setStats(statsData);
-        setSipments(shipmentData)
+        setShipments(shipmentData);
       } catch (error) {
         console.error("Error loading dashboard:", error);
       } finally {
@@ -37,55 +36,40 @@ const Dashboard: React.FC = () => {
     loadData();
   }, []);
 
-  if (loading) {
-    return <div className={styles.loader}>Cargando datos del servidor...</div>;
-  }
+  if (loading) return <div className={styles.loader}>Cargando...</div>;
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Panel de Control xBorder</h1>
-      </header>
+      <Header title="Panel de Control xBorder" styles={styles} />
 
+      {/* Sección de Stats */}
       <div className={styles.grid}>
-        {stats.map((stat, index) => (
-          <div key={index} className={styles.card}>
-            {/* We keep inline style ONLY for the dynamic color from the API */}
-            <div 
-              className={styles.statusDot} 
-              style={{ backgroundColor: stat.color }} 
-            />
-            <div>
-              <p className={styles.label}>{stat.label}</p>
-              <p className={styles.value}>{stat.value}</p>
-            </div>
-          </div>
+        {stats.map((stat, i) => (
+          <StatCard key={i} stat={stat} />
         ))}
       </div>
 
-      {/* Table section placeholder */}
+      {/* Sección de Tabla */}
       <section style={{ marginTop: '2rem' }}>
-         <Table data={shipments} columns={shipmentColumns} renderRow={(shipment) => ( // This function creates the <td> cells for ONE row
-            <>
-              <td>{shipment.my_reference}</td>
-              <td>{shipment.cliente_reference}</td>
-              <td>{shipment.truck}</td>
-              <td>{shipment.client}</td>
-              <td>{shipment.vehicleType}</td>
-              <td>{shipment.trailer}</td>
-              <td>{shipment.scac}</td>
-              <td>{shipment.orgien}</td>
-              <td>{shipment.status}</td>
-              <td>{getTime(shipment, "PICK UP")}</td>
-              <td>{shipment.destino}</td>
-              <td>{getTime(shipment, "DEPARTURE")}</td>
-              <td>{getTime(shipment, "CLEAR MEX")}</td>
-              <td>{getTime(shipment, "MEX INSPECCION")}</td>
-            </>
-          )}/>
+        <Table 
+          data={shipments} 
+          columns={SHIPMENT_COLUMNS} 
+          renderRow={(s) => <ShipmentRow shipment={s} />} 
+        />
       </section>
     </div>
   );
 };
+
+// Sub-componente interno para no saturar el principal
+const StatCard = ({ stat }: { stat: ShipmentStat }) => (
+  <div className={styles.card}>
+    <div className={styles.statusDot} style={{ backgroundColor: stat.color }} />
+    <div>
+      <p className={styles.label}>{stat.label}</p>
+      <p className={styles.value}>{stat.value}</p>
+    </div>
+  </div>
+);
 
 export default Dashboard;
