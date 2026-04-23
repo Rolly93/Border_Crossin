@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+
+pywebview
+python-dotenv
+paramiko
+fastapi-mail
+fastapi-utils
+typing-inspect
+
+pydantic
+pydantic-settings
+flask_login

@@ -4,7 +4,7 @@ import os
 
 class XMLService():
     """docstring for XMLService."""
-    def __init__(self, referencia, tipo_operacion,codigo_transport,ref_transport,codigo_evento,date_time,comments, output_dir="temp/xmltemp/"):
+    def __init__(self, output_dir="temp/xmltemp/"):
         self._output_dir=output_dir
         self.now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         
