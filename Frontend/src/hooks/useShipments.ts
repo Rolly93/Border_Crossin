@@ -1,0 +1,61 @@
+import { useState , useEffect } from "react";
+import { Shipment } from "@/types/Shipment";
+import { shipmentService } from "@/service/shipmentService";
+
+export function useShipments() {
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchShipments = async () => {
+    try {
+      setLoading(true);
+      const data = await shipmentService.getall();
+      setShipments(data);
+    } catch (err) {
+      setError("Error al cargar datos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchShipments();
+  }, []);
+
+const addLocalShipment = (newShipment: Shipment) => {
+  setShipments((prev) => [...prev, newShipment]);
+};
+
+  // Esta función actualizará el estado de React inmediatamente en pantalla
+  const updateLocalShipment = (id: number, updatedData: Shipment) => {
+    setShipments(prev => prev.map(item => item.id === id ? { ...updatedData } : item));
+  };
+
+  return { shipments, loading, error, updateLocalShipment, refresh: fetchShipments ,addLocalShipment};
+}
+
+export function usesUpdateShipment(){
+    const [success,setSuccess] = useState<boolean>(false)
+    const [loading,setLoading] = useState<boolean>(false);
+    const [error,setError] = useState<string |null>(null);
+
+    const updateShipment = async (id:number , updatedData:Shipment)=>{
+        try{
+            setError(null)
+            setLoading(true)
+            setSuccess(false)
+            
+            await shipmentService.post(id,updatedData);
+            
+        setSuccess(true)
+    }catch (error){
+        console.log('Error al actualizar el embarque' , error);
+        setError("No se pudo guardar la información en el servidor.");
+    }finally{
+        setLoading(false)
+    }
+    }
+return {updateShipment,loading,error,success}
+
+}
