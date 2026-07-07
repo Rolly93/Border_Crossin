@@ -1,15 +1,21 @@
 // components/Layout.tsx
 import { AppShell, Burger, Group, Skeleton, Text,NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Outlet , Link} from 'react-router-dom';
+import { useEffect } from 'react';
+import { Outlet , Link, useLocation} from 'react-router-dom';
 export function Layout() {
-  const [opened, { toggle }] = useDisclosure();
+  const [opened, { toggle ,close}] = useDisclosure();
+  const location = useLocation();
+
+  useEffect(()=>{
+    close();
+  },[location,close])
 
   return (
     <AppShell
       header={{ height: 60 }}
       navbar={{
-        width: 300,
+        width: {base:230 , sm:300},
         breakpoint: 'sm',
         collapsed: { mobile: !opened },
       }}
@@ -28,15 +34,18 @@ export function Layout() {
       {/* 2. Navbar Section */}
       <AppShell.Navbar p="md">
         <Text size="sm" fw={500} c="dimmed" mb="xs">Navigation</Text>
-        <NavLink component={Link} to="/dashboard" label="Dashboard" />
-        <NavLink component={Link} to="/sftp_connection" label='Sftp Connection' />
+        <NavLink component={Link} to="/dashboard" 
+        label="Dashboard" 
+        active={location.pathname ==='/dashboard'}/>
+        
+        <NavLink component={Link} 
+        to="/sftp_connection" 
+        label='Sftp Connection' 
+        active={location.pathname ==='/sftp_connection'}/>
 
         <Text size="sm" fw={500} c="dimmed" mb="xs">Employees</Text>
-        
-        <Skeleton height={28} mt="sm" animate={false} radius="xl" />
-        <Skeleton height={28} mt="sm" animate={false} radius="xl" />
-        <Skeleton height={28} mt="sm" animate={false} radius="xl" />
-      </AppShell.Navbar>
+        {/**<Skeleton height={28} mt="sm" animate={false} radius="xl" /> **/}
+        </AppShell.Navbar>
 
       <AppShell.Main>
         <Outlet />
