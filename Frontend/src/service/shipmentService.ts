@@ -1,7 +1,6 @@
 import { Shipment } from '@/types/Shipment';
 import { createApiClient } from './api';
 import { LOADSHIPMENT } from '@/mocks/shipmentsMock';
-import { ShipmentForm } from '@/components/Form/ShipmentForm';
 
 
 

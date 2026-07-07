@@ -35,9 +35,11 @@ export default function ShipmentRow({ shipments, loading, error, onRowDoubleClic
           onDoubleClick={() => onRowDoubleClick(shipment)} 
           style={{ cursor: 'pointer' }}
         >
+          <Table.Td>{shipment.costumer_tracking}</Table.Td>
           <Table.Td>{shipment.trcking_Number}</Table.Td>
           <Table.Td>{shipment.trailer}</Table.Td>
           <Table.Td>{shipment.truck}</Table.Td>
+          <Table.Td>{shipment.cliente}</Table.Td>
           <Table.Td>{shipment.type_operation}</Table.Td>
           <Table.Td>{shipment.orgien}</Table.Td>
           <Table.Td>{shipment.destino}</Table.Td>

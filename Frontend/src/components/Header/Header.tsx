@@ -5,21 +5,24 @@ import { ShipmentForm } from "../Form/ShipmentForm";
 interface HeadersProps {
   onAddShipment: (data: any) => Promise<void>;
   isCreating: boolean;
+
+  searchValue:string;
+  onSearchChange:(value:string) =>void;
 }
-export default function Headers({ onAddShipment, isCreating }: HeadersProps) {
+export default function Headers({ onAddShipment, isCreating ,searchValue , onSearchChange }: HeadersProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleFormSubmit = async (data: any) => {
-    // 1. Ejecutamos la función centralizada que guardará el dato en el estado del Padre
     await onAddShipment(data);
-    // 2. Cerramos el modal
     close(); 
   };
 
   return (
-    <>
       <Group justify={"space-between"} gap={"xl"}>
-        <Input placeholder="Search" />
+        <Input placeholder="Search shipments..."
+        value={searchValue}
+        onChange={(event)=>onSearchChange(event.currentTarget.value)} />
+        
         <Button variant="default" onClick={open}>
           Add Shipment
         </Button>
@@ -37,6 +40,5 @@ export default function Headers({ onAddShipment, isCreating }: HeadersProps) {
           </Box>
         </Modal>
       </Group>
-    </>
   );
 }

@@ -18,7 +18,7 @@ export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, load
     <Modal 
       opened={opened}
       onClose={onClose}
-      title={selectedElement ? `EMBARQUE ${selectedElement.trailer}` : "Form"}
+      title={selectedElement ? `Trailer ${selectedElement.trailer}` : "Form"}
       overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       size='auto'
     >

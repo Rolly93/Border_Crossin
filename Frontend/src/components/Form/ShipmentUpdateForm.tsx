@@ -4,23 +4,30 @@ import { DateTimePicker } from '@mantine/dates'; // Use DateTimePicker since you
 import { Shipment, EventCategory, ShipmentEvent } from '@/types/Shipment';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import { setupShipmentWatchers, shipmentValidationRules } from '../utils/validation/ShipmentFormRules';
+import { useState } from 'react';
+import EditableTextInput from '../Input/EditableTextInput';
 interface EventFieldConfig{
     key:EventCategory;
     label:string
+    showNotes?:boolean;
+    maxNotesLength?:number;
+    notesLable?:string;
 }
-      const EVENT_FIELDS :EventFieldConfig[] =[
+const EVENT_FIELDS :EventFieldConfig[] =[
         {key: "pick_up",  label:'Pick up' },
         {key: "departure" , label: 'Departure'},
-        {key: "delay", label: 'Delay'},
+        {key: "delay", label: 'Delay' , showNotes:true, maxNotesLength:50, notesLable:"Delay for"},
         {key: "clear_mex",  label: 'Clear Customs Mex' },
-        {key: "mex_inspeccion",  label:'Mex Inspection' },
-        {key: "usa_inspeccion" , label: 'USa Inspection'},
+        {key: "mex_inspeccion",  label:'Mex Inspection' , showNotes:true , maxNotesLength:25 ,  notesLable:"New Seal"},
+        {key: "usa_inspeccion" , label: 'USa Inspection' , showNotes:true , maxNotesLength:25 , notesLable:"New Seal"},
         {key: "clear_usa", label: 'Clear Sutoms USA'},
-        {key:"safety_yard",  label: 'Safety Yard'},
-        {key: "deliver" ,label: 'Delivered'},
-      ];      
+        {key:"safety_yard",  label: 'Safety Yard' , showNotes:true , maxNotesLength:25 , notesLable:"safeted at"},
+        {key: "deliver" ,label: 'Delivered' ,showNotes:true , maxNotesLength:25 , notesLable:"Who recives the shipment"},
+];      
 export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { onSubmit: (values: Shipment) => void, initialShipment?: Shipment }) 
 {
+  const [itEditid ,setIsEdit] = useState(false);
     const prepareInitialEvents = (existingEvent : ShipmentEvent[] = []):ShipmentEvent[]=>{
         return EVENT_FIELDS.map(field =>{
             const found = existingEvent.find(e=>e.category ===field.key);
@@ -30,8 +37,11 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
 
     }
 
+
+
     const form = useForm<Shipment>({
         mode: 'controlled',
+        validateInputOnChange:true,
         initialValues: {
           id: initialShipment?.id || 0,
           trcking_Number: initialShipment?.trcking_Number || '',
@@ -45,23 +55,28 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
           type_operation:initialShipment?.type_operation|| '',
           status: initialShipment?.status || '',
           events: prepareInitialEvents(initialShipment?.events), // Ensures all slots exist
-        },
+        },validate:shipmentValidationRules
       });
+      setupShipmentWatchers(form)
+
+
 return (
     <Box p="xs" >
       <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
         <Stack >
           
           {/* --- TOP SECTION: General Shipment Info --- */}
+          
           <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
-            <TextInput label="Embarque" {...form.getInputProps('trcking_Number')} />
-            <TextInput label="Cliente" {...form.getInputProps('cliente')} />
-            <TextInput label="No. Vehiculo" {...form.getInputProps('truck')} />
-            <TextInput label="Tipo Vehículo" {...form.getInputProps('vehicleType')} />
-            <TextInput label="Trailer" {...form.getInputProps('trailer')} />
-            <TextInput label="Origen" {...form.getInputProps('orgien')} />
-            <TextInput label="Destino" {...form.getInputProps('destino')} />
-            <TextInput label="Estatus" {...form.getInputProps('status')} />
+            < EditableTextInput  label="No. Embarque" formProps= {form.getInputProps('trcking_Number')} />
+            < EditableTextInput  label="Referencia" formProps={form.getInputProps('costumer_tracking')} />
+            < EditableTextInput  label="Cliente" formProps={form.getInputProps('cliente')} />
+            < EditableTextInput  label="No. Vehiculo" formProps={form.getInputProps('truck')} />
+            < EditableTextInput  label="Tipo Vehículo" formProps={form.getInputProps('vehicleType')} />
+            < EditableTextInput  label="Trailer" formProps={form.getInputProps('trailer')} />
+            < EditableTextInput  label="Origen" formProps={form.getInputProps('orgien')} />
+            < EditableTextInput  label="Destino" formProps={form.getInputProps('destino')} />
+            < EditableTextInput  label="Estatus" formProps={form.getInputProps('status')} />
           </SimpleGrid>
 
           <Divider my="sm" />
@@ -71,7 +86,6 @@ return (
           
           <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg">
             {EVENT_FIELDS.map((field) => {
-              // Find the index of this event in Mantine's form array state
               const eventIndex = form.values.events.findIndex(e => e.category === field.key);
               if (eventIndex === -1) return null;
               return (
@@ -83,16 +97,20 @@ return (
                     withDropdown: true,
                     popoverProps: { withinPortal: false },
                     format: '24h',
-                  }}                    placeholder="Seleccionar Fecha y Hora..."
+                  }}
+                  placeholder="Seleccionar Fecha y Hora..."
                   clearable
                   {...form.getInputProps(`events.${eventIndex}.dateTime`)}
                   />
-                  {/* Optional: You can add an accompanying notes field underneath each, or just leave the date */}
-                  <TextInput 
-                    placeholder="Notas opcionales" 
+                  {field.showNotes &&
+                  
+                  (<TextInput 
+                    placeholder={field.notesLable}
                     size="xs"
+                    maxLength={field.maxNotesLength || 50}
                     {...form.getInputProps(`events.${eventIndex}.notes`)}
-                  />
+                  />)
+                  }
                 </Stack>
               );
             })}

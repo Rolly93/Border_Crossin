@@ -20,7 +20,7 @@ export interface Shipment{
 export interface ShipmentEvent{
     category:EventCategory;
     dateTime:Date;
-    notes?:string
+    notes?:string;
 }
 export type EventCategory = 
   | "pick_up" 
@@ -32,3 +32,18 @@ export type EventCategory =
   | "clear_usa"
   |"safety_yard" 
   | "deliver";
+
+
+export interface ShipmentCreate{
+
+    trcking_Number : string;
+    costumer_tracking : string;
+    cliente:string;
+    truck:string;
+    vehicleType : string;
+    trailer : string;
+    orgien:string,
+    destino:string,
+    type_operation:string,
+
+}

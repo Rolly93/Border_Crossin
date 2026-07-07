@@ -2,14 +2,17 @@
 import { useForm } from '@mantine/form';
 import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/core';
 import { ShipmentFormProps } from '@/types/Forms';
+import { setupShipmentWatchers, shipmentValidationRules } from '../utils/validation/ShipmentFormRules';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
   // 1. Initialize the Mantine form hook
   const form = useForm({
     mode: 'controlled',
+    validateInputOnChange:true,
     initialValues: {
       trcking_Number: initialData?.trcking_Number || '',
       costumer_tracking: initialData?.costumer_tracking || '',
+      type_operation:initialData?.type_operation||'',
       cliente: initialData?.cliente || '',
       truck: initialData?.truck || '',
       vehicleType: initialData?.vehicleType || '',
@@ -19,13 +22,10 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
     },
 
-    // 2. Add validation rules if needed
-    validate: {
-      trcking_Number: (value) => (value.length < 2 ? 'Tracking number is required' : null),
-      cliente: (value) => (value.length < 2 ? 'Client name is required' : null),
-    },
+    validate:shipmentValidationRules,
   });
 
+setupShipmentWatchers(form)
   return (
     <Paper p="md" withBorder>
       <form onSubmit={form.onSubmit((values) => onSubmit(values as any))}>
@@ -34,16 +34,18 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
           <Group grow>
             <TextInput
-              label="Tracking Number"
+              label="No. Embarque"
               placeholder="e.g. TRK-12345"
               required
               {...form.getInputProps('trcking_Number')}
             />
             <TextInput
-              label="Customer Tracking"
+              label="Referencia"
+              required
               placeholder="e.g. CUST-987"
               {...form.getInputProps('costumer_tracking')}
             />
+
           </Group>
 
           <Group grow>
@@ -53,36 +55,51 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
               required
               {...form.getInputProps('cliente')}
             />
+              <Select
+              label="Tipo Operacion"
+              placeholder="Exportacion / Importacion ....."
+              data={[ 'Exportacion', 'Importacion']}
+              required
+              {...form.getInputProps('type_operation')}
+            />
           </Group>
 
           <Group grow>
             <TextInput
-              label="Truck"
+              label="Tractor"
+              required
               placeholder="Truck ID/Number"
               {...form.getInputProps('truck')}
             />
             <Select
               label="Vehicle Type"
+              required
               placeholder="e.g. Dry Van, Reefer"
               data={['Drya va', 'Truck']}
+              
               {...form.getInputProps('vehicleType')}
             />
             <TextInput
               label="Trailer"
+              required
               placeholder="Trailer Number"
               {...form.getInputProps('trailer')}
             />
+
           </Group>
+          
 
           <Group grow>
             <TextInput
               label="Origen"
-              placeholder="Origin City"
+              required
+              placeholder="Origin yard"
               {...form.getInputProps('orgien')}
             />
             <TextInput
               label="Destino"
-              placeholder="Destination City"
+              required
+              placeholder="Destination yard"
               {...form.getInputProps('destino')}
             />
           </Group>

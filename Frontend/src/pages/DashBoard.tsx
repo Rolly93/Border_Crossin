@@ -8,20 +8,32 @@ import { Container } from '@mantine/core';
 import { useShipments } from '@/hooks/useShipments';
 import { shipmentService } from '@/service/shipmentService';
 import { Shipment } from '@/types/Shipment';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export function DashBoard() {
 
-// 🌟 El hook vive aquí en el padre de ambos
   const { shipments, loading, error, updateLocalShipment, addLocalShipment } = useShipments();
   const [isCreating, setIsCreating] = useState(false);
+  const [search,setSerach] = useState('');
 
-  // Lógica para GUARDAR un nuevo embarque creado desde el Header
+  const filterShipments = useMemo(()=>{
+    const query = search.toLocaleLowerCase().trim();
+    if (!query) return shipments;
+
+    return( shipments.filter((shipment)=>{
+      return(
+        shipment.status?.toString().toLocaleLowerCase().includes(query)||
+        shipment.cliente?.toString().toLocaleLowerCase().includes(query)||
+        shipment.trailer?.toString().toLocaleLowerCase().includes(query)||
+        shipment.truck?.toString().toLocaleLowerCase().includes(query)
+);
+    }));
+  },[search,shipments])
+
   const handleCreateSubmit = async (newValues: Shipment) => {
     try {
       setIsCreating(true);
       
- 
       const shipmentToSave = await shipmentService.insert({ ...newValues }) 
       await shipmentService.post(shipmentToSave.id, shipmentToSave);
       
@@ -36,9 +48,14 @@ export function DashBoard() {
 
   return (
     <Container size="responsive">
-<Headers onAddShipment={handleCreateSubmit} isCreating={isCreating} />     
+    <Headers 
+      onAddShipment={handleCreateSubmit} 
+      isCreating={isCreating}
+      searchValue={search}
+      onSearchChange={setSerach} />     
+
        <ShipmentTable 
-          shipments={shipments} 
+          shipments={filterShipments} 
           loading={loading} 
           error={error} 
           updateLocalShipment={updateLocalShipment} 

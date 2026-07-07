@@ -4,12 +4,12 @@ import { Shipment } from '@/types/Shipment';
 export let LOADSHIPMENT: Shipment[] = [
   {
     id: 1,
-    trcking_Number: "TA123456",
+    trcking_Number: "92b1234567",
     costumer_tracking: "CUST-99211",
     cliente: "MOGA Logistics",
     truck: "TR-15",
-    vehicleType: "Full Trailer",
-    trailer: "TRAILER-92B",
+    vehicleType: "Trailer",
+    trailer: "TA123456",
     orgien: "Bodega Mexico",
     destino: "USA Distribution Center",
     type_operation: "Exportacion",
@@ -28,12 +28,11 @@ export let LOADSHIPMENT: Shipment[] = [
       {
         category: "clear_mex",
         dateTime: new Date("2026-07-01T14:15:00"),
-        notes: "Aduana mexicana liberada sin contratiempos."
       },
       {
         category: "mex_inspeccion",
         dateTime: new Date("2026-07-01T15:00:00"),
-        notes: "Inspección de rutina completada."
+        notes: "N1564"
       }
     ]
   },
