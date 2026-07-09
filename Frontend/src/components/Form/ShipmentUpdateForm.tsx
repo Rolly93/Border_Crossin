@@ -4,9 +4,12 @@ import { DateTimePicker } from '@mantine/dates'; // Use DateTimePicker since you
 import { Shipment, EventCategory, ShipmentEvent } from '@/types/Shipment';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
-import { setupShipmentWatchers, shipmentValidationRules } from '../utils/validation/ShipmentFormRules';
+import { setupShipmentWatchers } from '../utils/validation/ShipmentFormRules';
 import { useState } from 'react';
 import EditableTextInput from '../Input/EditableTextInput';
+
+import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
+import { ShipmentModel } from '../utils/domain/shipmentModel';
 interface EventFieldConfig{
     key:EventCategory;
     label:string
@@ -15,27 +18,21 @@ interface EventFieldConfig{
     notesLable?:string;
 }
 const EVENT_FIELDS :EventFieldConfig[] =[
-        {key: "pick_up",  label:'Pick up' },
-        {key: "departure" , label: 'Departure'},
-        {key: "delay", label: 'Delay' , showNotes:true, maxNotesLength:50, notesLable:"Delay for"},
-        {key: "clear_mex",  label: 'Clear Customs Mex' },
-        {key: "mex_inspeccion",  label:'Mex Inspection' , showNotes:true , maxNotesLength:25 ,  notesLable:"New Seal"},
-        {key: "usa_inspeccion" , label: 'USa Inspection' , showNotes:true , maxNotesLength:25 , notesLable:"New Seal"},
-        {key: "clear_usa", label: 'Clear Sutoms USA'},
-        {key:"safety_yard",  label: 'Safety Yard' , showNotes:true , maxNotesLength:25 , notesLable:"safeted at"},
-        {key: "deliver" ,label: 'Delivered' ,showNotes:true , maxNotesLength:25 , notesLable:"Who recives the shipment"},
+  {key: "pick_up",  label:'Pick up' },
+  {key: "departure" , label: 'Departure'},
+  {key: "delay", label: 'Delay' , showNotes:true, maxNotesLength:50, notesLable:"Delay for"},
+  {key: "clear_mex",  label: 'Clear Customs Mex' },
+  {key: "mex_inspeccion",  label:'Mex Inspection' , showNotes:true , maxNotesLength:25 ,  notesLable:"New Seal"},
+  {key: "usa_inspeccion" , label: 'USa Inspection' , showNotes:true , maxNotesLength:25 , notesLable:"New Seal"},
+  {key: "clear_usa", label: 'Clear Sutoms USA'},
+  {key:"safety_yard",  label: 'Safety Yard' , showNotes:true , maxNotesLength:25 , notesLable:"safeted at"},
+  {key: "deliver" ,label: 'Delivered' ,showNotes:true , maxNotesLength:25 , notesLable:"Who recives the shipment"},
 ];      
+const EXPECTED_CATEGORIES = EVENT_FIELDS.map(f=>f.key)
 export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { onSubmit: (values: Shipment) => void, initialShipment?: Shipment }) 
 {
   const [itEditid ,setIsEdit] = useState(false);
-    const prepareInitialEvents = (existingEvent : ShipmentEvent[] = []):ShipmentEvent[]=>{
-        return EVENT_FIELDS.map(field =>{
-            const found = existingEvent.find(e=>e.category ===field.key);
-            return found|| {category: field.key , dateTime : null as any , notes:''}
 
-        })
-
-    }
 
 
 
@@ -54,8 +51,18 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
           destino: initialShipment?.destino || '',
           type_operation:initialShipment?.type_operation|| '',
           status: initialShipment?.status || '',
-          events: prepareInitialEvents(initialShipment?.events), // Ensures all slots exist
-        },validate:shipmentValidationRules
+          events: ShipmentModel.prepareInitialEvents(initialShipment?.events, EXPECTED_CATEGORIES)
+        }, validate:{
+      cliente:(_value ,values)=>new ShipmentValidator(values).validateCliente(),
+      costumer_tracking:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
+      trcking_Number:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
+      truck:(_value ,values)=>new ShipmentValidator(values).validateTruck(),
+      orgien:(_value ,values)=>new ShipmentValidator(values).validateOrigin(),
+      destino:(_value ,values)=>new ShipmentValidator(values).validateDestination(),
+      trailer:(_value ,values)=>new ShipmentValidator(values).validateTrailer(),
+      type_operation : (_value, values) => new ShipmentValidator(values).validateTypeOperation(),
+
+    },
       });
       setupShipmentWatchers(form)
 
@@ -64,9 +71,7 @@ return (
     <Box p="xs" >
       <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
         <Stack >
-          
-          {/* --- TOP SECTION: General Shipment Info --- */}
-          
+
           <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
             < EditableTextInput  label="No. Embarque" formProps= {form.getInputProps('trcking_Number')} />
             < EditableTextInput  label="Referencia" formProps={form.getInputProps('costumer_tracking')} />
@@ -81,7 +86,6 @@ return (
 
           <Divider my="sm" />
 
-          {/* --- BOTTOM SECTION: Logistics Events Layout --- */}
           <Text fw={700} size="lg">Eventos de Logística / Transfer</Text>
           
           <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg">
@@ -116,7 +120,6 @@ return (
             })}
           </SimpleGrid>
 
-          {/* --- ACTION BUTTONS --- */}
           <Group justify="flex-end" mt="xl">
             <Button type="submit" color="dark">
               GUARDAR

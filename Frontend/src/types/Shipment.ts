@@ -19,7 +19,7 @@ export interface Shipment{
 
 export interface ShipmentEvent{
     category:EventCategory;
-    dateTime:Date;
+    dateTime:Date|null;
     notes?:string;
 }
 export type EventCategory = 

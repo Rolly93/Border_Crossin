@@ -11,7 +11,7 @@ const router = createBrowserRouter([
     element: <Layout />, // The persistent Shell
     children: [
       {
-        path: '/dashboard', // This makes it the default page at '/'
+        path: '/', // This makes it the default page at '/'
         element: <DashBoard />,
       },
       {

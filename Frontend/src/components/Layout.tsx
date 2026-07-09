@@ -34,9 +34,9 @@ export function Layout() {
       {/* 2. Navbar Section */}
       <AppShell.Navbar p="md">
         <Text size="sm" fw={500} c="dimmed" mb="xs">Navigation</Text>
-        <NavLink component={Link} to="/dashboard" 
+        <NavLink component={Link} to="/" 
         label="Dashboard" 
-        active={location.pathname ==='/dashboard'}/>
+        active={location.pathname ==='/'}/>
         
         <NavLink component={Link} 
         to="/sftp_connection" 

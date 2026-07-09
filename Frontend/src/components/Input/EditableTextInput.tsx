@@ -16,9 +16,7 @@ return(<TextInput label={label}
     readOnly={!isEditing}
     onDoubleClick={()=>setIsediting(true)}
     onBlur={(event) => {
-        // Ejecuta el onBlur original de Mantine si existe para que no se rompa la validación
         if (formProps?.onBlur) formProps.onBlur(event);
-        // Apaga nuestro modo de edición
         setIsediting(false);
       }}
     rightSection={isEditing?(

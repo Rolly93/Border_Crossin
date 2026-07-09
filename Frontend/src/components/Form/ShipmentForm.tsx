@@ -2,7 +2,8 @@
 import { useForm } from '@mantine/form';
 import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/core';
 import { ShipmentFormProps } from '@/types/Forms';
-import { setupShipmentWatchers, shipmentValidationRules } from '../utils/validation/ShipmentFormRules';
+import {setupShipmentWatchers} from '../utils/validation/ShipmentFormRules';
+import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
   // 1. Initialize the Mantine form hook
@@ -12,7 +13,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
     initialValues: {
       trcking_Number: initialData?.trcking_Number || '',
       costumer_tracking: initialData?.costumer_tracking || '',
-      type_operation:initialData?.type_operation||'',
+      type_operation:initialData?.type_operation||'Exportacion',
       cliente: initialData?.cliente || '',
       truck: initialData?.truck || '',
       vehicleType: initialData?.vehicleType || '',
@@ -22,10 +23,23 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
     },
 
-    validate:shipmentValidationRules,
+    validate:{
+      cliente:(_value ,values)=>new ShipmentValidator(values).validateCliente(),
+      costumer_tracking:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
+      trcking_Number:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
+      truck:(_value ,values)=>new ShipmentValidator(values).validateTruck(),
+      orgien:(_value ,values)=>new ShipmentValidator(values).validateOrigin(),
+      destino:(_value ,values)=>new ShipmentValidator(values).validateDestination(),
+      trailer:(_value ,values)=>new ShipmentValidator(values).validateTrailer(),
+      type_operation : (_value, values) => new ShipmentValidator(values).validateTypeOperation(),
+
+    },
   });
 
 setupShipmentWatchers(form)
+
+
+
   return (
     <Paper p="md" withBorder>
       <form onSubmit={form.onSubmit((values) => onSubmit(values as any))}>
