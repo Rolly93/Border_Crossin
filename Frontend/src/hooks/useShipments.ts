@@ -10,7 +10,7 @@ export function useShipments() {
   const fetchShipments = async () => {
     try {
       setLoading(true);
-      const data = await shipmentService.getall();
+      const data = await shipmentService.getAll();
       setShipments(data);
     } catch (err) {
       setError("Error al cargar datos");
@@ -27,7 +27,6 @@ const addLocalShipment = (newShipment: Shipment) => {
   setShipments((prev) => [...prev, newShipment]);
 };
 
-  // Esta función actualizará el estado de React inmediatamente en pantalla
   const updateLocalShipment = (id: number, updatedData: Shipment) => {
     setShipments(prev => prev.map(item => item.id === id ? { ...updatedData } : item));
   };
@@ -46,7 +45,7 @@ export function usesUpdateShipment(){
             setLoading(true)
             setSuccess(false)
             
-            await shipmentService.post(id,updatedData);
+            await shipmentService.update(id,updatedData);
             
         setSuccess(true)
     }catch (error){
