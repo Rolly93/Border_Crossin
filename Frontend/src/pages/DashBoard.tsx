@@ -35,7 +35,7 @@ export function DashBoard() {
       setIsCreating(true);
       
       const shipmentToSave = await shipmentService.insert({ ...newValues }) 
-      await shipmentService.post(shipmentToSave.id, shipmentToSave);
+      await shipmentService.update(shipmentToSave.id, shipmentToSave);
       
       addLocalShipment(shipmentToSave);
       
