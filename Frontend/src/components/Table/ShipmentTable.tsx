@@ -28,7 +28,7 @@ const [opened, { open, close }] = useDisclosure(false);
   const handleUpdateSubmit = async (updatedValues: Shipment) => {
     try {
       setIsSaving(true);
-      await shipmentService.post(updatedValues.id, updatedValues);
+      await shipmentService.update(updatedValues.id, updatedValues);
       
       updateLocalShipment(updatedValues.id, updatedValues);
       

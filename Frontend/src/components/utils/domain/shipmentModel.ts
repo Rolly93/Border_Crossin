@@ -37,4 +37,6 @@ static prepareInitialEvents(existingEvents: ShipmentEvent[] = [], expectedCatego
     });
 
  }
+
+
 }

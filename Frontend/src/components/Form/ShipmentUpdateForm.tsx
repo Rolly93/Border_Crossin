@@ -1,15 +1,17 @@
 import { useForm } from '@mantine/form';
-import { TextInput, Button, SimpleGrid, Group, Stack, Text, Divider, Box } from '@mantine/core';
-import { DateTimePicker } from '@mantine/dates'; // Use DateTimePicker since your type is 'dateTime'
-import { Shipment, EventCategory, ShipmentEvent } from '@/types/Shipment';
+import { TextInput, Button, SimpleGrid, Group, Stack, Text, Divider, Box, Notification } from '@mantine/core';
+import '@mantine/notifications/styles.css';
+import { DateTimePicker } from '@mantine/dates'; 
+import { Shipment, EventCategory, } from '@/types/Shipment';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { setupShipmentWatchers } from '../utils/validation/ShipmentFormRules';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import EditableTextInput from '../Input/EditableTextInput';
 
 import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 import { ShipmentModel } from '../utils/domain/shipmentModel';
+import { notifications } from '@mantine/notifications';
 interface EventFieldConfig{
     key:EventCategory;
     label:string
@@ -21,8 +23,8 @@ const EVENT_FIELDS :EventFieldConfig[] =[
   {key: "pick_up",  label:'Pick up' },
   {key: "departure" , label: 'Departure'},
   {key: "delay", label: 'Delay' , showNotes:true, maxNotesLength:50, notesLable:"Delay for"},
-  {key: "clear_mex",  label: 'Clear Customs Mex' },
   {key: "mex_inspeccion",  label:'Mex Inspection' , showNotes:true , maxNotesLength:25 ,  notesLable:"New Seal"},
+  {key: "clear_mex",  label: 'Clear Customs Mex' },
   {key: "usa_inspeccion" , label: 'USa Inspection' , showNotes:true , maxNotesLength:25 , notesLable:"New Seal"},
   {key: "clear_usa", label: 'Clear Sutoms USA'},
   {key:"safety_yard",  label: 'Safety Yard' , showNotes:true , maxNotesLength:25 , notesLable:"safeted at"},
@@ -37,7 +39,7 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
 
 
     const form = useForm<Shipment>({
-        mode: 'controlled',
+        mode: 'uncontrolled',
         validateInputOnChange:true,
         initialValues: {
           id: initialShipment?.id || 0,
@@ -61,11 +63,24 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
       destino:(_value ,values)=>new ShipmentValidator(values).validateDestination(),
       trailer:(_value ,values)=>new ShipmentValidator(values).validateTrailer(),
       type_operation : (_value, values) => new ShipmentValidator(values).validateTypeOperation(),
-
+      events : (_value, values) => {return new ShipmentValidator( values).validateEventChronology()}
     },
       });
       setupShipmentWatchers(form)
+      useEffect(() => {
+  if (form.errors.events || form.errors.costumer_tracking)  {
 
+    //const er =  form.errors.costumer_tracking |form.errors.events
+    notifications.show({
+      title: 'Error en Evento',
+      message: form.errors.events as string,
+      color: 'red',
+      position: 'top-center',
+    });
+
+  }
+
+}, [form.errors.events]);
 
 return (
     <Box p="xs" >
@@ -119,13 +134,11 @@ return (
               );
             })}
           </SimpleGrid>
-
           <Group justify="flex-end" mt="xl">
             <Button type="submit" color="dark">
               GUARDAR
             </Button>
           </Group>
-
         </Stack>
       </form>
     </Box>

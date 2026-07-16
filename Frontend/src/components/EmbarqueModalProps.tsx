@@ -1,6 +1,7 @@
-import { Modal, TextInput, Button, LoadingOverlay, Box } from '@mantine/core';
+import { Modal, TextInput, Button, LoadingOverlay, Box, MantineProvider } from '@mantine/core';
 import ShipmentUpdateForm from './Form/ShipmentUpdateForm';
 import { Shipment } from '@/types/Shipment';
+import { Notifications } from '@mantine/notifications';
 
 interface EmbarqueModalProps {
   opened: boolean;
@@ -32,7 +33,8 @@ export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, load
             onSubmit={(updatedValues) => {
               SubmitShipment(updatedValues);
             }}
-          />
+            />
+            
         )}
       </Box>
     </Modal>
