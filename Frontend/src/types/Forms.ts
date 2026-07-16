@@ -1,5 +1,4 @@
-import { Shipment , EventCategory } from '@/types/Shipment';
-import { EmbarqueData } from '@/types/embarque';
+import { Shipment  } from '@/types/Shipment';
 
 export interface ShipmentFormProps {
   initialData?: Partial<Shipment>;
