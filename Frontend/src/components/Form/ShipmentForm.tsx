@@ -5,6 +5,8 @@ import { ShipmentFormProps } from '@/types/Forms';
 import {setupShipmentWatchers} from '../utils/validation/ShipmentFormRules';
 import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 
+import { useFormNotifications } from '@/hooks/useNotifications';
+
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
   // 1. Initialize the Mantine form hook
   const form = useForm({
@@ -23,20 +25,27 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
     },
 
-    validate:{
-      cliente:(_value ,values)=>new ShipmentValidator(values).validateCliente(),
-      costumer_tracking:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
-      trcking_Number:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
-      truck:(_value ,values)=>new ShipmentValidator(values).validateTruck(),
-      orgien:(_value ,values)=>new ShipmentValidator(values).validateOrigin(),
-      destino:(_value ,values)=>new ShipmentValidator(values).validateDestination(),
-      trailer:(_value ,values)=>new ShipmentValidator(values).validateTrailer(),
-      type_operation : (_value, values) => new ShipmentValidator(values).validateTypeOperation(),
+    validate:(values)=>{
+      const validator = new ShipmentValidator(values);
 
-    },
+      return{
+      cliente:validator.validateCliente(),
+      costumer_tracking:validator.validateCustomertracking(),
+      trcking_Number:validator.validateTrackingNumber(),
+      truck:validator.validateTruck(),
+      orgien:validator.validateOrigin(),
+      destino:validator.validateDestination(),
+      trailer:validator.validateTrailer(),
+      type_operation:validator.validateTypeOperation(),
+}}
+    
   });
 
 setupShipmentWatchers(form)
+
+useFormNotifications({
+  errors:form.errors,
+title: 'Error de Datos'})
 
 
 

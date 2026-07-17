@@ -6,12 +6,11 @@ import { Shipment, EventCategory, } from '@/types/Shipment';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { setupShipmentWatchers } from '../utils/validation/ShipmentFormRules';
-import { useEffect, useState } from 'react';
 import EditableTextInput from '../Input/EditableTextInput';
 
 import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 import { ShipmentModel } from '../utils/domain/shipmentModel';
-import { notifications } from '@mantine/notifications';
+import { useFormNotifications } from '@/hooks/useNotifications';
 interface EventFieldConfig{
     key:EventCategory;
     label:string
@@ -33,7 +32,6 @@ const EVENT_FIELDS :EventFieldConfig[] =[
 const EXPECTED_CATEGORIES = EVENT_FIELDS.map(f=>f.key)
 export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { onSubmit: (values: Shipment) => void, initialShipment?: Shipment }) 
 {
-  const [itEditid ,setIsEdit] = useState(false);
 
 
 
@@ -54,33 +52,29 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
           type_operation:initialShipment?.type_operation|| '',
           status: initialShipment?.status || '',
           events: ShipmentModel.prepareInitialEvents(initialShipment?.events, EXPECTED_CATEGORIES)
-        }, validate:{
-      cliente:(_value ,values)=>new ShipmentValidator(values).validateCliente(),
-      costumer_tracking:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
-      trcking_Number:(_value ,values)=>new ShipmentValidator(values).validateCustomertracking(),
-      truck:(_value ,values)=>new ShipmentValidator(values).validateTruck(),
-      orgien:(_value ,values)=>new ShipmentValidator(values).validateOrigin(),
-      destino:(_value ,values)=>new ShipmentValidator(values).validateDestination(),
-      trailer:(_value ,values)=>new ShipmentValidator(values).validateTrailer(),
-      type_operation : (_value, values) => new ShipmentValidator(values).validateTypeOperation(),
-      events : (_value, values) => {return new ShipmentValidator( values).validateEventChronology()}
-    },
+        }, validate:(values)=> {
+
+          const validator = new ShipmentValidator(values);
+          const eventErrors = validator.validateEventChronology()||{};
+          return {
+            
+      cliente:validator.validateCliente(),
+      costumer_tracking:validator.validateCustomertracking(),
+      trcking_Number:validator.validateCustomertracking(),
+      truck:validator.validateTruck(),
+      orgien:validator.validateOrigin(),
+      destino:validator.validateDestination(),
+      trailer:validator.validateTrailer(),
+      type_operation :validator.validateTypeOperation(),
+      ...eventErrors,
+    };},
       });
       setupShipmentWatchers(form)
-      useEffect(() => {
-  if (form.errors.events || form.errors.costumer_tracking)  {
 
-    //const er =  form.errors.costumer_tracking |form.errors.events
-    notifications.show({
-      title: 'Error en Evento',
-      message: form.errors.events as string,
-      color: 'red',
-      position: 'top-center',
-    });
-
-  }
-
-}, [form.errors.events]);
+useFormNotifications({
+  errors:form.errors,
+  prefix:'events.',
+  title:'Error de Validacion en Evento'})
 
 return (
     <Box p="xs" >
@@ -103,13 +97,12 @@ return (
 
           <Text fw={700} size="lg">Eventos de Logística / Transfer</Text>
           
-          <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg">
+          <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg" maw={900}>
             {EVENT_FIELDS.map((field) => {
               const eventIndex = form.values.events.findIndex(e => e.category === field.key);
               if (eventIndex === -1) return null;
               return (
                 <Stack  key={field.key}>
-                  {/* Date Input for the event */}
                   <DateTimePicker
                     label={field.label}
                     timePickerProps={{
