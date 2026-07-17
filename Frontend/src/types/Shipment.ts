@@ -11,7 +11,7 @@ export interface Shipment{
     orgien:string,
     destino:string,
     type_operation:string,
-    status:string;
+    status?:string;
     events: ShipmentEvent[];
 
 
