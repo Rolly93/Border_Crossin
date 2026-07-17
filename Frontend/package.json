@@ -20,10 +20,12 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@mantine/core": "9.4.0",
-    "@mantine/dates": "^9.4.0",
+    "@mantine/core": "9.4.1",
+    "@mantine/dates": "^9.4.1",
     "@mantine/form": "^9.4.1",
-    "@mantine/hooks": "9.4.0",
+    "@mantine/hooks": "9.4.1",
+    "@mantine/notifications": "^9.4.1",
+    "@tabler/icons-react": "^3.45.0",
     "axios": "^1.18.1",
     "dayjs": "^1.11.21",
     "react": "^19.2.0",
