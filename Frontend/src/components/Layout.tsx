@@ -3,6 +3,7 @@ import { AppShell, Burger, Group, Skeleton, Text,NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { Outlet , Link, useLocation} from 'react-router-dom';
+import { ColorSchemeToggle } from './ColorSchemeToggle/ColorSchemeToggle';
 export function Layout() {
   const [opened, { toggle ,close}] = useDisclosure();
   const location = useLocation();
@@ -27,7 +28,9 @@ export function Layout() {
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <Text fw={700}>My Dashboard</Text>
+            
           </Group>
+                  <ColorSchemeToggle />
         </Group>
       </AppShell.Header>
 
