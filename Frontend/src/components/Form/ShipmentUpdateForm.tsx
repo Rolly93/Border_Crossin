@@ -50,7 +50,6 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
           orgien: initialShipment?.orgien || '',
           destino: initialShipment?.destino || '',
           type_operation:initialShipment?.type_operation|| '',
-          status: initialShipment?.status || '',
           events: ShipmentModel.prepareInitialEvents(initialShipment?.events, EXPECTED_CATEGORIES)
         }, validate:(values)=> {
 
@@ -90,7 +89,6 @@ return (
             < EditableTextInput  label="Trailer" formProps={form.getInputProps('trailer')} />
             < EditableTextInput  label="Origen" formProps={form.getInputProps('orgien')} />
             < EditableTextInput  label="Destino" formProps={form.getInputProps('destino')} />
-            < EditableTextInput  label="Estatus" formProps={form.getInputProps('status')} />
           </SimpleGrid>
 
           <Divider my="sm" />
