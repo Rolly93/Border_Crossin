@@ -60,7 +60,6 @@ export function DashBoard() {
           error={error} 
           updateLocalShipment={updateLocalShipment} 
         />
-      <ColorSchemeToggle />
     </Container>
   );
 }
