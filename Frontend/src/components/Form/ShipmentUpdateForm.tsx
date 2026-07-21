@@ -1,5 +1,5 @@
 import { useForm } from '@mantine/form';
-import { TextInput, Button, SimpleGrid, Group, Stack, Text, Divider, Box, Notification } from '@mantine/core';
+import { TextInput, Button, SimpleGrid, Group, Stack, Text, Divider, Box } from '@mantine/core';
 import '@mantine/notifications/styles.css';
 import { DateTimePicker } from '@mantine/dates'; 
 import { Shipment, EventCategory, } from '@/types/Shipment';
@@ -11,6 +11,8 @@ import EditableTextInput from '../Input/EditableTextInput';
 import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 import { ShipmentModel } from '../utils/domain/shipmentModel';
 import { useFormNotifications } from '@/hooks/useNotifications';
+
+import { notify } from '../utils/notifications';
 interface EventFieldConfig{
     key:EventCategory;
     label:string
@@ -70,14 +72,30 @@ export default  function ShipmentUpdateForm ({ onSubmit, initialShipment }: { on
       });
       setupShipmentWatchers(form)
 
+
+
 useFormNotifications({
   errors:form.errors,
   prefix:'events.',
   title:'Error de Validacion en Evento'})
 
+
+const handeSubmit =(values: Shipment) =>{
+  if (!form.isDirty()){
+notify.warning('No has realizado ninguna modificación en los datos o fechas.', 'Sin Cambios');    return;
+
+  }
+  if(!form.isDirty('events')){
+
+notify.warning('No has realizado ninguna modificación en los las fechas', 'Sin Cambios');    return;
+
+    }
+onSubmit(values)
+}
+
 return (
     <Box p="xs" >
-      <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
+      <form onSubmit={form.onSubmit((values) => handeSubmit(values))}>
         <Stack >
 
           <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
