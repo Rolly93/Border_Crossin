@@ -1,5 +1,5 @@
 import bcrypt  
-from backend.model.user import LoginRequest
+from ..model.user import LoginRequest
 from typing import Optional
 from config.config import Env
 class AuthService:
