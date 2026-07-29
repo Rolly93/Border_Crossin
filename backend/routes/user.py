@@ -2,7 +2,7 @@
 from fastapi import APIRouter , HTTPException
 from utility.auth_service import AuthService
 from fastapi_utils.cbv import cbv
-from backend.model.user import LoginRequest , NewUser
+from model.user import LoginRequest , NewUser
 from model.status import ResponseStatus
 from fastapi.responses import RedirectResponse
 
