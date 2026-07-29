@@ -31,6 +31,6 @@ class EmailConfig:
     USERNAME: str = os.getenv("MAIL_USERNAME")
     PASSWORD : str = os.getenv("MAIL_PASSWORD")
     SERVER : str = os.getenv("MAIL_SERVER")
-    PORT: str = int(os.getenv("MAIL_PORT"))
+    PORT: str = int(os.getenv("MAIL_PORT","587"))
     MAIL_FROM: str =  os.getenv("MAIL_FROM")
     
