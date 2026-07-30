@@ -1,6 +1,6 @@
 import paramiko
 
-from backend.config import SFTPConfig
+from config.config import SFTPConfig
 
 class SFPTService():
     """docstring for SftoService."""

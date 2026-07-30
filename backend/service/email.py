@@ -1,7 +1,7 @@
 import os
 from fastapi_mail import  MessageSchema , ConnectionConfig, MessageType ,FastMail
 from pydantic import EmailStr
-from backend.config import EmailConfig
+from config.config import EmailConfig
 from jinja2 import Environment , FileSystemLoader
 
 class EmailService:
