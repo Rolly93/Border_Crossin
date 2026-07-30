@@ -1,6 +1,5 @@
 // pages/Home.page.tsx
-import { ColorSchemeToggle } from '../components/ColorSchemeToggle/ColorSchemeToggle';
-import ShipmentTable from '../components/Table/ShipmentTable';
+import ShipmentTable from '../components/DashTable/ShipmentTable';
 import Headers from '@/components/Header/Header';
 import { Container } from '@mantine/core';
 
@@ -48,6 +47,7 @@ export function DashBoard() {
 
   return (
     <Container size="responsive">
+      
     <Headers 
       onAddShipment={handleCreateSubmit} 
       isCreating={isCreating}

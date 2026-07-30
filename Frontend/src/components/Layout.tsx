@@ -4,6 +4,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { Outlet , Link, useLocation} from 'react-router-dom';
 import { ColorSchemeToggle } from './ColorSchemeToggle/ColorSchemeToggle';
+import { useGlobalNotifications } from '@/hooks/useGlobalNotifications';
 export function Layout() {
   const [opened, { toggle ,close}] = useDisclosure();
   const location = useLocation();
@@ -11,7 +12,7 @@ export function Layout() {
   useEffect(()=>{
     close();
   },[location,close])
-
+useGlobalNotifications()
   return (
     <AppShell
       header={{ height: 60 }}
@@ -22,7 +23,6 @@ export function Layout() {
       }}
       padding="md"
     >
-      {/* 1. Header Section */}
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Group>
@@ -34,7 +34,6 @@ export function Layout() {
         </Group>
       </AppShell.Header>
 
-      {/* 2. Navbar Section */}
       <AppShell.Navbar p="md">
         <Text size="sm" fw={500} c="dimmed" mb="xs">Navigation</Text>
         <NavLink component={Link} to="/" 

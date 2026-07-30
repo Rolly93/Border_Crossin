@@ -1,10 +1,10 @@
-// pages/Home.page.tsx
 import { Container } from '@mantine/core';
-import { UnderConstruction } from './UnderConstruction';
+//import { UnderConstruction } from './UnderConstruction';
+import { ClientTable } from '@/components/ClientDash/ClienteTable';
 export function SftpConnection() {
   return (
-    <Container size="responsive">
-      <UnderConstruction projectName='sftp Connection' progress={10} expectedLaunchDate='Nov 2026'/>
-    </Container>
+    <Container  size="responsive" fluid p="md"  mih="100vh">
+      <ClientTable/>
+      </Container>
   );
 }
