@@ -1,5 +1,4 @@
 import { INotificationStreamService, NotificationEvent } from "@/service/notification/INotificationStreamService";
-import { type } from "node:os";
 
 export class MockNotificationStreamService implements INotificationStreamService{
 

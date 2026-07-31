@@ -2,7 +2,7 @@
 import { useForm } from '@mantine/form';
 import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/core';
 import { ShipmentFormProps } from '@/types/Forms';
-import {setupShipmentWatchers} from '../utils/validation/ShipmentFormRules';
+import { setupShipmentWatchers } from '../utils/validation/ShipmentFormRules';
 import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 
 import { useFormNotifications } from '@/hooks/useNotifications';
@@ -11,41 +11,43 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
   // 1. Initialize the Mantine form hook
   const form = useForm({
     mode: 'controlled',
-    validateInputOnChange:true,
+    validateInputOnChange: true,
     initialValues: {
-      trcking_Number: initialData?.trcking_Number || '',
+      tracking_number: initialData?.tracking_number || '',
       costumer_tracking: initialData?.costumer_tracking || '',
-      type_operation:initialData?.type_operation||'Exportacion',
+      type_operation: initialData?.type_operation || 'Exportacion',
       cliente: initialData?.cliente || '',
       truck: initialData?.truck || '',
-      vehicleType: initialData?.vehicleType || '',
+      vehicle_type: initialData?.vehicle_type || '',
       trailer: initialData?.trailer || '',
-      orgien: initialData?.orgien || '',
+      origen: initialData?.origen || '',
       destino: initialData?.destino || '',
 
     },
 
-    validate:(values)=>{
+    validate: (values) => {
       const validator = new ShipmentValidator(values);
 
-      return{
-      cliente:validator.validateCliente(),
-      costumer_tracking:validator.validateCustomertracking(),
-      trcking_Number:validator.validateTrackingNumber(),
-      truck:validator.validateTruck(),
-      orgien:validator.validateOrigin(),
-      destino:validator.validateDestination(),
-      trailer:validator.validateTrailer(),
-      type_operation:validator.validateTypeOperation(),
-}}
-    
+      return {
+        cliente: validator.validateCliente(),
+        costumer_tracking: validator.validateCustomertracking(),
+        tracking_number: validator.validateTrackingNumber(),
+        truck: validator.validateTruck(),
+        origen: validator.validateOrigin(),
+        destino: validator.validateDestination(),
+        trailer: validator.validateTrailer(),
+        type_operation: validator.validateTypeOperation(),
+      }
+    }
+
   });
 
-setupShipmentWatchers(form)
+  setupShipmentWatchers(form)
 
-useFormNotifications({
-  errors:form.errors,
-title: 'Error de Datos'})
+  useFormNotifications({
+    errors: form.errors,
+    title: 'Error de Datos'
+  })
 
 
 
@@ -60,7 +62,7 @@ title: 'Error de Datos'})
               label="No. Embarque"
               placeholder="e.g. TRK-12345"
               required
-              {...form.getInputProps('trcking_Number')}
+              {...form.getInputProps('tracking_number')}
             />
             <TextInput
               label="Referencia"
@@ -78,10 +80,10 @@ title: 'Error de Datos'})
               required
               {...form.getInputProps('cliente')}
             />
-              <Select
+            <Select
               label="Tipo Operacion"
               placeholder="Exportacion / Importacion ....."
-              data={[ 'Exportacion', 'Importacion']}
+              data={['Exportacion', 'Importacion']}
               required
               {...form.getInputProps('type_operation')}
             />
@@ -99,8 +101,8 @@ title: 'Error de Datos'})
               required
               placeholder="e.g. Dry Van, Reefer"
               data={['Drya va', 'Truck']}
-              
-              {...form.getInputProps('vehicleType')}
+
+              {...form.getInputProps('vehicle_type')}
             />
             <TextInput
               label="Trailer"
@@ -110,14 +112,14 @@ title: 'Error de Datos'})
             />
 
           </Group>
-          
+
 
           <Group grow>
             <TextInput
               label="Origen"
               required
               placeholder="Origin yard"
-              {...form.getInputProps('orgien')}
+              {...form.getInputProps('origen')}
             />
             <TextInput
               label="Destino"

@@ -1,6 +1,6 @@
 import axios ,{ AxiosInstance } from 'axios'
 
-export const getBaseUrl = (ip: string): string => `http://${ip}:8000/api`;
+export const getBaseUrl = (ip: string): string => `http://${ip}:8000`;
 
 export const createApiClient= (ip:string):AxiosInstance => {
     return axios.create({
