@@ -2,37 +2,38 @@ import paramiko
 
 from config.config import SFTPConfig
 
-class SFPTService():
+
+class SFPTService:
     """docstring for SftoService."""
-    def __init__(self,config:SFTPConfig):
-        
+
+    def __init__(self, config: SFTPConfig):
+
         self._host = config.HOST
         self._port = int(config.PORT)
-        self._user=config.USER
-        self._password = config.PASSWORD 
+        self._user = config.USER
+        self._password = config.PASSWORD
         self.trasport = None
         self.sftp = None
-    
+
     def connect(self):
         try:
             if not self._host:
                 raise ValueError("SFTP_HOST is not define in envarioment variables")
-            self.trasport = paramiko.Transport((self._host,self._port))
-            print(self._password , self._user)
-            self.trasport.connect(username=self._user,password=self._password)
+            self.trasport = paramiko.Transport((self._host, self._port))
+            print(self._password, self._user)
+            self.trasport.connect(username=self._user, password=self._password)
             self.sftp = paramiko.SFTPClient.from_transport(self.trasport)
             print(f"Connectando a SFTP: {self._host}")
         except paramiko.AuthenticationException as e:
             self.close()
             raise "Error: Usuario o contraseña incorrectos."
         except paramiko.SSHException as e:
-            self.close()
             raise f"Error de protocolo SSH: {e}"
-        except Exception as e :
+        except Exception as e:
             self.close()
             raise f"Erro inesperado al conectar: { e}"
 
-    def upload_file(self,local_path,remote_path):
+    def upload_file(self, local_path, remote_path):
         """Envio de Documentos via SFTP
 
         Args:
@@ -46,19 +47,22 @@ class SFPTService():
         """
         try:
             if self.sftp:
-                self.sftp.put(local_path,remote_path)
+                self.sftp.put(local_path, remote_path)
         except FileExistsError as e:
             raise f"Error {e}"
         except IOError as io_error:
-            raise   f"Error de E/S (Ruta remota valida?): { io_error}"
-        except Exception as e  :
+            raise f"Error de E/S (Ruta remota valida?): { io_error}"
+        except Exception as e:
             raise f"Error al subir archivo: {e}"
-    def close (self):
-        if self.sftp: self.sftp.close()
-        if self.trasport: self.trasport.close()
-        print (f"Conexion Cerrada!!")
-        
-    def delete_file (self , filename):
+
+    def close(self):
+        if self.sftp:
+            self.sftp.close()
+        if self.trasport:
+            self.trasport.close()
+        print(f"Conexion Cerrada!!")
+
+    def delete_file(self, filename):
         try:
             remote_path = filename
             self.sftp.remove(remote_path)
