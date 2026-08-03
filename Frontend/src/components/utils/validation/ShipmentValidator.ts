@@ -27,7 +27,7 @@ export class ShipmentValidator {
   }
 
   private get client() { return this.data.cliente?.trim().toLocaleUpperCase() || ''; }
-  private get tracking() { return this.data.costumer_tracking?.trim().toLocaleUpperCase() || ''; }
+  private get tracking() { return this.data.customer_tracking?.trim().toLocaleUpperCase() || ''; }
   private get opretationType() { return this.data.type_operation?.trim().toLocaleUpperCase() || ''; }
   /**
    * validateCliente

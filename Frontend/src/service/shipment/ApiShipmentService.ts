@@ -8,6 +8,7 @@ export class ApiShipmentService extends BaseShipemntService implements IShipment
 
     async getAll(): Promise<Shipment[]> {
         const response = await this.api.get<Shipment[]>('/shipment/');
+        console.log(response.data)
         return response.data
     }
     async update(id: number, data: Shipment): Promise<Shipment> {

@@ -39,7 +39,7 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
     initialValues: {
       id: initialShipment?.id || 0,
       tracking_number: initialShipment?.tracking_number || '',
-      costumer_tracking: initialShipment?.costumer_tracking || '',
+      customer_tracking: initialShipment?.customer_tracking || '',
       cliente: initialShipment?.cliente || '',
       truck: initialShipment?.truck || '',
       vehicle_type: initialShipment?.vehicle_type || '',
@@ -55,10 +55,10 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
       return {
 
         cliente: validator.validateCliente(),
-        costumer_tracking: validator.validateCustomertracking(),
+        customer_tracking: validator.validateCustomertracking(),
         tracking_number: validator.validateCustomertracking(),
         truck: validator.validateTruck(),
-        orgien: validator.validateOrigin(),
+        origen: validator.validateOrigin(),
         destino: validator.validateDestination(),
         trailer: validator.validateTrailer(),
         type_operation: validator.validateTypeOperation(),
@@ -97,12 +97,12 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
 
           <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
             < EditableTextInput label="No. Embarque" formProps={form.getInputProps('tracking_number')} />
-            < EditableTextInput label="Referencia" formProps={form.getInputProps('costumer_tracking')} />
+            < EditableTextInput label="Referencia" formProps={form.getInputProps('customer_tracking')} />
             < EditableTextInput label="Cliente" formProps={form.getInputProps('cliente')} />
             < EditableTextInput label="No. Vehiculo" formProps={form.getInputProps('truck')} />
             < EditableTextInput label="Tipo Vehículo" formProps={form.getInputProps('vehicle_type')} />
             < EditableTextInput label="Trailer" formProps={form.getInputProps('trailer')} />
-            < EditableTextInput label="Origen" formProps={form.getInputProps('orgien')} />
+            < EditableTextInput label="Origen" formProps={form.getInputProps('origen')} />
             < EditableTextInput label="Destino" formProps={form.getInputProps('destino')} />
           </SimpleGrid>
 

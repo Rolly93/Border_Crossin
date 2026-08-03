@@ -28,7 +28,7 @@ export type EventCategory =
 export interface ShipmentCreate {
 
     tracking_number: string;
-    costumer_tracking: string;
+    customer_tracking: string;
     cliente: string;
     truck: string;
     vehicle_type: string;

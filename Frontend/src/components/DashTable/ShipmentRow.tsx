@@ -13,7 +13,6 @@ export default function ShipmentRow({ shipments, loading, error, onRowDoubleClic
 
   if (loading) return <Table.Tr><Table.Td colSpan={16}><Center py="xl"><Loader size="sm" /></Center></Table.Td></Table.Tr>;
   if (error) return <Table.Tr><Table.Td colSpan={16}><Center py="xl"><Text c="red" fz="sm">{error}</Text></Center></Table.Td></Table.Tr>;
-
   return (
 
     shipments.map((rawShipment) => {
@@ -25,7 +24,7 @@ export default function ShipmentRow({ shipments, loading, error, onRowDoubleClic
 
           style={{ cursor: 'pointer' }}
         >
-          <Table.Td>{shipment.data.costumer_tracking}</Table.Td>
+          <Table.Td>{shipment.data.customer_tracking}</Table.Td>
           <Table.Td>{shipment.data.tracking_number}</Table.Td>
           <Table.Td>{shipment.data.trailer}</Table.Td>
           <Table.Td>{shipment.data.truck}</Table.Td>

@@ -14,7 +14,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
     validateInputOnChange: true,
     initialValues: {
       tracking_number: initialData?.tracking_number || '',
-      costumer_tracking: initialData?.costumer_tracking || '',
+      customer_tracking: initialData?.customer_tracking || '',
       type_operation: initialData?.type_operation || 'Exportacion',
       cliente: initialData?.cliente || '',
       truck: initialData?.truck || '',
@@ -30,7 +30,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
       return {
         cliente: validator.validateCliente(),
-        costumer_tracking: validator.validateCustomertracking(),
+        customer_tracking: validator.validateCustomertracking(),
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
@@ -68,7 +68,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
               label="Referencia"
               required
               placeholder="e.g. CUST-987"
-              {...form.getInputProps('costumer_tracking')}
+              {...form.getInputProps('customer_tracking')}
             />
 
           </Group>

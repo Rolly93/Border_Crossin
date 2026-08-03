@@ -5,7 +5,7 @@ export let LOADSHIPMENT: Shipment[] = [
   {
     id: 1,
     tracking_number: "92b1234567",
-    costumer_tracking: "CUST-99211",
+    customer_tracking: "CUST-99211",
     cliente: "MOGA Logistics",
     truck: "TR-15",
     vehicle_type: "Trailer",
@@ -39,7 +39,7 @@ export let LOADSHIPMENT: Shipment[] = [
   {
     id: 2,
     tracking_number: "TA789012",
-    costumer_tracking: "CUST-88341",
+    customer_tracking: "CUST-88341",
     cliente: "Alpha Manufacturing",
     truck: "TR-22",
     vehicle_type: "Bobtail",
@@ -68,7 +68,7 @@ export let LOADSHIPMENT: Shipment[] = [
   {
     id: 3,
     tracking_number: "TA456789",
-    costumer_tracking: "CUST-11223",
+    customer_tracking: "CUST-11223",
     cliente: "Global Trade Corp",
     truck: "TR-09",
     vehicle_type: "Flatbed",
