@@ -1,74 +1,61 @@
-from datetime import datetime
 from typing import List
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi_utils.cbv import cbv
-from model.shipment import Shipment, ShipmentCreate, ShipmentEvent
+from schema.shipment_shcema import Shipment, ShipmentCreate, ShipmentUpdate
 
 router = APIRouter(prefix="/shipment", tags=["shipment"])
+
+from sqlalchemy.orm import Session
+from databse import get_db
+from model.shipment_model import ShipmentModel, ShipmentEventModel
 
 
 @cbv(router)
 class RShipment:
 
-    @router.get(
-        "/",
-    )
-    async def shipment_dashboard(self) -> List[Shipment]:
-        return [
-            Shipment(
-                id=1,
-                tracking_number="92b1234567",
-                costumer_tracking="CUST-99211",
-                cliente="MOGA Logistics",
-                truck="TR-15",
-                vehicle_type="Trailer",
-                trailer="TA123456",
-                origen="Bodega Mexico",
-                destino="USA Distribution Center",
-                type_operation="Exportacion",
-                status="In Transit",
-                events=[
-                    ShipmentEvent(
-                        category="pick_up",
-                        dateTime=datetime.fromisoformat("2026-06-28T07:00:00"),
-                    ),
-                    ShipmentEvent(
-                        category="departure",
-                        dateTime=datetime.fromisoformat("2026-06-28T08:15:00"),
-                    ),
-                    ShipmentEvent(
-                        category="clear_mex",
-                        dateTime=datetime.fromisoformat("2026-06-29T11:00:00"),
-                    ),
-                    ShipmentEvent(
-                        category="usa_inspeccion",
-                        dateTime=datetime.fromisoformat("2026-06-29T14:00:00"),
-                        notes="Inspección de rayos X aprobada.",
-                    ),
-                    ShipmentEvent(
-                        category="clear_usa",
-                        dateTime=datetime.fromisoformat("2026-06-29T15:30:00"),
-                    ),
-                    ShipmentEvent(
-                        category="safety_yard",
-                        dateTime=datetime.fromisoformat("2026-06-29T18:00:00"),
-                        notes="Resguardo nocturno.",
-                    ),
-                    ShipmentEvent(
-                        category="deliver",
-                        dateTime=datetime.fromisoformat("2026-06-30T10:30:00"),
-                        notes="Entregado y firmado por el receptor",
-                    ),
-                ],
-            )
-        ]
+    @router.get("/", response_model=List[Shipment])
+    async def shipment_dashboard(self, db: Session = Depends(get_db)) -> List[Shipment]:
+        shipments = db.query(ShipmentModel).all()
+        return shipments
 
     @router.post("/create")
-    async def create_shipment(self, data: ShipmentCreate):
-        print(f"Data: {data}")
-        return {"status": "success", "data": data}
+    async def create_shipment(
+        self, shipment: ShipmentCreate, db: Session = Depends(get_db)
+    ):
+        db_shipment = ShipmentModel(**shipment.model_dump())
 
-    @router.put("{id}/update")
-    async def update_shipment(self, id: int, data: Shipment):
-        print(id, data)
-        return {"status": "success", "data": data}
+        db.add(db_shipment)
+        db.commit()
+        db.refresh(db_shipment)
+
+        return {"status": "success", "data": shipment}
+
+    @router.put("/{id}/update")
+    async def update_shipment(
+        self, id: int, shipment_data: ShipmentUpdate, db: Session = Depends(get_db)
+    ):
+
+        db_shipment = db.query(ShipmentModel).filter(ShipmentModel.id == id).first()
+        print(db_shipment, shipment_data)
+        if not db_shipment:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Shipment with id {id} not found",
+            )
+
+        update_data = shipment_data.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+
+            if key == "events" and value is not None:
+                db_shipment.events = [
+                    ShipmentEventModel(**event)
+                    for event in value
+                    if event.get("dateTime") is not None
+                ]
+            else:
+                setattr(db_shipment, key, value)
+
+            db.commit()
+            db.refresh(db_shipment)
+
+        return {"status": "success", "data": db_shipment}

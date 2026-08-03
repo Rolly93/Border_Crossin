@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from utility.auth_service import AuthService
 from fastapi_utils.cbv import cbv
-from model.user import LoginRequest, LoginResponse, NewUser
-from model.status import ResponseStatus
+from schema.user import LoginRequest, LoginResponse, NewUser
+from schema.status import ResponseStatus
 
 router = APIRouter(prefix="/user", tags=["user"])
 
