@@ -23,7 +23,7 @@ class Employee(Base):
     last_name = Column(String(200), nullable=False)
     role = Column(String(50), nullable=False, default="costumer representative")
     hire_date = Column(Date, nullable=False, server_default=func.date("now"))
-    rfc_employee = Column(String(200), nullable=False)
+    rfc_employee = Column(String(200), nullable=False, unique=True)
     still_employee = Column(Boolean, default=True, nullable=False)
 
     user = relationship("User", back_populates="employee", uselist=False)

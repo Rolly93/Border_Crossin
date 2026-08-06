@@ -1,15 +1,16 @@
 import bcrypt
-from schema.user import LoginResponse
+from schema.user import LoginResponse, LoginRequest
 from schema.employee_schema import EmployeeRequest
 from config.config import Env
 from fastapi import HTTPException, status
-from model.db_model import Employee
+from model.db_model import Employee, User
+from sqlalchemy.orm import Session
 
 
 class AuthService:
-    def __init__(self):
-        # In a real app, you'd pass a DB session here
+    def __init__(self, db: Session):
         self._env = Env()
+        self._db = db
         pass
 
     def hash_content(self, toHash: str) -> str:
@@ -23,43 +24,50 @@ class AuthService:
             plain_password.encode("utf-8"), hashed_password.encode("utf-8")
         )
 
-    def autenticar(self, email: str, password: str) -> LoginResponse | None:
+    def autenticar(self, email: str, password: str) -> LoginResponse:
         """
         Logic for the /login route.
         """
         # 1. Look for the user in your database
         # user = db.query(User).filter(User.email == email).first()
-        if email == self._env.USER_EMAIL and password == self._env.USER_PASSWORD:
-            return LoginResponse(
-                status="200 ok",
-                id=1,
-                is_admin=False,
-                email="test@test.com",
+        if email != self._env.USER_EMAIL and password != self._env.USER_PASSWORD:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Credenciales Incorrectas",
             )
         # 2. Verify password (Real logic)
         # if user and self.verify_password(password, user.hashed_password):
         #     return user
+        acces_granted = LoginResponse(
+            status="200 ok",
+            id=1,
+            is_admin=False,
+            email="test@test.com",
+        )
+        return acces_granted
 
-        return None
-
-    def is_duplicate(self, name, email):
-        """Verify if ist duplicate in the database"""
-        pass
-
-    def crear_usuario(self, nombre, email, password, es_admin=False):
+    def create_newuser(self, data: LoginRequest, is_admin: int, rfc: str):
+        if not data.password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=" Data Missing"
+            )
         """
         Logic for the /usuarios route.
         """
-        hashed = self.hash_content(password)
-        try:
-            # db_user = User(nombre=nombre, email=email, hashed_password=hashed, rol="admin" if es_admin else "user")
-            # db.add(db_user)
-            # db.commit()
-            print(f"Saving user {nombre} with hashed pass: {hashed}")
-            return True
-        except Exception as e:
-            print(f"Error: {e}")
-            return False
+
+        hashed = self.hash_content(data.password)
+        admin = self._db.query(User).filter(User.id == is_admin).first()
+        if not admin:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized: Admin privileges required",
+            )
+        # db.query(User).filter(User.email == email).first()
+        # db_user = User(nombre=nombre, email=email, hashed_password=hashed, rol="admin" if es_admin else "user")
+        # db.add(db_user)
+        # db.commit()
+
+        return True
 
     def es_token_valido(self, token: str) -> bool:
         """
@@ -72,6 +80,7 @@ class AuthService:
         """
         firstTime Use
         """
+
         return False
 
     def verify_admin(self, admin_id: int) -> int:

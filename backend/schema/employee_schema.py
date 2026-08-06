@@ -1,6 +1,4 @@
 from pydantic import BaseModel
-from typing import Text
-from datetime import date
 
 
 class EmployeeBase(BaseModel):
