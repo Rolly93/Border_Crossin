@@ -1,7 +1,9 @@
 import bcrypt
-from schema.user import LoginRequest
-from typing import Optional
+from schema.user import LoginResponse
+from schema.employee_schema import EmployeeRequest
 from config.config import Env
+from fastapi import HTTPException, status
+from model.db_model import Employee
 
 
 class AuthService:
@@ -21,29 +23,24 @@ class AuthService:
             plain_password.encode("utf-8"), hashed_password.encode("utf-8")
         )
 
-    def autenticar(self, email: str, password: str) -> Optional[LoginRequest]:
+    def autenticar(self, email: str, password: str) -> LoginResponse | None:
         """
         Logic for the /login route.
         """
         # 1. Look for the user in your database
         # user = db.query(User).filter(User.email == email).first()
-
         if email == self._env.USER_EMAIL and password == self._env.USER_PASSWORD:
-
-            class MockUser:
-                id = 1
-                usrname = "Test_Username"
-                rol = "admin"
-                email = self._env.USER_EMAIL
-                is_admin = True
-
-            return MockUser
-
+            return LoginResponse(
+                status="200 ok",
+                id=1,
+                is_admin=False,
+                email="test@test.com",
+            )
         # 2. Verify password (Real logic)
         # if user and self.verify_password(password, user.hashed_password):
         #     return user
 
-        return False
+        return None
 
     def is_duplicate(self, name, email):
         """Verify if ist duplicate in the database"""
@@ -70,3 +67,36 @@ class AuthService:
         """
         # For now, just a dummy check
         return token == "secret-setup-token"
+
+    def user_already_exists(self) -> bool:
+        """
+        firstTime Use
+        """
+        return False
+
+    def verify_admin(self, admin_id: int) -> int:
+        if not admin_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized: Admin privileges required",
+            )
+        return admin_id
+
+    def create_employee(self, data: EmployeeRequest) -> Employee:
+        existing_employee = None  # qury to check if rfc already exist
+
+        if existing_employee:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="An employee with this RFC is already registered",
+            )
+        clean_rfc = data.rfc_employee.strip().upper()
+
+        new_employee = Employee(
+            name=data.name,
+            last_name=data.last_name,
+            role=data.role,
+            rfc_employee=clean_rfc,
+            still_employee=True,
+        )
+        return new_employee

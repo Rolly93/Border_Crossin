@@ -1,16 +1,25 @@
-from dataclasses import dataclass
 from pydantic import BaseModel
+from typing import Text
 
 
-class LoginRequest(BaseModel):
-    email : str
-    password : str
+class UserModel(BaseModel):
+    status: Text
+    id: int | None = None
+    email: str
 
-class LoginResponse(BaseModel):
-    status :str
-    user_id :str
-    is_admin :str
+
+class LoginRequest(UserModel):
+    password: str | None = None
+
+
+class LoginResponse(LoginRequest):
+    is_admin: bool
+
 
 class NewUser(LoginRequest):
-    username : str
-    role:str
+    username: str
+    role: str
+
+
+class NewUserResponse(UserModel):
+    detail: str
