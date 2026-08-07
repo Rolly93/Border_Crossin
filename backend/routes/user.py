@@ -1,7 +1,12 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from utility.auth_service import AuthService
+from fastapi import APIRouter, HTTPException, Depends
+from backend.utility.user_service import UserService
 from fastapi_utils.cbv import cbv
-from schema.user import LoginRequest, LoginResponse, NewUser, NewUserResponse
+from backend.schema.user_schema import (
+    LoginRequest,
+    LoginResponse,
+    NewUser,
+    NewUserResponse,
+)
 from schema.employee_schema import EmployeeRequest
 from sqlalchemy.orm import Session
 from databse import get_db
@@ -13,7 +18,7 @@ router = APIRouter(prefix="/user", tags=["user"])
 class LoginRoute:
 
     def __init__(self, db: Session = Depends(get_db)):
-        self._auth = AuthService(db)
+        self._auth = UserService(db)
 
     @router.post("/login", response_model=LoginResponse)
     async def login_post(self, data: LoginRequest):

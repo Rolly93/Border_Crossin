@@ -1,18 +1,38 @@
 import bcrypt
-from schema.user import LoginResponse, NewUser, LoginRequest
+from backend.schema.user_schema import NewUser, LoginRequest
 from schema.employee_schema import EmployeeRequest
 from config.config import Env
 from fastapi import HTTPException, status
 from model.db_model import Employee, User
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, exists
+
+from stdnum.mx import rfc
+from repository import UserRepository, EmployeeRepository
 
 
 class AuthService:
     def __init__(self, db: Session):
         self._env = Env()
         self._db = db
+        self._user_repo = UserRepository(db)
+        self._emplpyee_repo = EmployeeRepository(db)
         pass
+
+    def _validate_RFC(self, rfc_validate: str) -> str:
+
+        format_rfc = rfc_validate.strip().upper()
+
+        if not rfc.validate(format_rfc, validate_check_digits=False):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"RFC Invalido: {rfc_validate}",
+            )
+
+        return format_rfc
+
+    def clean_username(self, dirt_username: str) -> str:
+        clean_username = dirt_username.strip()
+        return clean_username
 
     def hash_content(self, toHash: str) -> str:
         """Transforms a plain input into a secure hash."""
@@ -34,8 +54,9 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Credencial Missing"
             )
-        username = data.username.strip().lower()
-        user = self._db.query(User).filter(User.username == username).first()
+        username = self.clean_username(data.username)
+
+        user = self._user_repo.get_username(username)
 
         generic_error = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -51,6 +72,17 @@ class AuthService:
 
         return user
 
+    def _exist_email(self, email: str) -> str:
+        clean_email = email.lower().strip()
+
+        exist_user = self._user_repo.get_email(clean_email)
+        if exist_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email already register"
+            )
+
+        return clean_email
+
     def create_newuser(
         self, data: NewUser, is_admin: int, rfc: str, is_bootstrap: bool = False
     ) -> User:
@@ -65,36 +97,28 @@ class AuthService:
             self.verify_admin(is_admin)
 
         hashed = self.hash_content(data.password)
-        clean_email = data.email.lower().strip()
-        clean_rfc = rfc.strip().upper()
 
-        existing_user = self._db.query(User).filter(User.email == clean_email).first()
-        employee = (
-            self._db.query(Employee).filter(Employee.rfc_employee == clean_rfc).first()
-        )
+        clean_rfc = self._validate_RFC(rfc)
+        clean_email = self._exist_email(data.email)
+        clean_username = self.clean_username(data.username)
+        employee = self._emplpyee_repo.get_employee(clean_rfc)
 
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Email already register"
-            )
         if not employee:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Employee with this RFC does not exist",
             )
 
-        db_user = User(
-            username=data.username,
+        new_user = User(
+            username=clean_username,
             email=clean_email,
             hashed_password=hashed,
             is_admin=data.is_admin,
             employee_id=employee.id,
         )
-        self._db.add(db_user)
-        self._db.commit()
-        self._db.refresh(db_user)
 
-        return db_user
+        self._user_repo.create_user(new_user)
+        return new_user
 
     def es_token_valido(self, token: str) -> bool:
         """
@@ -104,19 +128,14 @@ class AuthService:
         return token == "secret-setup-token"
 
     def user_already_exists(self) -> bool:
-        any_user = self._db.query(User).first()
+        any_user = self._user_repo.get_all_users()
         if any_user is not None:
             return True
-
         return False
 
     def verify_admin(self, admin_id: int) -> bool:
 
-        is_admin = (
-            self._db.query(User)
-            .filter(exists().where(and_(User.id == admin_id, User.is_admin == True)))
-            .scalar()
-        )
+        is_admin = self._user_repo.get_valid_admin(admin_id)
         if not is_admin:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -126,10 +145,9 @@ class AuthService:
 
     def create_employee(self, data: EmployeeRequest) -> Employee:
 
+        clean_rfc = self._validate_RFC(data.rfc_employee)
         existing_employee = (
-            self._db.query(Employee)
-            .filter(Employee.rfc_employee == data.rfc_employee)
-            .first()
+            self._db.query(Employee).filter(Employee.rfc_employee == clean_rfc).first()
         )
 
         if existing_employee:
@@ -137,7 +155,6 @@ class AuthService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="An employee with this RFC is already registered",
             )
-        clean_rfc = data.rfc_employee.strip().upper()
 
         new_employee = Employee(
             name=data.name,
@@ -146,7 +163,5 @@ class AuthService:
             rfc_employee=clean_rfc,
             still_employee=True,
         )
-        self._db.add(new_employee)
-        self._db.commit()
-        self._db.refresh(new_employee)
+        self._emplpyee_repo.create_employee(new_employee)
         return new_employee

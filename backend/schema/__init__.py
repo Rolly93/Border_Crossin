@@ -6,6 +6,5 @@ from .shipment_shcema import (
     Shipment,
     ShipmentUpdate,
 )
-from .status import *
-from .user import *
+from .user_schema import *
 from employee_schema import EmployeeRequest
