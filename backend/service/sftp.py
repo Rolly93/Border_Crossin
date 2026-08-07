@@ -1,4 +1,5 @@
 import paramiko
+from fastapi import HTTPException, status
 
 from config.config import SFTPConfig
 
@@ -26,12 +27,21 @@ class SFPTService:
             print(f"Connectando a SFTP: {self._host}")
         except paramiko.AuthenticationException as e:
             self.close()
-            raise "Error: Usuario o contraseña incorrectos."
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Error: Usuario o contraseña incorrectos."
+            )
         except paramiko.SSHException as e:
-            raise f"Error de protocolo SSH: {e}"
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error de protocolo SSH: {e}"
+            )
         except Exception as e:
             self.close()
-            raise f"Erro inesperado al conectar: { e}"
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error inesperado al conectar: { e}"
+            )
 
     def upload_file(self, local_path, remote_path):
         """Envio de Documentos via SFTP
@@ -49,11 +59,20 @@ class SFPTService:
             if self.sftp:
                 self.sftp.put(local_path, remote_path)
         except FileExistsError as e:
-            raise f"Error {e}"
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"El archivo local no fue encontrado en la ruta: {local_path}"
+            )
         except IOError as io_error:
-            raise f"Error de E/S (Ruta remota valida?): { io_error}"
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Error de E/S (¿Ruta remota válida?): {io_error}"
+            )
         except Exception as e:
-            raise f"Error al subir archivo: {e}"
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error al subir archivo: {e}"
+            )
 
     def close(self):
         if self.sftp:
@@ -62,10 +81,17 @@ class SFPTService:
             self.trasport.close()
         print(f"Conexion Cerrada!!")
 
-    def delete_file(self, filename):
+    def delete_file(self, filename: str):
         try:
-            remote_path = filename
-            self.sftp.remove(remote_path)
-            print(f"Archivo ${remote_path} Eliminado del servidor")
-        except Exception as e:
-            print(f"No se pudo eliminar: {e}")
+            if not self.sftp:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No hay una sesión SFTP activa."
+                )
+            self.sftp.remove(filename)
+            print(f"Archivo {filename} eliminado del servidor")
+        except FileNotFoundError:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"El archivo remoto {filename} no existe en el servidor."
+            )

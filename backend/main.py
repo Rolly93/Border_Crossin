@@ -6,7 +6,7 @@ from routes.shipment import router as Shipment
 from routes.notification_router import router as notifications_router
 
 from databse import engine, Base
-from model import ShipmentModel, ShipmentEventModel
+
 
 Base.metadata.create_all(bind=engine)
 
