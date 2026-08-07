@@ -10,7 +10,7 @@ from stdnum.mx import rfc
 from repository import UserRepository, EmployeeRepository
 
 
-class AuthService:
+class UserService:
     def __init__(self, db: Session):
         self._env = Env()
         self._db = db
@@ -18,7 +18,7 @@ class AuthService:
         self._emplpyee_repo = EmployeeRepository(db)
         pass
 
-    def _validate_RFC(self, rfc_validate: str) -> str:
+    def is_valid(self, rfc_validate: str) -> str:
 
         format_rfc = rfc_validate.strip().upper()
 
@@ -98,7 +98,7 @@ class AuthService:
 
         hashed = self.hash_content(data.password)
 
-        clean_rfc = self._validate_RFC(rfc)
+        clean_rfc = self.is_valid(rfc)
         clean_email = self._exist_email(data.email)
         clean_username = self.clean_username(data.username)
         employee = self._emplpyee_repo.get_employee(clean_rfc)
@@ -145,7 +145,7 @@ class AuthService:
 
     def create_employee(self, data: EmployeeRequest) -> Employee:
 
-        clean_rfc = self._validate_RFC(data.rfc_employee)
+        clean_rfc = self.is_valid(data.rfc_employee)
         existing_employee = (
             self._db.query(Employee).filter(Employee.rfc_employee == clean_rfc).first()
         )

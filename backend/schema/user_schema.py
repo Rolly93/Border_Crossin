@@ -9,7 +9,7 @@ class UserModel(BaseModel):
 
 
 class LoginRequest(UserModel):
-    password: str | None = None
+    password: str
     username: str
 
 
@@ -20,7 +20,7 @@ class LoginResponse(LoginRequest):
 class NewUser(LoginRequest):
     username: str
     role: str
-    is_admin :bool |bool = False
+    is_admin: bool | bool = False
 
 
 class NewUserResponse(UserModel):

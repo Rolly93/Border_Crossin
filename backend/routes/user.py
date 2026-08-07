@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from backend.utility.user_service import UserService
 from fastapi_utils.cbv import cbv
 from backend.schema.user_schema import (
@@ -22,10 +22,6 @@ class LoginRoute:
 
     @router.post("/login", response_model=LoginResponse)
     async def login_post(self, data: LoginRequest):
-
-        if not data.password:
-            return HTTPException(status_code=400, detail="Datos no Proporcionados")
-
         self._auth.autenticar(data)
 
         return {
