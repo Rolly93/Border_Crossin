@@ -36,6 +36,7 @@ class AuthService:
             )
         username = data.username.strip().lower()
         user = self._db.query(User).filter(User.username == username).first()
+
         generic_error = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Credenciales incorrectas",
@@ -45,7 +46,7 @@ class AuthService:
             bcrypt.checkpw(b"dummy_password", b"$2b$12$eI8qzx6iLc7g...fakehash...")
             raise generic_error
 
-        if self.verify_password(data.password, user.hashed_password):
+        if not self.verify_password(data.password, user.hashed_password):
             raise generic_error
 
         return user
@@ -85,7 +86,7 @@ class AuthService:
         db_user = User(
             username=data.username,
             email=clean_email,
-            password=hashed,
+            hashed_password=hashed,
             is_admin=data.is_admin,
             employee_id=employee.id,
         )
@@ -124,7 +125,12 @@ class AuthService:
         return is_admin
 
     def create_employee(self, data: EmployeeRequest) -> Employee:
-        existing_employee = None  # qury to check if rfc already exist
+
+        existing_employee = (
+            self._db.query(Employee)
+            .filter(Employee.rfc_employee == data.rfc_employee)
+            .first()
+        )
 
         if existing_employee:
             raise HTTPException(

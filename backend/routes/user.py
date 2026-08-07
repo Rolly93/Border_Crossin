@@ -21,14 +21,12 @@ class LoginRoute:
         if not data.password:
             return HTTPException(status_code=400, detail="Datos no Proporcionados")
 
-        result = self._auth.autenticar(data)
+        self._auth.autenticar(data)
 
-        return LoginResponse(
-            status=result.status,
-            id=result.id,
-            email=result.email,
-            is_admin=result.is_admin,
-        )
+        return {
+            "status": "200 Success",
+            "detail": "Login Success",
+        }
 
     @router.post("/new_user", response_model=NewUserResponse)
     async def new_user(self, data: NewUser, rfc: str, admin: int = 0):
@@ -38,7 +36,9 @@ class LoginRoute:
         if user_exist:
             self._auth.verify_admin(admin)
 
-        new_user = self._auth.create_newuser(data, admin, rfc, is_bootstrap=user_exist)
+        new_user = self._auth.create_newuser(
+            data, admin, rfc, is_bootstrap=not user_exist
+        )
 
         return {
             "status": "201 Created",
