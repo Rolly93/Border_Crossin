@@ -34,20 +34,17 @@ class LoginRoute:
     async def new_user(self, data: NewUser, rfc: str, admin: int = 0):
 
         user_exist = self._auth.user_already_exists()
-        admin_user = self._auth.verify_admin(admin)
 
-        if admin_user and user_exist:
-            if not data:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Please contact your IT Mananger",
-                )
-        new_user = self._auth.create_newuser(data, admin, rfc)
+        if user_exist:
+            self._auth.verify_admin(admin)
 
-        return {    "status":"201 Created",
-                    "detail":"User Created Successfully",
-                    "email":data.email,
-                }
+        new_user = self._auth.create_newuser(data, admin, rfc, is_bootstrap=user_exist)
+
+        return {
+            "status": "201 Created",
+            "detail": "User Created Successfully",
+            "email": new_user.email,
+        }
 
     @router.post("/register_employee")
     async def register_employee(self, data: EmployeeRequest, admin: int):

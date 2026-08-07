@@ -1,11 +1,11 @@
 import bcrypt
-from schema.user import LoginResponse, NewUser , LoginRequest
+from schema.user import LoginResponse, NewUser, LoginRequest
 from schema.employee_schema import EmployeeRequest
 from config.config import Env
 from fastapi import HTTPException, status
-from model.db_model import Employee,User
+from model.db_model import Employee, User
 from sqlalchemy.orm import Session
-from sqlalchemy import and_ , exists
+from sqlalchemy import and_, exists
 
 
 class AuthService:
@@ -29,8 +29,7 @@ class AuthService:
         """
         Logic for the /login route.
         """
-        # 1. Look for the user in your database
-        # user = db.query(User).filter(User.email == email).first()
+
         if not data.password or not data.username:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Credencial Missing"
@@ -42,16 +41,18 @@ class AuthService:
             detail="Credenciales incorrectas",
         )
 
-        if  not user :
+        if not user:
             bcrypt.checkpw(b"dummy_password", b"$2b$12$eI8qzx6iLc7g...fakehash...")
             raise generic_error
 
-        if  self.verify_password(data.password, user.hashed_password):
+        if self.verify_password(data.password, user.hashed_password):
             raise generic_error
 
         return user
 
-    def create_newuser(self, data: NewUser, is_admin: int, rfc: str)->User:
+    def create_newuser(
+        self, data: NewUser, is_admin: int, rfc: str, is_bootstrap: bool = False
+    ) -> User:
         if not data.password:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=" Data Missing"
@@ -59,38 +60,35 @@ class AuthService:
         """
         Logic for the /usuarios route.
         """
+        if not is_bootstrap:
+            self.verify_admin(is_admin)
 
         hashed = self.hash_content(data.password)
-        admin = self._db.query(User).filter(User.id == is_admin).first()
-        if not admin:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unauthorized: Admin privileges required",
-            )
         clean_email = data.email.lower().strip()
         clean_rfc = rfc.strip().upper()
 
         existing_user = self._db.query(User).filter(User.email == clean_email).first()
-        employee = self._db.query(Employee).filter(Employee.rfc_employee == clean_rfc).first()
-
+        employee = (
+            self._db.query(Employee).filter(Employee.rfc_employee == clean_rfc).first()
+        )
 
         if existing_user:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already register"
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email already register"
             )
         if not employee:
             raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Employee with this RFC does not exist"
-                        )
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Employee with this RFC does not exist",
+            )
 
         db_user = User(
-                        username =data.username,
-                        email = clean_email,
-                        password=hashed,
-                        is_admin = data.is_admin ,
-                        employee_id = employee.id)
+            username=data.username,
+            email=clean_email,
+            password=hashed,
+            is_admin=data.is_admin,
+            employee_id=employee.id,
+        )
         self._db.add(db_user)
         self._db.commit()
         self._db.refresh(db_user)
@@ -113,9 +111,11 @@ class AuthService:
 
     def verify_admin(self, admin_id: int) -> bool:
 
-        is_admin = self._db.query(User).filter( exists().where(
-            and_(User.id==admin_id , User.is_admin == True)
-        )).scalar()
+        is_admin = (
+            self._db.query(User)
+            .filter(exists().where(and_(User.id == admin_id, User.is_admin == True)))
+            .scalar()
+        )
         if not is_admin:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
