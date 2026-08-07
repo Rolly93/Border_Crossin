@@ -1,0 +1,134 @@
+erDiagram
+    employee {
+        int id PK
+        string name
+        string last_name
+        string role
+        date hire_date
+        string rfc_employee
+        boolean still_employee
+    }
+
+    user {
+        int id PK
+        string username
+        string email
+        string password
+        boolean is_admin
+        int employee_id FK
+    }
+
+    client {
+        int id PK
+        string name
+        boolean is_ftp
+        boolean is_email_service
+    }
+
+    sftp_service {
+        int id PK
+        string host
+        string username
+        string encrypted_password
+        int port
+        string root_folder
+        string remote_folder
+        int client_id FK
+        int configure_by_id FK
+    }
+
+    sftp_send {
+        int id PK
+        int shipment_event_id FK
+        string filename
+        string local_path
+        string status
+        int sent_to FK
+        text sftp_log
+        int retries
+    }
+
+    driver_details {
+        int employee_id PK, FK
+        string license_number
+        date expiration_date
+        int hire_by FK
+    }
+
+    unit_truck {
+        int id PK
+        string plates
+        string state
+        int assigned_to FK
+        date assigned_day
+    }
+
+    trailer {
+        int id PK
+        string plates
+        string state
+        string seal
+        date assigned_day
+    }
+
+    trip_assigned {
+        int id PK
+        string tracking_number
+        string customer_tracking
+        string type_operation
+        int driver_id FK
+        int client_id FK
+        int assigned_by FK
+        int trailer_id FK
+        date assigned_day
+        string origen
+        string destination
+        int truck_id FK
+            }
+
+    shipment_events {
+        int id PK
+        int trip_assigned_id FK
+        int capture_by_id FK
+        string category
+        string event_type
+        datetime event_time
+        datetime captured_at
+        string notes
+        string new_seal
+    }
+
+    email_service {
+        int id PK
+        string recipient_email
+        string status
+        int trip_assigned_id FK
+        datetime created_at
+        datetime sent_at
+    }
+
+    employee ||--o{ user : "is"
+    employee ||--o{ unit_truck : "assigned trucks"
+    employee ||--|| driver_details : "is"
+    
+    user ||--o{ trip_assigned : "assigns"
+    user ||--o{ shipment_events : "captures"
+    user ||--o{ sftp_service : "configures"
+    user ||--o{ driver_details : "hires driver"
+
+    client ||--o{ trip_assigned : "receive s"
+    client ||--o{ sftp_service : "has"
+    client ||--o{ email_service : "has"
+
+    sftp_service ||--o{ sftp_send : "sends"  
+
+    driver_details ||--o{ trip_assigned : "drives"
+    trailer ||--o{ trip_assigned : "hauls"
+
+    trip_assigned ||--o{ shipment_events : "tracks"
+    trip_assigned ||--o{ email_service : "notifies"
+
+    unit_truck ||--o{ trip_assigned : "performs trip"
+    unit_truck ||--o{ trailer : "assing"
+
+    shipment_events ||--o{ sftp_send : "send"

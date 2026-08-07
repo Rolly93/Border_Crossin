@@ -1,0 +1,86 @@
+flowchart TD
+    subgraph Start Up
+        Start([Start Application]) --> CheckUser{Does user exist?}
+        CheckUser -- No --> CreateUser[Prompt Create Admin/User Account]
+        CreateUser --> InputNewCreds[User Enters New Credentials]
+        InputNewCreds --> SaveCreds[(Save Credentials to DB)]
+        
+        SaveCreds --> Landing[Open Login Page]
+        CheckUser -- Yes --> Landing
+    end
+
+    subgraph Authentication & Login
+        Landing --> InputCreds[User Enters Username & Password]
+        InputCreds --> ClickLogin{Click Login?}
+        
+        ClickLogin -- No --> InputCreds
+        ClickLogin -- Yes --> Validate[Validate Against Database]
+        
+        Validate --> ValidMatch{Valid Credentials?}
+        ValidMatch -- No --> Error[Show Error Message]
+        Error --> InputCreds
+    end
+
+    subgraph Dashboard Routing & Navigation
+        ValidMatch -- Yes --> CheckRole{Switch: User Role}
+        
+        %% Admin Branch & Responsibilities
+        CheckRole -- Admin --> AdminDash([Redirect to Admin Dashboard])
+        AdminDash --> AdminAction{Admin Tasks}
+        AdminAction --> ManageUsers[Manage Users & Employees]
+        AdminAction --> ManageClients[Configure Clients & SFTP Services]
+        AdminAction --> GlobalAudit[View All Fleet & System Logs]
+
+        %% CSR Branch & Responsibilities
+        CheckRole -- Customer Representative / CSR --> CSRDash([Redirect to CSR Home Page])
+        CSRDash --> NavChoice{User Selects Page}
+        
+        NavChoice -- Trips / Shipments --> TripPage[Create & Assign Shipments / Trips]
+        NavChoice -- Fleet Management --> FleetPage[Open Trucks & Trailers View]
+        NavChoice -- Events & Tracking --> EventPage[Record Transit & Seal Events / SFTP]
+    end
+    
+    subgraph Manage Users & Employees
+        ManageUsers --> MU_Choice{Action Type}
+        MU_Choice -- Add Employee --> MU_Add[Register Employee & Driver Details]
+        MU_Choice -- Assign User --> MU_User[Link User Account & Set Admin Rights]
+        MU_Add --> MU_Save[(Save to Employee DB)]
+        MU_User --> MU_Save[(Save to User DB)]
+    end
+    
+    subgraph Configure Clients & SFTP Service
+        ManageClients --> MC_Choice{Client Action}
+        MC_Choice -- New Client --> MC_Client[Register Client Name & Services]
+        MC_Choice -- Setup SFTP --> MC_SFTP[Configure Host, Port, Folders & Credentials]
+        MC_Client --> MC_Save[(Save to Client DB)]
+        MC_SFTP --> MC_Save[(Save to SFTP Service DB)]
+    end
+    
+    subgraph View all fleet & systems Logs
+        GlobalAudit --> GA_Choice{Select View}
+        GA_Choice -- Fleet Logs --> GA_Fleet[Audit UnitTrucks & Trailers Status]
+        GA_Choice -- Event Logs --> GA_Events[Review Shipment Events & SFTP Sends]
+        GA_Fleet --> GA_Display[Render System Dashboard Audit]
+        GA_Events --> GA_Display
+    end
+
+    subgraph Create & Assign Shipments / Trips
+        TripPage --> TA_Form[CSR Fills Out Trip Form]
+        TA_Form --> TA_Assign[Assign Truck, Trailer, & Driver]
+        TA_Assign --> TA_Save[(Save Trip to trip_assigned DB)]
+    end
+    
+    subgraph Open Trucks & Trailers View
+        FleetPage --> FP_View[Monitor Fleet Availability]
+        FP_View --> FP_Update[Update Truck/Trailer Status & Plates]
+    end
+
+    subgraph Record Transit & Seal Events / SFTP
+        EventPage --> EP_Log[Log New Transit Checkpoint / Event]
+        EP_Log --> EP_Update[Update Shipment Status & Seals]
+        EP_Update --> EP_Notify{Trigger Integrations}
+        EP_Notify --> EP_Email[Dispatch Status Email]
+        EP_Notify --> EP_SFTP[Transmit Manifest via SFTP]
+        EP_Email --> EP_DB[(Save to email_service & sftp_send DB)]
+        EP_SFTP --> EP_DB
+    end
