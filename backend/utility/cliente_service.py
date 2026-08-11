@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from model.shipment_model import ShipmentModel, ShipmentEventModel
-from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate
+from model.db_model import Client
+
+# Missing Client Schema
 
 
 class ClienteService:
