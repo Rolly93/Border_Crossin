@@ -1,0 +1,98 @@
+{
+  "shipment": {
+    "title": "Captura de Embarque",
+    "labels": {
+      "trackinNumber": "No  Embarque",
+      "customer_tracking": "Referencia",
+      "cliente": "Cliente",
+      "truck": "Tractor",
+      "vehicle_type": "Tipo de Vehiculo",
+      "trailer": "Trailer",
+      "origen": "Origen",
+      "destination": "Destino",
+      "dateTime": "Fecha y Hora",
+      "pick_up": "Recoleccion",
+      "departure": "Salida",
+      "delay": "Retraso",
+      "mex_inspeccion": "Inspeccion Mexicano",
+      "clear_mex": "Verde Mexicano",
+      "usa_inspeccion": "Inspeccion USA",
+      "clear_usa": "Verde Americano",
+      "safety_yard": "Resguardo de Patio Americano",
+      "deliver": "Entrega",
+      "inspectionNote": "Sello Nuevo",
+      "operation_type": "Tipo Operacion"
+    },
+    "placeholders": {
+      "trackinNumber": "Num de Seguimiento",
+      "customer_tracking": "Referencia del cliente",
+      "cliente": "Cliente",
+      "truck": "Num. Unidad",
+      "vehicle_type": "Tractor /  Unidad",
+      "trailer": "Trailer",
+      "origen": "Origen",
+      "destination": "Destino",
+      "dateTime": "Fecha y Hora",
+      "operation_type": "Ex: Exportacion / Importacion"
+    },
+    "table": {
+      "trackinNumber": "Referencia",
+      "customer_tracking": "No. Embarque",
+      "cliente": "Cliente",
+      "truck": "Tractor",
+      "vehicle_type": "Tipo de Vehiculo",
+      "trailer": "Trailer",
+      "origen": "Origen",
+      "destination": "Destino",
+      "inspectionMexCostums": "Inspeccion Mexicano",
+      "newMexSeal": "Sello Nuevo",
+      "clearMexCostums": "Verde Mexicano",
+      "inspectionUsaCostums": "Inspeccion USA",
+      "newUsaSeal": "Sello Nuevo",
+      "clearUsaCostums": "Verde Americano",
+      "deliver": "Entrega",
+      "recive": "Recibe",
+      "pick_up": "Recoleccion",
+      "departure": "Salida",
+      "delay": "Retraso",
+      "mex_inspeccion": "Inspeccion Mexicano",
+      "clear_mex": "Verde Mexicano",
+      "usa_inspeccion": "Inspeccion USA",
+      "clear_usa": "Verde Americano",
+      "safety_yard": "Resguardo de Patio Americano",
+      "inspectionNote": "Sello Nuevo",
+      "operation_type": "Tipo Operacion"
+    }
+  },
+  "modal": {
+    "titles": {
+      "newShipment": "Agregar Nuevo Embarque",
+      "selectedTrailer": "Trailer"
+    },
+    "labels": {
+      "username": "Usuario",
+      "password": "Contraseña",
+      "port": "Puerto",
+      "host": "Servidor"
+    },
+    "placeholders": {
+      "username": "Usuario",
+      "password": "Contraseña",
+      "port": "Puerto",
+      "host": "Servidor"
+    }
+  },
+  "common": {
+    "buttons": {
+      "newShipment": "Nuevo Embarque"
+    },
+    "search": {
+      "labels": {
+        "shipment": "Buscar Embarque"
+      },
+      "placeholders": {
+        "shipment": ".. / Referencia /  trailer"
+      }
+    }
+  }
+}
