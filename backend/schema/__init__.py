@@ -8,3 +8,4 @@ from .shipment_shcema import (
 )
 from .user_schema import *
 from employee_schema import EmployeeRequest
+from .client_schema import *

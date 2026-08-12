@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from model.db_model import Employee
+from model.db_model import Client
 from sqlalchemy import and_, exists
 
 

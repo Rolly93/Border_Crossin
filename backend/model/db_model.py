@@ -62,6 +62,7 @@ class Client(Base):
 
     sftp_services = relationship("SftpService", back_populates="client")
     shipment_assigns = relationship("ShipmentAssign", back_populates="client")
+    email_recipients = relationship("ClientEmailRecipient", back_populates="client")
 
 
 class SftpService(Base):
@@ -230,3 +231,16 @@ class EmailService(Base):
     )
 
     trip = relationship("ShipmentAssign", back_populates="email_services")
+
+
+class ClientEmailRecipient(Base):
+    __tablename__ = "client_email_recipient"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    client_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("client.id", ondelete="CASCADE")
+    )
+    email: Mapped[str] = mapped_column(String(200), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    client = relationship("Client", back_populates="email_recipients")
