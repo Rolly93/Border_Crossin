@@ -4,5 +4,5 @@ import { MockShipmentService } from './shipment/MockShipmentService';
 
 const ip = import.meta.env.VITE_API_URL|| false
 
-export const shipmentService :IShipmentService = ip 
+export const shipmentService :IShipmentService = ip
 ? new ApiShipmentService() : new  MockShipmentService();

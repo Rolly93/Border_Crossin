@@ -12,27 +12,32 @@ import { ShipmentValidator } from '../utils/validation/ShipmentValidator';
 import { ShipmentModel } from '../utils/domain/shipmentModel';
 import { useFormNotifications } from '@/hooks/useNotifications';
 
+import { useTranslation } from 'react-i18next';
+
 import { notify } from '../utils/notifications';
 interface EventFieldConfig {
   key: EventCategory;
-  label: string
   showNotes?: boolean;
   maxNotesLength?: number;
   notesLable?: string;
 }
+
 const EVENT_FIELDS: EventFieldConfig[] = [
-  { key: "pick_up", label: 'Pick up' },
-  { key: "departure", label: 'Departure' },
-  { key: "delay", label: 'Delay', showNotes: true, maxNotesLength: 50, notesLable: "Delay for" },
-  { key: "mex_inspeccion", label: 'Mex Inspection', showNotes: true, maxNotesLength: 25, notesLable: "New Seal" },
-  { key: "clear_mex", label: 'Clear Customs Mex' },
-  { key: "usa_inspeccion", label: 'USa Inspection', showNotes: true, maxNotesLength: 25, notesLable: "New Seal" },
-  { key: "clear_usa", label: 'Clear Sutoms USA' },
-  { key: "safety_yard", label: 'Safety Yard', showNotes: true, maxNotesLength: 25, notesLable: "safeted at" },
-  { key: "deliver", label: 'Delivered', showNotes: true, maxNotesLength: 25, notesLable: "Who recives the shipment" },
+  { key: "pick_up"  },
+  { key: "departure" },
+  { key: "delay", showNotes: true, maxNotesLength: 50},
+  { key: "mex_inspeccion" , showNotes: true, maxNotesLength: 25},
+  { key: "clear_mex" },
+  { key: "usa_inspeccion", showNotes: true, maxNotesLength: 25},
+  { key: "clear_usa" },
+  { key: "safety_yard" ,showNotes: true, maxNotesLength: 25 },
+  { key: "deliver",  showNotes: true, maxNotesLength: 25 },
 ];
 const EXPECTED_CATEGORIES = EVENT_FIELDS.map(f => f.key)
 export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSubmit: (values: Shipment) => void, initialShipment?: Shipment }) {
+
+
+const {t,i18n} = useTranslation()
   const form = useForm<Shipment>({
     mode: 'uncontrolled',
     validateInputOnChange: true,
@@ -96,14 +101,14 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
         <Stack >
 
           <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
-            < EditableTextInput label="No. Embarque" formProps={form.getInputProps('tracking_number')} />
-            < EditableTextInput label="Referencia" formProps={form.getInputProps('customer_tracking')} />
-            < EditableTextInput label="Cliente" formProps={form.getInputProps('cliente')} />
-            < EditableTextInput label="No. Vehiculo" formProps={form.getInputProps('truck')} />
-            < EditableTextInput label="Tipo Vehículo" formProps={form.getInputProps('vehicle_type')} />
-            < EditableTextInput label="Trailer" formProps={form.getInputProps('trailer')} />
-            < EditableTextInput label="Origen" formProps={form.getInputProps('origen')} />
-            < EditableTextInput label="Destino" formProps={form.getInputProps('destino')} />
+            < EditableTextInput label={t('shipment.labels.trackinNumber')} formProps={form.getInputProps('tracking_number')} />
+            < EditableTextInput label={t('shipment.labels.customer_tracking')} formProps={form.getInputProps('customer_tracking')} />
+            < EditableTextInput label={t('shipment.labels.cliente')} formProps={form.getInputProps('cliente')} />
+            < EditableTextInput label={t('shipment.labels.truck')} formProps={form.getInputProps('truck')} />
+            < EditableTextInput label={t('shipment.labels.vehicle_type')} formProps={form.getInputProps('vehicle_type')} />
+            < EditableTextInput label={t('shipment.labels.trailer')} formProps={form.getInputProps('trailer')} />
+            < EditableTextInput label={t('shipment.labels.origen')} formProps={form.getInputProps('origen')} />
+            < EditableTextInput label={t('shipment.labels.destination')} formProps={form.getInputProps('destino')} />
           </SimpleGrid>
 
           <Divider my="sm" />
@@ -117,20 +122,20 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
               return (
                 <Stack key={field.key}>
                   <DateTimePicker
-                    label={field.label}
+                    label={t(`shipment.labels.${field.key}`)}
                     timePickerProps={{
                       withDropdown: true,
                       popoverProps: { withinPortal: false },
                       format: '24h',
                     }}
-                    placeholder="Seleccionar Fecha y Hora..."
+                    placeholder={t('shipment.labels.dateTime')}
                     clearable
                     {...form.getInputProps(`events.${eventIndex}.dateTime`)}
                   />
                   {field.showNotes &&
 
                     (<TextInput
-                      placeholder={field.notesLable}
+                      placeholder={t('shipment.labels.inspectionNote')}
                       size="xs"
                       maxLength={field.maxNotesLength || 50}
                       {...form.getInputProps(`events.${eventIndex}.notes`)}
