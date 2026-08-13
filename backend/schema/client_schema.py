@@ -1,21 +1,19 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field
 from typing import Text, Optional
 from sftp_schema import SftpResponse
+from pydantic import EmailStr
+import re
 
 
 class ClientModel(BaseModel):
-    id: Optional[int] = None
     name: str
-    sftService: bool
-    emailService: bool
-    email: Optional[list[str]] = None
+    sftp_service: bool
+    email_service: bool
 
 
 class ClientResponse(ClientModel):
-    name: str
-    sftService: bool
-    emailService: bool
-    email: Optional[list[str]] = None
+    id: int
+    email: Optional[list[EmailStr]] = None
 
     class Config:
         from_attributes = True
@@ -33,4 +31,13 @@ class ClientResponse(ClientModel):
 
 
 class ClientRequest(ClientModel):
-    pass
+    email: Optional[list[EmailStr]] = None
+    name: str = Field(..., min_length=2, max_length=100)
+
+    @field_validator("name")
+    @classmethod
+    def validate_company_name(cls, v: str) -> str:
+        v = re.sub(r"/s+", " ", v)
+        if not re.search(r"[a-zA-Z0-9\u00C0-\u024F]", v):
+            raise ValueError("Company name must contain letters or numbers")
+        return v

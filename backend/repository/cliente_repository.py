@@ -25,32 +25,42 @@ class ClienteRepository:
                 ClientResponse(
                     id=client.id,
                     name=client.name,
-                    sftService=client.is_ftp,
-                    emailService=client.is_email_service,
+                    sftp_service=client.is_ftp,
+                    email_service=client.is_email_service,
                     email=active_emails if active_emails else None,
                 )
             )
 
         return result
 
-    def _client_exist(self , id:int )-> None | Client:
+    def _client_exist(self, id: int) -> None | Client:
         client = self._db.query(Client).filter(Client.id == id).first()
         if not client:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"client with id {id} not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"client with id {id} not found",
+            )
 
         return client
 
     def get_clients(self):
         return self._db.query(Client).all()
 
-    def it_has_email(self,id:int):
-        return (self._db.query(Client).filter(exists().where(and_(Client.id==id,Client.is_email_service))).scalar())
+    def it_has_email(self, id: int):
+        return (
+            self._db.query(Client)
+            .filter(exists().where(and_(Client.id == id, Client.is_email_service)))
+            .scalar()
+        )
 
-    def it_has_sftp_service(self,id:int):
-        return (self._db.query(Client).filter(exists().where(and_(Client.id==id , Client.is_ftp))).scalar())
+    def it_has_sftp_service(self, id: int):
+        return (
+            self._db.query(Client)
+            .filter(exists().where(and_(Client.id == id, Client.is_ftp)))
+            .scalar()
+        )
 
-    def create_new_client(self, data:Client)->Client:
+    def create_new_client(self, data: Client) -> Client:
         data_client = Client(**data.dump_json())
         self._db.add(data_client)
         self._db.commit()
@@ -58,18 +68,18 @@ class ClienteRepository:
 
         return data_client
 
-    def update_client(self, cliente_id:int , cliente_data : ClientRequest)->Client:
+    def update_client(self, cliente_id: int, cliente_data: ClientRequest) -> Client:
         client = self._client_exist(cliente_id)
-        
+
         update_data = cliente_data.model_dump(exclude_unset=True)
 
-        for k,v in update_data.items():
-            setattr(client , k,v)
+        for k, v in update_data.items():
+            setattr(client, k, v)
         self._db.commit()
         self._db.refresh(client)
         return client
 
-    def delete_client(self,client_id :int )->None:
+    def delete_client(self, client_id: int) -> None:
         client = self._client_exist(client_id)
         self._db.delete(client)
         self._db.commit()

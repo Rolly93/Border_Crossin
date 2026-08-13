@@ -9,3 +9,6 @@ from schema import ClientRequest, ClientResponse
 class ClienteService:
     def __init__(self, db: Session):
         self._db = db
+
+    def is_valid_name(self, name: str) -> str:
+        return ""

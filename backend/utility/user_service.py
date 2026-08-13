@@ -16,7 +16,6 @@ class UserService:
         self._db = db
         self._user_repo = UserRepository(db)
         self._emplpyee_repo = EmployeeRepository(db)
-        pass
 
     def is_valid(self, rfc_validate: str) -> str:
 
