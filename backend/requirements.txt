@@ -10,7 +10,6 @@ typing-inspect
 
 pydantic
 pydantic-settings
-flask_login
 sqlalchemy
 
 python-stdnum

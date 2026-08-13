@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional , Literal
 from enum import Enum
 from pydantic import BaseModel
 from datetime import datetime
@@ -46,7 +46,7 @@ class Shipment(ShipmentCreate):
     events: List[ShipmentEvent]
 
     class Config:
-        from_attributes: True
+        from_attributes: Literal[True]
 
 
 class ShipmentUpdate(BaseModel):

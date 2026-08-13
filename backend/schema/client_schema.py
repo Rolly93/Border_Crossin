@@ -4,12 +4,14 @@ from sftp_schema import SftpResponse
 
 
 class ClientModel(BaseModel):
-    status: Optional[Text]
-    id: int | None = None
+    id: Optional[int] = None
+    name: str
+    sftService: bool
+    emailService: bool
+    email: Optional[list[str]] = None
 
 
-class ClientResponse(BaseModel):
-    id: int
+class ClientResponse(ClientModel):
     name: str
     sftService: bool
     emailService: bool
@@ -30,5 +32,5 @@ class ClientResponse(BaseModel):
             return v
 
 
-class ClientRequest(ClientResponse):
+class ClientRequest(ClientModel):
     pass
