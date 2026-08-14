@@ -83,3 +83,11 @@ class ClienteRepository:
         client = self._client_exist(client_id)
         self._db.delete(client)
         self._db.commit()
+
+    def client_exist(self, name: str) -> list[Client]:
+        db_client = self._db.query(Client).filter(Client.name == name).all()
+        if db_client:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Cliente Duplicado"
+            )
+        return db_client

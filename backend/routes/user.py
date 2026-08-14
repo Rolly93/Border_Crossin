@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from backend.utility.user_service import UserService
+from utility.user_service import UserService
 from fastapi_utils.cbv import cbv
-from backend.schema.user_schema import (
+from schema.user_schema import (
     LoginRequest,
     LoginResponse,
     NewUser,

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from model.shipment_model import ShipmentModel, ShipmentEventModel
+from model.db_model import ShipmentAssign, ShipmentEventModel
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate
 
 
@@ -9,10 +9,10 @@ class ShipmentService:
         self.db = db
 
     def get_all_shipments(self):
-        return self.db.query(ShipmentModel).all()
+        return self.db.query(ShipmentAssign).all()
 
     def create_shipment(self, shipment: ShipmentCreate):
-        db_shipment = ShipmentModel(**shipment.model_dump())
+        db_shipment = ShipmentAssign(**shipment.model_dump())
         self.db.add(db_shipment)
         self.db.commit()
         self.db.refresh(db_shipment)
@@ -20,7 +20,9 @@ class ShipmentService:
 
     def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
         db_shipment = (
-            self.db.query(ShipmentModel).filter(ShipmentModel.id == shipment_id).first()
+            self.db.query(ShipmentAssign)
+            .filter(ShipmentAssign.id == shipment_id)
+            .first()
         )
 
         if not db_shipment:

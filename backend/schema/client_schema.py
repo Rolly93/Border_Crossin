@@ -1,14 +1,15 @@
 from pydantic import BaseModel, field_validator, Field
 from typing import Text, Optional
-from sftp_schema import SftpResponse
+from .sftp_schema import SftpResponse
 from pydantic import EmailStr
 import re
 
 
 class ClientModel(BaseModel):
+
     name: str
-    sftp_service: bool
-    email_service: bool
+    sftp_service: bool = False
+    email_service: bool = False
 
 
 class ClientResponse(ClientModel):
@@ -31,6 +32,16 @@ class ClientResponse(ClientModel):
 
 
 class ClientRequest(ClientModel):
+    """
+    Client Request Schema
+
+    Fields:
+    - name (str): Full name of the client
+    - email (str): Contact email address
+    - sftp_service (bool) : contract SFTP service?
+    - email_service (bool) : contract email service?
+    """
+
     email: Optional[list[EmailStr]] = None
     name: str = Field(..., min_length=2, max_length=100)
 

@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from model.db_model import Employee
-from sqlalchemy import and_, exists
 
 
 class EmployeeRepository:
@@ -14,6 +13,7 @@ class EmployeeRepository:
         db_employee = Employee(**data.dump_json())
         self._db.add(db_employee)
         self._db.commit()
+
         self._db.refresh(db_employee)
 
         return db_employee

@@ -1,5 +1,5 @@
 import bcrypt
-from backend.schema.user_schema import NewUser, LoginRequest
+from schema.user_schema import NewUser, LoginRequest
 from schema.employee_schema import EmployeeRequest
 from config.config import Env
 from fastapi import HTTPException, status
