@@ -11,9 +11,10 @@ interface ClienteModalProps {
     onSelectClient: ICliente | null;
     opened: boolean;
     onClose: () => void;
+    onSave: (data: any) => void
 }
 
-export default function ClientModalProps({ onSelectClient, opened, onClose }: ClienteModalProps) {
+export default function ClientModalProps({ onSelectClient, opened, onClose, onSave }: ClienteModalProps) {
     const [sftpOpened, { open: openSftp, close: closeSftp }] = useDisclosure(false);
     const [newEmail, setNewEmail] = useState("");
     const [recipients, setRecipients] = useState<string[]>([]);
@@ -40,9 +41,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose }: Cl
         }
     }, [onSelectClient]);
 
-    if (!onSelectClient) {
-        return null;
-    }
+
 
     const handleAddRecipient = () => {
         const validationError = isEmail('Invalid email')(newEmail);
@@ -74,19 +73,21 @@ export default function ClientModalProps({ onSelectClient, opened, onClose }: Cl
             email: recipients
         };
         console.log("Datos guardados:", finalData);
+
+        onSave(finalData)
         onClose();
     };
 
     return (
         <>
 
-            <Modal opened={opened} onClose={onClose} title="Editar Cliente" size="lg">
+            <Modal opened={opened} onClose={onClose} title={onSelectClient ? "Editar Cliente" : "Nuevo Cliente"} size="lg">
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing={'md'}>
                     <ActionCard
                         title="Email Notification"
                         icon={<IconMail size={20} />}
                         color="yellow"
-                        statusText={onSelectClient.email && onSelectClient.email.length > 0 ? "Activo" : "Inactivo"}
+                        statusText={onSelectClient?.email && onSelectClient.email.length > 0 ? "Activo" : "Inactivo"}
                         onClick={() => {
 
                         }}
@@ -95,7 +96,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose }: Cl
                         title="SFT Service"
                         icon={<IconFileText size={20} />}
                         color="grape"
-                        statusText={onSelectClient.sftService ? "Activo" : "Inactivo"}
+                        statusText={onSelectClient?.sftService ? "Activo" : "Inactivo"}
                         onClick={() => {
                             openSftp()
 

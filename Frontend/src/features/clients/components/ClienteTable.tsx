@@ -15,11 +15,45 @@ import { ClientTableRow } from "./ClientTableRow";
 
 export function ClientTable() {
   const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
-  const [opened, { open, close }] = useDisclosure();
-
-  function handelClickClient(onSelectClient: ICliente) {
+  const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
+  const [client, setClients] = useState<ICliente[]>(CLIENT);
+  function handleSelectClient(onSelectClient: ICliente) {
     setselectedClient(onSelectClient)
-    open()
+    openModal()
+  }
+  function handleCreateClient() {
+    setselectedClient(null);
+    openModal();
+  };
+
+  function handleSaveClient(formData: any) {
+    if (selectedClient) {
+      setClients((prev) =>
+        prev.map((c) =>
+          c.id === selectedClient.id
+            ? {
+              ...c,
+              nombre: formData.companyName,
+              contacto: formData.mainContact,
+              telefono: formData.phoneNumber,
+              email: formData.email,
+            }
+            : c
+        )
+      );
+    } else {
+      const newClient: ICliente = {
+
+        name: formData.companyName,
+        contacto: formData.mainContact,
+        telefono: formData.phoneNumber,
+        email: formData.email,
+        estatus: true,
+        sftService: false,
+        emailService: formData.email?.length > 0,
+      };
+      setClients((prev) => [newClient, ...prev]);
+    }
   }
 
 
@@ -32,7 +66,7 @@ export function ClientTable() {
           <Text size="sm" c="dimmed">Directorio y gestión de clientes activos</Text>
         </div>
         <Group>
-          <Button leftSection={<IconPlus size={16} />} color="blue">
+          <Button leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
             Agregar Cliente
           </Button>
           <Button variant="default" leftSection={<IconRefresh size={16} />}>
@@ -69,7 +103,8 @@ export function ClientTable() {
               <ClientTableRow
                 key={cliente.id}
                 cliente={cliente}
-                onClick={handelClickClient} />
+                onClick={handleSelectClient}
+              />
             ))}
 
           </Table.Tbody>
@@ -78,8 +113,9 @@ export function ClientTable() {
 
       <ClientModalProps
         onSelectClient={selectedClient}
-        opened={opened}
-        onClose={close} />
+        opened={modalOpened}
+        onClose={closeModal}
+        onSave={handleSaveClient} />
 
     </>
 
