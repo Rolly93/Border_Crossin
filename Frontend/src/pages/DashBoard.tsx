@@ -1,13 +1,13 @@
 // pages/Home.page.tsx
-import ShipmentTable from '../components/DashTable/ShipmentTable';
-import Headers from '@/components/Header/Header';
+import Headers from '@/components/ui/Header';
 import { Container } from '@mantine/core';
 
 
-import { useShipments } from '@/hooks/useShipments';
-import { shipmentService } from '@/service/shipmentService';
-import { Shipment } from '@/types/Shipment';
+import { useShipments } from '@/features/shipments/hooks/useShipments';
+import { shipmentService } from '@/features/shipments/service/shipmentService';
+import { Shipment } from '@/features/shipments/types/Shipment';
 import { useMemo, useState } from 'react';
+import ShipmentTable from '@/features/shipments/components/ShipmentTable';
 
 export function DashBoard() {
 
