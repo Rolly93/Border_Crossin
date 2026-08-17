@@ -2,12 +2,14 @@ from sqlalchemy import and_, exists
 
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
+from backend.repository.base_repository import BaseRepository
 from model.db_model import Client, ClientEmailRecipient
 from schema import ClientRequest, ClientResponse
 
 
-class ClienteRepository:
+class ClienteRepository(BaseRepository[Client]):
     def __init__(self, db: Session):
+        super().__init__(db, Client)
         self._db = db
 
     def get_clients_email(self) -> list[ClientResponse]:
@@ -62,10 +64,7 @@ class ClienteRepository:
 
     def create_new_client(self, data: Client) -> Client:
         data_client = Client(**data.dump_json())
-        self._db.add(data_client)
-        self._db.commit()
-        self._db.refresh(data_client)
-
+        self.save(data_client)
         return data_client
 
     def update_client(self, cliente_id: int, cliente_data: ClientRequest) -> Client:
