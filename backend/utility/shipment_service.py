@@ -25,5 +25,7 @@ class ShipmentService:
 
     def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
         shipment_update = self.repo_db.update_shipment(shipment_id, shipment_data)
-        self._client_service.it_has_sfpt_notification(shipment_update.client_id ,shipment_data: ShipmentUpdate)
+        self._client_service.it_has_sfpt_notification(
+            shipment_update.client_id, shipment_data
+        )
         return shipment_update
