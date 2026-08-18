@@ -4,5 +4,4 @@ router = APIRouter()
 
 @cbv(router)
 class DashBoard():
-    
-    
+    pass
