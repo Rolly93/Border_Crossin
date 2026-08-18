@@ -4,11 +4,11 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 secret_key = os.getenv("SECRET_KEY")
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    DATABASE_URL,
     connect_args={"check_same_thread": False},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
