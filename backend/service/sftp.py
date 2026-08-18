@@ -29,18 +29,18 @@ class SFPTService:
             self.close()
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Error: Usuario o contraseña incorrectos."
+                detail="Error: Usuario o contraseña incorrectos.",
             )
         except paramiko.SSHException as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error de protocolo SSH: {e}"
+                detail=f"Error de protocolo SSH: {e}",
             )
         except Exception as e:
             self.close()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error inesperado al conectar: { e}"
+                detail=f"Error inesperado al conectar: { e}",
             )
 
     def upload_file(self, local_path, remote_path):
@@ -51,7 +51,7 @@ class SFPTService:
             remote_path (str): a donde se estara depostiando : EJEM: /upload/test_xml.xm
 
         Raises:
-            f: Error de E/S (Ruta remota valida?
+            f: Error de E/S (Ruta remota valida?)
             f: Error al subir archivo
             f: Error: Generico
         """
@@ -61,17 +61,17 @@ class SFPTService:
         except FileExistsError as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"El archivo local no fue encontrado en la ruta: {local_path}"
+                detail=f"El archivo local no fue encontrado en la ruta: {local_path}",
             )
         except IOError as io_error:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Error de E/S (¿Ruta remota válida?): {io_error}"
+                detail=f"Error de E/S (¿Ruta remota válida?): {io_error}",
             )
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error al subir archivo: {e}"
+                detail=f"Error al subir archivo: {e}",
             )
 
     def close(self):
@@ -86,12 +86,12 @@ class SFPTService:
             if not self.sftp:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="No hay una sesión SFTP activa."
+                    detail="No hay una sesión SFTP activa.",
                 )
             self.sftp.remove(filename)
             print(f"Archivo {filename} eliminado del servidor")
         except FileNotFoundError:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"El archivo remoto {filename} no existe en el servidor."
+                detail=f"El archivo remoto {filename} no existe en el servidor.",
             )

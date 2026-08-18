@@ -144,6 +144,44 @@ class Trailer(Base):
 
 
 class ShipmentAssign(Base):
+    """Represents a trip or shipment assignment within the logistics system.
+
+    Maps to the 'trip_assigned' table. This model links driver, equipment,
+    client, and route information to track a specific shipment assignment and
+    its associated events and notifications.
+
+    Attributes:
+        id (int): Primary key; unique auto-incremented identifier for the trip.
+        tracking_number (str): Unique internal tracking identifier.
+        customer_tracking (str): Customer-provided tracking code/reference.
+        type_operation (str): Operational type (e.g., 'exportacion').
+            Defaults to 'exportacion'.
+        driver_id (int): Foreign key referencing the assigned driver
+            (`driver_details.employee_id`).
+        client_id (int): Foreign key referencing the client (`client.id`).
+        assigned_by (int): Foreign key referencing the user who created the
+            assignment (`user.id`).
+        trailer_id (int): Foreign key referencing the assigned trailer
+            (`trailer.id`).
+        unit_truck_id (int, optional): Foreign key referencing the assigned truck
+            (`unit_truck.id`). Optional/nullable.
+        assigned_day (date): Date when the shipment was assigned. Defaults to
+            the current timestamp.
+        origen (str): Origin location or address of the shipment.
+        destination (str): Destination location or address of the shipment.
+
+    Relationships:
+        driver (DriverDetails): The driver assigned to this trip.
+        client (Client): The client associated with this shipment.
+        assigned_by_user (User): The system user who created the assignment.
+        trailer (Trailer): The trailer assigned to this trip.
+        truck (UnitTruck): The truck unit assigned to this trip (if any).
+        events (List[ShipmentEventModel]): Tracking events associated with
+            this trip (cascades on delete).
+        email_services (List[EmailService]): Log of email services/notifications
+            triggered for this trip.
+    """
+
     __tablename__ = "trip_assigned"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

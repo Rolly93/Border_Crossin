@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi_utils.cbv import cbv
+from httpx import Client
 from databse import get_db
 from sqlalchemy.orm import Session
 from schema import ClientRequest
@@ -25,3 +26,10 @@ class ClientRoute:
         newclient = self._client_service.create_client(data)
 
         return {"status": "success", "data": newclient.name}
+
+    @router.patch(
+        "/update_client", response_model=ClientRequest, status_code=status.HTTP_200_OK
+    )
+    async def update_client(self, admin_id: int, data: ClientRequest):
+
+        return data

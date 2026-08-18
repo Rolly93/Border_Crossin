@@ -7,6 +7,7 @@ class EmployeeRepository:
         self._db = db
 
     def get_employee(self, rfc: str) -> Employee | None:
+
         return self._db.query(Employee).filter(Employee.rfc_employee == rfc).first()
 
     def create_employee(self, data: Employee) -> Employee:
