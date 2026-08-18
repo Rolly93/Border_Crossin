@@ -1,8 +1,7 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from backend.model import db_model
 from model.db_model import ShipmentAssign, ShipmentEventModel
-from schema.shipment_shcema import ShipmentEvent, ShipmentUpdate
+from schema.shipment_shcema import ShipmentUpdate
 
 
 class ShipmentRepository:

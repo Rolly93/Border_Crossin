@@ -1,9 +1,6 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
-from backend.service.XML_generator import XMLService
-from backend.service.sftp import SFPTService
-from backend.utility.cliente_service import ClienteService
-from model.db_model import ShipmentAssign, ShipmentEventModel
+from utility.cliente_service import ClienteService
+from model.db_model import ShipmentAssign
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate
 from repository import ShipmentRepository
 

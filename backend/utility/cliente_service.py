@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from backend.schema.shipment_shcema import ShipmentUpdate
-from backend.service.sftp import SFPTService
+from schema.shipment_shcema import ShipmentUpdate
+from service.sftp import SFPTService
 from model.db_model import Client
 from schema import ClientRequest
 from repository.cliente_repository import ClienteRepository
