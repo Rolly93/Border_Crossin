@@ -1,6 +1,4 @@
-from turtle import mode
 from typing import TypeVar, Generic, Type
-from httpx import delete
 from sqlalchemy.orm import Session
 
 T = TypeVar("T")
