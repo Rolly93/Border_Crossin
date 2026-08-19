@@ -5,10 +5,10 @@ import { ShipmentFormProps } from '@/features/shipments/types/ShipmentFormProps'
 import { setupShipmentWatchers } from '../validation/ShipmentFormRules';
 import { ShipmentValidator } from '../validation/ShipmentValidator';
 
-import { useTranslation } from 'react-i18next';
 
 
 import { useFormNotifications } from '@/features/notfications/hooks/useNotifications';
+import { useTranslation } from 'react-i18next';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
   const { t, i18n } = useTranslation()
@@ -63,8 +63,8 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
           <Group grow>
             <TextInput
-              label={t('shipment.labels.trackinNumber')}
-              placeholder={t('shipment.placeholders.trackinNumber')}
+              label={t('shipment.labels.trackingNumber')}
+              placeholder={t('shipment.placeholders.trackingNumber')}
               required
               {...form.getInputProps('tracking_number')}
             />

@@ -1,8 +1,7 @@
 
 export interface ICliente {
-    id?: number;
+    id: number;
     name: string;
-    contacto: string;
     telefono: string;
     estatus: boolean;
     sftService: boolean;

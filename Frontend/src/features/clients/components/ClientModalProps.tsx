@@ -30,16 +30,33 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     });
 
     useEffect(() => {
-        if (onSelectClient) {
-            form.setValues({
-                companyName: onSelectClient.name || '',
-                mainContact: onSelectClient.contacto || '',
-                phoneNumber: onSelectClient.telefono || ''
-            });
-            setRecipients(onSelectClient.email || []);
-            setEmailError(null);
+        if (opened) {
+            if (onSelectClient) {
+                form.setValues({
+                    companyName: onSelectClient.name || '',
+                    phoneNumber: onSelectClient.telefono || ''
+                });
+                const loadedEmails = Array.isArray(onSelectClient.email)
+                    ? onSelectClient.email
+                    : onSelectClient.email
+                        ? [onSelectClient.email]
+                        : [];
+
+                setRecipients(loadedEmails);
+                setEmailError(null);
+                setNewEmail('');
+                setEmailError(null);
+            }
+            else {
+                form.reset()
+                setRecipients([]);
+                setNewEmail('');
+                setEmailError(null);
+
+            }
+
         }
-    }, [onSelectClient]);
+    }, [onSelectClient, opened]);
 
 
 
@@ -72,8 +89,6 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
             ...values,
             email: recipients
         };
-        console.log("Datos guardados:", finalData);
-
         onSave(finalData)
         onClose();
     };
@@ -112,12 +127,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                         />
 
                         <TextInput
-                            label="Description"
-                            placeholder="Contacto principal"
-                            {...form.getInputProps('mainContact')}
-                        />
-
-                        <TextInput
+                            type="tel"
                             label="Phone Number"
                             placeholder="(__) __-____"
                             {...form.getInputProps('phoneNumber')}

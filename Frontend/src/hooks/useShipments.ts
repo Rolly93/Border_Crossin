@@ -1,6 +1,6 @@
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Shipment } from "@/types/Shipment";
-import { shipmentService } from "@/service/shipmentService";
+import { shipmentService } from "@/features/shipments/service/shipmentService";
 
 export function useShipments() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -23,38 +23,38 @@ export function useShipments() {
     fetchShipments();
   }, []);
 
-const addLocalShipment = (newShipment: Shipment) => {
-  setShipments((prev) => [...prev, newShipment]);
-};
+  const addLocalShipment = (newShipment: Shipment) => {
+    setShipments((prev) => [...prev, newShipment]);
+  };
 
   const updateLocalShipment = (id: number, updatedData: Shipment) => {
     setShipments(prev => prev.map(item => item.id === id ? { ...updatedData } : item));
   };
 
-  return { shipments, loading, error, updateLocalShipment, refresh: fetchShipments ,addLocalShipment};
+  return { shipments, loading, error, updateLocalShipment, refresh: fetchShipments, addLocalShipment };
 }
 
-export function usesUpdateShipment(){
-    const [success,setSuccess] = useState<boolean>(false)
-    const [loading,setLoading] = useState<boolean>(false);
-    const [error,setError] = useState<string |null>(null);
+export function usesUpdateShipment() {
+  const [success, setSuccess] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const updateShipment = async (id:number , updatedData:Shipment)=>{
-        try{
-            setError(null)
-            setLoading(true)
-            setSuccess(false)
-            
-            await shipmentService.update(id,updatedData);
-            
-        setSuccess(true)
-    }catch (error){
-        console.log('Error al actualizar el embarque' , error);
-        setError("No se pudo guardar la información en el servidor.");
-    }finally{
-        setLoading(false)
+  const updateShipment = async (id: number, updatedData: Shipment) => {
+    try {
+      setError(null)
+      setLoading(true)
+      setSuccess(false)
+
+      await shipmentService.update(id, updatedData);
+
+      setSuccess(true)
+    } catch (error) {
+      console.log('Error al actualizar el embarque', error);
+      setError("No se pudo guardar la información en el servidor.");
+    } finally {
+      setLoading(false)
     }
-    }
-return {updateShipment,loading,error,success}
+  }
+  return { updateShipment, loading, error, success }
 
 }

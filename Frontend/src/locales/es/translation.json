@@ -2,7 +2,7 @@
   "shipment": {
     "title": "Captura de Embarque",
     "labels": {
-      "trackinNumber": "No  Embarque",
+      "trackingNumber": "No  Embarque",
       "customer_tracking": "Referencia",
       "cliente": "Cliente",
       "truck": "Tractor",
@@ -24,7 +24,7 @@
       "operation_type": "Tipo Operacion"
     },
     "placeholders": {
-      "trackinNumber": "Num de Seguimiento",
+      "trackingNumber": "Num de Seguimiento",
       "customer_tracking": "Referencia del cliente",
       "cliente": "Cliente",
       "truck": "Num. Unidad",
@@ -36,7 +36,7 @@
       "operation_type": "Ex: Exportacion / Importacion"
     },
     "table": {
-      "trackinNumber": "Referencia",
+      "trackingNumber": "Referencia",
       "customer_tracking": "No. Embarque",
       "cliente": "Cliente",
       "truck": "Tractor",

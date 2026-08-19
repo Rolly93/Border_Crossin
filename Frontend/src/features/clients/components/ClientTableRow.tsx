@@ -12,7 +12,6 @@ export function ClientTableRow({ cliente, onClick }: ClientTableRowProps) {
   return (
     <Table.Tr onClick={() => onClick(cliente)} style={{ cursor: 'pointer' }}>
       <Table.Td>{cliente.name}</Table.Td>
-      <Table.Td>{cliente.contacto}</Table.Td>
       <Table.Td>{cliente.telefono}</Table.Td>
       <Table.Td>{cliente.estatus ? "Activo" : "Inactivo"}</Table.Td>
       <Table.Td>{cliente.sftService ? "Si" : "No"}</Table.Td>

@@ -4,13 +4,13 @@ import { Shipment } from '@/types/Shipment';
 export let LOADSHIPMENT: Shipment[] = [
   {
     id: 1,
-    trcking_Number: "92b1234567",
-    costumer_tracking: "CUST-99211",
+    tracking_number: "92b1234567",
+    customer_tracking: "CUST-99211",
     cliente: "MOGA Logistics",
     truck: "TR-15",
-    vehicleType: "Trailer",
+    vehicle_type: "Trailer",
     trailer: "TA123456",
-    orgien: "Bodega Mexico",
+    origen: "Bodega Mexico",
     destino: "USA Distribution Center",
     type_operation: "Exportacion",
     status: "In Transit",
@@ -38,13 +38,13 @@ export let LOADSHIPMENT: Shipment[] = [
   },
   {
     id: 2,
-    trcking_Number: "TA789012",
-    costumer_tracking: "CUST-88341",
+    tracking_number: "TA789012",
+    customer_tracking: "CUST-88341",
     cliente: "Alpha Manufacturing",
     truck: "TR-22",
-    vehicleType: "Bobtail",
+    vehicle_type: "Bobtail",
     trailer: "TRAILER-44X",
-    orgien: "Monterrey Plant",
+    origen: "Monterrey Plant",
     destino: "Laredo Yard",
     type_operation: "Exportacion",
     status: "Delayed",
@@ -67,13 +67,13 @@ export let LOADSHIPMENT: Shipment[] = [
   },
   {
     id: 3,
-    trcking_Number: "TA456789",
-    costumer_tracking: "CUST-11223",
+    tracking_number: "TA456789",
+    customer_tracking: "CUST-11223",
     cliente: "Global Trade Corp",
     truck: "TR-09",
-    vehicleType: "Flatbed",
+    vehicle_type: "Flatbed",
     trailer: "TRAILER-77Z",
-    orgien: "Querétaro Hub",
+    origen: "Querétaro Hub",
     destino: "Dallas Warehouse",
     type_operation: "Exportacion",
     status: "Delivered",
@@ -110,6 +110,5 @@ export let LOADSHIPMENT: Shipment[] = [
         notes: "Entregado y firmado por el receptor"
       }
     ]
-  }  
+  }
 ];
-

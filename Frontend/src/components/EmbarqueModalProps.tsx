@@ -1,12 +1,12 @@
 import { Modal, TextInput, Button, LoadingOverlay, Box, MantineProvider } from '@mantine/core';
-import ShipmentUpdateForm from './Form/ShipmentUpdateForm';
 import { Shipment } from '@/types/Shipment';
 import { Notifications } from '@mantine/notifications';
+import ShipmentUpdateForm from '@/features/shipments/components/ShipmentUpdateForm';
 
 interface EmbarqueModalProps {
   opened: boolean;
   onClose: () => void;
-  selectedElement: Shipment| null;
+  selectedElement: Shipment | null;
   onSubmit: (formData: Shipment) => Promise<void>
   loading: boolean;
 }
@@ -16,7 +16,7 @@ export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, load
     await onSubmit(formData)
   }
   return (
-    <Modal 
+    <Modal
       opened={opened}
       onClose={onClose}
       title={selectedElement ? `Trailer ${selectedElement.trailer}` : "Form"}
@@ -26,15 +26,15 @@ export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, load
       <Box style={{ position: 'relative', minHeight: 200 }}>
         {/* El loading ahora viene controlado desde el flujo del padre */}
         <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
-        
+
         {selectedElement && (
-          <ShipmentUpdateForm 
-            initialShipment={selectedElement} 
+          <ShipmentUpdateForm
+            initialShipment={selectedElement}
             onSubmit={(updatedValues) => {
               SubmitShipment(updatedValues);
             }}
-            />
-            
+          />
+
         )}
       </Box>
     </Modal>

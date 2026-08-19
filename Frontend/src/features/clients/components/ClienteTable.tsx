@@ -45,7 +45,6 @@ export function ClientTable() {
       const newClient: ICliente = {
 
         name: formData.companyName,
-        contacto: formData.mainContact,
         telefono: formData.phoneNumber,
         email: formData.email,
         estatus: true,
@@ -87,7 +86,6 @@ export function ClientTable() {
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Cliente</Table.Th>
-              <Table.Th>Contacto</Table.Th>
               <Table.Th>Telefono</Table.Th>
               <Table.Th>estatus</Table.Th>
               <Table.Th>SFTP Service</Table.Th>

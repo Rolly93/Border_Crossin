@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ICliente } from "../../types/Cliente";
-import { CLIENT } from "../../mocks/ClientMock";
+import { ICliente } from "../types/Cliente";
+import { CLIENT } from "../mocks/ClientMock";
 
 export function useClients() {
   const [clients, setClients] = useState<ICliente[]>(CLIENT);
@@ -9,7 +9,6 @@ export function useClients() {
     const client: ICliente = {
       id: newClientData.id || 0,
       name: newClientData.name || "",
-      contacto: newClientData.contacto || "",
       telefono: newClientData.telefono || "",
       email: newClientData.email || [],
       estatus: true,

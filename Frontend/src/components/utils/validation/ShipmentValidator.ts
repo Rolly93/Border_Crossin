@@ -1,6 +1,6 @@
-import { EventCategory, Shipment} from "@/types/Shipment";
+import { EventCategory, Shipment } from "@/types/Shipment";
 
-const EVENT_SEQUENCE_ORDER:EventCategory[]=[
+const EVENT_SEQUENCE_ORDER: EventCategory[] = [
   "pick_up",
   "departure",
   "delay",
@@ -12,7 +12,7 @@ const EVENT_SEQUENCE_ORDER:EventCategory[]=[
   "deliver"
 ]
 
-const REQUIERE_EVENTS =new Set<EventCategory>([
+const REQUIERE_EVENTS = new Set<EventCategory>([
   "pick_up",
   "departure",
   "clear_mex",
@@ -21,43 +21,43 @@ const REQUIERE_EVENTS =new Set<EventCategory>([
 ])
 export class ShipmentValidator {
 
-    private data : Partial<Shipment>;
-    constructor(formData:Partial<Shipment>  ){
-        this.data = formData;
+  private data: Partial<Shipment>;
+  constructor(formData: Partial<Shipment>) {
+    this.data = formData;
+  }
+
+  private get client() { return this.data.cliente?.trim().toLocaleUpperCase() || ''; }
+  private get tracking() { return this.data.customer_tracking?.trim().toLocaleUpperCase() || ''; }
+  private get opretationType() { return this.data.type_operation?.trim().toLocaleUpperCase() || ''; }
+  /**
+   * validateCliente
+   */
+  public validateCliente(): string | null {
+    if (!this.client) return 'Este campo no puede estar Vacio'
+    if (this.client.length < 3) return 'Nombre de cliente invalido'
+
+    return null
+  }
+  /**
+   * validateCustomertracking    */
+  public validateCustomertracking(): string | null {
+
+    if (this.client === 'EXPEDITORS') {
+      if (!this.tracking) return 'Referencia del cliente requerida'
+      if (this.opretationType === 'IMPORTACION' && !this.tracking.startsWith('12B')) {
+        return 'Referecia de Expeditors empieza con "12B" para importaciones'
+      }
+      if (this.opretationType === 'EXPORTACION' && !this.tracking.startsWith('82B') && !this.tracking.startsWith('92B')) {
+        return 'Referecia de Expeditors empieza con "82B" o "92B" para Exportacion'
+      }
+      if (this.tracking.length !== 10) { return 'Referecia de Expeditors debe de contener 10 Characters' }
     }
-
-    private get client(){ return this.data.cliente?.trim().toLocaleUpperCase()||'';}
-    private get tracking() { return this.data.costumer_tracking?.trim().toLocaleUpperCase()||'';}
-    private get opretationType(){ return this.data.type_operation?.trim().toLocaleUpperCase()||'';}
-    /**
-     * validateCliente
-     */
-    public validateCliente(): string | null {
-        if(!this.client) return'Este campo no puede estar Vacio'
-        if(this.client.length < 3) return'Nombre de cliente invalido'
-
-        return null
-    }
-    /**
-     * validateCustomertracking    */
-    public validateCustomertracking():string|null {
-        
-        if (this.client==='EXPEDITORS'){
-            if (!this.tracking) return 'Referencia del cliente requerida'
-            if (this.opretationType ==='IMPORTACION' && !this.tracking.startsWith('12B')){
-                return 'Referecia de Expeditors empieza con "12B" para importaciones'
-            }
-            if (this.opretationType ==='EXPORTACION' && !this.tracking.startsWith('82B')  && !this.tracking.startsWith('92B')){
-                return  'Referecia de Expeditors empieza con "82B" o "92B" para Exportacion'
-            }
-            if (this.tracking.length !==10) {return 'Referecia de Expeditors debe de contener 10 Characters'}
-        }
-        return null
-    }
+    return null
+  }
 
 
-    public validateTrackingNumber(): string | null {
-    return (this.data.trcking_Number?.trim().length || 0) < 5 ? 'No. Embarque Invalido' : null;
+  public validateTrackingNumber(): string | null {
+    return (this.data.tracking_number?.trim().length || 0) < 5 ? 'No. Embarque Invalido' : null;
   }
 
   public validateTruck(): string | null {
@@ -65,7 +65,7 @@ export class ShipmentValidator {
   }
 
   public validateOrigin(): string | null {
-    return (this.data.orgien?.trim().length || 0) < 5 ? 'Origen Invalido' : null;
+    return (this.data.origen?.trim().length || 0) < 5 ? 'Origen Invalido' : null;
   }
 
   public validateDestination(): string | null {
@@ -76,28 +76,28 @@ export class ShipmentValidator {
     return (this.data.trailer?.trim().length || 0) < 3 ? 'Trailer Invalido' : null;
   }
 
-public validateTypeOperation(): string | null {
+  public validateTypeOperation(): string | null {
     return (this.data.type_operation?.trim().length || 0) < 3 ? 'Pick Southbound or Northbound' : null;
   }
-public validateEventChronology(): Record<string, string> {
+  public validateEventChronology(): Record<string, string> {
 
-  const currentEvents = this.data?.events||[];
+    const currentEvents = this.data?.events || [];
 
-  return {
-    ...this.ValidateMissingRequiereEvents(currentEvents),
-    ...this.validateChronologicalOrder(currentEvents)
+    return {
+      ...this.ValidateMissingRequiereEvents(currentEvents),
+      ...this.validateChronologicalOrder(currentEvents)
 
-  } 
-}
-private validateChronologicalOrder(currentEvents:any[]):Record<string,string>{
-  const errors: Record<string, string> = {};
+    }
+  }
+  private validateChronologicalOrder(currentEvents: any[]): Record<string, string> {
+    const errors: Record<string, string> = {};
 
     if (!currentEvents || !Array.isArray(currentEvents)) {
       return errors;
     }
 
     const activeEvents = currentEvents
-      .filter((event): event is typeof event & { dateTime: string | Date } => 
+      .filter((event): event is typeof event & { dateTime: string | Date } =>
         !!event.dateTime && !!event.category
       )
       .sort((a, b) => {
@@ -126,8 +126,8 @@ private validateChronologicalOrder(currentEvents:any[]):Record<string,string>{
     return errors;
   }
 
-private ValidateMissingRequiereEvents(currentEvents:any[]):Record<string,string>{
-  const errors: Record<string, string> = {};
+  private ValidateMissingRequiereEvents(currentEvents: any[]): Record<string, string> {
+    const errors: Record<string, string> = {};
 
     if (!currentEvents || !Array.isArray(currentEvents)) {
       return errors;
@@ -157,7 +157,7 @@ private ValidateMissingRequiereEvents(currentEvents:any[]):Record<string,string>
         if (isRequire && !hasDate) {
           const latestCategoryFilled = EVENT_SEQUENCE_ORDER[latestFillIndex];
           const realIndex = currentEvents.findIndex(e => e.category === latestCategoryFilled);
-          
+
           if (realIndex !== -1) {
             errors[`events.${realIndex}.dateTime`] = `No puedes registrar "${this.FieldsName(latestCategoryFilled)}" si hace falta llenar el campo obligatorio anterior "${this.FieldsName(category)}"`;
           }
@@ -166,60 +166,58 @@ private ValidateMissingRequiereEvents(currentEvents:any[]):Record<string,string>
     }
 
     return errors;
-}
-
-private  FieldsName(fieldNAme:string):string {
-  switch (fieldNAme) {
-case "pick_up":
-  fieldNAme = " Recoleccion"
-  
-  break;
-  
-  case "departure":
-  fieldNAme = " Salida de patio"
-  
-  break;
-  
-  case "delay":
-  fieldNAme = " retraso"
-  
-  break;
-  
-  case "mex_inspeccion":
-  fieldNAme = " inspeccion Mexican"
-  
-  break;
-  
-  case "clear_mex":
-  fieldNAme = "Liberacion Aduana Mexicana"
-  
-  break;
-  
-  case "usa_inspeccion":
-  fieldNAme = "Inspeccion Aduana Usa"
-  
-  break;
-  
-  case "clear_usa":
-  fieldNAme = "Liberacion Aduana Americana"
-  
-  break;
-  
-  case "safety_yard":
-  fieldNAme = "Resguardo de yarda"
-  
-  break;
-  
-  case "deliver":
-  fieldNAme = "Entrega"
-  
-break;
-
-default:
-      break;
-  }
-  return fieldNAme
-}
   }
 
+  private FieldsName(fieldNAme: string): string {
+    switch (fieldNAme) {
+      case "pick_up":
+        fieldNAme = " Recoleccion"
 
+        break;
+
+      case "departure":
+        fieldNAme = " Salida de patio"
+
+        break;
+
+      case "delay":
+        fieldNAme = " retraso"
+
+        break;
+
+      case "mex_inspeccion":
+        fieldNAme = " inspeccion Mexican"
+
+        break;
+
+      case "clear_mex":
+        fieldNAme = "Liberacion Aduana Mexicana"
+
+        break;
+
+      case "usa_inspeccion":
+        fieldNAme = "Inspeccion Aduana Usa"
+
+        break;
+
+      case "clear_usa":
+        fieldNAme = "Liberacion Aduana Americana"
+
+        break;
+
+      case "safety_yard":
+        fieldNAme = "Resguardo de yarda"
+
+        break;
+
+      case "deliver":
+        fieldNAme = "Entrega"
+
+        break;
+
+      default:
+        break;
+    }
+    return fieldNAme
+  }
+}
