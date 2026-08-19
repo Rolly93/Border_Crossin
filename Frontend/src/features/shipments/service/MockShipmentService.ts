@@ -1,23 +1,15 @@
 import { Shipment } from "@/features/shipments/types/Shipment";
-import { BaseShipemntService } from "./BaseShipmentService";
-import { IShipmentService } from "./IShipmentService";
-import { LOADSHIPMENT } from "@/features/shipments/mocks/shipmentsMock";
-export class MockShipmentService extends BaseShipemntService implements IShipmentService {
-    async getAll(): Promise<Shipment[]> {
-        await this.delay(600);
-        return [...LOADSHIPMENT]
-    }
-    async update(id: number, data: Shipment): Promise<Shipment> {
-        await this.delay(100);
-        const index = LOADSHIPMENT.findIndex(item => item.id == id);
-        if (index !== -1) LOADSHIPMENT[index] = { ...data }
-        return data
-    }
-    async insert(data: Shipment): Promise<Shipment> {
-        await this.delay(100);
-        const nextId = LOADSHIPMENT.length > 0 ? Math.max(...LOADSHIPMENT.map(i => i.id)) + 1 : 1;
-        const newShipment = { ...data, id: nextId, events: data.events || [] };
-        return newShipment;
-    }
 
+import { LOADSHIPMENT } from "@/features/shipments/mocks/shipmentsMock";
+import { BaseMockService } from "@/components/service/BaseMockService";
+export class MockShipmentService extends BaseMockService<Shipment> {
+    constructor() {
+        super(LOADSHIPMENT);
+    }
+    override async insert(data: Shipment): Promise<Shipment> {
+        const newShipment = await super.insert({
+            ...data, events: data.events || []
+        })
+        return newShipment
+    }
 }
