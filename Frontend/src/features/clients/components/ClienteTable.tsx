@@ -34,7 +34,6 @@ export function ClientTable() {
             ? {
               ...c,
               nombre: formData.companyName,
-              contacto: formData.mainContact,
               telefono: formData.phoneNumber,
               email: formData.email,
             }
@@ -43,7 +42,7 @@ export function ClientTable() {
       );
     } else {
       const newClient: ICliente = {
-
+        id: formData.id || null,
         name: formData.companyName,
         telefono: formData.phoneNumber,
         email: formData.email,
