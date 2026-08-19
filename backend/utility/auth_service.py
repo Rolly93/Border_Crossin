@@ -1,5 +1,5 @@
-import bcrypt
-from backend.model.user import LoginRequest
+import bcrypt  
+from model.user import LoginRequest
 from typing import Optional
 from config.config import Env
 class AuthService:
@@ -21,9 +21,9 @@ class AuthService:
         """
         Logic for the /login route.
         """
-        # 1. Look for the user in your database
+        # 1. Look for the user in your database 
         # user = db.query(User).filter(User.email == email).first()
-
+        
         if email == self._env.USER_EMAIL and password == self._env.USER_PASSWORD:
             class MockUser:
                 id = 1
@@ -31,18 +31,18 @@ class AuthService:
                 rol = "admin"
                 email = self._env.USER_EMAIL
                 is_admin = True
-
-
+            
+            
             return MockUser
-
+        
         # 2. Verify password (Real logic)
         # if user and self.verify_password(password, user.hashed_password):
         #     return user
-
+            
         return False
     def is_duplicate(self,name , email ):
         """Verify if ist duplicate in the database
-
+        
         """
         pass
     def crear_usuario(self, nombre, email, password, es_admin=False):

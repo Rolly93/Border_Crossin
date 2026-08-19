@@ -3,7 +3,7 @@ import { MantineProvider } from '@mantine/core';
 import { Router } from './Router';
 import { theme } from './theme';
 import { Notifications } from '@mantine/notifications';
-import './i18n'
+
 export default function App() {
   return (
     <MantineProvider theme={theme}>

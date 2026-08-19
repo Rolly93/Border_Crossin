@@ -1,7 +1,7 @@
 import os
 from fastapi_mail import  MessageSchema , ConnectionConfig, MessageType ,FastMail
 from pydantic import EmailStr
-from backend.config import EmailConfig
+from config.config import EmailConfig
 from jinja2 import Environment , FileSystemLoader
 
 class EmailService:
@@ -28,9 +28,9 @@ class EmailService:
             recipient (list): Send to
             body (dic): track_num , shipment_num , trailer,pick_time
             departure_time , mex_inspection , mex_clear , usa_inspection
-            
+
         """
-        
+
         template = self.jinja_env.get_template("status_email.html")
         html_content =  template.render(body)
         message = MessageSchema(
@@ -51,10 +51,10 @@ import asyncio
 async def send_templated_email():
     # 1. Simular la configuración
     config = EmailConfig() # Asegúrate de que cargue los datos de Mailhog
-    
+
     # 2. Instanciar el servicio
     service = EmailService(config)
-    
+
     shipment = {
         "track_num" : "tr1234567",
         "shipment_num" : "92B1234567"

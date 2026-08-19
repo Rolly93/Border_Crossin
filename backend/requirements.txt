@@ -10,4 +10,7 @@ typing-inspect
 
 pydantic
 pydantic-settings
-flask_login
+sqlalchemy
+psycopg2
+
+python-stdnum
