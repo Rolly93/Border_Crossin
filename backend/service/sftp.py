@@ -21,7 +21,7 @@ class SFPTService:
             if not self._host:
                 raise ValueError("SFTP_HOST is not define in envarioment variables")
             self.trasport = paramiko.Transport((self._host, self._port))
-            print(self._password, self._user)
+            print(f"Intentando conexión SFTP con usuario: {self._user}")
             self.trasport.connect(username=self._user, password=self._password)
             self.sftp = paramiko.SFTPClient.from_transport(self.trasport)
             print(f"Connectando a SFTP: {self._host}")
