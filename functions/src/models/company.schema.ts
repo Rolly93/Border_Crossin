@@ -5,6 +5,7 @@ const baseCompanyBody = z.object({
   name: z.string().min(1, "Company name is required"),
   rfc: z.string().length(12, "RFC must be exactly 12 characters"),
   email: z.string().email("Invalid email address"),
+
 });
 
 // Input Schema (Request Body)

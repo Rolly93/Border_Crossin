@@ -1,5 +1,44 @@
 import { Request, Response, NextFunction } from "express";
 import { ZodType, ZodError } from "zod";
+import validateRfc from "validate-rfc";
+
+export interface RfcValidationResult {
+  isValid: boolean;
+  reason?: string;
+  rfc?: string | null;
+}
+
+export const verifyCompanyRfc = (rfcInput: string): RfcValidationResult => {
+  const cleanRfc = rfcInput?.trim().toUpperCase();
+
+  if (!cleanRfc) {
+    return {
+      isValid: false,
+      reason: "RFC field cannot be empty.",
+    };
+  }
+
+  const validationResult = validateRfc(cleanRfc);
+
+  if (!validationResult.isValid) {
+    return {
+      isValid: false,
+      reason: validationResult.errors?.join(", ") ?? "INVALID_RFC",
+    };
+  }
+
+  if (validationResult.type !== "company") {
+    return {
+      isValid: false,
+      reason: "The provided RFC belongs to an individual (Persona Física), not a Company (Persona Moral).",
+    };
+  }
+
+  return {
+    isValid: true,
+    rfc: validationResult.rfc,
+  };
+};
 
 export const validate = (schema: ZodType) =>
   async (req: Request, res: Response, next: NextFunction) => {
