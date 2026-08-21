@@ -385,3 +385,5 @@ yarn-error.log*
 
 firestore.rules
 .secret.local
+
+/.agents/*
