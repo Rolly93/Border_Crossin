@@ -1,24 +1,26 @@
 import { z } from "zod";
 
-// Base inner schema for company fields
 const baseCompanyBody = z.object({
   name: z.string().min(1, "Company name is required"),
   rfc: z.string().length(12, "RFC must be exactly 12 characters"),
-  email: z.string().email("Invalid email address"),
-
-});
-
-// Input Schema (Request Body)
-export const CreateCompanySchema = z.object({
-  body: baseCompanyBody.strict(),
-});
-
-// Response Schema (Extends base body with backend fields)
-export const CompanyResponseSchema = baseCompanyBody.extend({
-  active: z.boolean(),
+  scac: z.string().length(4, "SCAC must be exactly 4 characters"),
   maxUsers: z.number(),
+  active: z.boolean(),
 });
+
+// Create schema (omit maxUsers/active from request body since backend sets them)
+export const CreateCompanySchema = z.object({
+  body: baseCompanyBody.omit({ maxUsers: true, active: true }).strict(),
+});
+
+// CompanyResponse extending base to include id
+export const CompanyResponseSchema = baseCompanyBody.extend({
+  id: z.string(),
+});
+
+
 
 // Inferred Types
 export type CreateCompanyInput = z.infer<typeof CreateCompanySchema>["body"];
 export type CompanyResponse = z.infer<typeof CompanyResponseSchema>;
+export type CompanyBase = z.infer<typeof baseCompanyBody>;
