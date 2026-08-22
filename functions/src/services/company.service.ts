@@ -51,7 +51,7 @@ export class CompanyService {
     const docRef = this.collection.doc(id);
     const snapshot = await docRef.get();
 
-    if (!snapshot.exists) throw new AppError(404, `Company with ID '${id}' not found`);
+    if (!snapshot.exists) throw new AppError(404, `Company  not found`);
 
     await docRef.update({
       active: false,
@@ -85,7 +85,7 @@ export class CompanyService {
     const snapshot = await docRef.get();
 
     if (!snapshot.exists) {
-      throw new AppError(404, `Company with ID '${id}' not found`);
+      throw new AppError(404, `Company not found`);
     }
 
     return snapshot.data() as CompanyBase;
