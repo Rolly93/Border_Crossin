@@ -1,6 +1,5 @@
 import { ScrollArea } from "@mantine/core";
 import { Table } from "@mantine/core";
-import { CLIENT } from "@/features/clients/mocks/ClientMock";
 
 import { Title, Text, Group, Button } from '@mantine/core';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
@@ -8,15 +7,15 @@ import ClientModalProps from "./ClientModalProps";
 import { useState } from "react";
 import { ICliente } from "@/features/clients/types/Cliente";
 import { useDisclosure } from "@mantine/hooks";
-
 import { ClientMetrics } from "./ClientMetrics";
 import { ClientTableRow } from "./ClientTableRow";
+import { useClients } from "../hooks/useClients";
 
 
 export function ClientTable() {
   const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
-  const [client, setClients] = useState<ICliente[]>(CLIENT);
+  const { clients, addClient, updateClient, loading, error } = useClients()
   function handleSelectClient(onSelectClient: ICliente) {
     setselectedClient(onSelectClient)
     openModal()
@@ -27,32 +26,25 @@ export function ClientTable() {
   };
 
   function handleSaveClient(formData: any) {
+    const clienData: ICliente = {
+      id: formData.id || null,
+      name: formData.companyName,
+      telefono: formData.phoneNumber,
+      email: formData.email,
+      estatus: true,
+      sftService: formData.sftService,
+      emailService: formData.emailService,
+    };
+
     if (selectedClient) {
-      setClients((prev) =>
-        prev.map((c) =>
-          c.id === selectedClient.id
-            ? {
-              ...c,
-              nombre: formData.companyName,
-              telefono: formData.phoneNumber,
-              email: formData.email,
-            }
-            : c
-        )
-      );
+      updateClient(selectedClient.id, clienData)
     } else {
-      const newClient: ICliente = {
-        id: formData.id || null,
-        name: formData.companyName,
-        telefono: formData.phoneNumber,
-        email: formData.email,
-        estatus: true,
-        sftService: false,
-        emailService: formData.email?.length > 0,
-      };
-      setClients((prev) => [newClient, ...prev]);
+
+      addClient(clienData)
     }
+
   }
+
 
 
   return (
@@ -73,7 +65,7 @@ export function ClientTable() {
         </Group>
       </Group>
 
-      <ClientMetrics clients={CLIENT} />
+      <ClientMetrics clients={clients} />
       <ScrollArea>
 
         <Table
@@ -95,8 +87,7 @@ export function ClientTable() {
 
           <Table.Tbody>
 
-            {CLIENT.map((cliente) => (
-
+            {clients.map((cliente) => (
               <ClientTableRow
                 key={cliente.id}
                 cliente={cliente}

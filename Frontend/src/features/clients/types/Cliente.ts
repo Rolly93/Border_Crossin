@@ -16,7 +16,7 @@ export interface IClientCard {
     context: string;
 }
 
-export interface ISftoConfiguration {
+export interface ISftpConfiguration {
     id: number;
     idCliente: number;
     username: string;

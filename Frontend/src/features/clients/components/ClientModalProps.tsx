@@ -20,6 +20,11 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     const [recipients, setRecipients] = useState<string[]>([]);
     const [emailError, setEmailError] = useState<string | null>(null);
 
+    const [service, setService] = useState({
+        email: onSelectClient?.emailService,
+        sftp: onSelectClient?.sftService,
+    });
+
     const form = useForm({
         mode: 'uncontrolled',
         initialValues: {
@@ -46,12 +51,20 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                 setEmailError(null);
                 setNewEmail('');
                 setEmailError(null);
+                setService({
+                    email: loadedEmails.length > 0,
+                    sftp: Boolean(onSelectClient.sftService)
+                });
             }
             else {
                 form.reset()
                 setRecipients([]);
                 setNewEmail('');
                 setEmailError(null);
+                setService({
+                    email: false,
+                    sftp: false
+                });
 
             }
 
@@ -87,36 +100,51 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     const handleSubmit = (values: typeof form.values) => {
         const finalData = {
             ...values,
-            email: recipients
+            email: recipients,
+            sftService: service.sftp,
+            emailService: service.email
         };
         onSave(finalData)
         onClose();
     };
 
+
+    const toggleService = (key: keyof typeof service) => {
+        setService((prev) => ({
+            ...prev,
+            [key]: !prev[key],
+        }));
+
+    };
+
+    function handelModal() {
+        if (service.sftp) { openSftp() }
+    }
     return (
         <>
 
             <Modal opened={opened} onClose={onClose} title={onSelectClient ? "Editar Cliente" : "Nuevo Cliente"} size="lg">
                 <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing={'md'}>
-                    <ActionCard
-                        title="Email Notification"
-                        icon={<IconMail size={20} />}
-                        color="yellow"
-                        statusText={onSelectClient?.email && onSelectClient.email.length > 0 ? "Activo" : "Inactivo"}
-                        onClick={() => {
 
-                        }}
-                    />
                     <ActionCard
                         title="SFT Service"
                         icon={<IconFileText size={20} />}
                         color="grape"
-                        statusText={onSelectClient?.sftService ? "Activo" : "Inactivo"}
-                        onClick={() => {
-                            openSftp()
-
-                        }}
+                        statusText={service.sftp ? "Activo" : "Inactivo"}
+                        onHandelModal={handelModal}
+                        onToggle={() => { toggleService('sftp'); }}
+                        checked={service.sftp}
                     />
+                    <ActionCard
+                        title="Email Notification"
+                        icon={<IconMail size={20} />}
+                        color="yellow"
+                        statusText={service.email ? "Activo" : "Inactivo"}
+                        onToggle={() => toggleService('email')}
+                        checked={service.email}
+
+                    />
+
                 </SimpleGrid>
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <Stack>

@@ -1,4 +1,4 @@
-import { ICliente, ISftoConfiguration } from "@/features/clients/types/Cliente";
+import { ICliente, ISftpConfiguration } from "@/features/clients/types/Cliente";
 
 export let CLIENT: ICliente[] = [
     {
@@ -33,7 +33,7 @@ export let CLIENT: ICliente[] = [
 
 ]
 
-export let SftConfiguration: ISftoConfiguration[] = [
+export let SftConfiguration: ISftpConfiguration[] = [
     {
         id: 1,
         idCliente: 1,

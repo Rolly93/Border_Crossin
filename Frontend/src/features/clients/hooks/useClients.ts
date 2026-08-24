@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { ICliente } from "../types/Cliente";
-import { CLIENT } from "../mocks/ClientMock";
 import { clientService } from "../service/clientService";
 
 export function useClients() {
-  const [clients, setClients] = useState<ICliente[]>(CLIENT);
+  const [clients, setClients] = useState<ICliente[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,9 +26,10 @@ export function useClients() {
     return () => { isMounted = false; }
   }, [])
 
-  const addClient = async (newClientData: ICliente) => {
+  const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {
       const creatClient = await clientService.insert(newClientData)
+      console.log(creatClient);
 
       setClients((prev) => [creatClient, ...prev])
       return creatClient;
@@ -55,5 +55,5 @@ export function useClients() {
 
 
 
-  return { clients, addClient, updateClient, loading, error };
+  return { clients, addClient, updateClient, loading, error } as const;
 }
