@@ -52,7 +52,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                 setNewEmail('');
                 setEmailError(null);
                 setService({
-                    email: loadedEmails.length > 0,
+                    email: Boolean(onSelectClient.emailService),
                     sftp: Boolean(onSelectClient.sftService)
                 });
             }
@@ -140,7 +140,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                         icon={<IconMail size={20} />}
                         color="yellow"
                         statusText={service.email ? "Activo" : "Inactivo"}
-                        onToggle={() => toggleService('email')}
+                        onToggle={() => { toggleService('email') }}
                         checked={service.email}
 
                     />
