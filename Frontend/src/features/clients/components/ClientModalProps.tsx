@@ -235,7 +235,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                 </form>
             </Modal>
             <SftModal
-                onSelectClient={onSelectClient?.id}
+                clientId={onSelectClient?.id}
                 opened={sftpOpened}
                 onClose={closeSftp} />
         </>

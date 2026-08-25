@@ -29,7 +29,6 @@ export function useClients() {
   const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {
       const creatClient = await clientService.insert(newClientData)
-      console.log(creatClient);
 
       setClients((prev) => [creatClient, ...prev])
       return creatClient;

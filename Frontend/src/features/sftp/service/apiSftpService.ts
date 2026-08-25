@@ -2,7 +2,7 @@ import { BaseApiService } from "@/components/service/BaseApiService";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 export class ApiSftpService extends BaseApiService<ISftpConfiguration> {
   constructor() {
-    super('sfpt');
+    super('sftp');
   }
 
   async getConnection(id: number): Promise<ISftpConfiguration> {
