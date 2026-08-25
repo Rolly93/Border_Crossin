@@ -6,6 +6,7 @@ import { IconFileText, IconMail, IconPlus, IconX } from "@tabler/icons-react";
 import ActionCard from "../../../components/ui/ActionCard";
 import SftModal from "../../../components/Modal/SftModalProps";
 import { useDisclosure } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 
 interface ClienteModalProps {
     onSelectClient: ICliente | null;
@@ -35,40 +36,37 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     });
 
     useEffect(() => {
-        if (opened) {
-            if (onSelectClient) {
-                form.setValues({
-                    companyName: onSelectClient.name || '',
-                    phoneNumber: onSelectClient.telefono || ''
-                });
-                const loadedEmails = Array.isArray(onSelectClient.email)
-                    ? onSelectClient.email
-                    : onSelectClient.email
-                        ? [onSelectClient.email]
-                        : [];
+        if (!opened) { return; }
 
-                setRecipients(loadedEmails);
-                setEmailError(null);
-                setNewEmail('');
-                setEmailError(null);
-                setService({
-                    email: Boolean(onSelectClient.emailService),
-                    sftp: Boolean(onSelectClient.sftService)
-                });
-            }
-            else {
-                form.reset()
-                setRecipients([]);
-                setNewEmail('');
-                setEmailError(null);
-                setService({
-                    email: false,
-                    sftp: false
-                });
+        setNewEmail('');
+        setEmailError(null);
 
-            }
+        if (onSelectClient) {
+            form.setValues({
+                companyName: onSelectClient.name || '',
+                phoneNumber: onSelectClient.telefono || ''
+            });
+            const rawEmail = onSelectClient.email
+            const loadedEmails = Array.isArray(rawEmail)
+                ? rawEmail
+                : rawEmail
+                    ? [rawEmail]
+                    : [];
 
+            setRecipients(loadedEmails);
+            setService({
+                email: Boolean(onSelectClient.emailService),
+                sftp: Boolean(onSelectClient.sftService)
+            });
         }
+
+        else {
+            form.reset()
+            setRecipients([]);
+            setService({ email: false, sftp: false });
+        }
+
+
     }, [onSelectClient, opened]);
 
 
@@ -98,14 +96,17 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     };
 
     const handleSubmit = (values: typeof form.values) => {
-        const finalData = {
-            ...values,
-            email: recipients,
-            sftService: service.sftp,
-            emailService: service.email
-        };
-        onSave(finalData)
+        if (values.companyName) {
+            const finalData = {
+                ...values,
+                email: recipients,
+                sftService: service.sftp,
+                emailService: service.email
+            };
+            onSave(finalData)
+        }
         onClose();
+        return;
     };
 
 
@@ -118,8 +119,17 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     };
 
     function handelModal() {
-        if (service.sftp) { openSftp() }
+        if (service.sftp && onSelectClient?.id) { openSftp() }
+
+        else if (service.sftp && !onSelectClient?.id) {
+            notifications.show({
+                title: "Cliente no registrado",
+                message: "Debes de guardar primero la informacion del cliente antes de configurar la conezion SFTP",
+                color: 'warning'
+            })
+        }
     }
+
     return (
         <>
 
@@ -225,6 +235,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                 </form>
             </Modal>
             <SftModal
+                onSelectClient={onSelectClient?.id}
                 opened={sftpOpened}
                 onClose={closeSftp} />
         </>

@@ -36,7 +36,7 @@ export let CLIENT: ICliente[] = [
 export let SftConfiguration: ISftpConfiguration[] = [
     {
         id: 1,
-        idCliente: 1,
+        idClient: 1,
         username: 'sftp-username',
         password: 'pass-test',
         port: 22,
@@ -45,7 +45,7 @@ export let SftConfiguration: ISftpConfiguration[] = [
     },
     {
         id: 2,
-        idCliente: 3,
+        idClient: 3,
         username: 'sftp-ontheruser',
         password: 'this-is-a-test',
         port: 22,

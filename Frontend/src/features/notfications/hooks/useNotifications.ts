@@ -3,16 +3,16 @@ import { notifications } from '@mantine/notifications';
 
 interface UseFormNotificationsProps {
   errors: Record<string, any>;
-  prefix?: string; 
-  title?: string;  
+  prefix?: string;
+  title?: string;
 }
 
-export function useFormNotifications({ 
-  errors, 
-  prefix = '', 
-  title = 'Error de Validación' 
+export function useFormNotifications({
+  errors,
+  prefix = '',
+  title = 'Error de Validación'
 }: UseFormNotificationsProps) {
-  
+
   const serializedErrors = JSON.stringify(errors);
 
   useEffect(() => {
@@ -29,4 +29,5 @@ export function useFormNotifications({
         });
       });
     }
-  }, [serializedErrors, prefix, title]); }
+  }, [serializedErrors, prefix, title]);
+}

@@ -6,10 +6,11 @@ import { AtomTextInput } from "../atoms/AtomTextInput";
 interface IsftModalProps {
     opened: boolean;
     onClose: () => void;
+    onSelectClient: number | undefined
 }
 
 
-export default function SftModal({ opened, onClose }: IsftModalProps) {
+export default function SftModal({ opened, onClose, onSelectClient }: IsftModalProps) {
     const { t, i18n } = useTranslation()
     const form = useForm({
         mode: 'controlled',
