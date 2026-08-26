@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { DashBoard } from './pages/DashBoard';
 import { SftpConnection } from './pages/SftpConnection';
 import { Layout } from './components/layout/Layout';
+import { EmployeePage } from './pages/Employe';
 const router = createBrowserRouter([
   {
     path: '/',
@@ -14,7 +15,10 @@ const router = createBrowserRouter([
       {
         path: '/sftp_connection',
         element: <SftpConnection />
-      },
+      }, {
+        path: '/employee',
+        element: <EmployeePage />
+      }
 
     ],
   },
