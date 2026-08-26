@@ -101,7 +101,7 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
         <Stack >
 
           <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
-            < EditableTextInput label={t('shipment.labels.trackinNumber')} formProps={form.getInputProps('tracking_number')} />
+            < EditableTextInput label={t('shipment.labels.trackingNumber')} formProps={form.getInputProps('tracking_number')} />
             < EditableTextInput label={t('shipment.labels.customer_tracking')} formProps={form.getInputProps('customer_tracking')} />
             < EditableTextInput label={t('shipment.labels.cliente')} formProps={form.getInputProps('cliente')} />
             < EditableTextInput label={t('shipment.labels.truck')} formProps={form.getInputProps('truck')} />
