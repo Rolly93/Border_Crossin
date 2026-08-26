@@ -4,10 +4,10 @@ import { useEffect } from "react";
 
 export function useGlobalNotifications() {
     useEffect(() => {
-        console.log('1️⃣ [HOOK] Escuchando notificaciones...');
+        console.log('[HOOK] Escuchando notificaciones...');
         const unsubscribe = notificationsStreamService.subscribe((data) => {
 
-            console.log('📡 Evento recibido en React:', data);
+            console.log('Evento recibido en React:', data);
             notifications.show({
                 id: `sftp-${data.shipment_id}`,
                 color: data.status === 'SUCCESS' ? 'green' : 'red',
@@ -16,7 +16,7 @@ export function useGlobalNotifications() {
                 autoClose: 2500,
             })
         })
-        return () => unsubscribe();
+        return () => { unsubscribe(); }
 
     }, [])
 }

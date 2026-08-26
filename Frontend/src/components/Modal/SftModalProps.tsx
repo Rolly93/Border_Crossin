@@ -53,7 +53,7 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
             password: values.password,
             port: Number(values.port),
             host: values.host,
-            id: sftpConfig?.id || null,
+            id: sftpConfig?.id || undefined,
             idClient: Number(clientId)
 
         }

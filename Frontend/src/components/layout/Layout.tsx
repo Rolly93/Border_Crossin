@@ -1,10 +1,9 @@
-// components/Layout.tsx
 import { AppShell, Burger, Group, Skeleton, Text, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useGlobalNotifications } from '@/features/notfications/hooks/useGlobalNotifications';
-import { ColorSchemeToggle } from '../ui/ColorSchemeToggle';
+import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
 export function Layout() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
