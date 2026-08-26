@@ -7,11 +7,11 @@ export class MockSftpService extends BaseMockService<ISftpConfiguration> {
     super(SftConfiguration)
   }
 
-  async getConnection(id: number): Promise<ISftpConfiguration> {
+  async getConnection(clientId: number): Promise<ISftpConfiguration | null> {
     await this.delay(100);
-    console.log(id);
 
-    const index = SftConfiguration.findIndex((item) => item.idClient === id)
+
+    const index = SftConfiguration.findIndex((item) => item.idClient === clientId)
 
     if (index < 0) { throw new Error("Client without SFTP Service") }
     const configSftp = SftConfiguration[index]

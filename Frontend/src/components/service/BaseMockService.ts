@@ -14,14 +14,15 @@ export abstract class BaseMockService<T extends { id: number }> implements IBase
 
   async update(id: number, data: T): Promise<T> {
     await this.delay(100);
+
     const index = this.mockData.findIndex((item) => item.id === id);
 
+    console.log(index);
 
 
     if (index !== -1) {
       const updatedItem = { ...this.mockData[index], ...data, id }
       this.mockData[index] = updatedItem;
-      console.log(updatedItem)
       return updatedItem;
 
     }

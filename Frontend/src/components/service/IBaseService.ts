@@ -6,7 +6,7 @@ export interface IBaseService<T> {
 }
 
 export interface ISftpService<T> {
-  update(id: number, data: T): Promise<T>;
+  getConnection(id: number): Promise<T | null>;
   insert(data: T): Promise<T>;
-  getConnection(id: number): Promise<T>;
+  update(id: number, data: T): Promise<T>;
 }

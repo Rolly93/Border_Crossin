@@ -7,6 +7,7 @@ import ActionCard from "../../../components/ui/ActionCard";
 import SftModal from "../../../components/Modal/SftModalProps";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { AtomButton } from "@/components/atoms/AtomButton";
 
 interface ClienteModalProps {
     onSelectClient: ICliente | null;
@@ -20,7 +21,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     const [newEmail, setNewEmail] = useState("");
     const [recipients, setRecipients] = useState<string[]>([]);
     const [emailError, setEmailError] = useState<string | null>(null);
-
+    const clientId = onSelectClient?.id
     const [service, setService] = useState({
         email: onSelectClient?.emailService,
         sftp: onSelectClient?.sftService,
@@ -228,14 +229,15 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                         </ScrollArea.Autosize>
 
                         <Group justify="flex-end" mt="md">
-                            <Button variant="default" onClick={onClose}>Cancel</Button>
-                            <Button type="submit" color="teal">Save</Button>
+
+                            <AtomButton variant="default" onClick={onClose}>Cancel</AtomButton>
+                            <AtomButton type="submit" color="teal">Save</AtomButton>
                         </Group>
                     </Stack>
                 </form>
             </Modal>
             <SftModal
-                clientId={onSelectClient?.id}
+                clientId={clientId}
                 opened={sftpOpened}
                 onClose={closeSftp} />
         </>

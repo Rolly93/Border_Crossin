@@ -5,11 +5,26 @@ import { AtomTextInput } from "../atoms/AtomTextInput";
 import { useSftp } from "@/features/sftp/useSftp";
 import { useEffect } from "react";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
+import { AtomButton } from "../atoms/AtomButton";
 
 interface IsftModalProps {
     opened: boolean;
     onClose: () => void;
     clientId: number | undefined
+}
+export type SftpFormValues = {
+    username: string;
+    password: string;
+    port: string;
+    host: string;
+};
+
+interface SftpFromsProps {
+    initialData: Partial<ISftpConfiguration>;
+    clientId?: number;
+    onSaveSuccess?: () => void;
+    onSubmit: (values: SftpFormValues) => Promise<void> | void;
+    onDelete?: () => Promise<void> | void;
 }
 const DEFAULT_SFTP_CONFIG: Partial<ISftpConfiguration> = {
     username: "",
@@ -19,7 +34,7 @@ const DEFAULT_SFTP_CONFIG: Partial<ISftpConfiguration> = {
 };
 
 export default function SftModal({ opened, onClose, clientId }: IsftModalProps) {
-    const { sftpConfig, getSftpConfig, error, loading } = useSftp()
+    const { sftpConfig, getSftpConfig, error, loading, updateSftpConfig, createSftpConfig } = useSftp()
     const { t, i18n } = useTranslation()
 
 
@@ -28,6 +43,27 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
             getSftpConfig(clientId);
         }
     }, [opened, clientId, getSftpConfig]);
+
+    const handelDelete = async () => {
+
+    }
+    const handelSubmit = async (values: SftpFormValues) => {
+        const sftpPayload = {
+            username: values.username,
+            password: values.password,
+            port: Number(values.port),
+            host: values.host,
+            id: sftpConfig?.id || null,
+            idClient: Number(clientId)
+
+        }
+        if (sftpConfig?.id) {
+            await updateSftpConfig(sftpPayload)
+        } else {
+            await createSftpConfig(sftpPayload)
+        }
+        onClose()
+    }
 
 
 
@@ -43,22 +79,19 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
                 <SftpForm
                     key={`${clientId}-${sftpConfig?.id || "empty"}`}
                     initialData={sftpConfig || DEFAULT_SFTP_CONFIG}
-                    onClientId={clientId}
+                    onSubmit={handelSubmit}
+                    onDelete={handelDelete}
                 />
             )}
         </Drawer>)
 }
 
-interface SftpFormProps {
-    initialData: Partial<ISftpConfiguration>;
-    onClientId: number | undefined;
-    onSaveSuccess?: () => void;
-}
 
-function SftpForm({ initialData, onClientId, onSaveSuccess }: SftpFormProps) {
+
+function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
     const { t } = useTranslation();
-    const isEditing = Boolean(initialData.id)
-    const form = useForm({
+    const isEditMode = Boolean(initialData?.id);
+    const form = useForm<SftpFormValues>({
         mode: "uncontrolled",
         initialValues: {
             username: initialData.username || "",
@@ -67,24 +100,9 @@ function SftpForm({ initialData, onClientId, onSaveSuccess }: SftpFormProps) {
             host: initialData.host || "",
         },
     });
-    const handelSubmit = async (values: typeof form.values) => {
-        if (isEditing && !form.isDirty()) {
-            console.log("No changes detected");
-
-        }
-        const payload = {
-            username: values.username,
-            password: values.password,
-            port: Number(values.port),
-            host: values.host,
-            idClient: onClientId,
-        }
-
-    }
-
 
     return (
-        <form onSubmit={form.onSubmit((values) => { onsubmit as any })}>
+        <form onSubmit={form.onSubmit((values) => { onSubmit(values) })}>
             <Stack gap={'xl'} >
                 <Title order={2}>SFTP Configuration</Title>
                 <AtomTextInput
@@ -109,9 +127,17 @@ function SftpForm({ initialData, onClientId, onSaveSuccess }: SftpFormProps) {
                     {...form.getInputProps('host')}
                 />
                 <Group justify="flex-end" mt="xl">
-                    <Button type="submit" color="dark">
+                    {isEditMode ? (
+                        <AtomButton variant="outline" color='red' onClick={onDelete} >
+                            Eliminar
+                        </AtomButton>
+                    ) : (
+                        <div />
+                    )}
+
+                    <AtomButton type={'submit'} color='teal'  >
                         GUARDAR
-                    </Button>
+                    </AtomButton>
                 </Group>
             </Stack>
         </form>

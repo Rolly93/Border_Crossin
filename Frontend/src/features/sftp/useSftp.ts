@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { ISftpConfiguration } from "../clients/types/Cliente";
 import { sftpService } from "./service/sftpService";
-import { log } from "node:console";
+
 
 export function useSftp() {
   const [sftpConfig, setSftpConfig] = useState<ISftpConfiguration | null>(null)
@@ -26,9 +26,10 @@ export function useSftp() {
     }
   }, [])
 
-  const updateSftpConfig = async (sftpConfig: ISftpConfiguration, clientId: number) => {
+  const updateSftpConfig = async (sftpConfig: ISftpConfiguration) => {
+    const stfpId = sftpConfig.id!
     try {
-      const update = await sftpService.update(clientId, sftpConfig)
+      const update = await sftpService.update(stfpId, sftpConfig)
 
       setSftpConfig(update);
       return update
