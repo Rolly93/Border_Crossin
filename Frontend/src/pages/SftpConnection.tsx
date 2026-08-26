@@ -1,10 +1,11 @@
 // pages/Home.page.tsx
 import { Container } from '@mantine/core';
-import { UnderConstruction } from './UnderConstruction';
+import { ClientTable } from '@/features/clients/components/ClienteTable';
+import { useClients } from '@/features/clients/hooks/useClients';
 export function SftpConnection() {
   return (
     <Container size="responsive">
-      <UnderConstruction projectName='sftp Connection' progress={10} expectedLaunchDate='Nov 2026'/>
+      <ClientTable />
     </Container>
   );
 }

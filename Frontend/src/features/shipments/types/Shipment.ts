@@ -1,21 +1,12 @@
 
 
-export interface Shipment {
+export interface Shipment extends ShipmentCreate {
     id: number;
-    tracking_number: string;
-    customer_tracking: string;
-    cliente: string;
-    truck: string;
-    vehicle_type: string;
-    trailer: string;
-    origen: string,
-    destino: string,
-    type_operation: string,
     status?: string;
     events: ShipmentEvent[];
-
-
 }
+
+
 
 export interface ShipmentEvent {
     category: EventCategory;
@@ -47,3 +38,4 @@ export interface ShipmentCreate {
     type_operation: string,
 
 }
+

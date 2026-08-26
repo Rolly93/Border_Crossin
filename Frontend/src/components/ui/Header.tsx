@@ -1,6 +1,8 @@
-import { ShipmentForm } from "@/features/shipments/components/ShipmentForm";
 import { Group, Input, Modal, Button, LoadingOverlay, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { ShipmentForm } from "../../features/shipments/components/ShipmentForm";
+import { useTranslation } from "react-i18next";
+
 
 interface HeadersProps {
   onAddShipment: (data: any) => Promise<void>;
@@ -10,6 +12,7 @@ interface HeadersProps {
   onSearchChange: (value: string) => void;
 }
 export default function Headers({ onAddShipment, isCreating, searchValue, onSearchChange }: HeadersProps) {
+  const { t, i18n } = useTranslation()
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleFormSubmit = async (data: any) => {
@@ -19,18 +22,18 @@ export default function Headers({ onAddShipment, isCreating, searchValue, onSear
 
   return (
     <Group justify={"space-between"} gap={"xl"}>
-      <Input placeholder="Search shipments..."
+      <Input placeholder={t('common.search.placeholders.shipment')}
         value={searchValue}
         onChange={(event) => onSearchChange(event.currentTarget.value)} />
 
       <Button variant="default" onClick={open}>
-        Add Shipment
+        {t('common.buttons.newShipment')}
       </Button>
 
       <Modal
         opened={opened}
         onClose={close}
-        title="Add New Shipment"
+        title={t('modal.titles.newShipment')}
         size="lg"
       >
         <Box style={{ position: 'relative' }}>

@@ -1,7 +1,7 @@
-import { Modal, TextInput, Button, LoadingOverlay, Box, MantineProvider } from '@mantine/core';
-import { Shipment } from '@/types/Shipment';
-import { Notifications } from '@mantine/notifications';
-import ShipmentUpdateForm from '@/features/shipments/components/ShipmentUpdateForm';
+import { Modal, LoadingOverlay, Box } from '@mantine/core';
+import ShipmentUpdateForm from './ShipmentUpdateForm';
+import { Shipment } from '@/features/shipments/types/Shipment';
+import { useTranslation } from 'react-i18next';
 
 interface EmbarqueModalProps {
   opened: boolean;
@@ -12,6 +12,7 @@ interface EmbarqueModalProps {
 }
 
 export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, loading }: EmbarqueModalProps) {
+  const { t, i18n } = useTranslation()
   const SubmitShipment = async (formData: Shipment) => {
     await onSubmit(formData)
   }
@@ -19,12 +20,11 @@ export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, load
     <Modal
       opened={opened}
       onClose={onClose}
-      title={selectedElement ? `Trailer ${selectedElement.trailer}` : "Form"}
+      title={selectedElement ? `${t('modal.titles.selectedTrailer')} ${selectedElement.trailer}` : "Form"}
       overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       size='auto'
     >
       <Box style={{ position: 'relative', minHeight: 200 }}>
-        {/* El loading ahora viene controlado desde el flujo del padre */}
         <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
 
         {selectedElement && (

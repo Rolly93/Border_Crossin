@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shipment } from "@/types/Shipment";
+import { Shipment } from "@/features/shipments/types/Shipment";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
 
 export function useShipments() {
@@ -11,6 +11,7 @@ export function useShipments() {
     try {
       setLoading(true);
       const data = await shipmentService.getAll();
+      console.log(data)
       setShipments(data);
     } catch (err) {
       setError("Error al cargar datos");

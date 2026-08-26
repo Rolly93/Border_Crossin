@@ -1,4 +1,4 @@
-import { Shipment } from '@/types/Shipment';
+import { Shipment } from '@/features/shipments/types/Shipment';
 
 
 export let LOADSHIPMENT: Shipment[] = [
