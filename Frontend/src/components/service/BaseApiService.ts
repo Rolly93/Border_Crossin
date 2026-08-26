@@ -1,6 +1,5 @@
 import { createApiClient } from "@/service/api";
 import { IBaseService } from "./IBaseService";
-import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 
 export abstract class BaseApiService<T extends { id?: number }> implements IBaseService<T> {
   protected api = createApiClient(import.meta.env.VITE_API_URL)

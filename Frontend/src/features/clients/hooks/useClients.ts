@@ -28,10 +28,10 @@ export function useClients() {
 
   const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {
-      const creatClient = await clientService.insert(newClientData)
+      const createClient = await clientService.insert(newClientData)
 
-      setClients((prev) => [creatClient, ...prev])
-      return creatClient;
+      setClients((prev) => [createClient, ...prev])
+      return createClient;
     } catch (err) {
       console.error("Error creating client:", err)
       throw err;

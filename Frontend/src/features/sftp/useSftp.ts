@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ISftpConfiguration } from "../clients/types/Cliente";
 import { sftpService } from "./service/sftpService";
+import { log } from "node:console";
 
 export function useSftp() {
   const [sftpConfig, setSftpConfig] = useState<ISftpConfiguration | null>(null)
@@ -13,7 +14,6 @@ export function useSftp() {
       setError(null)
 
       const config = await sftpService.getConnection(id)
-      console.log(config);
 
       setSftpConfig(config)
       return config
@@ -44,6 +44,8 @@ export function useSftp() {
 
   const createSftpConfig = async (newSftp: ISftpConfiguration): Promise<ISftpConfiguration> => {
     try {
+      console.log(newSftp);
+
       const createNewSftp = await sftpService.insert(newSftp)
 
       setSftpConfig(createNewSftp);
