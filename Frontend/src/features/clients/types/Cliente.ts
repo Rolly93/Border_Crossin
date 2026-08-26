@@ -17,7 +17,7 @@ export interface IClientCard {
 }
 
 export interface ISftpConfiguration {
-    id: number | null;
+    id?: number;
     idClient: number;
     username: string;
     password: string;

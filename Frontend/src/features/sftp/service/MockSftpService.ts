@@ -2,9 +2,9 @@ import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { SftConfiguration } from "@/features/clients/mocks/ClientMock";
 import { BaseMockService } from "@/components/service/BaseMockService";
 
-export class MockSftpService extends BaseMockService<ISftpConfiguration> {
+export class MockSftpService extends BaseMockService<Required<ISftpConfiguration>> {
   constructor() {
-    super(SftConfiguration)
+    super(SftConfiguration as Required<ISftpConfiguration>[])
   }
 
   async getConnection(clientId: number): Promise<ISftpConfiguration | null> {
