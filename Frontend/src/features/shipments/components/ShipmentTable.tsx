@@ -55,7 +55,7 @@ export default function ShipmentTable({ shipments, loading, error, updateLocalSh
           layout='fixed' >
           <Table.Thead>
             <Table.Tr>
-              <Table.Th w={100}>{t('shipment.table.trackinNumber')}</Table.Th>
+              <Table.Th w={100}>{t('shipment.table.trackingNumber')}</Table.Th>
               <Table.Th w={130} >{t('shipment.table.customer_tracking')}</Table.Th>
               <Table.Th w={120} >{t('shipment.table.trailer')}</Table.Th>
               <Table.Th w={100} >Tractosr</Table.Th>
