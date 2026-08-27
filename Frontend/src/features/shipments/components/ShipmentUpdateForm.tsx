@@ -1,5 +1,5 @@
 import { useForm } from '@mantine/form';
-import { TextInput, Button, SimpleGrid, Group, Stack, Text, Divider, Box } from '@mantine/core';
+import { TextInput, SimpleGrid, Group, Stack, Text, Divider, Box } from '@mantine/core';
 import '@mantine/notifications/styles.css';
 import { DateTimePicker } from '@mantine/dates';
 import { Shipment, EventCategory, } from '@/features/shipments/types/Shipment';
@@ -15,6 +15,7 @@ import { useFormNotifications } from '@/features/notfications/hooks/useNotificat
 import { useTranslation } from 'react-i18next';
 
 import { notify } from '../../../components/utils/notifications';
+import { AtomButton } from '@/components/atoms/AtomButton';
 interface EventFieldConfig {
   key: EventCategory;
   showNotes?: boolean;
@@ -146,9 +147,10 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
             })}
           </SimpleGrid>
           <Group justify="flex-end" mt="xl">
-            <Button type="submit" color="dark">
+
+            <AtomButton type="submit" color="dark">
               GUARDAR
-            </Button>
+            </AtomButton>
           </Group>
         </Stack>
       </form>

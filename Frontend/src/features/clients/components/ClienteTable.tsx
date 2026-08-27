@@ -1,7 +1,6 @@
 import { ScrollArea } from "@mantine/core";
 import { Table } from "@mantine/core";
-
-import { Title, Text, Group, Button } from '@mantine/core';
+import { Title, Text, Group } from '@mantine/core';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import ClientModalProps from "./ClientModalProps";
 import { useState } from "react";
@@ -11,6 +10,7 @@ import { ClientMetrics } from "./ClientMetrics";
 import { ClientTableRow } from "./ClientTableRow";
 import { useClients } from "../hooks/useClients";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
+import { AtomButton } from "@/components/atoms/AtomButton";
 
 
 export function ClientTable() {
@@ -64,12 +64,14 @@ export function ClientTable() {
           <Text size="sm" c="dimmed">Directorio y gestión de clientes activos</Text>
         </div>
         <Group>
-          <Button leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
+
+
+          <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
             Agregar Cliente
-          </Button>
-          <Button variant="default" leftSection={<IconRefresh size={16} />}>
+          </AtomButton>
+          <AtomButton variant="default" leftSection={<IconRefresh size={16} />}>
             Actualizar
-          </Button>
+          </AtomButton>
         </Group>
       </Group>
 

@@ -1,5 +1,5 @@
 import { ICliente } from "@/features/clients/types/Cliente";
-import { Modal, TextInput, Button, Stack, Group, ScrollArea, Avatar, Text, ActionIcon, SimpleGrid } from "@mantine/core";
+import { Modal, TextInput, Stack, Group, ScrollArea, Avatar, Text, SimpleGrid } from "@mantine/core";
 import { useForm, isEmail } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { IconFileText, IconMail, IconPlus, IconX } from "@tabler/icons-react";
@@ -192,13 +192,13 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                                         }
                                     }}
                                 />
-                                <Button
+                                <AtomButton
                                     variant="default"
                                     leftSection={<IconPlus size={16} />}
                                     onClick={handleAddRecipient}
                                 >
                                     Add
-                                </Button>
+                                </AtomButton>
                             </Group>
                         </div>
 
