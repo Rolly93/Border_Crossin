@@ -8,6 +8,7 @@ import SftModal from "../../../components/Modal/SftModalProps";
 import { useDisclosure } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
+import { AtmoAction } from "@/components/atoms/AtomActionIcon";
 
 interface ClienteModalProps {
     onSelectClient: ICliente | null;
@@ -214,13 +215,10 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                                                     <Avatar color="blue" radius="xl" size="sm">{initial}</Avatar>
                                                     <Text size="sm">{email}</Text>
                                                 </Group>
-                                                <ActionIcon
-                                                    variant="subtle"
+                                                <AtmoAction variant="subtle"
                                                     color="gray"
                                                     onClick={() => handleRemoveRecipient(email)}
-                                                >
-                                                    <IconX size={16} />
-                                                </ActionIcon>
+                                                    icon={IconX} />
                                             </Group>
                                         );
                                     })

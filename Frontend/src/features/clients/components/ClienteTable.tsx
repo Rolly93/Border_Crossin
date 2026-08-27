@@ -10,12 +10,13 @@ import { useDisclosure } from "@mantine/hooks";
 import { ClientMetrics } from "./ClientMetrics";
 import { ClientTableRow } from "./ClientTableRow";
 import { useClients } from "../hooks/useClients";
+import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 
 
 export function ClientTable() {
   const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
-  const { clients, addClient, updateClient, loading, error } = useClients()
+  const { clients, addClient, updateClient, loading, error, deleteCliente } = useClients()
   function handleSelectClient(onSelectClient: ICliente) {
     setselectedClient(onSelectClient)
     openModal()
@@ -43,6 +44,13 @@ export function ClientTable() {
       addClient(clienData)
     }
 
+  }
+
+  function handelDeleteClient(id: number) {
+    if (!id) {
+      return;
+    }
+    deleteCliente(id)
   }
 
 
@@ -87,13 +95,15 @@ export function ClientTable() {
 
           <Table.Tbody>
 
-            {clients.map((cliente) => (
-              <ClientTableRow
-                key={cliente.id}
-                cliente={cliente}
-                onClick={handleSelectClient}
-              />
-            ))}
+            {loading ? (<TableSkeletonRows rows={5} columns={6} />) :
+              (clients.map((cliente) => (
+                <ClientTableRow
+                  key={cliente.id}
+                  cliente={cliente}
+                  onClick={handleSelectClient}
+                  onDelete={handelDeleteClient}
+                />
+              )))}
 
           </Table.Tbody>
         </Table>

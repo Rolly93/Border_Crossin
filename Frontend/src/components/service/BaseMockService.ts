@@ -42,5 +42,14 @@ export abstract class BaseMockService<T extends { id: number }> implements IBase
     this.mockData.push(newItem);
     return newItem;
   }
+  async delete(id: number): Promise<T> {
+    await this.delay(100);
+
+    const itemDelte = this.mockData.find((data) => data.id === id)
+    if (!itemDelte) { throw new Error('Item no found'); }
+
+    this.mockData = this.mockData.filter((data) => data.id !== id)
+    return itemDelte
+  }
 
 }

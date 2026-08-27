@@ -51,8 +51,20 @@ export function useClients() {
     }
   }
 
+  const deleteCliente = async (id: number) => {
+    try {
+      const clientDelete = await clientService.delete(id)
+
+      setClients((prev) => prev.filter((c) => (c.id !== clientDelete.id)))
+      return clientDelete
+    } catch (error) {
+      console.error("Error updating client:", error)
+    }
+
+  }
 
 
 
-  return { clients, addClient, updateClient, loading, error } as const;
+
+  return { clients, addClient, updateClient, loading, error, deleteCliente } as const;
 }

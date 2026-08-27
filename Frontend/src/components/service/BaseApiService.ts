@@ -1,5 +1,6 @@
 import { createApiClient } from "@/service/api";
 import { IBaseService } from "./IBaseService";
+import { data } from "react-router-dom";
 
 export abstract class BaseApiService<T extends { id?: number }> implements IBaseService<T> {
   protected api = createApiClient(import.meta.env.VITE_API_URL)
@@ -17,6 +18,10 @@ export abstract class BaseApiService<T extends { id?: number }> implements IBase
   async insert(data: T): Promise<T> {
     const response = await this.api.post<T>(`/${this.resourcePath}/create`, data)
 
+    return response.data
+  }
+  async delete(id: number): Promise<T> {
+    const response = await this.api.post<T>(`/${this.resourcePath}/delete`, id)
     return response.data
   }
 
