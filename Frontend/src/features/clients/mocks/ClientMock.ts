@@ -1,55 +1,90 @@
 import { ICliente, ISftpConfiguration } from "@/features/clients/types/Cliente";
 
 export let CLIENT: ICliente[] = [
-    {
-        id: 1,
-        name: "Expeditors",
-        telefono: 'N/A',
-        sftService: true,
-        emailService: true,
-        estatus: true,
-        email: ["test@tes.com", 'any@email.com']
-
-    },
-    {
-        id: 2,
-        name: "Egoba",
-        telefono: '+52 867 987-9874',
-        sftService: false,
-        emailService: true,
-        estatus: true,
-        email: ["just@onemail.com"]
-
-    },
-    {
-        id: 3,
-        name: "any client",
-        telefono: '+52 867 123-5871',
-        sftService: true,
-        emailService: false,
-        estatus: true,
-        email: null
-    }
-
-]
+    { id: 1, name: "Expeditors", telefono: "N/A", sftService: true, emailService: true, estatus: true, email: ["test@tes.com", "any@email.com"] },
+    { id: 2, name: "Egoba", telefono: "+52 867 987-9874", sftService: false, emailService: true, estatus: true, email: ["just@onemail.com"] },
+    { id: 3, name: "Transportes Castores", telefono: "+52 867 123-5871", sftService: true, emailService: false, estatus: true, email: null },
+    { id: 4, name: "Logística Express Naredo", telefono: "+52 867 445-1200", sftService: true, emailService: true, estatus: true, email: ["contacto@lenaredo.com"] },
+    { id: 5, name: "Transportes Tum", telefono: "+52 555 890-3341", sftService: false, emailService: true, estatus: false, email: ["soporte@tum.com.mx"] },
+    { id: 6, name: "BNSF Logistics", telefono: "N/A", sftService: true, emailService: true, estatus: true, email: ["ops@bnsflogistics.com", "billing@bnsflogistics.com"] },
+    { id: 7, name: "Schneider National", telefono: "+1 800 558-8700", sftService: true, emailService: false, estatus: true, email: null },
+    { id: 8, name: "Flemak Transports", telefono: "+52 867 312-9988", sftService: false, emailService: false, estatus: true, email: null },
+    { id: 9, name: "Grupo Traxión", telefono: "+52 555 012-3456", sftService: true, emailService: true, estatus: true, email: ["sistemas@traxion.global"] },
+    { id: 10, name: "Ryder Logistics", telefono: "+1 305 500-3726", sftService: true, emailService: true, estatus: true, email: ["dispatch@ryder.com"] },
+    { id: 11, name: "Transportes Olympic", telefono: "+52 818 221-4000", sftService: false, emailService: true, estatus: false, email: ["info@olympic.com.mx"] },
+    { id: 12, name: "Celadon Trucking", telefono: "N/A", sftService: false, emailService: false, estatus: false, email: null },
+    { id: 13, name: "Swift Transportation", telefono: "+1 800 800-3600", sftService: true, emailService: true, estatus: true, email: ["edi@swift.com", "sftp@swift.com"] },
+    { id: 14, name: "Werner Enterprises", telefono: "+1 402 895-6640", sftService: true, emailService: false, estatus: true, email: null },
+    { id: 15, name: "Autotransportes Internacionales", telefono: "+52 867 714-5050", sftService: false, emailService: true, estatus: true, email: ["ati_border@ati.com.mx"] },
+    { id: 16, name: "Landstar Global", telefono: "+1 900 872-9400", sftService: true, emailService: true, estatus: true, email: ["tracking@landstar.com"] },
+    { id: 17, name: "C.H. Robinson", telefono: "+1 952 937-7829", sftService: true, emailService: true, estatus: true, email: ["api-integrations@chrobinson.com"] },
+    { id: 18, name: "TLI Logistics", telefono: "+52 867 890-1122", sftService: false, emailService: true, estatus: true, email: ["traffic@tli.com.mx"] },
+    { id: 19, name: "Transportes Monroy Schiavon", telefono: "+52 555 899-1200", sftService: true, emailService: false, estatus: true, email: null },
+    { id: 20, name: "KCSM Logistics", telefono: "+52 818 305-7900", sftService: true, emailService: true, estatus: true, email: ["border_ops@kcsm.com.mx"] },
+    { id: 21, name: "R&R Express", telefono: "N/A", sftService: false, emailService: true, estatus: true, email: ["docs@rrexpress.com"] },
+    { id: 22, name: "XPO Logistics", telefono: "+1 844 976-6921", sftService: true, emailService: true, estatus: true, email: ["crossborder@xpo.com"] },
+    { id: 23, name: "Transportes Pitic", telefono: "+52 662 259-9000", sftService: false, emailService: false, estatus: false, email: null },
+    { id: 24, name: "Hub Group", telefono: "+1 800 377-5833", sftService: true, emailService: true, estatus: true, email: ["support@hubgroup.com"] },
+    { id: 25, name: "DB Schenker Mexico", telefono: "+52 555 321-7700", sftService: true, emailService: true, estatus: true, email: ["mexico.sftp@dbschenker.com"] },
+    { id: 26, name: "Transportes Monterrey-Laredo", telefono: "+52 867 719-2020", sftService: false, emailService: true, estatus: true, email: ["monterrey@tml.com.mx"] },
+    { id: 27, name: "JB Hunt Transport", telefono: "+1 800 452-4868", sftService: true, emailService: false, estatus: true, email: null },
+    { id: 28, name: "Transportes Quintanilla", telefono: "+52 867 712-4040", sftService: true, emailService: true, estatus: true, email: ["operaciones@tq.com.mx"] },
+    { id: 29, name: "Coyote Logistics", telefono: "N/A", sftService: true, emailService: true, estatus: true, email: ["borderops@coyote.com"] },
+    { id: 30, name: "Transportes Atlas", telefono: "+52 818 123-9900", sftService: false, emailService: false, estatus: true, email: null },
+    { id: 31, name: "Geodis Wilson", telefono: "+52 555 001-2233", sftService: true, emailService: true, estatus: true, email: ["mx.traffic@geodis.com"] },
+    { id: 32, name: "CRST International", telefono: "+1 319 393-1000", sftService: false, emailService: true, estatus: false, email: ["alerts@crst.com"] },
+    { id: 33, name: "Transportes Especializados RG", telefono: "+52 867 715-8899", sftService: true, emailService: true, estatus: true, email: ["sistemas@terg.com.mx"] },
+    { id: 34, name: "Echo Global Logistics", telefono: "+1 800 354-7993", sftService: true, emailService: true, estatus: true, email: ["edi_team@echo.com"] },
+    { id: 35, name: "Logística y Transporte Laredo", telefono: "+52 867 718-3322", sftService: false, emailService: true, estatus: true, email: ["facturacion@ltlaredo.com"] },
+    { id: 36, name: "Nippon Express Mexico", telefono: "+52 555 133-0200", sftService: true, emailService: false, estatus: true, email: null },
+    { id: 37, name: "US Xpress", telefono: "+1 800 251-6291", sftService: true, emailService: true, estatus: true, email: ["it_integrations@usxpress.com"] },
+    { id: 38, name: "Transportes 3 Guerras", telefono: "+52 461 598-3800", sftService: false, emailService: true, estatus: true, email: ["atencion@3guerras.com.mx"] },
+    { id: 39, name: "FedEx Freight Mexico", telefono: "N/A", sftService: true, emailService: true, estatus: true, email: ["mx_freight@fedex.com"] },
+    { id: 40, name: "DHL Supply Chain", telefono: "+52 555 345-2000", sftService: true, emailService: true, estatus: true, email: ["customs.mx@dhl.com", "sftp.admin@dhl.com"] },
+    { id: 41, name: "Auto Líneas América", telefono: "+52 867 710-1100", sftService: false, emailService: false, estatus: true, email: null },
+    { id: 42, name: "ArcBest / ABF Freight", telefono: "+1 800 610-5544", sftService: true, emailService: true, estatus: true, email: ["api@arcb.com"] },
+    { id: 43, name: "Transportes Del Real", telefono: "+52 867 714-9911", sftService: true, emailService: false, estatus: false, email: null },
+    { id: 44, name: "Universal Logistics Holdings", telefono: "+1 586 920-0100", sftService: true, emailService: true, estatus: true, email: ["crossborder@universallogistics.com"] },
+    { id: 45, name: "Transplace Mexico", telefono: "+52 818 153-2000", sftService: true, emailService: true, estatus: true, email: ["sftp_support@transplace.com"] },
+    { id: 46, name: "Fletes Mexico Carga Express", telefono: "+52 555 872-8800", sftService: false, emailService: true, estatus: true, email: ["servicioaclientes@fletesmexico.com.mx"] },
+    { id: 47, name: "Kuehne + Nagel Mexico", telefono: "+52 555 261-9000", sftService: true, emailService: true, estatus: true, email: ["info.mexico@kuehne-nagel.com"] },
+    { id: 48, name: "Transportes Inter-Californias", telefono: "+52 664 624-5000", sftService: false, emailService: false, estatus: true, email: null },
+    { id: 49, name: "Averitt Express", telefono: "+1 800 283-7488", sftService: true, emailService: true, estatus: true, email: ["edi_ops@averitt.com"] },
+    { id: 50, name: "NFI Industries", telefono: "+1 877 634-3770", sftService: true, emailService: true, estatus: true, email: ["sftp_admin@nfiindustries.com"] }
+];
 
 export let SftConfiguration: ISftpConfiguration[] = [
-    {
-        id: 1,
-        idClient: 1,
-        username: 'sftp-username',
-        password: 'pass-test',
-        port: 22,
-        host: 'domain@.org'
-
-    },
-    {
-        id: 2,
-        idClient: 3,
-        username: 'sftp-ontheruser',
-        password: 'this-is-a-test',
-        port: 22,
-        host: 'testing@.com'
-
-    }
-]
+    { id: 1, idClient: 1, username: "expeditors_sftp", password: "P@sswordExp2026!", port: 22, host: "sftp.expeditors.com" },
+    { id: 2, idClient: 3, username: "castores_usr", password: "Cas#867Secret123", port: 22, host: "sftp.castores.com.mx" },
+    { id: 3, idClient: 4, username: "lenaredo_sftp", password: "LenaR3do$SecureKey", port: 2222, host: "transfer.lenaredo.com" },
+    { id: 4, idClient: 6, username: "bnsf_partner", password: "BNSF_Logistics#2026", port: 22, host: "sftp.bnsflogistics.com" },
+    { id: 5, idClient: 7, username: "schneider_edi", password: "Schne1der!Pass2026", port: 22, host: "edi-sftp.schneider.com" },
+    { id: 6, idClient: 9, username: "traxion_sftp", password: "Trx!Key#992812", port: 22, host: "sftp.traxion.global" },
+    { id: 7, idClient: 10, username: "ryder_border", password: "Ryd3r$BorderCross99", port: 22, host: "sftp.ryder.com" },
+    { id: 8, idClient: 13, username: "swift_trans", password: "Swift#Transport2026", port: 22, host: "sftp.swift.com" },
+    { id: 9, idClient: 14, username: "werner_sftp", password: "Wern3r!SecurePass", port: 22, host: "sftp.werner.com" },
+    { id: 10, idClient: 16, username: "landstar_usr", password: "Land$tarKey!881", port: 22, host: "ftps.landstar.com" },
+    { id: 11, idClient: 17, username: "chr_partner", password: "CHR_Integrations#2026", port: 2222, host: "sftp.chrobinson.com" },
+    { id: 12, idClient: 19, username: "tms_border", password: "TMS_Schiavon#867", port: 22, host: "sftp.tms.com.mx" },
+    { id: 13, idClient: 20, username: "kcsm_sftp", password: "KCSM_RailPass!2026", port: 22, host: "sftp.kcsm.com.mx" },
+    { id: 14, idClient: 22, username: "xpo_crossborder", password: "XPO_CrossBorder$2026", port: 22, host: "sftp.xpo.com" },
+    { id: 15, idClient: 24, username: "hubgroup_edi", password: "HubGroup#Pass771", port: 22, host: "sftp.hubgroup.com" },
+    { id: 16, idClient: 25, username: "dbschenker_mx", password: "DBSchenker_MX!2026", port: 22, host: "sftp.dbschenker.com" },
+    { id: 17, idClient: 27, username: "jbhunt_sftp", password: "JBHunt_Secure#2026", port: 22, host: "sftp.jbhunt.com" },
+    { id: 18, idClient: 28, username: "tquintanilla", password: "TQ_LaredoPass!123", port: 22, host: "sftp.tq.com.mx" },
+    { id: 19, idClient: 29, username: "coyote_usr", password: "Coyot3_Border#Pass", port: 22, host: "sftp.coyote.com" },
+    { id: 20, idClient: 31, username: "geodis_mx", password: "G3od1s_MX$Secret", port: 22, host: "sftp.geodis.com" },
+    { id: 21, idClient: 33, username: "terg_sftp", password: "TERG_Laredo#2026Key", port: 2222, host: "sftp.terg.com.mx" },
+    { id: 22, idClient: 34, username: "echo_logistics", password: "Echo_Logistics!2026", port: 22, host: "sftp.echo.com" },
+    { id: 23, idClient: 36, username: "nippon_mx", password: "N1ppon_MX#Pass2026", port: 22, host: "sftp.nipponexpress.com" },
+    { id: 24, idClient: 37, username: "usxpress_edi", password: "USXpress_Key!8872", port: 22, host: "sftp.usxpress.com" },
+    { id: 25, idClient: 39, username: "fedex_freight", password: "FedEx_FreightMX#2026", port: 22, host: "sftp.fedex.com" },
+    { id: 26, idClient: 40, username: "dhl_supply", password: "DHL_SupplyChain!2026", port: 22, host: "sftp.dhl.com" },
+    { id: 27, idClient: 42, username: "arcbest_sftp", password: "ArcBest_SecurePass#1", port: 22, host: "sftp.arcb.com" },
+    { id: 28, idClient: 43, username: "delreal_sftp", password: "DelReal_Pass!8672", port: 22, host: "sftp.delreal.com.mx" },
+    { id: 29, idClient: 44, username: "universal_log", password: "Universal_Logistics#26", port: 22, host: "sftp.universallogistics.com" },
+    { id: 30, idClient: 45, username: "transplace_mx", password: "Transplace_MX!Key2026", port: 22, host: "sftp.transplace.com" },
+    { id: 31, idClient: 47, username: "kuehne_nagel", password: "KN_Mexico$Secret2026", port: 22, host: "sftp.kuehne-nagel.com" },
+    { id: 32, idClient: 49, username: "averitt_edi", password: "Av3r1tt_Express#2026", port: 22, host: "sftp.averitt.com" },
+    { id: 33, idClient: 50, username: "nfi_industries", password: "NFI_Industries!2026Key", port: 22, host: "sftp.nfiindustries.com" }
+];

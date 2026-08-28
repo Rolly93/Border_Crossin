@@ -1,30 +1,46 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ICliente } from "../types/Cliente";
 import { clientService } from "../service/clientService";
-
+const PAGE_SIZE = 10;
 export function useClients() {
   const [clients, setClients] = useState<ICliente[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true)
+
+
+  const fetchClients = useCallback(async (currentPage: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const response = await clientService.getPaginated(currentPage, PAGE_SIZE)
+      const newCliente: ICliente[] = Array.isArray(response) ? response : response.data
+      setHasMore(response.hasNextPage)
+      setClients((prev) => currentPage === 1 ? newCliente : [...prev, ...newCliente])
+
+    } catch (error) {
+      setError('Failed to load clientes')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
 
   useEffect(() => {
-    let isMounted = true
-    async function fetchClients() {
-      try {
-        setLoading(true)
+    fetchClients(1);
+  }, [fetchClients]);
 
-        const data = await clientService.getAll();
-        if (isMounted) setClients(data)
-      } catch (error) {
-        if (isMounted) setError("Failed to load clients")
-
-      } finally {
-        if (isMounted) setLoading(false)
-      }
+  const fetchNextPage = useCallback(() => {
+    if (!loading && hasMore) {
+      setPage((prevPage) => {
+        const nextPage = prevPage + 1;
+        fetchClients(nextPage);
+        return nextPage;
+      });
     }
-    fetchClients()
-    return () => { isMounted = false; }
-  }, [])
+  }, [loading, hasMore, fetchClients]);
 
   const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {
@@ -66,5 +82,14 @@ export function useClients() {
 
 
 
-  return { clients, addClient, updateClient, loading, error, deleteCliente } as const;
+  return {
+    clients,
+    loading,
+    error,
+    hasMore,
+    fetchNextPage,
+    addClient,
+    updateClient,
+    deleteCliente
+  } as const;
 }

@@ -1,6 +1,7 @@
 import { ShipmentForm } from "@/features/shipments/components/ShipmentForm";
-import { Group, Input, Modal, Button, LoadingOverlay, Box } from "@mantine/core";
+import { Group, Input, Modal, LoadingOverlay, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { AtomButton } from "../atoms/AtomButton";
 
 interface HeadersProps {
   onAddShipment: (data: any) => Promise<void>;
@@ -23,9 +24,9 @@ export default function Headers({ onAddShipment, isCreating, searchValue, onSear
         value={searchValue}
         onChange={(event) => onSearchChange(event.currentTarget.value)} />
 
-      <Button variant="default" onClick={open}>
+      <AtomButton variant="default" onClick={open}>
         Add Shipment
-      </Button>
+      </AtomButton>
 
       <Modal
         opened={opened}

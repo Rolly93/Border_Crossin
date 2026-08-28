@@ -1,6 +1,7 @@
 import { createApiClient } from "@/service/api";
-import { IBaseService } from "./IBaseService";
-import { data } from "react-router-dom";
+import { IBaseService, PaginatedResponse } from "./IBaseService";
+import { ICliente } from "@/features/clients/types/Cliente";
+
 
 export abstract class BaseApiService<T extends { id?: number }> implements IBaseService<T> {
   protected api = createApiClient(import.meta.env.VITE_API_URL)
@@ -23,6 +24,15 @@ export abstract class BaseApiService<T extends { id?: number }> implements IBase
   async delete(id: number): Promise<T> {
     const response = await this.api.post<T>(`/${this.resourcePath}/delete`, id)
     return response.data
+  }
+
+  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T> | T[]> {
+    const response = await this.api.get<PaginatedResponse<T>>(`${this.resourcePath}`, {
+      params: { page, limit },
+    });
+
+    return response.data;
+
   }
 
 }

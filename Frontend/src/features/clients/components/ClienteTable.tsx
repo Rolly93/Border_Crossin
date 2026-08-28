@@ -3,7 +3,7 @@ import { Table } from "@mantine/core";
 import { Title, Text, Group } from '@mantine/core';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import ClientModalProps from "./ClientModalProps";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { ICliente } from "@/features/clients/types/Cliente";
 import { useDisclosure } from "@mantine/hooks";
 import { ClientMetrics } from "./ClientMetrics";
@@ -16,7 +16,27 @@ import { AtomButton } from "@/components/atoms/AtomButton";
 export function ClientTable() {
   const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
-  const { clients, addClient, updateClient, loading, error, deleteCliente } = useClients()
+  const { clients,
+    loading,
+    hasMore,
+    fetchNextPage,
+    addClient,
+    updateClient,
+    deleteCliente } = useClients()
+
+  const observer = useRef<IntersectionObserver | null>(null)
+  const lastElemntRef = useCallback((node: HTMLTableRowElement | null) => {
+    if (loading) { return; }
+    if (observer.current) { observer.current.disconnect() }
+    observer.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        fetchNextPage();
+
+      }
+    })
+    if (node) { return observer.current.observe(node) }
+  }, [loading, hasMore, fetchNextPage])
+
   function handleSelectClient(onSelectClient: ICliente) {
     setselectedClient(onSelectClient)
     openModal()
@@ -97,16 +117,19 @@ export function ClientTable() {
 
           <Table.Tbody>
 
-            {loading ? (<TableSkeletonRows rows={5} columns={6} />) :
-              (clients.map((cliente) => (
-                <ClientTableRow
-                  key={cliente.id}
-                  cliente={cliente}
-                  onClick={handleSelectClient}
-                  onDelete={handelDeleteClient}
-                />
-              )))}
-
+            {loading && clients.length === 0 ? (
+              <TableSkeletonRows rows={4} columns={6} />
+            ) : (clients.map((cliente, index) => {
+              const isLastElemnt = clients.length === index + 1;
+              return (<ClientTableRow
+                ref={isLastElemnt ? lastElemntRef : null}
+                key={cliente.id}
+                cliente={cliente}
+                onClick={handleSelectClient}
+                onDelete={handelDeleteClient}
+              />)
+            }))}
+            {loading && <TableSkeletonRows rows={4} columns={6} />}
           </Table.Tbody>
         </Table>
       </ScrollArea>

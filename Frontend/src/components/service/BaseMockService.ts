@@ -1,4 +1,4 @@
-import { IBaseService } from "./IBaseService";
+import { IBaseService, PaginatedResponse } from "./IBaseService";
 
 export abstract class BaseMockService<T extends { id: number }> implements IBaseService<T> {
   constructor(protected mockData: T[]) { }
@@ -51,5 +51,21 @@ export abstract class BaseMockService<T extends { id: number }> implements IBase
     this.mockData = this.mockData.filter((data) => data.id !== id)
     return itemDelte
   }
+  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
+    await this.delay(1000);
+    const safeData = Array.isArray(this.mockData) ? this.mockData : [];
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const data = safeData.slice(startIndex, endIndex);
+    return {
+      data,
+      totalRecords: safeData.length,
+      hasNextPage: endIndex < safeData.length,
+      page, limit
+    }
+  }
+
+
 
 }
