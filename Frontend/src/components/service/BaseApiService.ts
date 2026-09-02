@@ -1,6 +1,5 @@
 import { createApiClient } from "@/service/api";
 import { IBaseService, PaginatedResponse } from "./IBaseService";
-import { ICliente } from "@/features/clients/types/Cliente";
 
 
 export abstract class BaseApiService<T extends { id?: number }> implements IBaseService<T> {
@@ -26,12 +25,20 @@ export abstract class BaseApiService<T extends { id?: number }> implements IBase
     return response.data
   }
 
-  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T> | T[]> {
+  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
     const response = await this.api.get<PaginatedResponse<T>>(`${this.resourcePath}`, {
       params: { page, limit },
     });
-
-    return response.data;
+    if (response.status === 200) {
+      return response.data;
+    }
+    return {
+      page: response.data.page,
+      hasNextPage: response.data.hasNextPage,
+      totalRecords: response.data.totalRecords,
+      limit: response.data.limit,
+      data: response.data.data
+    }
 
   }
 

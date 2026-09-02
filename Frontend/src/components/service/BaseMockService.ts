@@ -1,7 +1,10 @@
 import { IBaseService, PaginatedResponse } from "./IBaseService";
 
 export abstract class BaseMockService<T extends { id: number }> implements IBaseService<T> {
-  constructor(protected mockData: T[]) { }
+  protected items: T[]
+  constructor(protected mockData: T[]) {
+    this.items = mockData
+  }
 
   protected delay(ms: number = 100): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -9,20 +12,16 @@ export abstract class BaseMockService<T extends { id: number }> implements IBase
 
   async getAll(): Promise<T[]> {
     await this.delay(600);
-    return [...this.mockData];
+    return [...this.items];
   }
 
   async update(id: number, data: T): Promise<T> {
     await this.delay(100);
 
-    const index = this.mockData.findIndex((item) => item.id === id);
-
-    console.log(index);
-
-
+    const index = this.items.findIndex((item) => item.id === id);
     if (index !== -1) {
-      const updatedItem = { ...this.mockData[index], ...data, id }
-      this.mockData[index] = updatedItem;
+      const updatedItem = { ...this.items[index], ...data, id }
+      this.items[index] = updatedItem;
       return updatedItem;
 
     }
@@ -34,26 +33,26 @@ export abstract class BaseMockService<T extends { id: number }> implements IBase
     await this.delay(100);
 
     const nextId =
-      this.mockData.length > 0
-        ? Math.max(...this.mockData.map((i) => i.id || 0)) + 1
+      this.items.length > 0
+        ? Math.max(...this.items.map((i) => i.id || 0)) + 1
         : 1;
 
     const newItem = { ...data, id: nextId };
-    this.mockData.push(newItem);
+    this.items.push(newItem);
     return newItem;
   }
   async delete(id: number): Promise<T> {
     await this.delay(100);
 
-    const itemDelte = this.mockData.find((data) => data.id === id)
+    const itemDelte = this.items.find((data) => data.id === id)
     if (!itemDelte) { throw new Error('Item no found'); }
 
-    this.mockData = this.mockData.filter((data) => data.id !== id)
+    this.items = this.items.filter((data) => data.id !== id)
     return itemDelte
   }
   async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
     await this.delay(1000);
-    const safeData = Array.isArray(this.mockData) ? this.mockData : [];
+    const safeData = Array.isArray(this.items) ? this.items : [];
 
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;

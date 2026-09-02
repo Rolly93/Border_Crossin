@@ -15,11 +15,9 @@ export class MockNotificationStreamService implements INotificationStreamService
 
     subscribe(onMessage: (data: NotificationEvent) => void): () => void {
         this.listeners.push(onMessage);
-        console.log(' Suscriptor agregado. Total activos:', this.listeners.length);
 
         return () => {
             this.listeners = this.listeners.filter((l) => l !== onMessage);
-            console.log(' Suscriptor eliminado. Total restantes:', this.listeners.length);
         };
     }
 

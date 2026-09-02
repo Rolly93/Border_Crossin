@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ICliente } from "../types/Cliente";
 import { clientService } from "../service/clientService";
+import { ClientMetricsResponse } from "../types/IClientService";
 const PAGE_SIZE = 10;
 export function useClients() {
   const [clients, setClients] = useState<ICliente[]>([]);
@@ -8,13 +9,19 @@ export function useClients() {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true)
-
+  const [metrics, setMetrics] = useState<ClientMetricsResponse>(
+    {
+      totalClients: 0,
+      activeClient: 0,
+      emailService: 0,
+      sftpService: 0,
+    }
+  )
 
   const fetchClients = useCallback(async (currentPage: number) => {
     try {
       setLoading(true)
       setError(null)
-
       const response = await clientService.getPaginated(currentPage, PAGE_SIZE)
       const newCliente: ICliente[] = Array.isArray(response) ? response : response.data
       setHasMore(response.hasNextPage)
@@ -26,6 +33,19 @@ export function useClients() {
       setLoading(false)
     }
   }, [])
+
+  const fetchClientsMetrics = async () => {
+    try {
+      const data = await clientService.getMetrics();
+      setMetrics(data);
+    } catch (err) {
+      setError("Error al cargar datos");
+    }
+  };
+
+  useEffect(() => {
+    fetchClientsMetrics();
+  }, []);
 
 
   useEffect(() => {
@@ -47,6 +67,7 @@ export function useClients() {
       const createClient = await clientService.insert(newClientData)
 
       setClients((prev) => [createClient, ...prev])
+      await fetchClientsMetrics();
       return createClient;
     } catch (err) {
       console.error("Error creating client:", err)
@@ -61,6 +82,7 @@ export function useClients() {
       const updated = await clientService.update(id, updatedData)
       setClients((prev) =>
         prev.map((c) => (c.id === id ? updated : c)));
+      await fetchClientsMetrics();
       return updated
     } catch (error) {
       console.error("Error updating client:", error)
@@ -72,6 +94,7 @@ export function useClients() {
       const clientDelete = await clientService.delete(id)
 
       setClients((prev) => prev.filter((c) => (c.id !== clientDelete.id)))
+      await fetchClientsMetrics();
       return clientDelete
     } catch (error) {
       console.error("Error updating client:", error)
@@ -90,6 +113,7 @@ export function useClients() {
     fetchNextPage,
     addClient,
     updateClient,
-    deleteCliente
+    deleteCliente,
+    metrics
   } as const;
 }

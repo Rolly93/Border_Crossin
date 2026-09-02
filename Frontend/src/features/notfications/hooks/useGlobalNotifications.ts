@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 export function useGlobalNotifications() {
     useEffect(() => {
-        console.log('[HOOK] Escuchando notificaciones...');
         const unsubscribe = notificationsStreamService.subscribe((data) => {
 
             console.log('Evento recibido en React:', data);

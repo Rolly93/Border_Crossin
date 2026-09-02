@@ -1,4 +1,3 @@
-import { ScrollArea } from "@mantine/core";
 import { Table } from "@mantine/core";
 import { Title, Text, Group } from '@mantine/core';
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
@@ -22,7 +21,7 @@ export function ClientTable() {
     fetchNextPage,
     addClient,
     updateClient,
-    deleteCliente } = useClients()
+    deleteCliente, metrics } = useClients()
 
   const observer = useRef<IntersectionObserver | null>(null)
   const lastElemntRef = useCallback((node: HTMLTableRowElement | null) => {
@@ -95,16 +94,19 @@ export function ClientTable() {
         </Group>
       </Group>
 
-      <ClientMetrics clients={clients} />
-      <ScrollArea>
+      <ClientMetrics onMetrics={metrics} />
+      <Table.ScrollContainer minWidth={760} h={500}>
 
         <Table
           highlightOnHover
           horizontalSpacing="md"
           verticalSpacing="xs"
-          miw={700} layout="fixed"
-          mt={25}>
-          <Table.Thead>
+          miw={700}
+          layout="fixed"
+          stickyHeader
+          mt={25}
+        >
+          <Table.Thead >
             <Table.Tr>
               <Table.Th>Cliente</Table.Th>
               <Table.Th>Telefono</Table.Th>
@@ -112,6 +114,7 @@ export function ClientTable() {
               <Table.Th>SFTP Service</Table.Th>
               <Table.Th>Email Service</Table.Th>
               <Table.Th>Email Registrate</Table.Th>
+              <Table.Th>Actions</Table.Th>
             </Table.Tr>
           </Table.Thead>
 
@@ -132,7 +135,7 @@ export function ClientTable() {
             {loading && <TableSkeletonRows rows={4} columns={6} />}
           </Table.Tbody>
         </Table>
-      </ScrollArea>
+      </Table.ScrollContainer>
 
       <ClientModalProps
         onSelectClient={selectedClient}
