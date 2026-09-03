@@ -18,6 +18,7 @@ export function useShipments() {
       const response = await shipmentService.getPaginated(currentPage, PAGE_SIZE);
 
       const isArray = Array.isArray(response);
+
       const newShipments: Shipment[] = isArray ? response : response.data;
       const canFetchMore = isArray
         ? newShipments.length === PAGE_SIZE
@@ -74,6 +75,7 @@ export function useShipments() {
 
   const addShipment = async (newShipment: Shipment): Promise<Shipment> => {
     try {
+
       const createdShipment = await shipmentService.insert(newShipment);
       setShipments((prev) => [createdShipment, ...prev]);
       return createdShipment;

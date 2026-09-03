@@ -49,7 +49,7 @@ export default function ShipmentTable({ shipments, loading, error, onUpdateShipm
 
   return (
     <>
-      <Table.ScrollContainer minWidth={1400} maxHeight={500} >
+      <Table.ScrollContainer minWidth={1400} maxHeight={500} h={500}  >
         <Table
           highlightOnHover
           horizontalSpacing={'md'}

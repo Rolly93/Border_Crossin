@@ -26,18 +26,9 @@ export class ShipmentValidator {
     this.data = formData;
   }
 
-  private get client() { return this.data.cliente?.trim().toLocaleUpperCase() || ''; }
   private get tracking() { return this.data.customer_tracking?.trim().toLocaleUpperCase() || ''; }
   private get opretationType() { return this.data.type_operation?.trim().toLocaleUpperCase() || ''; }
-  /**
-   * validateCliente
-   */
-  public validateCliente(): string | null {
-    if (!this.client) return 'Este campo no puede estar Vacio'
-    if (this.client.length < 3) return 'Nombre de cliente invalido'
 
-    return null
-  }
   /**
    * validateCustomertracking    */
   public validateCustomertracking(): string | null {

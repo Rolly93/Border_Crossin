@@ -15,6 +15,8 @@ export default function Headers({ onAddShipment, isCreating, searchValue, onSear
 
   const handleFormSubmit = async (data: any) => {
     await onAddShipment(data);
+    console.log(data);
+
     close();
   };
 

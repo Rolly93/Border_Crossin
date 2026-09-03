@@ -3,12 +3,18 @@ import { ICliente } from "../types/Cliente";
 import { clientService } from "../service/clientService";
 import { ClientMetricsResponse } from "../types/IClientService";
 const PAGE_SIZE = 10;
+
+interface ClientOption {
+  id: number;
+  name: string;
+}
 export function useClients() {
   const [clients, setClients] = useState<ICliente[]>([]);
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(true)
+  const [clientsName, setClientsName] = useState<ClientOption[]>([]);
   const [metrics, setMetrics] = useState<ClientMetricsResponse>(
     {
       totalClients: 0,
@@ -34,6 +40,28 @@ export function useClients() {
     }
   }, [])
 
+
+
+  const getClientList = async (): Promise<ClientOption[]> => {
+    try {
+      const data = await clientService.getAll();
+      const clienteName = data.map((c: any) => ({
+        name: c.name,
+        id: c.id,
+      }));
+
+      setClientsName(clienteName);
+
+      return clienteName
+    } catch (error) {
+      console.error("Error getting client names:", error)
+      throw error;
+    }
+  }
+
+  useEffect(() => {
+    getClientList();
+  }, []);
   const fetchClientsMetrics = async () => {
     try {
       const data = await clientService.getMetrics();
@@ -42,6 +70,8 @@ export function useClients() {
       setError("Error al cargar datos");
     }
   };
+
+
 
   useEffect(() => {
     fetchClientsMetrics();
@@ -114,6 +144,7 @@ export function useClients() {
     addClient,
     updateClient,
     deleteCliente,
-    metrics
+    metrics,
+    clientsName
   } as const;
 }

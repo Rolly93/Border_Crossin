@@ -5,6 +5,7 @@ import { BaseMockService } from "@/components/service/BaseMockService";
 import { EventCategory, ShipmentEvent } from "@/types/Shipment";
 import { notificationsStreamService } from "@/features/notfications/services/NotificationService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
+import { CLIENT } from "@/features/clients/mocks/ClientMock";
 
 const CATEGORY_LABELS: Record<EventCategory, string> = {
     pick_up: 'Recolección',
@@ -19,6 +20,7 @@ const CATEGORY_LABELS: Record<EventCategory, string> = {
 
 }
 export class MockShipmentService extends BaseMockService<Shipment> {
+    protected clients = CLIENT
     constructor() {
         super(LOADSHIPMENT);
 
@@ -26,9 +28,20 @@ export class MockShipmentService extends BaseMockService<Shipment> {
 
 
     override async insert(data: Shipment): Promise<Shipment> {
+
+        const clientName = this.clients.find((client) => client.id.toString() === data.cliente.toString() ? client.name : '')
+
+
+        if (!clientName?.name) {
+
+            throw new Error("Client does not exist");
+
+        }
+
         const newShipment = await super.insert({
             ...data, events: data.events || []
         })
+        newShipment.cliente = clientName.name
         return newShipment
     }
 

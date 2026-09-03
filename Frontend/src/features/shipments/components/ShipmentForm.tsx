@@ -9,10 +9,11 @@ import { ShipmentValidator } from '../validation/ShipmentValidator';
 
 import { useFormNotifications } from '@/features/notfications/hooks/useNotifications';
 import { useTranslation } from 'react-i18next';
+import { useClients } from '@/features/clients/hooks/useClients';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
+  const { clientsName } = useClients()
   const { t, i18n } = useTranslation()
-
   const form = useForm({
     mode: 'controlled',
     validateInputOnChange: true,
@@ -33,7 +34,6 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
       const validator = new ShipmentValidator(values);
 
       return {
-        cliente: validator.validateCliente(),
         customer_tracking: validator.validateCustomertracking(),
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
@@ -78,9 +78,15 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
           </Group>
 
           <Group grow>
-            <TextInput
+            <Select
               label={t('shipment.labels.cliente')}
               placeholder={t('shipment.placeholders.cliente')}
+              data={clientsName.map((client) => ({
+                value: client.id,
+                label: client.name,
+              }))}
+              autoSelectOnBlur
+              searchable
               required
               {...form.getInputProps('cliente')}
             />
@@ -88,6 +94,8 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
               label={t('shipment.labels.operation_type')}
               placeholder={t('shipment.placeholders.operation_type')}
               data={['Exportacion', 'Importacion']}
+              autoSelectOnBlur
+              searchable
               required
               {...form.getInputProps('type_operation')}
             />
