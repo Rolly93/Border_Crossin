@@ -1,6 +1,5 @@
 import { createApiClient } from "@/service/api";
-import { IBaseService, PaginatedResponse } from "./IBaseService";
-
+import { IBaseService } from "./IBaseService";
 
 export abstract class BaseApiService<T extends { id?: number }> implements IBaseService<T> {
   protected api = createApiClient(import.meta.env.VITE_API_URL)
@@ -21,25 +20,12 @@ export abstract class BaseApiService<T extends { id?: number }> implements IBase
     return response.data
   }
   async delete(id: number): Promise<T> {
-    const response = await this.api.post<T>(`/${this.resourcePath}/delete`, id)
-    return response.data
+
+    const respose = await this.api.delete<T>(`/${this.resourcePath}/delete`, {
+      data: { id }
+    })
+    return respose.data
   }
 
-  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
-    const response = await this.api.get<PaginatedResponse<T>>(`${this.resourcePath}`, {
-      params: { page, limit },
-    });
-    if (response.status === 200) {
-      return response.data;
-    }
-    return {
-      page: response.data.page,
-      hasNextPage: response.data.hasNextPage,
-      totalRecords: response.data.totalRecords,
-      limit: response.data.limit,
-      data: response.data.data
-    }
-
-  }
 
 }

@@ -50,20 +50,7 @@ export abstract class BaseMockService<T extends { id: number }> implements IBase
     this.items = this.items.filter((data) => data.id !== id)
     return itemDelte
   }
-  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
-    await this.delay(1000);
-    const safeData = Array.isArray(this.items) ? this.items : [];
 
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const data = safeData.slice(startIndex, endIndex);
-    return {
-      data,
-      totalRecords: safeData.length,
-      hasNextPage: endIndex < safeData.length,
-      page, limit
-    }
-  }
 
 
 

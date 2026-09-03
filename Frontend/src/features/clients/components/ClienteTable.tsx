@@ -24,7 +24,7 @@ export function ClientTable() {
     deleteCliente, metrics } = useClients()
 
   const observer = useRef<IntersectionObserver | null>(null)
-  const lastElemntRef = useCallback((node: HTMLTableRowElement | null) => {
+  const lastElementRef = useCallback((node: HTMLTableRowElement | null) => {
     if (loading) { return; }
     if (observer.current) { observer.current.disconnect() }
     observer.current = new IntersectionObserver((entries) => {
@@ -35,6 +35,8 @@ export function ClientTable() {
     })
     if (node) { return observer.current.observe(node) }
   }, [loading, hasMore, fetchNextPage])
+
+
 
   function handleSelectClient(onSelectClient: ICliente) {
     setselectedClient(onSelectClient)
@@ -123,9 +125,9 @@ export function ClientTable() {
             {loading && clients.length === 0 ? (
               <TableSkeletonRows rows={4} columns={6} />
             ) : (clients.map((cliente, index) => {
-              const isLastElemnt = clients.length === index + 1;
+              const isLastElement = clients.length === index + 1;
               return (<ClientTableRow
-                ref={isLastElemnt ? lastElemntRef : null}
+                ref={isLastElement ? lastElementRef : null}
                 key={cliente.id}
                 cliente={cliente}
                 onClick={handleSelectClient}

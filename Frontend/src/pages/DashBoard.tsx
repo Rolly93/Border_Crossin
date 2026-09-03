@@ -2,18 +2,17 @@
 import Headers from '@/components/Header/Header';
 import { Container } from '@mantine/core';
 
-
-import { useShipments } from '@/hooks/useShipments';
+import { useShipments } from '@/features/shipments/hooks/useShipments';
 import { Shipment } from '@/types/Shipment';
-import { useMemo, useState } from 'react';
-import { shipmentService } from '@/features/shipments/service/shipmentService';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import ShipmentTable from '@/features/shipments/components/ShipmentTable';
 
 export function DashBoard() {
 
-  const { shipments, loading, error, updateLocalShipment, addLocalShipment } = useShipments();
+  const { shipments, loading, error, addShipment, updateShipment, hasMore, fetchNextPage } = useShipments();
   const [isCreating, setIsCreating] = useState(false);
   const [search, setSearch] = useState('');
+  const observer = useRef<IntersectionObserver | null>(null)
 
   const filterShipments = useMemo(() => {
     const query = search.toLocaleLowerCase().trim();
@@ -29,20 +28,28 @@ export function DashBoard() {
     }));
   }, [search, shipments])
 
+  const lastElementRef = useCallback(
+    (node: HTMLTableRowElement | null) => {
+      if (loading || search.trim().length > 0) return;
+
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchNextPage();
+        }
+      });
+
+      if (node) {
+        observer.current.observe(node);
+      }
+    },
+    [loading, hasMore, fetchNextPage, search]
+  );
+
+
   const handleCreateSubmit = async (newValues: Shipment) => {
-    try {
-      setIsCreating(true);
-
-      const shipmentToSave = await shipmentService.insert({ ...newValues })
-      await shipmentService.update(shipmentToSave.id, shipmentToSave);
-
-      addLocalShipment(shipmentToSave);
-
-    } catch (err) {
-      console.error("Error creating shipment:", err);
-    } finally {
-      setIsCreating(false);
-    }
+    addShipment(newValues)
   };
 
   return (
@@ -57,7 +64,8 @@ export function DashBoard() {
         shipments={filterShipments}
         loading={loading}
         error={error}
-        updateLocalShipment={updateLocalShipment}
+        onUpdateShipment={updateShipment}
+        onLastElement={lastElementRef}
       />
     </Container>
   );

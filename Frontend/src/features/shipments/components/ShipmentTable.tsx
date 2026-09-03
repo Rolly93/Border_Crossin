@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { Table } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Shipment } from '@/features/shipments/types/Shipment';
-import ShipmentRow from './ShipmentRow';
+import { ShipmentRow } from './ShipmentRow';
 import { shipmentService } from '@/features/shipments/service/shipmentService';
 import { useTranslation } from 'react-i18next';
 import { EmbarqueModal } from './EmbarqueModalProps';
+import { TableSkeletonRows } from '@/components/ui/TableSkeletonRows';
 
 interface ShipmentTableProps {
   shipments: Shipment[];
   loading: boolean;
   error: string | null;
-  updateLocalShipment: (id: number, data: Shipment) => void;
+  onUpdateShipment: (id: number, data: Shipment) => void;
+  onLastElement?: (node: HTMLTableRowElement | null) => void;
 }
 
-export default function ShipmentTable({ shipments, loading, error, updateLocalShipment }: ShipmentTableProps) {
+export default function ShipmentTable({ shipments, loading, error, onUpdateShipment, onLastElement }: ShipmentTableProps) {
   const { t, i18n } = useTranslation()
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedElement, setSelectedElement] = useState<Shipment | null>(null);
@@ -32,7 +34,7 @@ export default function ShipmentTable({ shipments, loading, error, updateLocalSh
       setIsSaving(true);
       await shipmentService.update(updatedValues.id, updatedValues);
 
-      updateLocalShipment(updatedValues.id, updatedValues);
+      onUpdateShipment(updatedValues.id, updatedValues);
 
       close();
     } catch (err) {
@@ -80,10 +82,22 @@ export default function ShipmentTable({ shipments, loading, error, updateLocalSh
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            <ShipmentRow shipments={shipments}
-              loading={loading}
-              error={error}
-              onRowDoubleClick={handleRowDoubleClick} />
+            {loading && shipments.length === 0 ? (
+              <TableSkeletonRows rows={5} columns={15} />
+            ) : (
+              shipments.map((shipment, index) => {
+                const isLastElement = shipments.length === index + 1;
+                return (
+                  <ShipmentRow
+                    ref={isLastElement ? onLastElement : null}
+                    key={shipment.id}
+                    shipment={shipment}
+                    onRowDoubleClick={handleRowDoubleClick}
+                  />
+                );
+              })
+            )}
+            {loading && shipments.length > 0 && <TableSkeletonRows rows={3} columns={15} />}
           </Table.Tbody>
         </Table>
 

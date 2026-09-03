@@ -1,3 +1,4 @@
+import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
 
 
 export interface Shipment extends ShipmentCreate {
@@ -13,6 +14,7 @@ export interface ShipmentEvent {
     dateTime: Date | null;
     notes?: string;
 }
+
 export type EventCategory =
     | "pick_up"
     | "departure"
@@ -39,3 +41,11 @@ export interface ShipmentCreate {
 
 }
 
+
+
+
+export interface IShipmentService extends IBaseService<Shipment> {
+
+    getPaginated(page: number, limit: number): Promise<PaginatedResponse<Shipment>>;
+
+}

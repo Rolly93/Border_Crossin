@@ -5,5 +5,5 @@ import { MockSftpService } from "./MockSftpService";
 
 const ip = import.meta.env.VITE_API_URL || false
 
-export const sftpService: ISftpService<ISftpConfiguration> = ip ?
+export const sftpService: ISftpService = ip ?
   new ApiSftpService() : new MockSftpService();

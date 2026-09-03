@@ -1,5 +1,7 @@
 import { BaseApiService } from "@/components/service/BaseApiService";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
+
+
 export class ApiSftpService extends BaseApiService<ISftpConfiguration> {
   constructor() {
     super('sftp');
@@ -11,4 +13,5 @@ export class ApiSftpService extends BaseApiService<ISftpConfiguration> {
 
     return response.data
   }
+
 }

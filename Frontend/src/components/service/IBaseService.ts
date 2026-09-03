@@ -1,3 +1,4 @@
+import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -13,11 +14,8 @@ export interface IBaseService<T> {
   update(id: number, data: T): Promise<T>;
   insert(data: T): Promise<T>;
   delete(id: number): Promise<T>;
-  getPaginated(page: number, limit: number): Promise<PaginatedResponse<T>>;
 }
 
-export interface ISftpService<T> {
-  getConnection(id: number): Promise<T | null>;
-  insert(data: T): Promise<T>;
-  update(id: number, data: T): Promise<T>;
+export interface ISftpService extends IBaseService<ISftpConfiguration> {
+  getConnection(id: number): Promise<ISftpConfiguration | null>;
 }

@@ -1,4 +1,4 @@
-import { IBaseService } from "@/components/service/IBaseService";
+import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
 import { ICliente } from "./Cliente";
 
 export interface ClientMetricsResponse {
@@ -10,4 +10,5 @@ export interface ClientMetricsResponse {
 
 export interface IClientService extends IBaseService<ICliente> {
   getMetrics(): Promise<ClientMetricsResponse>;
+  getPaginated(page: number, limit: number): Promise<PaginatedResponse<ICliente>>
 }

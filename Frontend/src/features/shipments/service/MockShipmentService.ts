@@ -4,6 +4,7 @@ import { LOADSHIPMENT } from "@/features/shipments/mocks/shipmentsMock";
 import { BaseMockService } from "@/components/service/BaseMockService";
 import { EventCategory, ShipmentEvent } from "@/types/Shipment";
 import { notificationsStreamService } from "@/features/notfications/services/NotificationService";
+import { PaginatedResponse } from "@/components/service/IBaseService";
 
 const CATEGORY_LABELS: Record<EventCategory, string> = {
     pick_up: 'Recolección',
@@ -61,5 +62,19 @@ export class MockShipmentService extends BaseMockService<Shipment> {
                 message: `[MOCK] Archivo XML del evento "${eventName}" enviado por SFTP (Embarque #${shipmentId}).`,
             });
         }, 2500)
+    }
+    async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<Shipment>> {
+        await this.delay(1000);
+        const safeData = Array.isArray(this.items) ? this.items : [];
+
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const data = safeData.slice(startIndex, endIndex);
+        return {
+            data,
+            totalRecords: safeData.length,
+            hasNextPage: endIndex < safeData.length,
+            page, limit
+        }
     }
 }
