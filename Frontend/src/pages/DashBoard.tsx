@@ -1,4 +1,3 @@
-// pages/Home.page.tsx
 import Headers from '@/components/Header/Header';
 import { Container } from '@mantine/core';
 

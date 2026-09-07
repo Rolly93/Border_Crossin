@@ -15,9 +15,16 @@ export abstract class BaseApiService<T extends { id?: number }> implements IBase
     return response.data
   }
   async insert(data: T): Promise<T> {
-    const response = await this.api.post<T>(`/${this.resourcePath}/create`, data)
-
-    return response.data
+    try {
+      const response = await this.api.post<T>(`/${this.resourcePath}/create`, data);
+      return response.data
+    } catch (error: any) {
+      if (error.response?.data?.errors) {
+        throw error.response.data.errors;
+      }
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to create record';
+      throw new Error(errorMessage);
+    }
   }
   async delete(id: number): Promise<T> {
 

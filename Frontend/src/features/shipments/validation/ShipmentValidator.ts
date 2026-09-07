@@ -26,27 +26,6 @@ export class ShipmentValidator {
     this.data = formData;
   }
 
-  private get tracking() { return this.data.customer_tracking?.trim().toLocaleUpperCase() || ''; }
-  private get opretationType() { return this.data.type_operation?.trim().toLocaleUpperCase() || ''; }
-
-  /**
-   * validateCustomertracking    */
-  public validateCustomertracking(): string | null {
-
-    if (this.client === 'EXPEDITORS') {
-      if (!this.tracking) return 'Referencia del cliente requerida'
-      if (this.opretationType === 'IMPORTACION' && !this.tracking.startsWith('12B')) {
-        return 'Referecia de Expeditors empieza con "12B" para importaciones'
-      }
-      if (this.opretationType === 'EXPORTACION' && !this.tracking.startsWith('82B') && !this.tracking.startsWith('92B')) {
-        return 'Referecia de Expeditors empieza con "82B" o "92B" para Exportacion'
-      }
-      if (this.tracking.length !== 10) { return 'Referecia de Expeditors debe de contener 10 Characters' }
-    }
-    return null
-  }
-
-
   public validateTrackingNumber(): string | null {
     return (this.data.tracking_number?.trim().length || 0) < 5 ? 'No. Embarque Invalido' : null;
   }

@@ -4,12 +4,10 @@ import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/
 import { ShipmentFormProps } from '@/features/shipments/types/ShipmentFormProps';
 import { setupShipmentWatchers } from '../validation/ShipmentFormRules';
 import { ShipmentValidator } from '../validation/ShipmentValidator';
-
-
-
-import { useFormNotifications } from '@/features/notfications/hooks/useNotifications';
 import { useTranslation } from 'react-i18next';
 import { useClients } from '@/features/clients/hooks/useClients';
+import { notifications } from '@mantine/notifications';
+import { ValidateClientReference } from '@/components/utils/businessRules';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
   const { clientsName } = useClients()
@@ -34,7 +32,6 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
       const validator = new ShipmentValidator(values);
 
       return {
-        customer_tracking: validator.validateCustomertracking(),
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
@@ -48,16 +45,50 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
   setupShipmentWatchers(form)
 
-  useFormNotifications({
-    errors: form.errors,
-    title: 'Error de Datos'
-  })
 
 
+
+
+
+  const handleValidationError = (errors: typeof form.errors) => {
+    notifications.show({
+      title: 'Error de Datos',
+      message: 'Por favor revisa los campos marcados en rojo antes de continuar.',
+      color: 'red',
+    });
+  };
+
+
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      const selectedClient = clientsName.find((c) => c.id === Number(values.cliente));
+      const clientName = selectedClient?.name || '';
+
+      const { isValid, field, error } = ValidateClientReference({
+        onClientName: clientName,
+        onReferenceClient: values.customer_tracking,
+        onTypeOperation: values.type_operation,
+      });
+
+      if (!isValid && field && error) {
+        form.setFieldError(field, error);
+        return;
+      }
+
+      await onSubmit(values);
+
+    } catch (err: any) {
+      if (typeof err === 'object' && !err.message) {
+        form.setErrors(err);
+      } else if (err.message) {
+        form.setFieldError('customer_tracking', err.message);
+      }
+    }
+  };
 
   return (
     <Paper p="md" withBorder>
-      <form onSubmit={form.onSubmit((values) => onSubmit(values as any))}>
+      <form onSubmit={form.onSubmit((values) => handleSubmit(values as any), handleValidationError)}>
         <Stack gap="md">
           <Title order={3}>Shipment Information</Title>
 
