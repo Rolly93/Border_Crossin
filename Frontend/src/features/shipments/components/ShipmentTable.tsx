@@ -62,6 +62,8 @@ export default function ShipmentTable({ shipments, loading, error, onUpdateShipm
               <Table.Th w={120} >{t('shipment.table.trailer')}</Table.Th>
               <Table.Th w={100} >Tractosr</Table.Th>
               <Table.Th w={180} >Cliente</Table.Th>
+              <Table.Th w={180} >asignacion</Table.Th>
+
               <Table.Th w={140} >Tipo Operacion</Table.Th>
               <Table.Th w={160} >Origen</Table.Th>
               <Table.Th w={160} >Destino</Table.Th>

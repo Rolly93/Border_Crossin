@@ -1,8 +1,8 @@
 import { Shipment } from "@/features/shipments/types/Shipment";
-import { BaseApiService } from "@/components/service/BaseApiService";
+import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
 
-export class ApiShipmentService extends BaseApiService<Shipment> {
+export class ApiShipmentService extends BaseCrudApiService<Shipment> {
     constructor() {
         super('shipment')
     }

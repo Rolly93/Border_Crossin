@@ -1,4 +1,4 @@
-import { BaseApiService } from "@/components/service/BaseApiService";
+import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { ICliente } from "../types/Cliente";
 import { IClientService } from "../types/IClientService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
@@ -10,7 +10,7 @@ interface MetricsResponse {
   sftpService: number;
 
 }
-export class ApiClientService extends BaseApiService<ICliente> implements IClientService {
+export class ApiClientService extends BaseCrudApiService<ICliente> implements IClientService {
   constructor() {
     super('client');
   }

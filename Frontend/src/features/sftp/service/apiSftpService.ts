@@ -1,8 +1,8 @@
-import { BaseApiService } from "@/components/service/BaseApiService";
+import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 
 
-export class ApiSftpService extends BaseApiService<ISftpConfiguration> {
+export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration> {
   constructor() {
     super('sftp');
   }

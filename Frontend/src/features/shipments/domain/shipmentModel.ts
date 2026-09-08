@@ -23,6 +23,7 @@ export class ShipmentModel {
       })
       .replace(',', '');
   }
+
   public getNotes(categoryKey: EventCategory): string {
 
 

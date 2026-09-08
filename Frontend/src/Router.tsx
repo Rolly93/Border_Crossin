@@ -2,24 +2,33 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { DashBoard } from './pages/DashBoard';
 import { SftpConnection } from './pages/SftpConnection';
 import { Layout } from './components/layout/Layout';
+import { LoginPage } from './pages/LoginPage';
+import { ProtectedRouter } from './features/login/components/ProtectedRoute';
+import { AuthProvider } from './features/login/context/AuthContext';
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+
+  }, {
     path: '/',
-    element: <Layout />,
+    element: <ProtectedRouter />,
     children: [
       {
-        path: '/',
-        element: <DashBoard />,
+        element: <Layout />,
+        children: [
+          { path: '/', element: <DashBoard />, },
+          { path: '/sftp_connection', element: <SftpConnection /> },
+        ]
       },
-      {
-        path: '/sftp_connection',
-        element: <SftpConnection />
-      },
-
     ],
   },
 ]);
 
 export function Router() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }

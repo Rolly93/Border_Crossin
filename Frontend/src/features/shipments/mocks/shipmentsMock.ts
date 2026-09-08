@@ -9,6 +9,7 @@ export let LOADSHIPMENT: Shipment[] = [
     cliente: "MOGA Logistics",
     truck: "TR-15",
     vehicle_type: "Trailer",
+    create: new Date("2026-07-01T08:00:00"),
     trailer: "TA123456",
     origen: "Bodega Mexico",
     destino: "USA Distribution Center",
@@ -41,6 +42,8 @@ export let LOADSHIPMENT: Shipment[] = [
     tracking_number: "TA789012",
     customer_tracking: "CUST-88341",
     cliente: "Alpha Manufacturing",
+
+    create: new Date("2026-07-01T08:00:00"),
     truck: "TR-22",
     vehicle_type: "Bobtail",
     trailer: "TRAILER-44X",
@@ -70,6 +73,8 @@ export let LOADSHIPMENT: Shipment[] = [
     tracking_number: "TA456789",
     customer_tracking: "CUST-11223",
     cliente: "Global Trade Corp",
+
+    create: new Date("2026-07-01T08:00:00"),
     truck: "TR-09",
     vehicle_type: "Flatbed",
     trailer: "TRAILER-77Z",
@@ -116,6 +121,8 @@ export let LOADSHIPMENT: Shipment[] = [
     tracking_number: "TA102938",
     customer_tracking: "CUST-44012",
     cliente: "AeroParts Mexico",
+
+    create: new Date("2026-07-01T08:00:00"),
     truck: "TR-04",
     vehicle_type: "Dry Van",
     trailer: "DV-9011",
@@ -145,6 +152,8 @@ export let LOADSHIPMENT: Shipment[] = [
     tracking_number: "TA556677",
     customer_tracking: "CUST-33109",
     cliente: "Baja Express Auto",
+
+    create: new Date("2026-07-01T08:00:00"),
     truck: "TR-88",
     vehicle_type: "Trailer",
     trailer: "TA881023",
@@ -174,6 +183,7 @@ export let LOADSHIPMENT: Shipment[] = [
     customer_tracking: "CUST-77231",
     cliente: "NorteAgro Supplies",
     truck: "TR-12",
+    create: new Date("2026-07-01T08:00:00"),
     vehicle_type: "Reefer",
     trailer: "RF-3321",
     origen: "Sinaloa Processing Center",
@@ -201,6 +211,8 @@ export let LOADSHIPMENT: Shipment[] = [
     tracking_number: "TA334455",
     customer_tracking: "CUST-10928",
     cliente: "MOGA Logistics",
+
+    create: new Date("2026-07-01T08:00:00"),
     truck: "TR-31",
     vehicle_type: "Trailer",
     trailer: "TA776655",
@@ -228,219 +240,4 @@ export let LOADSHIPMENT: Shipment[] = [
       }
     ]
   },
-  {
-    id: 8,
-    tracking_number: "TA667788",
-    customer_tracking: "CUST-55123",
-    cliente: "Electrónicos del Norte",
-    truck: "TR-50",
-    vehicle_type: "Dry Van",
-    trailer: "DV-1122",
-    origen: "Juárez Assembly Facility",
-    destino: "El Paso Distribution",
-    type_operation: "Exportacion",
-    status: "Delayed",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-07-02T08:00:00")
-      },
-      {
-        category: "delay",
-        dateTime: new Date("2026-07-02T10:30:00"),
-        notes: "Falla mecánica menor en tracto. Unidad de sustitución en camino."
-      }
-    ]
-  },
-  {
-    id: 9,
-    tracking_number: "TA443322",
-    customer_tracking: "CUST-88901",
-    cliente: "Alpha Manufacturing",
-    truck: "TR-19",
-    vehicle_type: "Flatbed",
-    trailer: "FB-0099",
-    origen: "Monterrey Plant",
-    destino: "San Antonio Depot",
-    type_operation: "Exportacion",
-    status: "In Transit",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-07-02T05:30:00")
-      },
-      {
-        category: "departure",
-        dateTime: new Date("2026-07-02T06:15:00")
-      }
-    ]
-  },
-  {
-    id: 10,
-    tracking_number: "TA112233",
-    customer_tracking: "CUST-22334",
-    cliente: "Steel & Machinery MX",
-    truck: "TR-03",
-    vehicle_type: "Flatbed",
-    trailer: "FB-8811",
-    origen: "Monclova Yard",
-    destino: "Laredo Crossing Hub",
-    type_operation: "Exportacion",
-    status: "In Transit",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-07-01T12:00:00"),
-        notes: "Carga sobredimensionada asegurada."
-      },
-      {
-        category: "departure",
-        dateTime: new Date("2026-07-01T13:00:00")
-      },
-      {
-        category: "safety_yard",
-        dateTime: new Date("2026-07-01T20:00:00"),
-        notes: "Pernocta en patio de seguridad en Colombia, NL."
-      }
-    ]
-  },
-  {
-    id: 11,
-    tracking_number: "TA887766",
-    customer_tracking: "CUST-66554",
-    cliente: "Global Trade Corp",
-    truck: "TR-42",
-    vehicle_type: "Trailer",
-    trailer: "TA-9001",
-    origen: "El Paso Port",
-    destino: "Chihuahua Industrial Park",
-    type_operation: "Importacion",
-    status: "In Inspection",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-07-02T09:00:00")
-      },
-      {
-        category: "mex_inspeccion",
-        dateTime: new Date("2026-07-02T13:10:00"),
-        notes: "Rojo aduanal asignado en puente internacional."
-      }
-    ]
-  },
-  {
-    id: 12,
-    tracking_number: "TA990011",
-    customer_tracking: "CUST-99001",
-    cliente: "PharmaCare Latam",
-    truck: "TR-08",
-    vehicle_type: "Reefer",
-    trailer: "RF-5050",
-    origen: "Mexico City Plant",
-    destino: "Pharr Gateway",
-    type_operation: "Exportacion",
-    status: "In Transit",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-06-30T22:00:00"),
-        notes: "Cadena de frío verificada 4°C."
-      },
-      {
-        category: "departure",
-        dateTime: new Date("2026-06-30T23:00:00")
-      },
-      {
-        category: "clear_mex",
-        dateTime: new Date("2026-07-02T08:30:00")
-      }
-    ]
-  },
-  {
-    id: 13,
-    tracking_number: "TA771122",
-    customer_tracking: "CUST-33445",
-    cliente: "AeroParts Mexico",
-    truck: "TR-60",
-    vehicle_type: "Bobtail",
-    trailer: "BT-1212",
-    origen: "Saltillo Plant",
-    destino: "Laredo Freight Hub",
-    type_operation: "Exportacion",
-    status: "Delivered",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-06-27T11:00:00")
-      },
-      {
-        category: "clear_mex",
-        dateTime: new Date("2026-06-27T18:00:00")
-      },
-      {
-        category: "clear_usa",
-        dateTime: new Date("2026-06-27T20:15:00")
-      },
-      {
-        category: "deliver",
-        dateTime: new Date("2026-06-28T09:00:00"),
-        notes: "Entregado en rampa 4."
-      }
-    ]
-  },
-  {
-    id: 14,
-    tracking_number: "TA223344",
-    customer_tracking: "CUST-77889",
-    cliente: "MOGA Logistics",
-    truck: "TR-27",
-    vehicle_type: "Trailer",
-    trailer: "TA-3344",
-    origen: "Toluca Logistics Center",
-    destino: "Laredo Yard",
-    type_operation: "Exportacion",
-    status: "Delayed",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-07-01T15:00:00")
-      },
-      {
-        category: "departure",
-        dateTime: new Date("2026-07-01T16:00:00")
-      },
-      {
-        category: "delay",
-        dateTime: new Date("2026-07-02T02:00:00"),
-        notes: "Bloqueo carretero en caseta de cobro."
-      }
-    ]
-  },
-  {
-    id: 15,
-    tracking_number: "TA550011",
-    customer_tracking: "CUST-11990",
-    cliente: "Baja Express Auto",
-    truck: "TR-11",
-    vehicle_type: "Dry Van",
-    trailer: "DV-6677",
-    origen: "Mexicali Facility",
-    destino: "Calexico Hub",
-    type_operation: "Exportacion",
-    status: "In Transit",
-    events: [
-      {
-        category: "pick_up",
-        dateTime: new Date("2026-07-02T10:00:00")
-      },
-      {
-        category: "departure",
-        dateTime: new Date("2026-07-02T10:45:00")
-      },
-      {
-        category: "clear_mex",
-        dateTime: new Date("2026-07-02T12:30:00")
-      }
-    ]
-  }
 ];

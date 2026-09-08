@@ -4,9 +4,12 @@ import { useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useGlobalNotifications } from '@/features/notfications/hooks/useGlobalNotifications';
 import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
+import { AtomButton } from '../atoms/AtomButton';
+import { useAuth } from '@/features/login/context/AuthContext';
 export function Layout() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
+  const { logout } = useAuth()
 
   useEffect(() => {
     close();
@@ -46,6 +49,12 @@ export function Layout() {
 
         <Text size="sm" fw={500} c="dimmed" mb="xs">Employees</Text>
         {/**<Skeleton height={28} mt="sm" animate={false} radius="xl" /> **/}
+
+        <AppShell.Section pt={'md'}>
+          <AtomButton variant={'light'} color='red' fullWidth onClick={logout}>
+            Log Out
+          </AtomButton>
+        </AppShell.Section>
       </AppShell.Navbar>
 
       <AppShell.Main>

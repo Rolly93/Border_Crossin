@@ -8,10 +8,28 @@ interface ShipmentRowProps {
   onRowDoubleClick: (element: Shipment) => void;
 }
 
+function getDate(date: Date): string {
+
+  if (!date) return '--';
+
+  return new Date(date)
+    .toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })
+    .replace(',', '');
+}
+
 export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
   ({ shipment: rawShipment, onRowDoubleClick }, ref) => {
-    const shipment = new ShipmentModel(rawShipment);
 
+
+    const shipment = new ShipmentModel(rawShipment);
+    const create = getDate(shipment.data.create!)
     return (
       <Table.Tr
         ref={ref}
@@ -23,6 +41,7 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
         <Table.Td>{shipment.data.trailer}</Table.Td>
         <Table.Td>{shipment.data.truck}</Table.Td>
         <Table.Td>{shipment.data.cliente}</Table.Td>
+        <Table.Td>{create}</Table.Td>
         <Table.Td>{shipment.data.type_operation}</Table.Td>
         <Table.Td>{shipment.data.origen}</Table.Td>
         <Table.Td>{shipment.data.destino}</Table.Td>

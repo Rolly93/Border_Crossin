@@ -4,6 +4,7 @@ import { IBaseService, PaginatedResponse } from "@/components/service/IBaseServi
 export interface Shipment extends ShipmentCreate {
     id: number;
     status?: string;
+    create?: Date | null
     events: ShipmentEvent[];
 }
 
