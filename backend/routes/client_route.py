@@ -1,6 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, Depends, status
 from fastapi_utils.cbv import cbv
-from httpx import Client
 from databse import get_db
 from sqlalchemy.orm import Session
 from schema import ClientRequest
