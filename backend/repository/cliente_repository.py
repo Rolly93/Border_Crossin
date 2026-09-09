@@ -2,7 +2,7 @@ from sqlalchemy import and_, exists
 
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
-from backend.repository.base_repository import BaseRepository
+from repository.base_repository import BaseRepository
 from model.db_model import Client, ClientEmailRecipient
 from schema import ClientRequest, ClientResponse
 

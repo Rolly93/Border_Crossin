@@ -102,7 +102,7 @@ class UserService:
         clean_username = self.clean_username(data.username)
         employee = self._emplpyee_repo.get_employee(clean_rfc)
 
-        if not employee:
+        if not employee and not is_bootstrap:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Employee with this RFC does not exist",
@@ -113,7 +113,7 @@ class UserService:
             email=clean_email,
             hashed_password=hashed,
             is_admin=data.is_admin,
-            employee_id=employee.id,
+            employee_id=employee.id if employee else None,
         )
 
         self._user_repo.create_user(new_user)

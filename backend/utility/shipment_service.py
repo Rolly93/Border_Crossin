@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from backend.service.XML_generator import XMLService
-from backend.service.sftp import SFPTService
-from backend.utility.cliente_service import ClienteService
+from service.XML_generator import XMLService
+from service.sftp import SFPTService
+from utility.cliente_service import ClienteService
 from model.db_model import ShipmentAssign, ShipmentEventModel
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate
 from repository import ShipmentRepository
@@ -25,5 +25,7 @@ class ShipmentService:
 
     def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
         shipment_update = self.repo_db.update_shipment(shipment_id, shipment_data)
-        self._client_service.it_has_sfpt_notification(shipment_update.client_id ,shipment_data: ShipmentUpdate)
+        self._client_service.it_has_sfpt_notification(
+            shipment_update.client_id, shipment_data
+        )
         return shipment_update

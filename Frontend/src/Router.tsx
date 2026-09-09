@@ -5,12 +5,18 @@ import { Layout } from './components/layout/Layout';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRouter } from './features/login/components/ProtectedRoute';
 import { AuthProvider } from './features/login/context/AuthContext';
+import { FirstTimeLog } from './features/login/components/FirstTimeCreate';
 const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
 
   }, {
+    path: '/onetime',
+    element: <FirstTimeLog />,
+
+  }
+  , {
     path: '/',
     element: <ProtectedRouter />,
     children: [

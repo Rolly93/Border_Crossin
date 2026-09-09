@@ -4,9 +4,13 @@ import {
   Button,
   Paper,
   Title,
-  Alert
+  Alert,
+  Text,
+  Anchor
 } from '@mantine/core';
 import { useLoginForm } from '../hook/useLoginForm';
+import { AtomButton } from '@/components/atoms/AtomButton';
+import { useNavigate } from 'react-router-dom';
 
 export function LoginForm() {
   const {
@@ -18,6 +22,7 @@ export function LoginForm() {
     loading,
     handleSubmit,
   } = useLoginForm();
+  const navigate = useNavigate()
 
   return (
     <>
@@ -50,9 +55,15 @@ export function LoginForm() {
             mt="md"
           />
 
-          <Button type="submit" fullWidth mt="xl" loading={loading}>
+          <AtomButton type="submit" fullWidth mt="xl" loading={loading}>
             Sign In
-          </Button>
+          </AtomButton>
+          <Text c={'dimmed'} size='sm' ta='center'>
+            Don't have an account? {''}
+            <Anchor component="button" type='button' size='sm' onClick={() => navigate('/onetime')}>
+              Create Account
+            </Anchor>
+          </Text>
         </form>
       </Paper>
     </>

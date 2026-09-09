@@ -45,7 +45,9 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(String(250), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    employee_id: Mapped[int] = mapped_column(Integer, ForeignKey("employee.id"))
+    employee_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("employee.id"), nullable=True
+    )
 
     employee = relationship("Employee", back_populates="user")
     shipment_assigns = relationship("ShipmentAssign", back_populates="assigned_by_user")

@@ -30,7 +30,7 @@ class LoginRoute:
         }
 
     @router.post("/new_user", response_model=NewUserResponse)
-    async def new_user(self, data: NewUser, rfc: str, admin: int = 0):
+    async def new_user(self, data: NewUser, rfc: str, admin: int = 1):
 
         user_exist = self._auth.user_already_exists()
 
