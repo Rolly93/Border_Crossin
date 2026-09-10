@@ -10,47 +10,44 @@ import {
   Alert,
   Group,
 } from '@mantine/core';
-
-interface EmployeeFormValues {
-  name: string;
-  last_name: string;
-  role: string;
-  rfc_employee: string;
-
-}
-
-interface EmployeeFormProps {
-  onSuccess?: () => void;
-}
+import { DateInput } from '@mantine/dates';
+import { validateRFC } from '@/components/utils/businessRules';
+import { EmployeeFormProps, IEmployeeFormsValues } from '../type/employee.interface';
 
 export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | string[] | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<EmployeeFormValues>({
+  const form = useForm<IEmployeeFormsValues>({
     initialValues: {
-      name: '',
-      last_name: '',
+      firstName: '',
+      lastName: '',
       role: '',
-      rfc_employee: '',
-    },
-    validate: {
-      name: (val) => (val.trim().length > 0 ? null : 'First name is required'),
-      last_name: (val) => (val.trim().length > 0 ? null : 'Last name is required'),
-      role: (val) => (val ? null : 'Role is required'),
-      rfc_employee: (val) =>
-        /^[A-Z&Ñ]{3,4}\d{6}[A-Z0-9]{3}$/i.test(val.trim())
-          ? null
-          : 'Invalid RFC format (e.g., ABCD123456XYZ)',
-    },
+      rfc: '',
+      dateOfBirth: new Date(),
+    }
   });
 
-  const handleSubmit = async (values: EmployeeFormValues) => {
+  const handleSubmit = async (values: IEmployeeFormsValues) => {
     setError(null);
     setLoading(true);
 
+
+
     try {
+
+      const formattedValues = {
+        ...values,
+        dateOfBirth: values.dateOfBirth ? new Date(values.dateOfBirth) : new Date(),
+      };
+      const { isValid, errors } = validateRFC(formattedValues);
+
+      if (!isValid && errors.length > 0) {
+        setError(errors);
+        setLoading(false);
+        return;
+      }
       const response = await fetch('/api/employees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,6 +67,7 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
     }
   };
 
+
   return (
     <Paper radius="md" p="xl" withBorder style={{ maxWidth: 500, margin: '40px auto' }}>
       <Title order={2} mb="md">
@@ -88,14 +86,16 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
             label="First Name"
             placeholder="John"
             required
-            {...form.getInputProps('name')}
+            {...form.getInputProps('firstName')}
           />
           <TextInput
             label="Last Name"
             placeholder="Doe"
             required
-            {...form.getInputProps('last_name')}
+            {...form.getInputProps('lastName')}
           />
+          <DateInput label="Date Birth" placeholder='01/01/1990' required
+            {...form.getInputProps('dateOfBirth')} />
         </Group>
 
         <TextInput
@@ -104,7 +104,7 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
           required
           mb="sm"
           style={{ textTransform: 'uppercase' }}
-          {...form.getInputProps('rfc_employee')}
+          {...form.getInputProps('rfc')}
         />
 
         <Select
