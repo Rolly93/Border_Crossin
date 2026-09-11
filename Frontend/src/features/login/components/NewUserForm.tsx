@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   PasswordInput,
   Alert,
@@ -6,57 +5,29 @@ import {
   Button,
   Stack,
   Group,
+  Checkbox,
 } from '@mantine/core';
 import { AtomTextInput } from '@/components/atoms/AtomTextInput';
+import { useLoginForm } from '../hook/useLoginForm';
 
 interface NewuserFormProps {
   onSuccess?: () => void;
 }
 
 export function NewuserForm({ onSuccess }: NewuserFormProps) {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<string | null>('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { loading, error, setUserData, userData, setError, signIn } = useLoginForm();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+    await signIn(userData)
 
-    try {
-      const response = await fetch('/new_user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          is_admin: role === 'admin',
-        }),
-      });
+    if (onSuccess) { onSuccess() }
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Failed to create user account');
-      }
-
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
       {error && (
-        <Alert color="red" mb="md" title="Creation Failed" onClose={() => setError(null)} withCloseButton>
+        <Alert color="red" mb="md" title="Creation Failed" onClose={() => setError('')} withCloseButton>
           {error}
         </Alert>
       )}
@@ -65,20 +36,16 @@ export function NewuserForm({ onSuccess }: NewuserFormProps) {
         <AtomTextInput
           label="Username"
           placeholder="johndoe"
-          value={username}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setUsername(e.target.value)
-          }
+          value={userData.username}
+          onChange={(e) => setUserData((prev) => { return { ...prev, username: e.target.value } })}
           required
         />
 
         <AtomTextInput
           label="Email"
           placeholder="you@example.com"
-          value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
+          value={userData.email}
+          onChange={(e) => setUserData((prev) => { return { ...prev, email: e.target.value } })}
           required
         />
 
@@ -86,23 +53,32 @@ export function NewuserForm({ onSuccess }: NewuserFormProps) {
           <PasswordInput
             label="Password"
             placeholder="Your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={userData.password}
+            onChange={(e) => setUserData((prev) => { return { ...prev, password: e.target.value } })}
             required
           />
 
           <Select
             label="Role"
             placeholder="Select role"
-            value={role}
-            onChange={setRole}
-            data={[
-              { value: 'user', label: 'User' },
-              { value: 'operator', label: 'Operator' },
+            value={userData.role}
+            onChange={(value) =>
+              setUserData((prev) => ({ ...prev, role: value ?? '' }))
+            } data={[
+              { value: 'csr', label: 'Csr' },
               { value: 'admin', label: 'Admin' },
             ]}
             required
           />
+          <Checkbox
+            label="Is it Admin?"
+            checked={userData.isAdmin}
+            onChange={(event) => {
+              const isChecked = event.currentTarget.checked;
+              setUserData((prev) => ({ ...prev, isAdmin: isChecked }));
+            }}
+          />
+
         </Group>
 
         <Button type="submit" loading={loading} fullWidth mt="sm" size="md">

@@ -1,7 +1,6 @@
 import {
   TextInput,
   PasswordInput,
-  Button,
   Paper,
   Title,
   Alert,
@@ -11,18 +10,27 @@ import {
 import { useLoginForm } from '../hook/useLoginForm';
 import { AtomButton } from '@/components/atoms/AtomButton';
 import { useNavigate } from 'react-router-dom';
+import { FormEvent } from 'react';
 
 export function LoginForm() {
   const {
-    email,
-    setEmail,
-    password,
-    setPassword,
+    userData, setUserData,
     error,
     loading,
-    handleSubmit,
+    Login,
   } = useLoginForm();
   const navigate = useNavigate()
+
+  function handelSubmit(values: FormEvent) {
+    values.preventDefault()
+    const credentials = {
+      username: userData.username,
+      password: userData.password,
+    };
+
+    Login(credentials);
+
+  }
 
   return (
     <>
@@ -31,7 +39,7 @@ export function LoginForm() {
       </Title>
 
       <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handelSubmit}>
           {error && (
             <Alert color="red" mb="md" title="Login Failed">
               {error}
@@ -39,19 +47,23 @@ export function LoginForm() {
           )}
 
           <TextInput
-            label="Email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.currentTarget.value)}
+            label="username"
+            placeholder="usarname"
+            value={userData.username}
+            onChange={(e) => setUserData((prev) => {
+              return { ...prev, username: e.target.value }
+            })}
             required
           />
+
 
           <PasswordInput
             label="Password"
             placeholder="Your password"
-            value={password}
-            onChange={(e) => setPassword(e.currentTarget.value)}
-            required
+            value={userData.password}
+            onChange={(e) => setUserData((prev) => {
+              return { ...prev, password: e.target.value }
+            })} required
             mt="md"
           />
 

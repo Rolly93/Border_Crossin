@@ -47,10 +47,7 @@ export class MockShipmentService extends BaseMockService<Shipment> {
 
     override async update(id: number, data: Shipment): Promise<Shipment> {
         await this.delay(100);
-
         const index = this.mockData.findIndex((item) => item.id === id);
-
-
         const targetEvent = data.events.find((event) => event.dateTime !== null && event.dateTime !== undefined)
 
         if (index !== -1) {
@@ -59,12 +56,11 @@ export class MockShipmentService extends BaseMockService<Shipment> {
                 this.triggerSftpSimulation(id, targetEvent)
             }
             this.mockData[index] = updatedItem;
-
             return updatedItem;
-
         }
         throw new Error("Item not Found");
     }
+
     private triggerSftpSimulation(shipmentId: number, event?: ShipmentEvent) {
         const eventName = event ? (CATEGORY_LABELS[event.category] || event.category) : 'General'
 

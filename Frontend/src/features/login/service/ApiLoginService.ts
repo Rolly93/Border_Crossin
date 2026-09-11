@@ -1,14 +1,7 @@
 import { BaseApiService } from "@/components/service/BaseApiService";
-import { ILoginService } from "../type/ILoginService";
+import { ILoginService, ISignIn, LoginCredentials, LoginResponse } from "../type/ILoginService";
 
-export interface LoginResponse {
-  token: string;
-}
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
 
 export class AuthService extends BaseApiService implements ILoginService {
   constructor() {
@@ -22,6 +15,7 @@ export class AuthService extends BaseApiService implements ILoginService {
     );
     return response.data;
   }
+
   async logout(): Promise<void> {
     try {
       await this.api.post(`/${this.resourcePath}/logout`)
@@ -31,6 +25,13 @@ export class AuthService extends BaseApiService implements ILoginService {
       localStorage.removeItem('jwt_token')
     }
 
+  }
+  async signIn(credentials: ISignIn): Promise<void> {
+    try {
+      await this.api.post(`/${this.resourcePath}/new_user`, credentials)
+    } catch (error) {
+
+    }
   }
 }
 

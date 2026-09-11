@@ -13,12 +13,11 @@ import {
 import { DateInput } from '@mantine/dates';
 import { validateRFC } from '@/components/utils/businessRules';
 import { EmployeeFormProps, IEmployeeFormsValues } from '../type/employee.interface';
+import { useEmployee } from '../hook/useEmployee';
 
 export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | string[] | null>(null);
-  const [loading, setLoading] = useState(false);
-
+  const { createNewEmployee, error, loading, setError } = useEmployee()
   const form = useForm<IEmployeeFormsValues>({
     initialValues: {
       firstName: '',
@@ -30,10 +29,6 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
   });
 
   const handleSubmit = async (values: IEmployeeFormsValues) => {
-    setError(null);
-    setLoading(true);
-
-
 
     try {
 
@@ -45,25 +40,17 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
 
       if (!isValid && errors.length > 0) {
         setError(errors);
-        setLoading(false);
         return;
       }
-      const response = await fetch('/api/employees', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
+      await createNewEmployee(values)
+      if (onSuccess) {
+        onSuccess()
+      } else {
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Failed to save employee');
+        navigate('/sftp_connection');
       }
-
-      navigate('/sftp_connection');
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -113,10 +100,8 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
           required
           mb="xl"
           data={[
-            { value: 'driver', label: 'Driver' },
             { value: 'operator', label: 'Operator' },
-            { value: 'admin', label: 'Admin' },
-            { value: 'manager', label: 'Manager' },
+            { value: 'csr', label: 'Csr' },
           ]}
           {...form.getInputProps('role')}
         />

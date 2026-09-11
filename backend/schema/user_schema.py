@@ -15,6 +15,8 @@ class LoginRequest(UserModel):
 
 class LoginResponse(LoginRequest):
     is_admin: bool
+    access_token: str
+    token_type: str
 
 
 class NewUser(LoginRequest):

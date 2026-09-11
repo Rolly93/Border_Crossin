@@ -144,7 +144,7 @@ class UserService:
 
     def create_employee(self, data: EmployeeRequest) -> Employee:
 
-        clean_rfc = self.is_valid(data.rfc_employee)
+        clean_rfc = self.is_valid(data.rfc)
         existing_employee = (
             self._db.query(Employee).filter(Employee.rfc_employee == clean_rfc).first()
         )
@@ -156,8 +156,8 @@ class UserService:
             )
 
         new_employee = Employee(
-            name=data.name,
-            last_name=data.last_name,
+            name=data.firstName,
+            last_name=data.lastName,
             role=data.role,
             rfc_employee=clean_rfc,
             still_employee=True,

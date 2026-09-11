@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import date
 
 
 class EmployeeBase(BaseModel):
@@ -7,7 +8,8 @@ class EmployeeBase(BaseModel):
 
 
 class EmployeeRequest(EmployeeBase):
-    name: str
-    last_name: str
+    firstName: str
+    lastName: str
     role: str
-    rfc_employee: str
+    rfc: str
+    dateOfBirth: date

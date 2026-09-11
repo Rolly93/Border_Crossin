@@ -10,6 +10,7 @@ from schema.user_schema import (
 from schema.employee_schema import EmployeeRequest
 from sqlalchemy.orm import Session
 from databse import get_db
+from deps.auth import get_current_user
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -48,9 +49,13 @@ class LoginRoute:
         }
 
     @router.post("/register_employee")
-    async def register_employee(self, data: EmployeeRequest, admin: int):
+    async def register_employee(
+        self, data: EmployeeRequest, current_user: dict = Depends(get_current_user)
+    ):
 
-        self._auth.verify_admin(admin)
+        user_exist = self._auth.user_already_exists()
+        user_id = current_user.get("sub")
+
         new_employee = self._auth.create_employee(data)
 
         return {

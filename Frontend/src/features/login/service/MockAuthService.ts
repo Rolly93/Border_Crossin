@@ -1,17 +1,15 @@
-import { ILoginService, LoginCredentials } from "../type/ILoginService";
+import { ILoginService, ISignIn, LoginCredentials } from "../type/ILoginService";
 
 export interface LoginResponse {
   token: string;
 }
-
-
 
 export class MockAuthService implements ILoginService {
 
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (credentials.email === 'admin@test.com' && credentials.password === 'password') {
+        if (credentials.username === 'admin@test.com' && credentials.password === 'password') {
           resolve({
             token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock_payload.mock_signature"
           });
@@ -31,5 +29,8 @@ export class MockAuthService implements ILoginService {
         resolve();
       }, 500);
     });
+  }
+  async signIn(credentials: ISignIn): Promise<void> {
+
   }
 }
