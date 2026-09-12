@@ -13,16 +13,17 @@ class Env:
 
     env_path = Path(__file__).resolve().parent.parent / ".env"
     load_dotenv(dotenv_path=env_path)
-    VITE_API_URL = os.getenv(
-        "VITE_API_URL",
-    )
+
+    VITE_API_URL = os.getenv("VITE_API_URL", "http://localhost:8000/api")
     PORT = int(os.getenv("PORT", 8000))
     VITE_USE_MOCK = bool(os.getenv("VITE_USE_MOCK", False))
     USER_EMAIL = str(os.getenv("USER_EMAIL", False))
     USER_PASSWORD = str(os.getenv("USER_PASSWORD", False))
-
-
-load_dotenv()
+    SECRET_KEY = str(os.getenv("SECRET_KEY", ""))
+    ALGORITHM = str(os.getenv("ALGORITHM", "HS256"))
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1440)
+    )
 
 
 @dataclass(frozen=True)

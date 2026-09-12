@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from utility.user_service import UserService
 from fastapi_utils.cbv import cbv
 from schema.user_schema import (
@@ -11,6 +11,8 @@ from schema.employee_schema import EmployeeRequest
 from sqlalchemy.orm import Session
 from databse import get_db
 from deps.auth import get_current_user
+from service.jwt_service import JWTService
+from schema import TokenPayload
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -20,27 +22,41 @@ class LoginRoute:
 
     def __init__(self, db: Session = Depends(get_db)):
         self._auth = UserService(db)
+        self.jwt = JWTService()
 
     @router.post("/login", response_model=LoginResponse)
     async def login_post(self, data: LoginRequest):
-        self._auth.autenticar(data)
+
+        userData = self._auth.autenticar(data)
+
+        token = self.jwt.create_access_token(
+            user_id=userData.id, extra_data={"is_admin": userData.is_admin}
+        )
 
         return {
             "status": "200 Success",
             "detail": "Login Success",
+            "access_token": token,
+            "token_type": "bearer",
         }
 
     @router.post("/new_user", response_model=NewUserResponse)
-    async def new_user(self, data: NewUser, rfc: str, admin: int = 1):
+    async def new_user(
+        self,
+        data: NewUser,
+        rfc: str,
+        current_user: TokenPayload = Depends(get_current_user),
+    ):
 
         user_exist = self._auth.user_already_exists()
 
-        if user_exist:
-            self._auth.verify_admin(admin)
+        if user_exist and not current_user.is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only administrators can create new users",
+            )
 
-        new_user = self._auth.create_newuser(
-            data, admin, rfc, is_bootstrap=not user_exist
-        )
+        new_user = self._auth.create_newuser(data, rfc=rfc, is_bootstrap=not user_exist)
 
         return {
             "status": "201 Created",
@@ -52,9 +68,6 @@ class LoginRoute:
     async def register_employee(
         self, data: EmployeeRequest, current_user: dict = Depends(get_current_user)
     ):
-
-        user_exist = self._auth.user_already_exists()
-        user_id = current_user.get("sub")
 
         new_employee = self._auth.create_employee(data)
 

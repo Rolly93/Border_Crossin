@@ -3,7 +3,6 @@ from datetime import date
 
 
 class EmployeeBase(BaseModel):
-    status: str | None = None
     id: int | None = None
 
 

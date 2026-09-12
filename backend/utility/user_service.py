@@ -83,7 +83,7 @@ class UserService:
         return clean_email
 
     def create_newuser(
-        self, data: NewUser, is_admin: int, rfc: str, is_bootstrap: bool = False
+        self, data: NewUser, rfc: str, is_bootstrap: bool = False
     ) -> User:
         if not data.password:
             raise HTTPException(
@@ -92,11 +92,8 @@ class UserService:
         """
         Logic for the /usuarios route.
         """
-        if not is_bootstrap:
-            self.verify_admin(is_admin)
 
         hashed = self.hash_content(data.password)
-
         clean_rfc = self.is_valid(rfc)
         clean_email = self._exist_email(data.email)
         clean_username = self.clean_username(data.username)
@@ -118,13 +115,6 @@ class UserService:
 
         self._user_repo.create_user(new_user)
         return new_user
-
-    def es_token_valido(self, token: str) -> bool:
-        """
-        Logic for the /setup/{token} route.
-        """
-        # For now, just a dummy check
-        return token == "secret-setup-token"
 
     def user_already_exists(self) -> bool:
         any_user = self._user_repo.get_all_users()

@@ -18,3 +18,6 @@ class EmployeeRepository:
         self._db.refresh(db_employee)
 
         return db_employee
+
+    def get_all_users(self) -> list[Employee] | None:
+        return self._db.query(Employee).first()
