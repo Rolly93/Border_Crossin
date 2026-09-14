@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Optional, Union
 import jwt
-from fastapi import HTTPException, status
 from config.config import Env
-from schema.token_schema import TokenPayload
+from schema.token_schema import TokenPayload, InitialTokenPayload
 
 
 class JWTService:
@@ -15,18 +14,28 @@ class JWTService:
 
     def extract_token_from_header(self, auth_header: Optional[str]) -> Optional[str]:
         if auth_header and auth_header.startswith("Bearer"):
-            return auth_header.split(" ")[1]
+            parts = auth_header.split(maxsplit=1)
+            if len(parts) == 2:
+                return parts[1].strip()
         return None
 
     def create_access_token(
-        self, user_id: int | str, extra_data: Optional[dict] = None
+        self,
+        user_id: int | str,
+        extra_data: Optional[dict] = None,
+        expires_delta: Optional[timedelta] = None,
     ) -> str:
 
         now = datetime.now(timezone.utc)
+        expire = now + (
+            expires_delta
+            if expires_delta
+            else timedelta(minutes=self._token_expire_minutes)
+        )
         to_encode = {
             "sub": str(user_id),
-            "ita": now,
-            "ex": now + timedelta(minutes=self._token_expire_minutes),
+            "iat": now,
+            "exp": now + timedelta(minutes=self._token_expire_minutes),
         }
 
         if extra_data:
@@ -34,7 +43,11 @@ class JWTService:
 
         return jwt.encode(to_encode, self._secrete_key, algorithm=self._algorithm)
 
-    def decode_access_token(self, token: str) -> TokenPayload:
+    def decode_access_token(
+        self, token: str
+    ) -> Union[TokenPayload, InitialTokenPayload]:
 
         payload = jwt.decode(token, self._secrete_key, algorithms=[self._algorithm])
+        if payload.get("is_first_time") is True:
+            return InitialTokenPayload(**payload)
         return TokenPayload(**payload)

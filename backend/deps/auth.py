@@ -1,42 +1,77 @@
-import jwt
-from fastapi import Header, Query, HTTPException, status, Depends
-from typing import Optional
-from service.jwt_service import JWTService
-from schema.token_schema import TokenPayload
-from repository import UserRepository
+import secrets
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Union
 
-from databse import get_db
-from sqlalchemy.orm import Session
+import jwt
+from fastapi import Header, HTTPException, Query, Request, status
+from schema.token_schema import InitialTokenPayload, TokenPayload
+from service.jwt_service import JWTService
 
 jwt_service = JWTService()
 
 
 def get_current_user(
+    rq: Request,
     authorization: Optional[str] = Header(None),
     token: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-) -> TokenPayload:
-    user_repo = UserRepository(db)
-    user_count = user_repo.get_all_users()
-
-    if not user_count:
-        return TokenPayload(sub=0, is_admin=True)
-
+) -> Union[TokenPayload, InitialTokenPayload]:
     jwt_token = jwt_service.extract_token_from_header(authorization) or token
 
     if not jwt_token:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="user not Authorized"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not authorized",
         )
 
     try:
-        return jwt_service.decode_access_token(jwt_token)
+        payload = jwt_service.decode_access_token(jwt_token)
+
+        if isinstance(payload, InitialTokenPayload):
+            current_ip = get_client_ip(rq)
+            if payload.client_ip != current_ip:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="IP address mismatch for bootstrap token",
+                )
+
+        return payload
+
     except jwt.ExpiredSignatureError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has Expired"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
         )
     except jwt.PyJWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication Token",
+            detail="Invalid authentication token",
         )
+
+
+def create_firstime_token(rfc: str, client_ip: str) -> str:
+    expiration = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {
+        "sub": rfc,
+        "client_ip": client_ip,
+        "is_first_time": True,
+        "exp": expiration,
+        "jti": secrets.token_urlsafe(16),
+    }
+    return jwt.encode(
+        payload, jwt_service._secrete_key, algorithm=jwt_service._algorithm
+    )
+
+
+def get_client_ip(rq: Request) -> str:
+    x_frwd_for = rq.headers.get("X-Forwarded-For")
+
+    if x_frwd_for:
+        return x_frwd_for.split(",")[0].strip()
+
+    if rq.client and rq.client.host:
+        return rq.client.host
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Unable to determine client IP address from host context.",
+    )
