@@ -5,7 +5,7 @@ import { NewuserForm } from "./NewUserForm";
 
 export function FirstTimeLog() {
   const [activeStep, setActiveStep] = useState(0);
-
+  const [rfc, setRfc] = useState('')
   const nextStep = () => setActiveStep((current) => (current < 2 ? current + 1 : current));
 
   return (
@@ -20,11 +20,11 @@ export function FirstTimeLog() {
 
         <Stepper active={activeStep} mb="xl">
           <Stepper.Step label="Employee" description="Personal details">
-            <EmployeeForm onSuccess={nextStep} />
+            <EmployeeForm onSuccess={nextStep} onSetRfc={setRfc} />
           </Stepper.Step>
 
           <Stepper.Step label="Account" description="Login credentials">
-            <NewuserForm onSuccess={nextStep} />
+            <NewuserForm onSuccess={nextStep} onRfc={rfc} />
           </Stepper.Step>
 
           <Stepper.Completed>

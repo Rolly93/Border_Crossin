@@ -10,7 +10,7 @@ export function useLoginForm() {
     isAdmin: false,
     role: '',
     username: '',
-    password: ''
+    password: '',
   })
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

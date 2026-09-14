@@ -18,6 +18,7 @@ export interface IEmployeeFormsValues extends IEmployeeCreate {
 
 export interface EmployeeFormProps {
   onSuccess?: () => void;
+  onSetRfc?: (rfc: string) => void;
 }
 
 

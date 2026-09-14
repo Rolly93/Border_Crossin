@@ -15,7 +15,7 @@ import { validateRFC } from '@/components/utils/businessRules';
 import { EmployeeFormProps, IEmployeeFormsValues } from '../type/employee.interface';
 import { useEmployee } from '../hook/useEmployee';
 
-export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
+export function EmployeeForm({ onSuccess, onSetRfc }: EmployeeFormProps) {
   const navigate = useNavigate();
   const { createNewEmployee, error, loading, setError } = useEmployee()
   const form = useForm<IEmployeeFormsValues>({
@@ -43,8 +43,9 @@ export function EmployeeForm({ onSuccess }: EmployeeFormProps) {
         return;
       }
       await createNewEmployee(values)
-      if (onSuccess) {
+      if (onSuccess && onSetRfc) {
         onSuccess()
+        onSetRfc(values.rfc)
       } else {
 
         navigate('/sftp_connection');

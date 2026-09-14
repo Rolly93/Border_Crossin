@@ -27,7 +27,7 @@ class Employee(Base):
     hire_date: Mapped[date] = mapped_column(
         Date, nullable=False, server_default=func.date("now")
     )
-    rfc_employee: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
+    rfc: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     still_employee: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     user = relationship("User", back_populates="employee", uselist=False)

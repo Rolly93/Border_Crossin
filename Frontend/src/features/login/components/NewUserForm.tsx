@@ -12,15 +12,20 @@ import { useLoginForm } from '../hook/useLoginForm';
 
 interface NewuserFormProps {
   onSuccess?: () => void;
+  onRfc?: string
 }
 
-export function NewuserForm({ onSuccess }: NewuserFormProps) {
+export function NewuserForm({ onSuccess, onRfc }: NewuserFormProps) {
   const { loading, error, setUserData, userData, setError, signIn } = useLoginForm();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    await signIn(userData)
+    if (onSuccess && onRfc) {
 
-    if (onSuccess) { onSuccess() }
+      onSuccess()
+    } else {
+      await signIn(userData)
+    }
+
 
   };
 
@@ -57,6 +62,7 @@ export function NewuserForm({ onSuccess }: NewuserFormProps) {
             onChange={(e) => setUserData((prev) => { return { ...prev, password: e.target.value } })}
             required
           />
+
 
           <Select
             label="Role"
