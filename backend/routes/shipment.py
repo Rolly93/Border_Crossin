@@ -16,8 +16,8 @@ class RShipment:
         self._service = ShipmentService(db)
 
     @router.get("/", response_model=List[Shipment])
-    async def shipment_dashboard(self):
-        return self._service.get_all_shipments()
+    async def shipment_dashboard(self, page: int = 1, limit: int = 10):
+        return self._service.get_all_shipments(page=page, limit=limit)
 
     @router.post("/create")
     async def create_shipment(self, shipment: ShipmentCreate):

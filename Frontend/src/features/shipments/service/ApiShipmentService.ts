@@ -8,7 +8,8 @@ export class ApiShipmentService extends BaseCrudApiService<Shipment> {
     }
 
     async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<Shipment>> {
-        const response = await this.api.get<PaginatedResponse<Shipment>>(`${this.resourcePath}`, {
+
+        const response = await this.api.get<PaginatedResponse<Shipment>>(`/${this.resourcePath}/`, {
             params: { page, limit },
         });
         if (response.status === 200) {

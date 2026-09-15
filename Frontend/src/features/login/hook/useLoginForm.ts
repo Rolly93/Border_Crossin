@@ -24,8 +24,10 @@ export function useLoginForm() {
     try {
 
       const data = await AuthtenticationService.login(credencials);
-      login(data.token);
+
+      login(data.access_token);
       navigate('/');
+      return data
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message ||
@@ -39,13 +41,29 @@ export function useLoginForm() {
   };
 
   const signIn = async (employeeData: ISignIn) => {
-    setError('')
-    setLoading(true)
+    setError('');
+    setLoading(true);
 
     try {
-      const data = await AuthtenticationService.signIn(employeeData)
-    } catch (error) {
+      const data = await AuthtenticationService.signIn(employeeData);
 
+      return data;
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      let errorMessage = 'Failed to sign in';
+
+      if (typeof detail === 'string') {
+        errorMessage = detail;
+      } else if (Array.isArray(detail)) {
+        errorMessage = detail.map((e: any) => `${e.loc?.[1] || 'Field'}: ${e.msg}`).join(', ');
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   }
 

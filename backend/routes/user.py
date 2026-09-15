@@ -1,5 +1,4 @@
-from typing import Optional
-
+from typing import Optional, Union
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from utility.user_service import UserService
 from fastapi_utils.cbv import cbv
@@ -9,13 +8,11 @@ from schema.user_schema import (
     NewUser,
     NewUserResponse,
 )
-from schema.employee_schema import EmployeeRequest
 from sqlalchemy.orm import Session
 from databse import get_db
-from deps.auth import get_current_user, get_client_ip
+from deps.auth import get_optional_current_user, get_client_ip
 from service.jwt_service import JWTService
 from schema import TokenPayload, InitialTokenPayload
-from deps import create_firstime_token
 
 router = APIRouter(prefix="/user", tags=["user"])
 
@@ -28,12 +25,12 @@ class LoginRoute:
         self.jwt = JWTService()
 
     @router.post("/login", response_model=LoginResponse)
-    async def login_post(self, data: LoginRequest):
+    async def login_post(self, data: LoginRequest, rq: Request):
 
         userData = self._auth.autenticar(data)
-
+        ip = get_client_ip(rq)
         token = self.jwt.create_access_token(
-            user_id=userData.id, extra_data={"is_admin": userData.is_admin}
+            ip, user_id=userData.id, extra_data={"is_admin": userData.is_admin}
         )
 
         return {
@@ -41,18 +38,24 @@ class LoginRoute:
             "detail": "Login Success",
             "access_token": token,
             "token_type": "bearer",
+            "isAdmin": userData.is_admin,
         }
 
-    @router.post("/new_user", response_model=NewUserResponse)
+    @router.post("/create", response_model=NewUserResponse)
     async def new_user(
         self,
         data: NewUser,
         rfc: Optional[str] = None,
-        current_user: InitialTokenPayload = Depends(get_current_user),
+        current_user: Union[TokenPayload, InitialTokenPayload] = Depends(
+            get_optional_current_user
+        ),
     ):
+
         user_exist = self._auth.user_already_exists()
 
-        if user_exist and not current_user.is_admin:
+        is_admin = getattr(current_user, "is_admin", False)
+
+        if user_exist and not is_admin:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only administrators can create new users",
@@ -74,40 +77,4 @@ class LoginRoute:
             "status": "201 Created",
             "detail": "User Created Successfully",
             "email": created_user.email,
-        }
-
-    @router.post("/register_employee")
-    async def register_employee(
-        self,
-        rq: Request,
-        data: EmployeeRequest,
-        current_user: Optional[TokenPayload] = Depends(get_current_user),
-    ):
-        user_exist = self._auth.user_already_exists()
-        ip = get_client_ip(rq)
-
-        if not current_user and not user_exist:
-            new_employee = self._auth.create_employee(data)
-            initial_token = self.jwt.create_access_token(
-                user_id=data.rfc, extra_data={"client_ip": ip, "is_first_time": True}
-            )
-            return {
-                "status": "201",
-                "detail": "Employee registered successfully",
-                "token": initial_token,
-                "name": new_employee.name,
-            }
-
-        if not current_user or not current_user.is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Authentication required to register additional employees.",
-            )
-
-        new_employee = self._auth.create_employee(data)
-
-        return {
-            "status": "201",
-            "detail": "Employee registered successfully",
-            "name": new_employee.name,
         }

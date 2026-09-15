@@ -8,16 +8,15 @@ class EmployeeRepository:
 
     def get_employee(self, rfc: str) -> Employee | None:
 
-        return self._db.query(Employee).filter(Employee.rfc_employee == rfc).first()
+        return self._db.query(Employee).filter(Employee.rfc == rfc).first()
 
     def create_employee(self, data: Employee) -> Employee:
-        db_employee = Employee(**data.dump_json())
-        self._db.add(db_employee)
+        self._db.add(data)
         self._db.commit()
 
-        self._db.refresh(db_employee)
+        self._db.refresh(data)
 
-        return db_employee
+        return data
 
     def get_all_users(self) -> list[Employee] | None:
         return self._db.query(Employee).first()

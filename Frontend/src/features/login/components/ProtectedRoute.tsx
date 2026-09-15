@@ -3,5 +3,6 @@ import { useAuth } from "../context/AuthContext";
 
 export function ProtectedRouter() {
   const { token } = useAuth();
-  return token ? <Outlet /> : <Navigate to='/login' replace />
+  const activeToken = token || localStorage.getItem('jwt_token');
+  return activeToken ? <Outlet /> : <Navigate to='/login' replace />;
 }

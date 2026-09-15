@@ -4,5 +4,4 @@ import { MockEmployeeService } from "./MockEmployeeService";
 
 const ip = import.meta.env.VITE_API_URL || false
 
-export const employeeService: IEmployeeService = ip
-  ? new ApiEmployeeService() : new MockEmployeeService();
+export const employeeService: IEmployeeService = ip && new ApiEmployeeService()

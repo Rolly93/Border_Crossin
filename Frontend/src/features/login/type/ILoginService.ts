@@ -5,8 +5,13 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  token: string;
+  access_token: string;
+  token_type: string;
+  status: string;
+  detail: string;
+  isAdmin: boolean;
 }
+
 
 
 export interface ISignIn extends LoginCredentials {

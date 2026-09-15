@@ -5,12 +5,12 @@ import { ILoginService, ISignIn, LoginCredentials, LoginResponse } from "../type
 
 export class AuthService extends BaseApiService implements ILoginService {
   constructor() {
-    super('auth')
+    super('user')
   }
 
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     const response = await this.api.post<LoginResponse>(
-      `/${this.resourcePath}/login`,
+      `${this.resourcePath}/login`,
       credentials
     );
     return response.data;
@@ -18,7 +18,7 @@ export class AuthService extends BaseApiService implements ILoginService {
 
   async logout(): Promise<void> {
     try {
-      await this.api.post(`/${this.resourcePath}/logout`)
+      await this.api.post(`${this.resourcePath}/logout`)
     } catch (error) {
 
     } finally {
@@ -27,11 +27,9 @@ export class AuthService extends BaseApiService implements ILoginService {
 
   }
   async signIn(credentials: ISignIn): Promise<void> {
-    try {
-      await this.api.post(`/${this.resourcePath}/new_user`, credentials)
-    } catch (error) {
+    console.log(`${this.resourcePath}/create`, credentials);
 
-    }
+    await this.api.post(`${this.resourcePath}/create`, credentials);
   }
 }
 

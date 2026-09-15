@@ -26,6 +26,9 @@ class ShipmentEvent(BaseModel):
     category: EventCategory
     dateTime: Optional[datetime] = None
     notes: Optional[str] = None
+    class Config:
+        from_attributes: Literal[True]
+        orm_mode = True
 
 
 class ShipmentCreate(BaseModel):
@@ -47,6 +50,7 @@ class Shipment(ShipmentCreate):
 
     class Config:
         from_attributes: Literal[True]
+        orm_mode = True
 
 
 class ShipmentUpdate(BaseModel):
@@ -57,6 +61,6 @@ class ShipmentUpdate(BaseModel):
     vehicle_type: Optional[str] = None
     trailer: Optional[str] = None
     origen: Optional[str] = None
-    destino: Optional[str] = None
+    destination: Optional[str] = None
     type_operation: Optional[str] = None
     events: List[ShipmentEvent]

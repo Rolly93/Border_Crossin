@@ -6,13 +6,10 @@ from model.db_model import Client
 from schema import ClientRequest
 from repository.cliente_repository import ClienteRepository
 
-# Missing Client Schema
-
 
 class ClienteService:
     def __init__(self, db: Session):
         self._db = ClienteRepository(db)
-        self._sftp_service = SFPTService()
 
     def create_client(self, data: ClientRequest) -> Client:
         self._db.client_exist(data.name)

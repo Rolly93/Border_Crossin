@@ -1,7 +1,7 @@
 import { AppShell, Burger, Group, Skeleton, Text, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useEffect } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGlobalNotifications } from '@/features/notfications/hooks/useGlobalNotifications';
 import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
 import { AtomButton } from '../atoms/AtomButton';
@@ -10,11 +10,17 @@ export function Layout() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
   const { logout } = useAuth()
-
+  const navigate = useNavigate();
   useEffect(() => {
     close();
   }, [location, close])
   useGlobalNotifications()
+
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login", { replace: true });
+  };
   return (
     <AppShell
       header={{ height: 60 }}
@@ -38,9 +44,9 @@ export function Layout() {
 
       <AppShell.Navbar p="md">
         <Text size="sm" fw={500} c="dimmed" mb="xs">Navigation</Text>
-        <NavLink component={Link} to="/"
+        <NavLink component={Link} to="/dashboard"
           label="Dashboard"
-          active={location.pathname === '/'} />
+          active={location.pathname === '/dashboard'} />
 
         <NavLink component={Link}
           to="/sftp_connection"
@@ -51,7 +57,7 @@ export function Layout() {
         {/**<Skeleton height={28} mt="sm" animate={false} radius="xl" /> **/}
 
         <AppShell.Section pt={'md'}>
-          <AtomButton variant={'light'} color='red' fullWidth onClick={logout}>
+          <AtomButton variant={'light'} color='red' fullWidth onClick={handleLogout}>
             Log Out
           </AtomButton>
         </AppShell.Section>

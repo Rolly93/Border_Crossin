@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { authService, AuthService } from '../service/ApiLoginService';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   token: string | null;
@@ -11,7 +12,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('jwt_token'));
-
   const login = (newToken: string) => {
     localStorage.setItem('jwt_token', newToken);
     setToken(newToken);
@@ -20,6 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     authService.logout()
     setToken(null);
+
   };
 
   return (
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 };

@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
+from repository.base_repository import BaseRepository
 from model.db_model import User
 from sqlalchemy import and_, exists
 
 
-class UserRepository:
+class UserRepository(BaseRepository[User]):
     def __init__(self, db: Session):
         self._db = db
 
@@ -24,9 +25,6 @@ class UserRepository:
         return self._db.query(User).filter(User.username == username).first()
 
     def create_user(self, data: User) -> User:
-        db_user = User(**data.dump_json())
-        self._db.add(db_user)
-        self._db.commit()
-        self._db.refresh(db_user)
+        db_user = self.save(data)
 
         return db_user

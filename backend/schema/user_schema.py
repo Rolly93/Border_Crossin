@@ -1,29 +1,40 @@
-from pydantic import BaseModel
-from typing import Text
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class UserModel(BaseModel):
-    status: Text
-    id: int | None = None
-    email: str
+class UserBase(BaseModel):
+    email: EmailStr
+    username: str
 
 
-class LoginRequest(UserModel):
+class LoginRequest(BaseModel):
+    username: str
     password: str
-    username: str
 
 
-class LoginResponse(LoginRequest):
-    is_admin: bool
-    access_token: str
-    token_type: str
-
-
-class NewUser(LoginRequest):
-    username: str
+class NewUser(UserBase):
+    password: str
     role: str
-    is_admin: bool | bool = False
+    isAdmin: bool = False
 
 
-class NewUserResponse(UserModel):
+class UserModel(UserBase):
+    id: Optional[int] = None
+    status: str = "active"
+
+
+class NewUserResponse(BaseModel):
+    status: str = "success"
     detail: str
+    token: Optional[str] = None
+
+
+class LoginResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    status: str
+    detail: str
+    access_token: str
+    token_type: str = "bearer"
+    is_admin: bool = Field(..., alias="isAdmin")

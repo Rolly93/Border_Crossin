@@ -18,9 +18,11 @@ export function useEmployee() {
       setLoading(true)
       setError(null)
       const newEmployee = await employeeService.insert(employeeData)
+
       return newEmployee
     } catch (e: any) {
       setError(e.message)
+      throw e
     } finally {
       setLoading(false)
     }

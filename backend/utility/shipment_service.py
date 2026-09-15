@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from service.XML_generator import XMLService
 from service.sftp import SFPTService
 from utility.cliente_service import ClienteService
@@ -14,8 +13,25 @@ class ShipmentService:
         self.repo_db = ShipmentRepository(db)
         self._client_service = ClienteService(db)
 
-    def get_all_shipments(self):
-        return self.db.query(ShipmentAssign).all()
+    def get_all_shipments(self, page: int = 1, limit: int = 10):
+        shipments = (
+            self.db.query(ShipmentAssign).offset((page - 1) * limit).limit(limit).all()
+        )
+        return [
+            {
+                "id": s.id,
+                "tracking_number": s.tracking_number,
+                "customer_tracking": s.customer_tracking,
+                "type_operation": s.type_operation,
+                "origen": s.origen,
+                "destination": s.destination,
+                "cliente": s.client.name if s.client else None,
+                "truck": s.truck.plates if s.truck else None,
+                "trailer": s.trailer.plates if s.trailer else None,
+                "events": s.events,
+            }
+            for s in shipments
+        ]
 
     def create_shipment(self, shipment: ShipmentCreate):
 

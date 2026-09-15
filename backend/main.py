@@ -5,6 +5,7 @@ from routes.user import router as LoginRoute
 from routes.shipment import router as Shipment
 from routes.notification_router import router as notifications_router
 from routes.client_route import router as client_router
+from routes.employee_route import router as employee_route
 from databse import engine, Base
 from deps.auth import get_current_user
 
@@ -24,3 +25,4 @@ app.include_router(LoginRoute)
 app.include_router(Shipment, dependencies=[Depends(get_current_user)])
 app.include_router(notifications_router, dependencies=[Depends(get_current_user)])
 app.include_router(client_router, dependencies=[Depends(get_current_user)])
+app.include_router(employee_route)

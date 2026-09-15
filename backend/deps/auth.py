@@ -1,5 +1,3 @@
-import secrets
-from datetime import datetime, timedelta, timezone
 from typing import Optional, Union
 
 import jwt
@@ -8,6 +6,20 @@ from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
 
 jwt_service = JWTService()
+
+
+def get_client_ip(rq: Request) -> str:
+    x_frwd_for = rq.headers.get("X-Forwarded-For")
+    if x_frwd_for:
+        return x_frwd_for.split(",")[0].strip()
+
+    if rq.client and rq.client.host:
+        return rq.client.host
+
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Unable to determine client IP address from host context.",
+    )
 
 
 def get_current_user(
@@ -48,30 +60,17 @@ def get_current_user(
         )
 
 
-def create_firstime_token(rfc: str, client_ip: str) -> str:
-    expiration = datetime.now(timezone.utc) + timedelta(minutes=15)
-    payload = {
-        "sub": rfc,
-        "client_ip": client_ip,
-        "is_first_time": True,
-        "exp": expiration,
-        "jti": secrets.token_urlsafe(16),
-    }
-    return jwt.encode(
-        payload, jwt_service._secrete_key, algorithm=jwt_service._algorithm
-    )
+def get_optional_current_user(
+    rq: Request,
+    authorization: Optional[str] = Header(None),
+    token: Optional[str] = Query(None),
+) -> Optional[Union[TokenPayload, InitialTokenPayload]]:
+    jwt_token = jwt_service.extract_token_from_header(authorization) or token
 
+    if not jwt_token or jwt_token.strip().lower() in ("undefined", "null", "none", ""):
+        return None
 
-def get_client_ip(rq: Request) -> str:
-    x_frwd_for = rq.headers.get("X-Forwarded-For")
-
-    if x_frwd_for:
-        return x_frwd_for.split(",")[0].strip()
-
-    if rq.client and rq.client.host:
-        return rq.client.host
-
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail="Unable to determine client IP address from host context.",
-    )
+    try:
+        return get_current_user(rq=rq, authorization=authorization, token=token)
+    except HTTPException:
+        return None

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 
-export const getBaseUrle = (ip: string) => import.meta.env.VITE_API_URL || `http://${ip}:8000/api`
+export const getBaseUrle = (ip: string) => import.meta.env.VITE_API_URL || `http://${ip}:8000`
 
 export const createApiClient = (ip: string): AxiosInstance => {
     const client = axios.create({
@@ -10,11 +10,19 @@ export const createApiClient = (ip: string): AxiosInstance => {
 
     client.interceptors.request.use((config) => {
         const token = localStorage.getItem('jwt_token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`
+        if (
+            token &&
+            token !== 'undefined' &&
+            token !== 'null' &&
+            token.trim() !== ''
+        ) {
+            config.headers.Authorization = `Bearer ${token}`;
+        } else {
+            delete config.headers.Authorization;
         }
         return config
     })
+
     return client
 
 }

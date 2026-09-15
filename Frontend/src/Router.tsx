@@ -23,7 +23,7 @@ const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
-          { path: '/', element: <DashBoard />, },
+          { path: '/dashboard', element: <DashBoard />, },
           { path: '/sftp_connection', element: <SftpConnection /> },
         ]
       },

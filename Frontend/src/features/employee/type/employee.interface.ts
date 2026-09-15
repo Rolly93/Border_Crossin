@@ -1,4 +1,3 @@
-import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 
 
 export interface IEmployee {
@@ -8,12 +7,15 @@ export interface IEmployee {
   dateOfBirth: Date;
   rfc: string;
   role: string;
+
+}
+
+export interface IEmployeeCreateResponse extends IEmployee {
+  token?: string;
+  detail?: string;
 }
 export type IEmployeeCreate = Omit<IEmployee, 'id'>
 export interface IEmployeeFormsValues extends IEmployeeCreate {
-
-
-
 }
 
 export interface EmployeeFormProps {

@@ -21,16 +21,29 @@ export function LoginForm() {
   } = useLoginForm();
   const navigate = useNavigate()
 
-  function handelSubmit(values: FormEvent) {
+  async function handelSubmit(values: FormEvent<HTMLFormElement>) {
     values.preventDefault()
     const credentials = {
       username: userData.username,
       password: userData.password,
     };
 
-    Login(credentials);
+    try {
+      const result = await Login(credentials);
 
+      if (result?.access_token) {
+        localStorage.setItem("token", result.access_token);
+        navigate("/dashboard");
+      }
+      else {
+        console.error("Login failed: No access token returned from server");
+      }
+    } catch (error: any) {
+      console.error("Login failed:", error.response?.data?.detail || error.message);
+    }
   }
+
+
 
   return (
     <>
