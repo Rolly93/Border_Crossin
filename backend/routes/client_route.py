@@ -1,34 +1,33 @@
 from fastapi import APIRouter, Depends, status
-from fastapi_utils.cbv import cbv
-from databse import get_db
-from sqlalchemy.orm import Session
+from deps.service import get_client_service
+from deps.auth import get_current_user
 from schema import ClientRequest
 from utility.cliente_service import ClienteService
-from utility.user_service import UserService
 
-router = APIRouter(prefix="/client", tags=["client"])
+router = APIRouter(
+    prefix="/client", tags=["client"], dependencies=[Depends(get_current_user)]
+)
 
 
-@cbv(router)
-class ClientRoute:
-    def __init__(self, db: Session = Depends(get_db)):
-        self._client_service = ClienteService(db)
-        self._auth = UserService(db)
+@router.post(
+    "/new_client",
+    status_code=status.HTTP_201_CREATED,
+)
+async def new_client(
+    admin_id: int,
+    data: ClientRequest,
+    service: ClienteService = Depends(get_client_service),
+):
+    return service.register_client(admin_id=admin_id, data=data)
 
-    @router.post(
-        "/new_client", response_model=ClientRequest, status_code=status.HTTP_201_CREATED
-    )
-    async def new_client(self, admin_id: int, data: ClientRequest):
 
-        self._auth.verify_admin(admin_id)
-
-        newclient = self._client_service.create_client(data)
-
-        return {"status": "success", "data": newclient.name}
-
-    @router.patch(
-        "/update_client", response_model=ClientRequest, status_code=status.HTTP_200_OK
-    )
-    async def update_client(self, admin_id: int, data: ClientRequest):
-
-        return data
+@router.patch(
+    "/update_client",
+    status_code=status.HTTP_200_OK,
+)
+async def update_client(
+    admin_id: int,
+    data: ClientRequest,
+    service: ClienteService = Depends(get_client_service),
+):
+    return service.update_client_info(admin_id=admin_id, data=data)

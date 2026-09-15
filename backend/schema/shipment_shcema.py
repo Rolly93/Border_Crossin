@@ -1,6 +1,6 @@
-from typing import List, Optional , Literal
+from typing import List, Optional, Literal
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 
@@ -26,9 +26,10 @@ class ShipmentEvent(BaseModel):
     category: EventCategory
     dateTime: Optional[datetime] = None
     notes: Optional[str] = None
+
     class Config:
         from_attributes: Literal[True]
-        orm_mode = True
+        model_config = ConfigDict(from_attributes=True)
 
 
 class ShipmentCreate(BaseModel):
@@ -50,7 +51,7 @@ class Shipment(ShipmentCreate):
 
     class Config:
         from_attributes: Literal[True]
-        orm_mode = True
+        model_config = ConfigDict(from_attributes=True)
 
 
 class ShipmentUpdate(BaseModel):

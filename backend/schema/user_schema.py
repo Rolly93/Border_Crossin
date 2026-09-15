@@ -37,4 +37,4 @@ class LoginResponse(BaseModel):
     detail: str
     access_token: str
     token_type: str = "bearer"
-    is_admin: bool = Field(..., alias="isAdmin")
+    isAdmin: bool = Field(..., alias="isAdmin")

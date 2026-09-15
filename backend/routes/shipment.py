@@ -1,30 +1,42 @@
 from typing import List
-from fastapi import APIRouter, Depends
-from fastapi_utils.cbv import cbv
+from fastapi import APIRouter, Depends, status
 from schema.shipment_shcema import Shipment, ShipmentCreate, ShipmentUpdate
-from sqlalchemy.orm import Session
-from databse import get_db
+from deps.auth import get_current_user
+from deps.service import get_shipment_service
 from utility.shipment_service import ShipmentService
 
-router = APIRouter(prefix="/shipment", tags=["shipment"])
+router = APIRouter(
+    prefix="/shipment",
+    tags=["Shipments"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
-@cbv(router)
-class RShipment:
+@router.get("/", response_model=List[Shipment])
+async def shipment_dashboard(
+    page: int = 1,
+    limit: int = 10,
+    service: ShipmentService = Depends(get_shipment_service),
+):
+    return service.get_all_shipments(page=page, limit=limit)
 
-    def __init__(self, db: Session = Depends(get_db)):
-        self._service = ShipmentService(db)
 
-    @router.get("/", response_model=List[Shipment])
-    async def shipment_dashboard(self, page: int = 1, limit: int = 10):
-        return self._service.get_all_shipments(page=page, limit=limit)
+@router.post(
+    "/create",
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_shipment(
+    shipment: ShipmentCreate, service: ShipmentService = Depends(get_shipment_service)
+):
+    created = service.create_shipment(shipment)
+    return {"status": "success", "data": created}
 
-    @router.post("/create")
-    async def create_shipment(self, shipment: ShipmentCreate):
-        created = self._service.create_shipment(shipment)
-        return {"status": "success", "data": created}
 
-    @router.put("/{id}/update")
-    async def update_shipment(self, id: int, shipment_data: ShipmentUpdate):
-        updated = self._service.update_shipment(id, shipment_data)
-        return {"status": "success", "data": updated}
+@router.put("/{id}/update")
+async def update_shipment(
+    id: int,
+    shipment_data: ShipmentUpdate,
+    service: ShipmentService = Depends(get_shipment_service),
+):
+    updated = service.update_shipment(id, shipment_data)
+    return {"status": "success", "data": updated}

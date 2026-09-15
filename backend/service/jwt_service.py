@@ -1,10 +1,10 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Union
-from fastapi import Request
 import jwt
 from config.config import Env
 from schema.token_schema import InitialTokenPayload, TokenPayload
+
 
 class JWTService:
 
@@ -24,7 +24,7 @@ class JWTService:
     def create_access_token(
         self,
         ip: str,
-        user_id: Union[int, str],
+        sub: Union[int, str],
         extra_data: Optional[dict] = None,
         expires_delta: Optional[timedelta] = None,
     ) -> str:
@@ -36,7 +36,7 @@ class JWTService:
         )
 
         to_encode = {
-            "sub": str(user_id),
+            "sub": str(sub),
             "iat": now,
             "exp": expire,
             "jti": secrets.token_urlsafe(16),

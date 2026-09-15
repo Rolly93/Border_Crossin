@@ -9,7 +9,6 @@ from fastapi_utils.cbv import cbv
 
 router = APIRouter()
 
-# Firebase Remote Config Web API Endpoint or REST Gateway
 FIREBASE_REMOTE_CONFIG_URL = "https://firebaseremoteconfig.googleapis.com/v1/projects/YOUR_PROJECT_ID/remoteConfig"
 
 

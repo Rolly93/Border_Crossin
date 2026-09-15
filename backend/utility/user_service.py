@@ -1,4 +1,8 @@
+from typing import Optional, Union
+
 import bcrypt
+from schema.token_schema import InitialTokenPayload, TokenPayload
+from service.jwt_service import JWTService
 from config.config import Env
 from fastapi import HTTPException, status
 from model.db_model import Employee, User
@@ -7,25 +11,29 @@ from schema.employee_schema import EmployeeRequest
 from schema.user_schema import LoginRequest, NewUser
 from sqlalchemy.orm import Session
 from stdnum.mx import rfc
+from datetime import timedelta
 
 dummy_password = "my_dummy_password_123".encode("utf-8")
 entered_input_1 = "wrong_password_abc".encode("utf-8")
+
+
 class UserService:
 
     def __init__(self, db: Session):
         self._env = Env()
         self._db = db
         self._user_repo = UserRepository(db)
-        self._employee_repo = EmployeeRepository(db)  # Fixed typo
+        self._employee_repo = EmployeeRepository(db)
+        self.jwt = JWTService()
 
     def is_valid(self, rfc_validate: str) -> str:
-      format_rfc = rfc_validate.strip().upper()
-      if not rfc.validate(format_rfc):
-          raise HTTPException(
-              status_code=status.HTTP_400_BAD_REQUEST,
-              detail=f"RFC Invalido: {rfc_validate}",
-          )
-      return format_rfc
+        format_rfc = rfc_validate.strip().upper()
+        if not rfc.validate(format_rfc):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"RFC Invalido: {rfc_validate}",
+            )
+        return format_rfc
 
     def clean_username(self, dirt_username: str) -> str:
         return dirt_username.strip()
@@ -75,7 +83,7 @@ class UserService:
         return clean_email
 
     def create_newuser(
-        self, data: NewUser, rfc: str, is_bootstrap: bool = False
+        self, data: NewUser, rfc: str | int, is_bootstrap: bool = False
     ) -> User:
         if not data.password:
             raise HTTPException(
@@ -83,7 +91,7 @@ class UserService:
             )
 
         hashed = self.hash_content(data.password)
-        clean_rfc = self.is_valid(rfc)
+        clean_rfc = self.is_valid(str(rfc))
         clean_email = self._exist_email(data.email)
         clean_username = self.clean_username(data.username)
         employee = self._employee_repo.get_employee(clean_rfc)
@@ -121,6 +129,55 @@ class UserService:
             )
         return is_admin
 
+    def login(self, data: LoginRequest, ip: str) -> dict:
+        user_data = self.autenticar(data)
+        token = self.jwt.create_access_token(
+            ip, sub=user_data.id, extra_data={"is_admin": user_data.is_admin}
+        )
+
+        return {
+            "status": "200 Success",
+            "detail": "Login Success",
+            "access_token": token,
+            "token_type": "bearer",
+            "isAdmin": user_data.is_admin,
+        }
+
+    def register_new_user(
+        self,
+        data: NewUser,
+        rfc: Optional[str],
+        current_user: Optional[Union[TokenPayload, InitialTokenPayload]],
+    ) -> dict:
+        user_exist = self.user_already_exists()
+        is_admin = getattr(current_user, "is_admin", False)
+
+        if user_exist and not is_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only administrators can create new users",
+            )
+
+        target_rfc = current_user.sub if not user_exist else rfc
+
+        if not target_rfc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "RFC parameter is required for non-bootstrap user" " creation."
+                ),
+            )
+
+        created_user = self.create_newuser(
+            data, rfc=target_rfc, is_bootstrap=not user_exist
+        )
+
+        return {
+            "status": "201 Created",
+            "detail": "User Created Successfully",
+            "email": created_user.email,
+        }
+
     def create_employee(self, data: EmployeeRequest) -> Employee:
         clean_rfc = self.is_valid(data.rfc)
         existing_employee = (
@@ -142,3 +199,42 @@ class UserService:
         )
         self._employee_repo.create_employee(new_employee)
         return new_employee
+
+    def register_employee(
+        self,
+        data: EmployeeRequest,
+        ip: str,
+        current_user: Optional[Union[TokenPayload, InitialTokenPayload]],
+    ) -> dict:
+        user_exist = self.user_already_exists()
+
+        if not current_user and not user_exist:
+            new_employee = self.create_employee(data)
+
+            initial_token = self.jwt.create_access_token(
+                sub=data.rfc,
+                ip=ip,
+                extra_data={"is_first_time": True},
+                expires_delta=timedelta(minutes=15),
+            )
+
+            return {
+                "status": "201",
+                "detail": "Employee registered successfully",
+                "token": initial_token,
+                "name": new_employee.name,
+            }
+
+        if not current_user or not getattr(current_user, "is_admin", False):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=("Authentication required to register additional" " employees."),
+            )
+
+        new_employee = self.create_employee(data)
+
+        return {
+            "status": "201",
+            "detail": "Employee registered successfully",
+            "name": new_employee.name,
+        }
