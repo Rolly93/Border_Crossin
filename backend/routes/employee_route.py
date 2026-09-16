@@ -5,7 +5,7 @@ from schema.employee_schema import EmployeeRequest
 from schema import TokenPayload, InitialTokenPayload
 from deps.auth import get_client_ip, get_optional_current_user
 from deps.service import get_user_service
-from utility.user_service import UserService
+from utility.employee_service import EmployeeService
 
 router = APIRouter(prefix="/employees", tags=["employee"])
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/employees", tags=["employee"])
 async def register_employee(
     rq: Request,
     data: EmployeeRequest,
-    service: UserService = Depends(get_user_service),
+    service: EmployeeService = Depends(get_user_service),
     current_user: Optional[Union[TokenPayload, InitialTokenPayload]] = Depends(
         get_optional_current_user
     ),

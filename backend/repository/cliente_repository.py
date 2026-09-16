@@ -1,9 +1,11 @@
+from typing import Optional
+
 from sqlalchemy import and_, exists
 
 from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from repository.base_repository import BaseRepository
-from model.db_model import Client, ClientEmailRecipient
+from model.db_model import Client
 from schema import ClientRequest, ClientResponse
 
 
@@ -35,16 +37,6 @@ class ClienteRepository(BaseRepository[Client]):
 
         return result
 
-    def _client_exist(self, id: int) -> None | Client:
-        client = self._db.query(Client).filter(Client.id == id).first()
-        if not client:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"client with id {id} not found",
-            )
-
-        return client
-
     def get_clients(self):
         return self._db.query(Client).all()
 
@@ -55,10 +47,10 @@ class ClienteRepository(BaseRepository[Client]):
             .scalar()
         )
 
-    def it_has_sftp_service(self, id: int):
-        return (
+    def it_has_sftp_service(self, id_val: int) -> bool:
+        return bool(
             self._db.query(Client)
-            .filter(exists().where(and_(Client.id == id, Client.is_ftp)))
+            .filter(exists().where(and_(Client.id == id_val, Client.is_ftp)))
             .scalar()
         )
 
@@ -67,26 +59,21 @@ class ClienteRepository(BaseRepository[Client]):
         self.save(data_client)
         return data_client
 
-    def update_client(self, cliente_id: int, cliente_data: ClientRequest) -> Client:
-        client = self._client_exist(cliente_id)
+    def update_client(self, cliente_id: int, client_data: ClientRequest) -> Client:
+        update_client = self.update(cliente_id, client_data)
 
-        update_data = cliente_data.model_dump(exclude_unset=True)
+        if not update_client:
+            raise HTTPException(status_code=404, detail="User not found")
 
-        for k, v in update_data.items():
-            setattr(client, k, v)
-        self._db.commit()
-        self._db.refresh(client)
-        return client
+        return update_client
 
     def delete_client(self, client_id: int) -> None:
-        client = self._client_exist(client_id)
-        self._db.delete(client)
-        self._db.commit()
 
-    def client_exist(self, name: str) -> list[Client]:
-        db_client = self._db.query(Client).filter(Client.name == name).all()
-        if db_client:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Cliente Duplicado"
-            )
-        return db_client
+        client = self.get_client_by_id(client_id)
+        self.delete(client)
+
+    def client_exist(self, name: str) -> Optional[Client]:
+        return self._db.query(Client).filter(Client.name == name).first()
+
+    def get_client_by_id(self, id_val: int) -> Optional[Client]:
+        return self.get_by_id(id_val)
