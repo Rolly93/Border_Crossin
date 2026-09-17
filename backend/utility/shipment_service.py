@@ -2,7 +2,6 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from service.xml_service import XMLService
-from service.sftp_service import SFTPService
 from utility.cliente_service import ClienteService
 from model.db_model import ShipmentAssign
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
@@ -38,9 +37,6 @@ class ShipmentService:
     def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
         shipment_update = self._shipment_db.update_shipment(shipment_id, shipment_data)
 
-        self._client_service.get_client_service(
-            shipment_update.client_id, "sftp_service"
-        )
         return shipment_update
 
     def sftp_service(self, shipment: ShipmentUpdate):

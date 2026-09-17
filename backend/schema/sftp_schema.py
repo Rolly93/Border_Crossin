@@ -17,10 +17,10 @@ class SftpResponse(SftpRequest):
     port: int
     root_folder: str
     remote_folder: str
+    encrypted_password: str
 
 
 class SftpConfiRequst(SftpResponse):
-    encrypted_password: str
     configure_by_id: int
 
 
@@ -32,7 +32,7 @@ class SftpInactivateRequest(SftpResponse):
     pass
 
 
-class SftpConfigurationRequest(SftpConfiRequst):
+class SftpConfigurationRequest(SftpResponse):
     pass
 
 

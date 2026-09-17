@@ -1,6 +1,6 @@
 from pydantic import BaseModel, field_validator, Field
-from typing import Text, Optional
-from .sftp_schema import SftpResponse
+from typing import Optional, List
+from .sftp_schema import SftpConfigurationRequest
 from pydantic import EmailStr
 import re
 
@@ -11,6 +11,10 @@ class ClientModel(BaseModel):
     name: str
     sftp_service: bool = False
     email_service: bool = False
+
+
+class ClienteServiceResponse(ClientModel):
+    sftp_config: List[SftpConfigurationRequest] = []
 
 
 class ClientResponse(ClientModel):

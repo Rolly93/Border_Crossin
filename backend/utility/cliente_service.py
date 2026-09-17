@@ -1,10 +1,10 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Literal
+from backend.repository.sftp_repository import SftpRepository
 from model.db_model import Client
 from repository.cliente_repository import ClienteRepository
-from schema import ClientRequest, ClientResponse, ClientModel
-from schema.shipment_shcema import ShipmentUpdate
+from schema import ClientRequest, ClientModel, SftpConfigurationRequest
 
 ServiceType = Literal["sftp_service", "email_service", "sms_service"]
 
@@ -13,6 +13,7 @@ class ClienteService:
 
     def __init__(self, db: Session):
         self._db = ClienteRepository(db)
+        self._sftp_service = SftpRepository(db)
 
     def register_client(self, data: ClientRequest) -> dict:
         new_client = self.create_client(data)
@@ -45,14 +46,11 @@ class ClienteService:
 
     def get_client_service(
         self, client_id: int, service_type: ServiceType
-    ) -> ClientModel | None:
+    ) -> SftpConfigurationRequest | None:
         client_data = self._db.has_active_service(client_id)
-        if client_data.sftp_service or client_data.email_service:
-            data_client = ClientModel(
-                id=client_data.id,
-                name=client_data.name,
-                sftp_service=client_data.sftp_service,
-                email_service=client_data.email_service,
-            )
-            return data_client
+        sftp_service = None
+        email_service = None
+        if "sft_service" == service_type:
+            service = self._sftp_service.get_sftp_data(client_data.id)
+
         return None

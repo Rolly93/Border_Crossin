@@ -17,7 +17,7 @@ class SftpRepository(BaseRepository[SftpService]):
     def get_connectios(self):
         pass
 
-    def get_sftp_data(self, client_id: int) -> SftpService:
+    def get_sftp_data(self, client_id: int) -> SftpResponse:
         return (
             self._db.query(SftpService)
             .filter(SftpService.client_id == client_id)
