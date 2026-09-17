@@ -6,6 +6,7 @@ from utility.cliente_service import ClienteService
 from model.db_model import ShipmentAssign
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
 from repository import ShipmentRepository
+from service import ShipmentDispatchService
 
 
 class ShipmentService:
@@ -13,6 +14,7 @@ class ShipmentService:
         self.db = db
         self._shipment_db = ShipmentRepository(db)
         self._client_service = ClienteService(db)
+        self._orchestrator_service = ShipmentDispatchService
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -42,4 +44,17 @@ class ShipmentService:
     def sftp_service(self, shipment: ShipmentUpdate):
         client_id = shipment.cliente
         client_data = self._client_service.get_client_service(client_id, "sftp_service")
+
+        if not client_data:
+            return
+        if not client_data.sftp_config:
+            return
+
+        if client_data.sftp_service:
+            self._orchestrator_service(
+                sftp_config=client_data.sftp_config,
+                xml_svc=XMLService(),
+                shipment=shipment,
+            )
+
         pass

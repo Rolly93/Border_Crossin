@@ -9,16 +9,21 @@ class ClientModel(BaseModel):
 
     id: int
     name: str
-    sftp_service: bool = False
-    email_service: bool = False
+    sftp_service: bool
+    email_service: bool
+
+
+class EmailConfigurationRequest(BaseModel):
+    email: List[EmailStr]
 
 
 class ClienteServiceResponse(ClientModel):
-    sftp_config: List[SftpConfigurationRequest] = []
+    sftp_config: SftpConfigurationRequest | None
+    email_config: EmailConfigurationRequest | None
 
 
 class ClientResponse(ClientModel):
-    email: list[EmailStr]
+    email: List[EmailStr]
 
     class Config:
         from_attributes = True

@@ -37,7 +37,7 @@ class ClienteRepository(BaseRepository[Client]):
                     name=client.name,
                     sftp_service=client.is_ftp,
                     email_service=client.is_email_service,
-                    email=active_emails if active_emails else None,
+                    email=active_emails,
                 )
             )
 

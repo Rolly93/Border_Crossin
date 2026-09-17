@@ -2,28 +2,33 @@ import paramiko
 from fastapi import HTTPException, status
 
 from config.config import SFTPConfig
+from schema import SftpConfigurationRequest
 
 
 class SFTPService:
     """docstring for SftoService."""
 
-    def __init__(self, config: SFTPConfig):
+    def __init__(self, config: SftpConfigurationRequest):
 
-        self._host = config.HOST
-        self._port = int(config.PORT)
-        self._user = config.USER
-        self._password = config.PASSWORD
+        self.__host = config.host
+        self.__port = config.port
+        self.__user = config.username
+        self.__password = config.encrypted_password
+
+        self._root_folder = config.root_folder
+        self._remote_folder = config.remote_folder
+
         self.trasport = None
         self.sftp = None
 
     def connect(self):
         try:
-            if not self._host:
+            if not self.__host:
                 raise ValueError("SFTP_HOST is not define in envarioment variables")
-            self.trasport = paramiko.Transport((self._host, self._port))
-            self.trasport.connect(username=self._user, password=self._password)
+            self.trasport = paramiko.Transport((self.__host, self.__port))
+            self.trasport.connect(username=self.__user, password=self.__password)
             self.sftp = paramiko.SFTPClient.from_transport(self.trasport)
-            print(f"Connectando a SFTP: {self._host}")
+            print(f"Connectando a SFTP: {self.__host}")
         except paramiko.AuthenticationException as e:
             self.close()
             raise HTTPException(
@@ -42,7 +47,9 @@ class SFTPService:
                 detail=f"Error inesperado al conectar: { e}",
             )
 
-    def upload_file(self, local_path, remote_path):
+    def upload_file(
+        self,
+    ):
         """Envio de Documentos via SFTP
 
         Args:
@@ -56,11 +63,11 @@ class SFTPService:
         """
         try:
             if self.sftp:
-                self.sftp.put(local_path, remote_path)
+                self.sftp.put(self._root_folder, self._remote_folder)
         except FileExistsError as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"El archivo local no fue encontrado en la ruta: {local_path}",
+                detail=f"El archivo local no fue encontrado en la ruta: {self._root_folder}",
             )
         except IOError as io_error:
             raise HTTPException(

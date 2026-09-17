@@ -15,6 +15,7 @@ from .sftp_schema import (
     sftpSendFile,
     SftpInactivateRequest,
     SftpResponse,
+    SftpConfigProcess,
 )
 from .token_schema import TokenPayload, InitialTokenPayload
 from .xml_file_schema import XmlRequest

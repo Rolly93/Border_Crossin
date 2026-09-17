@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from repository.base_repository import BaseRepository
 from model.db_model import SftpService
-from schema import SftpResponse, SftpConfiRequst
+from schema import SftpResponse, SftpConfiRequst, SftpConfigurationRequest
 
 
 class SftpRepository(BaseRepository[SftpService]):
@@ -17,7 +17,7 @@ class SftpRepository(BaseRepository[SftpService]):
     def get_connectios(self):
         pass
 
-    def get_sftp_data(self, client_id: int) -> SftpResponse:
+    def get_sftp_data(self, client_id: int) -> SftpConfigurationRequest:
         return (
             self._db.query(SftpService)
             .filter(SftpService.client_id == client_id)

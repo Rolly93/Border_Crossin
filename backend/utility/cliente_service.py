@@ -4,7 +4,13 @@ from typing import Literal
 from backend.repository.sftp_repository import SftpRepository
 from model.db_model import Client
 from repository.cliente_repository import ClienteRepository
-from schema import ClientRequest, ClientModel, SftpConfigurationRequest
+from schema import (
+    ClientRequest,
+    ClienteServiceResponse,
+    ClientModel,
+    SftpConfigurationRequest,
+    EmailConfigurationRequest,
+)
 
 ServiceType = Literal["sftp_service", "email_service", "sms_service"]
 
@@ -46,11 +52,23 @@ class ClienteService:
 
     def get_client_service(
         self, client_id: int, service_type: ServiceType
-    ) -> SftpConfigurationRequest | None:
+    ) -> ClienteServiceResponse | None:
         client_data = self._db.has_active_service(client_id)
-        sftp_service = None
-        email_service = None
+        sftp_service: SftpConfigurationRequest | None = None
+        email_service: EmailConfigurationRequest | None = None
         if "sft_service" == service_type:
-            service = self._sftp_service.get_sftp_data(client_data.id)
+            sftp_data = self._sftp_service.get_sftp_data(client_data.id)
+            if sftp_data:
+                sftp_service = SftpConfigurationRequest.model_validate(
+                    sftp_data.model_dump()
+                )
 
-        return None
+        if "email_service" == service_type:
+            email_list = ["user1@example.com", "user2@example.com"]
+            email_service = EmailConfigurationRequest(email=email_list)
+
+        return ClienteServiceResponse(
+            **client_data.model_dump(),
+            sftp_config=sftp_service,
+            email_config=email_service,
+        )

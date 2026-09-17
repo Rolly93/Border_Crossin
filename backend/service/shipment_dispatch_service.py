@@ -4,6 +4,7 @@ from typing import Optional
 from schema import SftpSendConfig, ShipmentUpdate
 from model import ShipmentAssign
 from service import XMLService, SFTPService, EmailService
+from schema import SftpConfigurationRequest
 from repository import SftpRepository
 
 logger = logging.getLogger(__name__)
@@ -15,18 +16,18 @@ class ShipmentDispatchService:
     def __init__(
         self,
         xml_svc: XMLService,
-        sftp_svc: SFTPService,
-        email_svc: EmailService,
-        sftp_send_repo: SftpRepository,
+        sftp_config: SftpConfigurationRequest,
+        shipment: ShipmentUpdate,
     ):
 
         self.xml_svc = xml_svc
-        self.sftp_svc = sftp_svc
-        self.email_svc = email_svc
-        self.sftp_send_repo = sftp_send_repo
+        self.sft_svc = SFTPService(sftp_config)
+        self.xml_request_data = None
 
-        def dispatch_file_xml(
-            self, shipmentEvent: ShipmentUpdate, connection_data: SftpSendConfig
-        ) -> str:
+    def dispatch_file_xml(
+        self, shipmentEvent: ShipmentUpdate, connection_data: SftpSendConfig
+    ) -> str:
 
-            return ""
+        file_root = self.xml_svc.create_event_file()
+        self.xml_svc.create_event_file
+        return ""
