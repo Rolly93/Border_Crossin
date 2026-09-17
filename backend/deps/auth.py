@@ -1,7 +1,7 @@
-from typing import Optional, Union
+from typing import Optional, Union, Annotated
 
 import jwt
-from fastapi import Header, HTTPException, Query, Request, status
+from fastapi import Depends, Header, HTTPException, Query, Request, status
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
 
@@ -74,3 +74,12 @@ def get_optional_current_user(
         return get_current_user(rq=rq, authorization=authorization, token=token)
     except HTTPException:
         return None
+
+
+CurrentUser = Annotated[
+    Union[TokenPayload, InitialTokenPayload], Depends(get_current_user)
+]
+OptionalCurrentUser = Annotated[
+    Optional[Union[TokenPayload, InitialTokenPayload]],
+    Depends(get_optional_current_user),
+]

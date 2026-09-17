@@ -32,19 +32,24 @@ class ShipmentEvent(BaseModel):
         model_config = ConfigDict(from_attributes=True)
 
 
-class ShipmentCreate(BaseModel):
+class ShipmentBase(BaseModel):
     tracking_number: str
     customer_tracking: str
-    cliente: str
-    truck: str
-    vehicle_type: str
-    trailer: str
-    origen: str
-    destino: str
     type_operation: str
+    origen: str
+    destination: str
+
+    cliente: Optional[str] = None
+    truck: Optional[str] = None
+    trailer: Optional[str] = None
+    vehicle_type: Optional[str] = None
 
 
-class Shipment(ShipmentCreate):
+class ShipmentCreate(ShipmentBase):
+    pass
+
+
+class ShipmentResponse(ShipmentCreate):
     id: int
     status: Optional[str] = "success"
     events: List[ShipmentEvent]
@@ -57,7 +62,7 @@ class Shipment(ShipmentCreate):
 class ShipmentUpdate(BaseModel):
     tracking_number: Optional[str] = None
     customer_tracking: Optional[str] = None
-    cliente: Optional[str] = None
+    cliente: int
     truck: Optional[str] = None
     vehicle_type: Optional[str] = None
     trailer: Optional[str] = None

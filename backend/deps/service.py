@@ -1,4 +1,5 @@
 from fastapi import Depends
+from typing import Annotated
 from sqlalchemy.orm import Session
 from databse import get_db
 from utility.shipment_service import ShipmentService
@@ -16,3 +17,8 @@ def get_user_service(db: Session = Depends(get_db)) -> UserService:
 
 def get_client_service(db: Session = Depends(get_db)) -> ClienteService:
     return ClienteService(db)
+
+
+ShipmentSvc = Annotated[ShipmentService, Depends(get_shipment_service)]
+UserSvc = Annotated[UserService, Depends(get_shipment_service)]
+ClientSvc = Annotated[ClienteService, Depends(get_client_service)]

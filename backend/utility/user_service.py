@@ -67,7 +67,6 @@ class UserService:
         )
 
         if not user:
-            # Constant-time comparison using pre-computed hash to protect against timing attacks
             self.verify_password("dummy_password", DUMMY_HASH)
             raise unauthorized_error
 

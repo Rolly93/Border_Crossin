@@ -3,7 +3,6 @@ from typing import Text
 
 
 class SftpModel(BaseModel):
-    status: Text
     id: int | None = None
 
 
@@ -13,7 +12,7 @@ class SftpRequest(SftpModel):
 
 class SftpResponse(SftpRequest):
     host: str
-    client_name: str
+    client_id: int
     username: str
     port: int
     root_folder: str
@@ -21,8 +20,20 @@ class SftpResponse(SftpRequest):
 
 
 class SftpConfiRequst(SftpResponse):
-    encry_password: str
+    encrypted_password: str
     configure_by_id: int
+
+
+class SftpSendConfig(SftpResponse):
+    encrypted_password: str
+
+
+class SftpInactivateRequest(SftpResponse):
+    pass
+
+
+class SftpConfigurationRequest(SftpConfiRequst):
+    pass
 
 
 class sftpSendFile(SftpResponse):

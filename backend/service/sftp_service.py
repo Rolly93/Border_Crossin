@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from config.config import SFTPConfig
 
 
-class SFPTService:
+class SFTPService:
     """docstring for SftoService."""
 
     def __init__(self, config: SFTPConfig):

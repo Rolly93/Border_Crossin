@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import os
 
+from schema.xml_file_schema import XmlRequest
+
 
 class XMLService:
     """docstring for XMLService."""
@@ -13,16 +15,7 @@ class XMLService:
         if not os.path.exists(self._output_dir):
             os.makedirs(self._output_dir)
 
-    def create_event_file(
-        self,
-        referencia: str,
-        tipo_operacion: str,
-        codigo_transport: str,
-        ref_transport: str,
-        codigo_evento: str,
-        date_time: str,
-        comments: str,
-    ) -> str:
+    def create_event_file(self, data: XmlRequest) -> str:
         """XML Events File Creator
 
         Keyword arguments:
@@ -40,17 +33,19 @@ class XMLService:
         root = ET.Element(
             "AvisoEventos",
             {
-                "ReferenciaExpd": referencia,
-                "TipoOperacion": tipo_operacion,
-                "CodigoTransportista": codigo_transport,
-                "ReferenciaTransportista": ref_transport,
-                "CodigoEvento": codigo_evento,
-                "FechaHoraEvento": date_time,
-                "Comentarios": comments,
+                "ReferenciaExpd": data.client_reference,
+                "TipoOperacion": data.operation_type,
+                "CodigoTransportista": data.scac_code,
+                "ReferenciaTransportista": data.drayage_reference,
+                "CodigoEvento": data.date_time,
+                "FechaHoraEvento": data.event_code,
+                "Comentarios": data.comments if data.comments else "",
             },
         )
         tree = ET.ElementTree(root)
-        file_name = f"{codigo_transport}_{referencia}_{codigo_evento}_{self.now}.xml"
+        file_name = (
+            f"{data.scac_code}_{data.client_reference}_{data.event_code}_{self.now}.xml"
+        )
         file_path = os.path.join(self._output_dir, file_name)
 
         tree.write(file_path, encoding="utf-8", xml_declaration=True)

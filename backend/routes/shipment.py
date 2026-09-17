@@ -1,22 +1,21 @@
 from typing import List
-from fastapi import APIRouter, Depends, status
-from schema.shipment_shcema import Shipment, ShipmentCreate, ShipmentUpdate
-from deps.auth import get_current_user
-from deps.service import get_shipment_service
-from utility.shipment_service import ShipmentService
+from fastapi import APIRouter, status, HTTPException
+from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
+from deps.auth import CurrentUser
+from deps.service import ShipmentSvc
 
 router = APIRouter(
     prefix="/shipment",
     tags=["Shipments"],
-    dependencies=[Depends(get_current_user)],
 )
 
 
-@router.get("/", response_model=List[Shipment])
+@router.get("/", response_model=List[ShipmentResponse])
 async def shipment_dashboard(
+    service: ShipmentSvc,
+    current_user: CurrentUser,
     page: int = 1,
     limit: int = 10,
-    service: ShipmentService = Depends(get_shipment_service),
 ):
     return service.get_all_shipments(page=page, limit=limit)
 
@@ -26,7 +25,9 @@ async def shipment_dashboard(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_shipment(
-    shipment: ShipmentCreate, service: ShipmentService = Depends(get_shipment_service)
+    shipment: ShipmentCreate,
+    current_user: CurrentUser,
+    service: ShipmentSvc,
 ):
     created = service.create_shipment(shipment)
     return {"status": "success", "data": created}
@@ -36,7 +37,19 @@ async def create_shipment(
 async def update_shipment(
     id: int,
     shipment_data: ShipmentUpdate,
-    service: ShipmentService = Depends(get_shipment_service),
+    current_user: CurrentUser,
+    service: ShipmentSvc,
 ):
     updated = service.update_shipment(id, shipment_data)
+
     return {"status": "success", "data": updated}
+
+
+@router.patch("/{id}/delete", response_model=status.HTTP_202_ACCEPTED)
+async def delete_shipment(
+    id: int,
+    current_user: CurrentUser,
+    service: ShipmentSvc,
+):
+    shipment_deleted = service.delete_shipmnet(id, current_user.sub)
+    return {"status": "success", "data": shipment_deleted}

@@ -7,14 +7,14 @@ import re
 
 class ClientModel(BaseModel):
 
+    id: int
     name: str
     sftp_service: bool = False
     email_service: bool = False
 
 
 class ClientResponse(ClientModel):
-    id: int
-    email: Optional[list[EmailStr]] = None
+    email: list[EmailStr]
 
     class Config:
         from_attributes = True

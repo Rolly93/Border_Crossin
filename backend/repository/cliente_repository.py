@@ -6,7 +6,13 @@ from sqlalchemy.orm import Session, joinedload
 from fastapi import HTTPException, status
 from repository.base_repository import BaseRepository
 from model.db_model import Client
-from schema import ClientRequest, ClientResponse
+from schema import ClientRequest, ClientResponse, ClientModel
+from enum import Enum
+
+
+class ClientServiceType(str, Enum):
+    SFTP = "sftp_service"
+    EMAIL = "email_service"
 
 
 class ClienteRepository(BaseRepository[Client]):
@@ -40,22 +46,16 @@ class ClienteRepository(BaseRepository[Client]):
     def get_clients(self):
         return self._db.query(Client).all()
 
-    def it_has_email(self, id: int):
+    def has_active_service(self, client_id: int) -> ClientModel:
         return (
             self._db.query(Client)
-            .filter(exists().where(and_(Client.id == id, Client.is_email_service)))
-            .scalar()
-        )
-
-    def it_has_sftp_service(self, id_val: int) -> bool:
-        return bool(
-            self._db.query(Client)
-            .filter(exists().where(and_(Client.id == id_val, Client.is_ftp)))
+            .filter(exists().where(Client.id == client_id))
             .scalar()
         )
 
     def create_new_client(self, data: Client) -> Client:
-        data_client = Client(**data.dump_json())
+        dict_client = data.model_dump(exclude_unset=True)
+        data_client = Client(**dict_client)
         self.save(data_client)
         return data_client
 
@@ -77,3 +77,10 @@ class ClienteRepository(BaseRepository[Client]):
 
     def get_client_by_id(self, id_val: int) -> Optional[Client]:
         return self.get_by_id(id_val)
+
+    def toggle_service(
+        self, client_id: int, service: ClientServiceType, is_active: bool = False
+    ) -> Client:
+        client_data = self.has_active_service(client_id)
+        setattr(client_data, service.value, is_active)
+        return self.update(client_id, client_data)

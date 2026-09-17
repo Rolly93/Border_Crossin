@@ -1,10 +1,13 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-
+from typing import Literal
 from model.db_model import Client
 from repository.cliente_repository import ClienteRepository
-from schema import ClientRequest
+from schema import ClientRequest, ClientResponse, ClientModel
 from schema.shipment_shcema import ShipmentUpdate
+
+ServiceType = Literal["sftp_service", "email_service", "sms_service"]
+
 
 class ClienteService:
 
@@ -40,10 +43,16 @@ class ClienteService:
         self._db.update_client(client.id, client)
         return client
 
-    def it_has_sfpt_notification(
-        self, client_id: int, shipment: ShipmentUpdate
-    ) -> str | None:
-        if self._db.it_has_sftp_service(id_val=client_id):
-            return None
-
-        return ""
+    def get_client_service(
+        self, client_id: int, service_type: ServiceType
+    ) -> ClientModel | None:
+        client_data = self._db.has_active_service(client_id)
+        if client_data.sftp_service or client_data.email_service:
+            data_client = ClientModel(
+                id=client_data.id,
+                name=client_data.name,
+                sftp_service=client_data.sftp_service,
+                email_service=client_data.email_service,
+            )
+            return data_client
+        return None

@@ -1,6 +1,7 @@
 from typing import Any, Generic, Optional, Protocol, Type, TypeVar
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class HasID(Protocol):
@@ -16,10 +17,14 @@ class BaseRepository(Generic[T]):
         self._model = model
 
     def save(self, instance: T) -> T:
-        self._db.add(instance)
-        self._db.commit()
-        self._db.refresh(instance)
-        return instance
+        try:
+            self._db.add(instance)
+            self._db.commit()
+            self._db.refresh(instance)
+            return instance
+        except SQLAlchemyError as err:
+            self._db.rollback()
+            raise RuntimeError(f"Database save error: {err}") from err
 
     def delete(self, instance: T) -> None:
         self._db.delete(instance)

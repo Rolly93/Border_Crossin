@@ -212,6 +212,8 @@ class ShipmentAssign(Base):
     assigned_day: Mapped[date] = mapped_column(
         Date, nullable=False, server_default=func.current_timestamp()
     )
+
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     origen: Mapped[str] = mapped_column(String(200), nullable=False)
     destination: Mapped[str] = mapped_column(String(200), nullable=False)
 
@@ -233,19 +235,25 @@ class ShipmentEventModel(Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, index=True, autoincrement=True
     )
-    trip_assigned_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("trip_assigned.id", ondelete="CASCADE"), nullable=False
-    )
-    capture_by_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
     category: Mapped[EventCategory | None] = mapped_column(
         SQLEnum(EventCategory), nullable=True
     )
+
     event_type: Mapped[str] = mapped_column(String(50), nullable=True)
     event_time: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     captured_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.current_timestamp()
     )
     notes: Mapped[str] = mapped_column(String(200), nullable=True)
+
+    trip_assigned_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("trip_assigned.id", ondelete="CASCADE"), nullable=False
+    )
+    capture_by_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    last_modify: Mapped[Date] = mapped_column(
+        DateTime, server_default=func.current_timestamp()
+    )
     new_seal: Mapped[str] = mapped_column(String(50), default="N/A")
 
     trip = relationship("ShipmentAssign", back_populates="events")

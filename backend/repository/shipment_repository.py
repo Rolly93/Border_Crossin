@@ -1,12 +1,16 @@
+from datetime import datetime, timezone
+from typing import List
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from model import db_model
 from model.db_model import ShipmentAssign, ShipmentEventModel
-from schema.shipment_shcema import ShipmentEvent, ShipmentUpdate
+from schema.shipment_shcema import ShipmentUpdate
+from repository.base_repository import BaseRepository
 
 
-class ShipmentRepository:
+class ShipmentRepository(BaseRepository[ShipmentAssign]):
     def __init__(self, db: Session):
+        super().__init__(db, model=ShipmentAssign)
         self._db = db
 
     def get_by_tracking(self, tracking_number: str) -> ShipmentAssign | None:
@@ -16,10 +20,22 @@ class ShipmentRepository:
             .first()
         )
 
+    def delete_shipment(
+        self, shipment_to_inactive: ShipmentAssign, who_deleted: str
+    ) -> str | None:
+        shipment_to_inactive.is_active = False
+
+        for event in shipment_to_inactive.events:
+            event.is_active = False
+            event.last_modify = datetime.now(timezone.utc)
+            event.capure_by_id = who_deleted
+
+        self.save(shipment_to_inactive)
+
+        return shipment_to_inactive.customer_tracking
+
     def create(self, shipment_data: ShipmentAssign):
-        self._db.add(shipment_data)
-        self._db.commit()
-        self._db.refresh(shipment_data)
+        self.save(shipment_data)
 
     def get_shipment(self, id: int) -> ShipmentAssign:
         shipment_id = (
@@ -48,3 +64,9 @@ class ShipmentRepository:
         self._db.commit()
         self._db.refresh(shipment)
         return shipment
+
+    def get_all_shipments(self, page: int = 1, limit: int = 10) -> List[ShipmentAssign]:
+        shipments = (
+            self._db.query(ShipmentAssign).offset((page - 1) * limit).limit(limit).all()
+        )
+        return shipments

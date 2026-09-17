@@ -1,47 +1,49 @@
 from sqlalchemy.orm import Session
-from service.XML_generator import XMLService
-from service.sftp import SFPTService
+from typing import List
+
+from service.xml_service import XMLService
+from service.sftp_service import SFTPService
 from utility.cliente_service import ClienteService
-from model.db_model import ShipmentAssign, ShipmentEventModel
-from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate
+from model.db_model import ShipmentAssign
+from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
 from repository import ShipmentRepository
 
 
 class ShipmentService:
     def __init__(self, db: Session):
         self.db = db
-        self.repo_db = ShipmentRepository(db)
+        self._shipment_db = ShipmentRepository(db)
         self._client_service = ClienteService(db)
 
-    def get_all_shipments(self, page: int = 1, limit: int = 10):
-        shipments = (
-            self.db.query(ShipmentAssign).offset((page - 1) * limit).limit(limit).all()
-        )
-        return [
-            {
-                "id": s.id,
-                "tracking_number": s.tracking_number,
-                "customer_tracking": s.customer_tracking,
-                "type_operation": s.type_operation,
-                "origen": s.origen,
-                "destination": s.destination,
-                "cliente": s.client.name if s.client else None,
-                "truck": s.truck.plates if s.truck else None,
-                "trailer": s.trailer.plates if s.trailer else None,
-                "events": s.events,
-            }
-            for s in shipments
-        ]
+    def get_all_shipments(
+        self, page: int = 1, limit: int = 10
+    ) -> List[ShipmentResponse]:
+        raw_shipments = self._shipment_db.get_all_shipments(page, limit)
+
+        return [ShipmentResponse.model_validate(s) for s in raw_shipments]
 
     def create_shipment(self, shipment: ShipmentCreate):
 
         db_shipment = ShipmentAssign(**shipment.model_dump())
-        self.repo_db.create(db_shipment)
+        self._shipment_db.create(db_shipment)
         return db_shipment
 
+    def delete_shipmnet(self, id: int, user: str) -> str | None:
+
+        shipment_found = self._shipment_db.get_shipment(id)
+
+        shipment_delete = self._shipment_db.delete_shipment(shipment_found, user)
+        return shipment_delete
+
     def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
-        shipment_update = self.repo_db.update_shipment(shipment_id, shipment_data)
-        self._client_service.it_has_sfpt_notification(
-            shipment_update.client_id, shipment_data
+        shipment_update = self._shipment_db.update_shipment(shipment_id, shipment_data)
+
+        self._client_service.get_client_service(
+            shipment_update.client_id, "sftp_service"
         )
         return shipment_update
+
+    def sftp_service(self, shipment: ShipmentUpdate):
+        client_id = shipment.cliente
+        client_data = self._client_service.get_client_service(client_id, "sftp_service")
+        pass
