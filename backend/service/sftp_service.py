@@ -14,8 +14,6 @@ class SFTPService:
         self.__port = config.port
         self.__user = config.username
         self.__password = config.encrypted_password
-
-        self._root_folder = config.root_folder
         self._remote_folder = config.remote_folder
 
         self.trasport = None
@@ -47,9 +45,7 @@ class SFTPService:
                 detail=f"Error inesperado al conectar: { e}",
             )
 
-    def upload_file(
-        self,
-    ):
+    def upload_file(self, _roo_folder: str):
         """Envio de Documentos via SFTP
 
         Args:
@@ -63,11 +59,11 @@ class SFTPService:
         """
         try:
             if self.sftp:
-                self.sftp.put(self._root_folder, self._remote_folder)
+                self.sftp.put(_roo_folder, self._remote_folder)
         except FileExistsError as e:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"El archivo local no fue encontrado en la ruta: {self._root_folder}",
+                detail=f"El archivo local no fue encontrado en la ruta: {_roo_folder}",
             )
         except IOError as io_error:
             raise HTTPException(

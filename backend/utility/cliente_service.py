@@ -1,7 +1,9 @@
+from annotated_types import UpperCase
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Literal
 from backend.repository.sftp_repository import SftpRepository
+from backend.schema.shipment_shcema import ShipmentUpdate
 from model.db_model import Client
 from repository.cliente_repository import ClienteRepository
 from schema import (

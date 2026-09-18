@@ -1,12 +1,18 @@
-from typing import List, Optional, Literal
+from typing import Annotated, List, Optional, Literal, Self
 from enum import Enum
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, BeforeValidator
 from datetime import datetime
 
+toUppercase = Annotated[
+    str, BeforeValidator(lambda v: v.upper().strip() if isinstance(v, str) else v)
+]
+toCapitalCase = Annotated[
+    str, BeforeValidator(lambda v: v.strip().capitalize() if isinstance(v, str) else v)
+]
 
 class ShipmentStats(BaseModel):
     label: str
-    value: str | int
+    value: int
     color: str
 
 
@@ -59,6 +65,43 @@ class ShipmentResponse(ShipmentCreate):
         model_config = ConfigDict(from_attributes=True)
 
 
+class EventPayload(BaseModel):
+    tracking_number: Optional[toUppercase] = None
+    customer_tracking: Optional[toUppercase] = None
+    cliente: int
+    truck: Optional[toUppercase] = None
+    vehicle_type: Optional[toUppercase] = None
+    trailer: Optional[toUppercase] = None
+    origen: Optional[toUppercase] = None
+    scac_code :str
+    destination: Optional[toUppercase] = None
+    type_operation: Optional[toUppercase] = None
+    event: EventCategory
+    dateTime: Optional[datetime] = None
+    notes: Optional[str]
+
+    @classmethod
+    def from_shipment_update(cls, shipment_data: ShipmentUpdate) -> List[EventPayload]:
+        events_list = (
+            shipment_data.events
+            if isinstance(shipment_data.events, list)
+            else [shipment_data.events]
+        )
+
+        shipment_meta = shipment_data.model_dump(exclude={"events"})
+
+        return [
+            cls(
+                **shipment_meta,
+                event=e.category,
+                dateTime=e.dateTime,
+                notes=e.notes,
+            )
+            for e in events_list
+            if e.notes is not None
+        ]
+
+
 class ShipmentUpdate(BaseModel):
     tracking_number: Optional[str] = None
     customer_tracking: Optional[str] = None
@@ -69,4 +112,4 @@ class ShipmentUpdate(BaseModel):
     origen: Optional[str] = None
     destination: Optional[str] = None
     type_operation: Optional[str] = None
-    events: List[ShipmentEvent]
+    events: List[ShipmentEvent] | ShipmentEvent

@@ -5,6 +5,7 @@ from .shipment_shcema import (
     ShipmentCreate,
     ShipmentResponse,
     ShipmentUpdate,
+    EventPayload,
 )
 from .user_schema import *
 from .employee_schema import EmployeeRequest
