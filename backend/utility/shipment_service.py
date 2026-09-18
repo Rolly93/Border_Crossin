@@ -50,6 +50,7 @@ class ShipmentService:
 
         files_send: List[str] = []
         if client_data.sftp_service:
+
             xml_strategy = XMLServiceFactory.get_xml_service(client_data.name)
             orchestrator_service = self._orchestrator_service(
                 sftp_config=client_data.sftp_config,

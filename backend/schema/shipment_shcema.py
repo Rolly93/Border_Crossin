@@ -10,6 +10,7 @@ toCapitalCase = Annotated[
     str, BeforeValidator(lambda v: v.strip().capitalize() if isinstance(v, str) else v)
 ]
 
+
 class ShipmentStats(BaseModel):
     label: str
     value: int
@@ -30,7 +31,7 @@ class EventCategory(str, Enum):
 
 class ShipmentEvent(BaseModel):
     category: EventCategory
-    dateTime: Optional[datetime] = None
+    dateTime: datetime
     notes: Optional[str] = None
 
     class Config:
@@ -65,6 +66,19 @@ class ShipmentResponse(ShipmentCreate):
         model_config = ConfigDict(from_attributes=True)
 
 
+class ShipmentUpdate(BaseModel):
+    tracking_number: Optional[str] = None
+    customer_tracking: Optional[str] = None
+    cliente: int
+    truck: Optional[str] = None
+    vehicle_type: Optional[str] = None
+    trailer: Optional[str] = None
+    origen: Optional[str] = None
+    destination: Optional[str] = None
+    type_operation: Optional[str] = None
+    events: List[ShipmentEvent] | ShipmentEvent
+
+
 class EventPayload(BaseModel):
     tracking_number: Optional[toUppercase] = None
     customer_tracking: Optional[toUppercase] = None
@@ -73,15 +87,15 @@ class EventPayload(BaseModel):
     vehicle_type: Optional[toUppercase] = None
     trailer: Optional[toUppercase] = None
     origen: Optional[toUppercase] = None
-    scac_code :str
+    scac_code: toCapitalCase
     destination: Optional[toUppercase] = None
     type_operation: Optional[toUppercase] = None
     event: EventCategory
-    dateTime: Optional[datetime] = None
+    dateTime: datetime
     notes: Optional[str]
 
     @classmethod
-    def from_shipment_update(cls, shipment_data: ShipmentUpdate) -> List[EventPayload]:
+    def from_shipment_update(cls, shipment_data: ShipmentUpdate) -> List[Self]:
         events_list = (
             shipment_data.events
             if isinstance(shipment_data.events, list)
@@ -100,16 +114,3 @@ class EventPayload(BaseModel):
             for e in events_list
             if e.notes is not None
         ]
-
-
-class ShipmentUpdate(BaseModel):
-    tracking_number: Optional[str] = None
-    customer_tracking: Optional[str] = None
-    cliente: int
-    truck: Optional[str] = None
-    vehicle_type: Optional[str] = None
-    trailer: Optional[str] = None
-    origen: Optional[str] = None
-    destination: Optional[str] = None
-    type_operation: Optional[str] = None
-    events: List[ShipmentEvent] | ShipmentEvent

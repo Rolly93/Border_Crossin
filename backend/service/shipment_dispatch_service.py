@@ -1,9 +1,10 @@
 import logging
 
 from typing import List
-from schema import ShipmentUpdate, EventPayload
+from schema import ShipmentUpdate
+
 from service import XMLService, SFTPService
-from schema import SftpConfigurationRequest
+from schema import SftpConfigurationRequest, EventPayload
 
 logger = logging.getLogger(__name__)
 
@@ -24,26 +25,14 @@ class ShipmentDispatchService:
         self.shipment = shipment
 
     def dispatch_file_xml(self) -> List[str]:
-        xml_payload: List[EventPayload] = EventPayload.from_shipment_update(
+        event_payload: List[EventPayload] = EventPayload.from_shipment_update(
             self.shipment
         )
-        dispatched_files: List[str] = []
 
-        for payload in xml_payload:
-            try:
-                file_path = self.xml_svc.create_event_file(**payload.model_dump())
-                self.sft_svc.upload_file(file_path)
-                logger.info(
-                    f"Dispatched XML event '{payload.event}' for tracking '{payload.tracking_number}'"
-                )
-                dispatched_files.append(file_path)
-            except Exception as e:
-                logger.error(
-                    f"Failed to dispatch event '{payload.event}' for tracking '{payload.tracking_number}': {e}"
-                )
-                raise e
+        dispatch_files: list[str] = []
+        for payload in event_payload:
+            file_path = self.xml_svc.create_event_file(payload)
+            self.sft_svc.upload_file(file_path)
+            dispatch_files.append(file_path)
 
-        return dispatched_files
-
-    def dispatch_email_notification(self):
-        pass
+        return dispatch_files

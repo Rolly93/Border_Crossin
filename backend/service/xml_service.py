@@ -6,6 +6,7 @@ import os
 from schema.shipment_shcema import EventPayload
 from schema.xml_file_schema import BaseXMLTransformer
 
+
 class XMLService:
     """docstring for XMLService."""
 
@@ -29,6 +30,7 @@ class XMLService:
 
     def create_event_file(self, data: EventPayload) -> str:
         xml_dict = self.transformer.transform_event(data)
+        filename = self.transformer.format_filename(data)
 
         root_tag = list(xml_dict.keys())[0]
         root_content = xml_dict[root_tag]
@@ -38,9 +40,7 @@ class XMLService:
         else:
             root = ET.Element(root_tag)
 
-        now_str = datetime.now().strftime("%Y%m%dT%H%M%S")
-        file_name = f"{data.tracking_number}_{data.event}_{now_str}.xml"
-        file_path = os.path.join(self._output_dir, file_name)
+        file_path = os.path.join(filename)
 
         tree = ET.ElementTree(root)
         tree.write(file_path, encoding="utf-8", xml_declaration=True)
