@@ -5,8 +5,7 @@ from enum import Enum
 from datetime import datetime
 from exeption import *
 
-from backend.schema.shipment_shcema import EventPayload, EventCategory
-
+from schema.shipment_shcema import EventPayload, EventCategory
 
 class XmlRequest:
     customer_tracking: str

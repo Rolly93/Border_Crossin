@@ -45,7 +45,7 @@ async def update_shipment(
     return {"status": "success", "data": updated}
 
 
-@router.patch("/{id}/delete", response_model=status.HTTP_202_ACCEPTED)
+@router.patch("/{id}/delete")
 async def delete_shipment(
     id: int,
     current_user: CurrentUser,
