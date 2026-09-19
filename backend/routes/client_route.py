@@ -18,7 +18,7 @@ async def new_client(
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):
-    return service.register_client(admin_id=admin_id, data=data)
+    return service.register_client(data=data)
 
 
 @router.patch(
@@ -30,4 +30,4 @@ async def update_client(
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):
-    return service.update_client_info(admin_id=admin_id, data=data)
+    return service.update_client_info(client_id=data.id, data=data)

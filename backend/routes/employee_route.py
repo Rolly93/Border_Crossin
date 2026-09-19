@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request, status
 
 from schema.employee_schema import EmployeeRequest
 from schema import TokenPayload, InitialTokenPayload
-from deps.auth import get_client_ip, get_optional_current_user
+from deps.auth import get_client_ip, get_current_user, get_optional_current_user
 from deps.service import get_user_service
 from utility.employee_service import EmployeeService
 
@@ -25,3 +25,17 @@ async def register_employee(
 ):
     ip = get_client_ip(rq)
     return service.register_employee(data=data, ip=ip, current_user=current_user)
+
+
+@router.post(
+    "/register_driver",
+    summary="Register Driver",
+    status_code=status.HTTP_201_CREATED,
+)
+async def resgister_driver(
+    rq: Request,
+    data: EmployeeRequest,
+    service: EmployeeService = Depends(get_user_service),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    pass

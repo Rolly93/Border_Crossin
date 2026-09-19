@@ -42,17 +42,28 @@ class BaseXMLTransformer(ABC):
 
 class ExpeditorsXMLService(BaseXMLTransformer):
 
-    def validate_reference(self, referece: str) -> str:
-        if not referece.startswith("82B") or not referece.startswith("92B"):
+    def validate_reference(self, reference: str | None) -> str:
+        if not reference or not isinstance(reference, str):
             raise InvalidReferenceError(
-                f"The Reference {referece} should start with 92B or 82B"
+                "Customer tracking reference is required and cannot be empty or None."
             )
-        if len(referece) != 10:
+        if len(reference) != 10:
             raise InvalidReferenceLengthError(
-                f"The Reference {referece} should be 10 charactes lenght"
+                f"The Reference {reference} should be 10 charactes lenght"
             )
 
-        return referece
+        if not reference.startswith(("82B", "92B")):
+            raise InvalidReferenceError(
+                f"The Reference {reference} should start with 92B or 82B"
+            )
+
+        sufix = reference[3:]
+        if not sufix.isdigit():
+            raise InvalidReferenceError(
+                f"The reference {reference} should just contain only one 'B'"
+            )
+
+        return reference.upper()
 
     def _format_datetime(self, dt: datetime) -> str:
 
@@ -87,14 +98,15 @@ class ExpeditorsXMLService(BaseXMLTransformer):
 
     def format_filename(self, data: EventPayload, scac: str) -> str:
         now_str = datetime.now().strftime("%Y%m%dT%H%M%S")
-        reference = data.customer_tracking
+        reference = self.validate_reference(data.customer_tracking)
         eventcode = self._event_code(data.event)
         return f"{scac}_{reference}_{eventcode}_{now_str}.xml"
 
     def transform_event(self, data: EventPayload) -> Dict[str, Any]:
+        valid_ref = self.validate_reference(data.customer_tracking)
         return {
             "AvisoEventos": {
-                "ReferenciaExpd": data.customer_tracking,
+                "ReferenciaExpd": valid_ref,
                 "TipoOperacion": data.type_operation,
                 "CodigoTransportista": data.scac_code,
                 "ReferenciaTransportista": data.tracking_number,

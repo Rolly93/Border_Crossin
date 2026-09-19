@@ -39,6 +39,7 @@ class ShipmentService:
 
     def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
         shipment_update = self._shipment_db.update_shipment(shipment_id, shipment_data)
+        self.sftp_service(shipment_update)
 
         return shipment_update
 

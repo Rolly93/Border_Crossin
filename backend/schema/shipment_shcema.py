@@ -81,7 +81,7 @@ class ShipmentUpdate(BaseModel):
 
 class EventPayload(BaseModel):
     tracking_number: Optional[toUppercase] = None
-    customer_tracking: Optional[toUppercase] = None
+    customer_tracking: Optional[toUppercase]
     cliente: int
     truck: Optional[toUppercase] = None
     vehicle_type: Optional[toUppercase] = None
