@@ -61,3 +61,6 @@ class ShipmentService:
             files_send = orchestrator_service.dispatch_file_xml()
 
         return files_send
+
+    def email_service(self, shipment: ShipmentUpdate):
+        pass
