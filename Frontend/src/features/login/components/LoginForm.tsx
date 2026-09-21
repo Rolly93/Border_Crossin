@@ -20,7 +20,7 @@ export function LoginForm() {
     Login,
   } = useLoginForm();
   const navigate = useNavigate()
-
+  const token = localStorage.getItem('toke')
   async function handelSubmit(values: FormEvent<HTMLFormElement>) {
     values.preventDefault()
     const credentials = {
@@ -83,12 +83,7 @@ export function LoginForm() {
           <AtomButton type="submit" fullWidth mt="xl" loading={loading}>
             Sign In
           </AtomButton>
-          <Text c={'dimmed'} size='sm' ta='center'>
-            Don't have an account? {''}
-            <Anchor component="button" type='button' size='sm' onClick={() => navigate('/onetime')}>
-              Create Account
-            </Anchor>
-          </Text>
+
         </form>
       </Paper>
     </>

@@ -1,3 +1,4 @@
+import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
 
 
 export interface IEmployee {
@@ -7,13 +8,16 @@ export interface IEmployee {
   dateOfBirth: Date;
   rfc: string;
   role: string;
-
-}
-
-export interface IEmployeeCreateResponse extends IEmployee {
   token?: string;
   detail?: string;
+
 }
+
+
+
+
+
+export interface IEMployeeResponse extends IEmployee { }
 export type IEmployeeCreate = Omit<IEmployee, 'id'>
 export interface IEmployeeFormsValues extends IEmployeeCreate {
 }
@@ -24,10 +28,7 @@ export interface EmployeeFormProps {
 }
 
 
-export interface IEmployeeService {
-  getAll(): Promise<IEmployee[]>;
-  getById?(id: number): Promise<IEmployee | undefined>;
-  insert(data: IEmployeeCreate): Promise<IEmployee>;
-  update(id: number, data: Partial<IEmployee>): Promise<IEmployee>;
-  delete(id: number): Promise<IEmployee>;
+export interface IEmployeeService extends IBaseService<IEmployee> {
+  getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployee>>
+
 }

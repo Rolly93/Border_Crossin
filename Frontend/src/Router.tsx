@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ProtectedRouter } from './features/login/components/ProtectedRoute';
 import { AuthProvider } from './features/login/context/AuthContext';
 import { FirstTimeLog } from './features/login/components/FirstTimeCreate';
+import { EmployeePage } from './pages/EmployeePage';
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/dashboard', element: <DashBoard />, },
           { path: '/sftp_connection', element: <SftpConnection /> },
+          { path: '/employee', element: <EmployeePage /> },
         ]
       },
     ],

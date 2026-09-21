@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Container, Paper, Stepper, Title, Text } from '@mantine/core';
-import { EmployeeForm } from "@/features/employee/compnents/EmployeeForm";
+import { EmployeeForm } from "@/features/employee/components/EmployeeForm";
 import { NewuserForm } from "./NewUserForm";
 
 export function FirstTimeLog() {

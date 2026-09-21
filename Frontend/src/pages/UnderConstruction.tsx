@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Container, 
-  Title, 
-  Text, 
-  Progress, 
-  TextInput, 
-  Button, 
-  Group, 
-  Stack, 
+import {
+  Container,
+  Title,
+  Text,
+  Progress,
+  Group,
+  Stack,
   ThemeIcon,
   Box,
   rem
@@ -36,10 +34,10 @@ export const UnderConstruction: React.FC<UnderConstructionProps> = ({
   };
 
   return (
-    <Box 
+    <Box
       style={{
         backgroundColor: 'var(--mantine-color-default)',
-        minHeight: 'calc(100vh - 120px)', 
+        minHeight: 'calc(100vh - 120px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -65,41 +63,41 @@ export const UnderConstruction: React.FC<UnderConstructionProps> = ({
 
       <Container size="sm">
         <Stack align="center" gap="xl" style={{ textAlign: 'center', zIndex: 1 }}>
-          
-          <ThemeIcon 
-            size={80} 
-            radius="xl" 
-            variant="light" 
+
+          <ThemeIcon
+            size={80}
+            radius="xl"
+            variant="light"
             color="blue"
             style={{
               boxShadow: 'var(--mantine-shadow-sm)',
             }}
           >
-            <svg 
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               style={{ width: rem(40), height: rem(40) }}
-              fill="none" 
-              viewBox="0 0 16 16" 
-              stroke="currentColor" 
+              fill="none"
+              viewBox="0 0 16 16"
+              stroke="currentColor"
               strokeWidth={0.5}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z"/>
-              <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z"/>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.15.15 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.2.2 0 0 1-.054.06.1.1 0 0 1-.066.017H1.146a.1.1 0 0 1-.066-.017.2.2 0 0 1-.054-.06.18.18 0 0 1 .002-.183L7.884 2.073a.15.15 0 0 1 .054-.057m1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767z" />
+              <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0M7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0z" />
             </svg>
           </ThemeIcon>
 
           <Stack gap="xs">
-            <Text 
-              size="xs" 
-              fw={700} 
-              tt="uppercase" 
-              lts={1.5} 
+            <Text
+              size="xs"
+              fw={700}
+              tt="uppercase"
+              lts={1.5}
               c="blue.5"
             >
               Coming Soon
             </Text>
-            <Title 
-              order={1} 
+            <Title
+              order={1}
               style={{
                 fontSize: rem(38),
                 fontWeight: 900,
@@ -120,8 +118,8 @@ export const UnderConstruction: React.FC<UnderConstructionProps> = ({
               <Text size="xs" fw={700} c="blue.5">{progress}% Complete</Text>
             </Group>
             <Progress.Root size="xl">
-              <Progress.Section 
-                value={progress} 
+              <Progress.Section
+                value={progress}
                 animated
                 color={progress > 80 ? 'green' : progress > 40 ? 'orange' : 'red'}
               >

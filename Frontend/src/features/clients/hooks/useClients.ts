@@ -2,18 +2,28 @@ import { useCallback, useEffect, useState } from "react";
 import { ICliente } from "../types/Cliente";
 import { clientService } from "../service/clientService";
 import { ClientMetricsResponse } from "../types/IClientService";
-const PAGE_SIZE = 10;
+import { usePaginatedList } from "@/components/hook/usePaginaterList";
 
 interface ClientOption {
   id: number;
   name: string;
 }
 export function useClients() {
-  const [clients, setClients] = useState<ICliente[]>([]);
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true)
+
+  const fetchFn = useCallback((page: number, size: number) => clientService.getPaginated(page, size), []
+  )
+
+  const {
+    data: clients,
+    setData: setClients, hasMore,
+    loading,
+    error,
+    setError,
+    fetchNextPage, setLoading
+
+  } = usePaginatedList<ICliente>(fetchFn);
+
+
   const [clientsName, setClientsName] = useState<ClientOption[]>([]);
   const [metrics, setMetrics] = useState<ClientMetricsResponse>(
     {
@@ -23,22 +33,6 @@ export function useClients() {
       sftpService: 0,
     }
   )
-
-  const fetchClients = useCallback(async (currentPage: number) => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await clientService.getPaginated(currentPage, PAGE_SIZE)
-      const newCliente: ICliente[] = Array.isArray(response) ? response : response.data
-      setHasMore(response.hasNextPage)
-      setClients((prev) => currentPage === 1 ? newCliente : [...prev, ...newCliente])
-
-    } catch (error) {
-      setError('Failed to load clientes')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
 
 
 
@@ -78,19 +72,7 @@ export function useClients() {
   }, []);
 
 
-  useEffect(() => {
-    fetchClients(1);
-  }, [fetchClients]);
 
-  const fetchNextPage = useCallback(() => {
-    if (!loading && hasMore) {
-      setPage((prevPage) => {
-        const nextPage = prevPage + 1;
-        fetchClients(nextPage);
-        return nextPage;
-      });
-    }
-  }, [loading, hasMore, fetchClients]);
 
   const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {

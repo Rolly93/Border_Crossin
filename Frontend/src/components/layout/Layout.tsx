@@ -53,6 +53,12 @@ export function Layout() {
           label='Sftp Connection'
           active={location.pathname === '/sftp_connection'} />
 
+
+        <NavLink component={Link}
+          to="/employee"
+          label='Employee'
+          active={location.pathname === '/employee'} />
+
         <Text size="sm" fw={500} c="dimmed" mb="xs">Employees</Text>
         {/**<Skeleton height={28} mt="sm" animate={false} radius="xl" /> **/}
 
