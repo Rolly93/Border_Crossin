@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
-from deps.service import get_client_service
-from deps.auth import get_current_user
+from deps.service import ClientSvc, get_client_service
+from deps.auth import CurrentUser, get_current_user
 from schema import ClientRequest
 from utility.cliente_service import ClienteService
 
@@ -9,12 +9,21 @@ router = APIRouter(
 )
 
 
+@router.get("/", status_code=status.HTTP_200_OK)
+async def client_dashboard(
+    service: ClientSvc,
+    current_user: CurrentUser,
+    page: int = 1,
+    limit: int = 10,
+):
+    return service.get_all_clients(page=page, limit=limit)
+
+
 @router.post(
-    "/new_client",
+    "/create",
     status_code=status.HTTP_201_CREATED,
 )
 async def new_client(
-    admin_id: int,
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):
@@ -22,11 +31,10 @@ async def new_client(
 
 
 @router.patch(
-    "/update_client",
+    "/update",
     status_code=status.HTTP_200_OK,
 )
 async def update_client(
-    admin_id: int,
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):

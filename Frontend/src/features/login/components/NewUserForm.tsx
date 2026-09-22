@@ -73,7 +73,9 @@ export function NewuserForm({ onSuccess, onRfc }: NewuserFormProps) {
             onChange={(value) =>
               setUserData((prev) => ({ ...prev, role: value! }))
             }
-            data={[
+            data={onSuccess ? [
+              { value: 'admin', label: 'Admin' },
+            ] : [
               { value: 'csr', label: 'Csr' },
               { value: 'admin', label: 'Admin' },
             ]}

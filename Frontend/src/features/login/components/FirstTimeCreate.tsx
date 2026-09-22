@@ -1,12 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Container, Paper, Stepper, Title, Text } from '@mantine/core';
 import { EmployeeForm } from "@/features/employee/components/EmployeeForm";
 import { NewuserForm } from "./NewUserForm";
+import { Navigate, replace, useNavigate } from 'react-router-dom';
 
 export function FirstTimeLog() {
   const [activeStep, setActiveStep] = useState(0);
   const [rfc, setRfc] = useState('')
+  const navigate = useNavigate()
   const nextStep = () => setActiveStep((current) => (current < 2 ? current + 1 : current));
+
+
+  useEffect(() => {
+    if (activeStep === 2) {
+      const timer = setTimeout(() => {
+        navigate('/dashboard', { replace: true })
+      }, 2000);
+      return () => clearTimeout(timer)
+    }
+  }, [activeStep, navigate])
 
   return (
     <Container size="sm" py={50}>

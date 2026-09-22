@@ -55,6 +55,7 @@ class EmployeeService:
         ip: str,
         current_user: Optional[Union[TokenPayload, InitialTokenPayload]],
     ) -> dict:
+
         has_users = bool(self._user_repo.get_all_users())
 
         if not current_user and not has_users:

@@ -39,7 +39,8 @@ export function useClients() {
   const getClientList = async (): Promise<ClientOption[]> => {
     try {
       const data = await clientService.getAll();
-      const clienteName = data.map((c: any) => ({
+      const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
+      const clienteName = safeData.map((c: any) => ({
         name: c.name,
         id: c.id,
       }));
@@ -61,7 +62,9 @@ export function useClients() {
       const data = await clientService.getMetrics();
       setMetrics(data);
     } catch (err) {
+
       setError("Error al cargar datos");
+      throw err
     }
   };
 
@@ -81,8 +84,9 @@ export function useClients() {
       setClients((prev) => [createClient, ...prev])
       await fetchClientsMetrics();
       return createClient;
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating client:", err)
+      setError(err.message)
       throw err;
 
     }
@@ -96,8 +100,8 @@ export function useClients() {
         prev.map((c) => (c.id === id ? updated : c)));
       await fetchClientsMetrics();
       return updated
-    } catch (error) {
-      console.error("Error updating client:", error)
+    } catch (error: any) {
+      console.error("Error updating client:", error.message)
     }
   }
 
@@ -125,7 +129,7 @@ export function useClients() {
     fetchNextPage,
     addClient,
     updateClient,
-    deleteCliente,
+    deleteCliente, setError,
     metrics,
     clientsName
   } as const;

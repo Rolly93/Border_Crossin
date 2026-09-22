@@ -1,5 +1,5 @@
 import { ICliente } from "@/features/clients/types/Cliente";
-import { Modal, TextInput, Stack, Group, ScrollArea, Avatar, Text, SimpleGrid } from "@mantine/core";
+import { Modal, TextInput, Stack, Group, ScrollArea, Avatar, Text, SimpleGrid, Alert } from "@mantine/core";
 import { useForm, isEmail } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { IconFileText, IconMail, IconPlus, IconX } from "@tabler/icons-react";
@@ -15,9 +15,11 @@ interface ClienteModalProps {
     opened: boolean;
     onClose: () => void;
     onSave: (data: any) => void
+    onError?: string | null;
+    onSetError: (v: any) => void
 }
 
-export default function ClientModalProps({ onSelectClient, opened, onClose, onSave }: ClienteModalProps) {
+export default function ClientModalProps({ onSelectClient, opened, onClose, onSave, onError, onSetError }: ClienteModalProps) {
     const [sftpOpened, { open: openSftp, close: closeSftp }] = useDisclosure(false);
     const [newEmail, setNewEmail] = useState("");
     const [recipients, setRecipients] = useState<string[]>([]);
@@ -97,18 +99,28 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
         setRecipients(recipients.filter(email => email !== emailToRemove));
     };
 
-    const handleSubmit = (values: typeof form.values) => {
-        if (values.companyName) {
-            const finalData = {
-                ...values,
-                email: recipients,
-                sftService: service.sftp,
-                emailService: service.email
-            };
-            onSave(finalData)
+    const handleSubmit = async (values: typeof form.values) => {
+
+        if (!values.companyName) return
+
+
+        const finalData = {
+            ...values,
+            email: recipients,
+            sftService: service.sftp,
+            emailService: service.email
+        };
+        try {
+
+
+            await onSave(finalData)
+
+            onClose();
+        } catch (err: any) {
+            console.log('Save Failed', err);
+
+
         }
-        onClose();
-        return;
     };
 
 
@@ -136,7 +148,11 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
         <>
 
             <Modal opened={opened} onClose={onClose} title={onSelectClient ? "Editar Cliente" : "Nuevo Cliente"} size="lg">
-                <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing={'md'}>
+                {onError && (
+                    <Alert color="red" mb="md" onClose={() => onSetError(null)} withCloseButton>
+                        {onError}
+                    </Alert>
+                )}                <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing={'md'}>
 
                     <ActionCard
                         title="SFT Service"

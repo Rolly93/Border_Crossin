@@ -3,15 +3,12 @@ import {
   PasswordInput,
   Paper,
   Title,
-  Alert,
-  Text,
-  Anchor
+  Alert, Text, Anchor
 } from '@mantine/core';
 import { useLoginForm } from '../hook/useLoginForm';
 import { AtomButton } from '@/components/atoms/AtomButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FormEvent } from 'react';
-
 export function LoginForm() {
   const {
     userData, setUserData,
@@ -20,7 +17,6 @@ export function LoginForm() {
     Login,
   } = useLoginForm();
   const navigate = useNavigate()
-  const token = localStorage.getItem('toke')
   async function handelSubmit(values: FormEvent<HTMLFormElement>) {
     values.preventDefault()
     const credentials = {
@@ -83,6 +79,12 @@ export function LoginForm() {
           <AtomButton type="submit" fullWidth mt="xl" loading={loading}>
             Sign In
           </AtomButton>
+          <Text c="dimmed" size="sm" ta="center" mt="md">
+            Don't have an account yet?{' '}
+            <Anchor component={Link} to="/onetime" size="sm" fw={500}>
+              Create account
+            </Anchor>
+          </Text>
 
         </form>
       </Paper>

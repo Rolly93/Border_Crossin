@@ -1,11 +1,11 @@
-from typing import Optional
+import select
+from typing import List, Optional
 
-from sqlalchemy import and_, exists
-
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import and_, exists, select
+from sqlalchemy.orm import Session, selectinload, joinedload
 from fastapi import HTTPException, status
 from repository.base_repository import BaseRepository
-from model.db_model import Client
+from model.db_model import Client, ClientEmailRecipient
 from schema import ClientRequest, ClientResponse, ClientModel
 from enum import Enum
 
@@ -35,8 +35,8 @@ class ClienteRepository(BaseRepository[Client]):
                 ClientResponse(
                     id=client.id,
                     name=client.name,
-                    sftp_service=client.is_ftp,
-                    email_service=client.is_email_service,
+                    sftService=client.is_ftp,
+                    emailService=client.is_email_service,
                     email=active_emails,
                 )
             )
@@ -84,3 +84,16 @@ class ClienteRepository(BaseRepository[Client]):
         client_data = self.has_active_service(client_id)
         setattr(client_data, service.value, is_active)
         return self.update(client_id, client_data)
+
+    def get_all_clients(self, page: int = 1, limit: int = 10) -> List[Client]:
+        offset = (page - 1) * limit
+
+        stmt = (
+            select(Client)
+            .options(selectinload(Client.email_recipients))
+            .offset(offset)
+            .limit(limit)
+        )
+
+        clients = list(self._db.scalars(stmt).all())
+        return clients

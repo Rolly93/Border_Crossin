@@ -18,9 +18,10 @@ export function ClientTable() {
   const { clients,
     loading,
     hasMore,
+    error,
     fetchNextPage,
     addClient,
-    updateClient,
+    updateClient, setError,
     deleteCliente, metrics } = useClients()
 
   const observer = useRef<IntersectionObserver | null>(null)
@@ -143,7 +144,9 @@ export function ClientTable() {
         onSelectClient={selectedClient}
         opened={modalOpened}
         onClose={closeModal}
-        onSave={handleSaveClient} />
+        onSave={handleSaveClient}
+        onError={error}
+        onSetError={setError} />
 
     </>
 

@@ -15,9 +15,22 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
     super('client');
   }
   async getMetrics(): Promise<MetricsResponse> {
-    const response = await this.api.get<MetricsResponse>(`/${this.resourcePath}/metrics`)
-    return response.data
+    try {
+      const response = await this.api.get<MetricsResponse>(`/${this.resourcePath}`);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching metrics:", error);
+
+      const errorMessage =
+        error.response?.data?.detail ||
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch metrics";
+
+      throw new Error(errorMessage);
+    }
   }
+
 
 
   async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<ICliente>> {

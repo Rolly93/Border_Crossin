@@ -31,8 +31,8 @@ class ClienteService:
         self._db.client_exist(data.name)
         new_client = Client(
             name=data.name,
-            is_ftp=data.sftp_service,
-            is_email=data.email_service,
+            is_ftp=data.sftService,
+            is_email=data.emailService,
         )
         self._db.create_new_client(new_client)
         return new_client
@@ -46,19 +46,19 @@ class ClienteService:
             )
 
         client.name = data.name
-        client.is_ftp = data.sftp_service
-        client.is_email = data.email_service
+        client.is_ftp = data.sftService
+        client.is_email = data.emailService
 
         self._db.update_client(client.id, client)
         return client
 
     def get_client_service(
         self, client_id: int, service_type: ServiceType
-    ) -> ClienteServiceResponse | None:
+    ) -> ClienteServiceResponse:
         client_data = self._db.has_active_service(client_id)
         sftp_service: SftpConfigurationRequest | None = None
         email_service: EmailConfigurationRequest | None = None
-        if "sft_service" == service_type:
+        if "sft_service" == service_type and client_data.id:
             sftp_data = self._sftp_service.get_sftp_data(client_data.id)
             if sftp_data:
                 sftp_service = SftpConfigurationRequest.model_validate(
@@ -71,6 +71,10 @@ class ClienteService:
 
         return ClienteServiceResponse(
             **client_data.model_dump(),
-            sftp_config=sftp_service,
-            email_config=email_service,
+            sftService=sftp_service,
+            emailService=email_service,
         )
+
+    def get_all_clients(self, page: int = 1, limit: int = 10):
+        clients = self._db.get_all_clients(page, limit)
+        return [ClientModel.model_validate(client) for client in clients]

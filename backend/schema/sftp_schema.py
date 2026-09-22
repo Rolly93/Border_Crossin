@@ -1,6 +1,4 @@
 from pydantic import BaseModel
-from typing import Text
-
 
 class SftpModel(BaseModel):
     id: int
