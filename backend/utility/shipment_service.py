@@ -46,15 +46,15 @@ class ShipmentService:
     def sftp_service(self, shipment: ShipmentUpdate):
         client_id = shipment.cliente
         client_data = self._client_service.get_client_service(client_id, "sftp_service")
-        if not client_data or not client_data.sftp_config:
+        if not client_data or not client_data.sftService:
             return
 
         files_send: List[str] = []
-        if client_data.sftp_service:
+        if client_data.sftService:
 
             xml_strategy = XMLServiceFactory.get_xml_service(client_data.name)
             orchestrator_service = self._orchestrator_service(
-                sftp_config=client_data.sftp_config,
+                sftp_config=client_data.sftService,
                 xml_svc=XMLService(xml_strategy),
                 shipment=shipment,
             )
