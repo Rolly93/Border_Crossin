@@ -44,6 +44,9 @@ class ClienteRepository(BaseRepository[Client]):
         return result
 
     def get_clients(self) -> List[Client]:
+        stmt = select(Client).options(
+            selectinload(Client.email_recipients), selectinload(Client.sftp_services)
+        )
         return self._db.query(Client).all()
 
     def has_active_service(self, client_id: int) -> ClientModel:
