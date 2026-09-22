@@ -15,7 +15,7 @@ interface ClienteModalProps {
     opened: boolean;
     onClose: () => void;
     onSave: (data: any) => void
-    onError?: string | null;
+    onError?: string | null | string[];
     onSetError: (v: any) => void
 }
 

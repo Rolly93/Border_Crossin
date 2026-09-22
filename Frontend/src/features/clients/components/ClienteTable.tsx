@@ -75,6 +75,7 @@ export function ClientTable() {
     deleteCliente(id)
   }
 
+  console.log(metrics);
 
 
   return (
@@ -82,7 +83,7 @@ export function ClientTable() {
 
       <Group justify="space-between" mb="lg">
         <div>
-          <Title order={2} c="gray.9">Cartelera de Clientes</Title>
+          <Title order={2} >Cartelera de Clientes</Title>
           <Text size="sm" c="dimmed">Directorio y gestión de clientes activos</Text>
         </div>
         <Group>
@@ -96,7 +97,6 @@ export function ClientTable() {
           </AtomButton>
         </Group>
       </Group>
-
       <ClientMetrics onMetrics={metrics} />
       <Table.ScrollContainer minWidth={760} h={500}>
 

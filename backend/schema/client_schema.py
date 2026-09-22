@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, ConfigDict
 from typing import Optional, List
 from .sftp_schema import SftpConfigurationRequest
 from pydantic import EmailStr
@@ -6,6 +6,7 @@ import re
 
 
 class ClientModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: Optional[int]
     name: str
     sftService: bool
@@ -24,7 +25,7 @@ class ClientModel(BaseModel):
 
 
 class ClientRequest(ClientModel):
-    id: int
+    ...
     """
     Client Request Scshema
 

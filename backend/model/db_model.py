@@ -59,8 +59,8 @@ class Client(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
-    is_ftp: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_email_service: Mapped[bool] = mapped_column(Boolean, default=False)
+    sftService: Mapped[bool] = mapped_column(Boolean, default=False)
+    emailService: Mapped[bool] = mapped_column(Boolean, default=False)
 
     sftp_services = relationship("SftpService", back_populates="client")
     shipment_assigns = relationship("ShipmentAssign", back_populates="client")

@@ -1,7 +1,7 @@
 from annotated_types import UpperCase
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from typing import Literal
+from typing import List, Literal
 from repository.sftp_repository import SftpRepository
 from schema.shipment_shcema import ShipmentUpdate
 from model.db_model import Client
@@ -30,9 +30,7 @@ class ClienteService:
     def create_client(self, data: ClientRequest) -> Client:
         self._db.client_exist(data.name)
         new_client = Client(
-            name=data.name,
-            is_ftp=data.sftService,
-            is_email=data.emailService,
+            name=data.name, sftService=data.sftService, emailService=data.emailService
         )
         self._db.create_new_client(new_client)
         return new_client
@@ -77,4 +75,10 @@ class ClienteService:
 
     def get_all_clients(self, page: int = 1, limit: int = 10):
         clients = self._db.get_all_clients(page, limit)
+
+        return [ClientModel.model_validate(client) for client in clients]
+
+    def get_clients(self) -> List[ClientModel]:
+        clients = self._db.get_clients()
+
         return [ClientModel.model_validate(client) for client in clients]

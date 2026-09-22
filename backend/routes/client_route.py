@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status
+from schema.client_schema import ClientModel
 from deps.service import ClientSvc, get_client_service
 from deps.auth import CurrentUser, get_current_user
 from schema import ClientRequest
@@ -9,14 +10,26 @@ router = APIRouter(
 )
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[ClientModel])
 async def client_dashboard(
     service: ClientSvc,
     current_user: CurrentUser,
     page: int = 1,
     limit: int = 10,
 ):
+
     return service.get_all_clients(page=page, limit=limit)
+
+
+@router.get(
+    "/metrics", status_code=status.HTTP_200_OK, response_model=list[ClientModel]
+)
+async def get_clients(
+    service: ClientSvc,
+    current_user: CurrentUser,
+):
+
+    return service.get_clients()
 
 
 @router.post(
@@ -38,4 +51,6 @@ async def update_client(
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):
+    if not data.id:
+        return
     return service.update_client_info(client_id=data.id, data=data)

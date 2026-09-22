@@ -14,7 +14,12 @@ interface ClientMetricsProps {
 
 
 export function ClientMetrics({ onMetrics }: ClientMetricsProps) {
-
+  const ontotal = {
+    totalClient: onMetrics.totalClients && 0,
+    activeClient: onMetrics.activeClient && 0,
+    totalEmail: onMetrics.emailService && 0,
+    sftpTotal: onMetrics.sftpService && 0
+  }
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
       <ActionCard
@@ -22,7 +27,7 @@ export function ClientMetrics({ onMetrics }: ClientMetricsProps) {
         icon={<IconBuilding size={20} />}
         color=""
         statusText="Clientes"
-        metric={onMetrics.totalClients}
+        metric={ontotal.totalClient}
         metricLabel="Total de Clientes registrados"
       />
 
@@ -31,7 +36,7 @@ export function ClientMetrics({ onMetrics }: ClientMetricsProps) {
         icon={<IconCheck size={20} />}
         color="teal"
         statusText="Clientes Activos"
-        metric={onMetrics.activeClient}
+        metric={ontotal.activeClient}
         metricLabel="Activos"
       />
 
@@ -40,7 +45,7 @@ export function ClientMetrics({ onMetrics }: ClientMetricsProps) {
         icon={<IconMail size={20} />}
         color="yellow"
         statusText="con Servicio de alertas Email"
-        metric={onMetrics.emailService}
+        metric={ontotal.totalEmail}
         metricLabel="Activos"
       />
 
@@ -49,7 +54,7 @@ export function ClientMetrics({ onMetrics }: ClientMetricsProps) {
         icon={<IconFileText size={20} />}
         color="grape"
         statusText="con conexion SFTP"
-        metric={onMetrics.sftpService}
+        metric={ontotal.sftpTotal}
         metricLabel="Activos"
       />
     </SimpleGrid>

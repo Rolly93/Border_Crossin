@@ -10,8 +10,8 @@ export function useEmployee() {
     data: employeeData,
     setData: setEmployeeData,
     loading,
-    error, hasMore,
-
+    error,
+    hasMore,
     setError,
     fetchNextPage, setLoading
 
@@ -41,6 +41,7 @@ export function useEmployee() {
 
   }
   const createNewEmployee = async (employeeData: IEmployee) => {
+
     try {
       setLoading(true)
       setError(null)
@@ -55,5 +56,5 @@ export function useEmployee() {
     }
   }
 
-  return { employeeData, loading, error, hasMore, createNewEmployee, fetchNextPage, updateEmployee, deleteEmployee } as const;
+  return { employeeData, loading, error, hasMore, createNewEmployee, fetchNextPage, setError, updateEmployee, deleteEmployee } as const;
 }

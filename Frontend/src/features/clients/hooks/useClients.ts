@@ -36,7 +36,7 @@ export function useClients() {
 
 
 
-  const getClientList = async (): Promise<ClientOption[]> => {
+  const getClientList = async (): Promise<ClientOption[] | null> => {
     try {
       const data = await clientService.getAll();
       const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
@@ -60,6 +60,8 @@ export function useClients() {
   const fetchClientsMetrics = async () => {
     try {
       const data = await clientService.getMetrics();
+      console.log(data);
+
       setMetrics(data);
     } catch (err) {
 
@@ -79,6 +81,8 @@ export function useClients() {
 
   const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {
+      console.log(newClientData);
+
       const createClient = await clientService.insert(newClientData)
 
       setClients((prev) => [createClient, ...prev])

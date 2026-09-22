@@ -43,7 +43,7 @@ class ClienteRepository(BaseRepository[Client]):
 
         return result
 
-    def get_clients(self):
+    def get_clients(self) -> List[Client]:
         return self._db.query(Client).all()
 
     def has_active_service(self, client_id: int) -> ClientModel:
@@ -54,10 +54,9 @@ class ClienteRepository(BaseRepository[Client]):
         )
 
     def create_new_client(self, data: Client) -> Client:
-        dict_client = data.model_dump(exclude_unset=True)
-        data_client = Client(**dict_client)
-        self.save(data_client)
-        return data_client
+
+        self.save(data)
+        return data
 
     def update_client(self, cliente_id: int, client_data: ClientRequest) -> Client:
         update_client = self.update(cliente_id, client_data)

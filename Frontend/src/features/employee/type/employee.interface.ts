@@ -2,7 +2,7 @@ import { IBaseService, PaginatedResponse } from "@/components/service/IBaseServi
 
 
 export interface IEmployee {
-  id: number;
+  id?: number;
   firstName: string;
   lastName: string;
   dateOfBirth: Date;

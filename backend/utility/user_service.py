@@ -11,6 +11,7 @@ from repository import EmployeeRepository, UserRepository
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from schema.user_schema import LoginRequest, NewUser
 from service.jwt_service import JWTService
+from datetime import timedelta
 
 DUMMY_HASH = "$2b$12$eImiTXuWVxfM37uY4JANjO5E.5R0zJqfG8R6zG1yQ4rZ2gYxK.6Ce"
 
@@ -60,7 +61,6 @@ class UserService:
     def authenticate(self, data: LoginRequest) -> User:
         username = data.username.strip()
         user = self._user_repo.get_username(username)
-
         unauthorized_error = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -69,7 +69,6 @@ class UserService:
         if not user:
             self.verify_password("dummy_password", DUMMY_HASH)
             raise unauthorized_error
-
         if not self.verify_password(data.password, user.hashed_password):
             raise unauthorized_error
 
@@ -77,10 +76,16 @@ class UserService:
 
     def login(self, data: LoginRequest, ip: str) -> dict:
         user = self.authenticate(data)
-        token = self.jwt.create_access_token(
-            ip=ip, sub=user.id, extra_data={"is_admin": user.is_admin}
-        )
 
+        token = self.jwt.create_access_token(
+            ip=ip,
+            sub=user.id,
+            extra_data={
+                "is_admin": user.is_admin,
+                "is_first_time": False,
+            },
+            expires_delta=timedelta(hours=8),
+        )
         return {
             "status": "200 Success",
             "detail": "Login successful",
