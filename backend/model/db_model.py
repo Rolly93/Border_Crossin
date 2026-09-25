@@ -61,6 +61,7 @@ class Client(Base):
     name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     sftService: Mapped[bool] = mapped_column(Boolean, default=False)
     emailService: Mapped[bool] = mapped_column(Boolean, default=False)
+    phonenumber: Mapped[int] = mapped_column(Integer, unique=True, nullable=True)
 
     sftp_services = relationship("SftpService", back_populates="client")
     shipment_assigns = relationship("ShipmentAssign", back_populates="client")

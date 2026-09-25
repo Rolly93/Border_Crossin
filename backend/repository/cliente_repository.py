@@ -4,6 +4,7 @@ from typing import List, Optional
 from sqlalchemy import and_, exists, select
 from sqlalchemy.orm import Session, selectinload, joinedload
 from fastapi import HTTPException, status
+from schema.sftp_schema import SftpConfigProcess
 from repository.base_repository import BaseRepository
 from model.db_model import Client, ClientEmailRecipient
 from schema import ClientRequest, ClientResponse, ClientModel
@@ -11,8 +12,8 @@ from enum import Enum
 
 
 class ClientServiceType(str, Enum):
-    SFTP = "sftp_service"
-    EMAIL = "email_service"
+    SFTP = "sftService"
+    EMAIL = "emailService"
 
 
 class ClienteRepository(BaseRepository[Client]):
@@ -35,6 +36,7 @@ class ClienteRepository(BaseRepository[Client]):
                 ClientResponse(
                     id=client.id,
                     name=client.name,
+                    telefono=client.te,
                     sftService=client.is_ftp,
                     emailService=client.is_email_service,
                     email=active_emails,
@@ -56,9 +58,33 @@ class ClienteRepository(BaseRepository[Client]):
             .scalar()
         )
 
+    def add_emails_to_client(self, client_id: int, client_emails: list[str]):
+        client = self._db.query(Client).filter(Client.id == client_id).first()
+
+        if not client:
+            raise ValueError("Client Not found")
+
+        existing_email = {rec.email.strip().lower() for rec in client.email_recipients}
+        for email_str in client_emails:
+            clean_email = email_str.strip().lower()
+            if clean_email in existing_email:
+                continue
+            new_email = ClientEmailRecipient(client_id=client_id, email=clean_email)
+            client.email_recipients.append(new_email)
+
+        self._db.commit()
+
+    def add_sftp_connection(self, data: SftpConfigProcess):
+        client = self._db.query(Client).filter(Client.id == data.client_id).first()
+        if not client:
+            raise ValueError("Client Not found")
+
     def create_new_client(self, data: Client) -> Client:
 
-        self.save(data)
+        new_client = self.save(data)
+
+        if new_client.emailService:
+            self.add_emails_to_client(new_client.id, new_client.email_recipients)
         return data
 
     def update_client(self, cliente_id: int, client_data: ClientRequest) -> Client:

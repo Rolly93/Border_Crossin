@@ -30,7 +30,10 @@ class ClienteService:
     def create_client(self, data: ClientRequest) -> Client:
         self._db.client_exist(data.name)
         new_client = Client(
-            name=data.name, sftService=data.sftService, emailService=data.emailService
+            name=data.name,
+            telefono=data.telefono,
+            sftService=data.sftService,
+            emailService=data.emailService,
         )
         self._db.create_new_client(new_client)
         return new_client
