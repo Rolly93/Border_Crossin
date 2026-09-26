@@ -1,8 +1,9 @@
 import os
-from fastapi_mail import  MessageSchema , ConnectionConfig, MessageType ,FastMail
+from fastapi_mail import MessageSchema, ConnectionConfig, MessageType, FastMail
 from pydantic import EmailStr
 from config.config import EmailConfig
-from jinja2 import Environment , FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
+
 
 class EmailService:
     def __init__(self, config: EmailConfig):
@@ -15,9 +16,9 @@ class EmailService:
             MAIL_STARTTLS=False,
             MAIL_SSL_TLS=False,
             USE_CREDENTIALS=False,
-            VALIDATE_CERTS=False
+            VALIDATE_CERTS=False,
         )
-        template_path = os.path.join(os.path.dirname(__file__),'..','templates')
+        template_path = os.path.join(os.path.dirname(__file__), "..", "templates")
         self.jinja_env = Environment(loader=FileSystemLoader(template_path))
 
     async def send_notification(self, subject: str, recipient: str, body: str):
@@ -32,12 +33,12 @@ class EmailService:
         """
 
         template = self.jinja_env.get_template("status_email.html")
-        html_content =  template.render(body)
+        html_content = template.render(body)
         message = MessageSchema(
             subject=subject,
             recipients=[recipient],  # Debe ser una lista
             body=html_content,
-            subtype=MessageType.html # O MessageType.plain
+            subtype=MessageType.html,  # O MessageType.plain
         )
 
         fm = FastMail(self.conf)
@@ -46,24 +47,23 @@ class EmailService:
             print(f"📧 Notificación enviada a {recipient}")
         except Exception as e:
             print(f"❌ Error al enviar email: {e}")
+
+
 import asyncio
+
 
 async def send_templated_email():
     # 1. Simular la configuración
-    config = EmailConfig() # Asegúrate de que cargue los datos de Mailhog
+    config = EmailConfig()  # Asegúrate de que cargue los datos de Mailhog
 
     # 2. Instanciar el servicio
     service = EmailService(config)
 
-    shipment = {
-        "track_num" : "tr1234567",
-        "shipment_num" : "92B1234567"
-    }
+    shipment = {"track_num": "tr1234567", "shipment_num": "92B1234567"}
     await service.send_notification(
-        subject="STATUS UPDATE",
-        recipient="rolando@ejemplo.com",
-        body=shipment
+        subject="STATUS UPDATE", recipient="rolando@ejemplo.com", body=shipment
     )
+
 
 if __name__ == "__main__":
     asyncio.run(send_templated_email())

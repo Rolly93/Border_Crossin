@@ -74,11 +74,6 @@ class ClienteRepository(BaseRepository[Client]):
 
         self._db.commit()
 
-    def add_sftp_connection(self, data: SftpConfigProcess):
-        client = self._db.query(Client).filter(Client.id == data.client_id).first()
-        if not client:
-            raise ValueError("Client Not found")
-
     def create_new_client(self, data: Client) -> Client:
 
         new_client = self.save(data)

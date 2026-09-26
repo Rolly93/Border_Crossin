@@ -2,6 +2,7 @@ from annotated_types import UpperCase
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Literal
+from schema.sftp_schema import SftpConfiRequst
 from repository.sftp_repository import SftpRepository
 from schema.shipment_shcema import ShipmentUpdate
 from model.db_model import Client
@@ -26,6 +27,10 @@ class ClienteService:
     def register_client(self, data: ClientRequest) -> dict:
         new_client = self.create_client(data)
         return {"status": "success", "data": new_client.name}
+
+    def config_sftp(self, sftp_data: SftpConfigurationRequest):
+        new_connection = SftpConfiRequst(**sftp_data.model_dump())
+        return self._sftp_service.insert_sftp_service(new_connection)
 
     def create_client(self, data: ClientRequest) -> Client:
         self._db.client_exist(data.name)
