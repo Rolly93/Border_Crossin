@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -35,6 +35,10 @@ class SftpRepository(BaseRepository[SftpService]):
 
     def update(self, id_sftp: str | int, sftp_data: BaseModel) -> SftpService | None:
         return super().update(id_sftp, sftp_data)
+
+    def get_all_sftp_data(self) -> List[SftpService]:
+        sftp_data = self._db.query(SftpService).all()
+        return sftp_data
 
     def insert_sftp_service(self, sftp_data: SftpConfiRequst) -> SftpResponse:
         encrypt_paswd = encrypt_password(sftp_data.encrypted_password)

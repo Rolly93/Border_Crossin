@@ -1,22 +1,7 @@
-from .shipment_shcema import (
-    ShipmentStats,
-    EventCategory,
-    ShipmentEvent,
-    ShipmentCreate,
-    ShipmentResponse,
-    ShipmentUpdate,
-    EventPayload,
-)
+from .shipment_shcema import *
 from .user_schema import *
-from .employee_schema import EmployeeRequest
+from .employee_schema import *
 from .client_schema import *
-from .sftp_schema import (
-    SftpConfiRequst,
-    SftpSendConfig,
-    sftpSendFile,
-    SftpInactivateRequest,
-    SftpResponse,
-    SftpConfigProcess,
-)
+from .sftp_schema import *
 from .token_schema import TokenPayload, InitialTokenPayload
-from .xml_file_schema import XmlRequest
+from .xml_file_schema import *

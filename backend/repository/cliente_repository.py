@@ -1,10 +1,10 @@
 import select
 from typing import List, Optional
 
-from sqlalchemy import and_, exists, select
+from sqlalchemy import exists, select, func
 from sqlalchemy.orm import Session, selectinload, joinedload
-from fastapi import HTTPException, status
-from schema.sftp_schema import SftpConfigProcess
+from fastapi import HTTPException
+from schema.client_schema import ClientPaginateData, PaginatedClientResponse
 from repository.base_repository import BaseRepository
 from model.db_model import Client, ClientEmailRecipient
 from schema import ClientRequest, ClientResponse, ClientModel
@@ -49,6 +49,7 @@ class ClienteRepository(BaseRepository[Client]):
         stmt = select(Client).options(
             selectinload(Client.email_recipients), selectinload(Client.sftp_services)
         )
+
         return self._db.query(Client).all()
 
     def has_active_service(self, client_id: int) -> ClientModel:
@@ -108,8 +109,11 @@ class ClienteRepository(BaseRepository[Client]):
         setattr(client_data, service.value, is_active)
         return self.update(client_id, client_data)
 
-    def get_all_clients(self, page: int = 1, limit: int = 10) -> List[Client]:
+    def get_all_clients(
+        self, page: int = 1, limit: int = 10
+    ) -> PaginatedClientResponse:
         offset = (page - 1) * limit
+        total_records = self._db.query(Client).count()
 
         stmt = (
             select(Client)
@@ -117,6 +121,29 @@ class ClienteRepository(BaseRepository[Client]):
             .offset(offset)
             .limit(limit)
         )
+        clients_orm = self._db.scalars(stmt).all()
 
-        clients = list(self._db.scalars(stmt).all())
-        return clients
+        has_next_page = (offset + limit) < total_records
+        formatted_clients = []
+
+        for client in clients_orm:
+            active_emails = [
+                rec.email for rec in client.email_recipients if rec.isactive
+            ]
+            formatted_clients.append(
+                ClientPaginateData(
+                    id=client.id,
+                    name=client.name,
+                    telefono=str(client.phonenumber) if client.phonenumber else None,
+                    emailService=client.emailService,
+                    sftService=client.sftService,
+                    email=active_emails,
+                )
+            )
+        return PaginatedClientResponse(
+            data=formatted_clients,
+            totalRecords=total_records,
+            hasNextPage=has_next_page,
+            page=page,
+            limit=limit,
+        )

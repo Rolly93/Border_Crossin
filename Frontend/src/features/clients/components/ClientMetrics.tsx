@@ -1,7 +1,6 @@
 import { SimpleGrid } from "@mantine/core";
 import {
   IconBuilding,
-  IconCheck,
   IconMail,
   IconFileText,
 } from "@tabler/icons-react";
@@ -15,30 +14,21 @@ interface ClientMetricsProps {
 
 export function ClientMetrics({ onMetrics }: ClientMetricsProps) {
   const ontotal = {
-    totalClient: onMetrics.totalClients && 0,
-    activeClient: onMetrics.activeClient && 0,
-    totalEmail: onMetrics.emailService && 0,
-    sftpTotal: onMetrics.sftpService && 0
+    totalClient: onMetrics.totalClients ?? 0,
+    totalEmail: onMetrics.emailService ?? 0,
+    sftpTotal: onMetrics.sftpService ?? 0
   }
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
       <ActionCard
         title="Clientes Activos"
         icon={<IconBuilding size={20} />}
-        color=""
+        color="blue"
         statusText="Clientes"
         metric={ontotal.totalClient}
         metricLabel="Total de Clientes registrados"
       />
 
-      <ActionCard
-        title="Activos"
-        icon={<IconCheck size={20} />}
-        color="teal"
-        statusText="Clientes Activos"
-        metric={ontotal.activeClient}
-        metricLabel="Activos"
-      />
 
       <ActionCard
         title="Email Notification"

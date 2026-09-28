@@ -3,7 +3,6 @@ import { ICliente } from "./Cliente";
 
 export interface ClientMetricsResponse {
   totalClients: number;
-  activeClient: number;
   emailService: number;
   sftpService: number;
 }

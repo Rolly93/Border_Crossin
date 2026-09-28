@@ -5,6 +5,12 @@ from pydantic import EmailStr
 import re
 
 
+class MetricsClientResponse(BaseModel):
+    total_clients: int
+    email_service: int
+    sftp_service: int
+
+
 class ClientModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: Optional[int]
@@ -47,7 +53,7 @@ class ClienteServiceResponse(ClientRequest):
     emailService: EmailConfigurationRequest | None
 
 
-class ClientResponse(ClientRequest):
+class ClientResponse(ClientModel):
 
     class Config:
         from_attributes = True
@@ -62,3 +68,20 @@ class ClientResponse(ClientRequest):
                 emails = [item.email for item in v if getattr(item, "is_active", True)]
                 return emails if emails else None
             return v
+
+
+class ClientPaginateData(BaseModel):
+    id: int
+    name: str
+    telefono: Optional[str]
+    emailService: bool
+    sftService: bool
+    email: Optional[List[EmailStr]] | None
+
+
+class PaginatedClientResponse(BaseModel):
+    data: List[ClientPaginateData]
+    totalRecords: int
+    hasNextPage: bool
+    page: int
+    limit: int

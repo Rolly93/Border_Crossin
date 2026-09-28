@@ -36,8 +36,8 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
 
 
   async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<ICliente>> {
-    const response = await this.api.get<PaginatedResponse<ICliente>>(`/${this.resourcePath}/`, {
-      params: { page, limit },
+    const response = await this.api.get<PaginatedResponse<ICliente>>(`/${this.resourcePath}`, {
+      params: { page: page, limit: limit },
     });
     if (response.status === 200) {
       return response.data;

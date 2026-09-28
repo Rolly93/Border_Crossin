@@ -2,6 +2,8 @@ from annotated_types import UpperCase
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Literal
+from repository.email_repository import EmailRepository
+from schema.client_schema import MetricsClientResponse
 from schema.sftp_schema import SftpConfiRequst
 from repository.sftp_repository import SftpRepository
 from schema.shipment_shcema import ShipmentUpdate
@@ -23,6 +25,7 @@ class ClienteService:
     def __init__(self, db: Session):
         self._db = ClienteRepository(db)
         self._sftp_service = SftpRepository(db)
+        self._email_service = EmailRepository(db)
 
     def register_client(self, data: ClientRequest) -> dict:
         new_client = self.create_client(data)
@@ -36,7 +39,7 @@ class ClienteService:
         self._db.client_exist(data.name)
         new_client = Client(
             name=data.name,
-            telefono=data.telefono,
+            phonenumber=data.telefono,
             sftService=data.sftService,
             emailService=data.emailService,
         )
@@ -84,9 +87,22 @@ class ClienteService:
     def get_all_clients(self, page: int = 1, limit: int = 10):
         clients = self._db.get_all_clients(page, limit)
 
-        return [ClientModel.model_validate(client) for client in clients]
+        return clients
 
     def get_clients(self) -> List[ClientModel]:
         clients = self._db.get_clients()
 
         return [ClientModel.model_validate(client) for client in clients]
+
+    def get_metrics(self) -> MetricsClientResponse:
+        sftp_data = self._sftp_service.get_all_sftp_data()
+        email_data = self._email_service.get_all_email_data()
+
+        client_data = self._db.get_clients()
+
+        metrics = MetricsClientResponse(
+            total_clients=len(client_data),
+            email_service=len(email_data),
+            sftp_service=len(sftp_data),
+        )
+        return metrics

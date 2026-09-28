@@ -19,7 +19,7 @@ class Env:
     VITE_USE_MOCK = bool(os.getenv("VITE_USE_MOCK", False))
     USER_EMAIL = str(os.getenv("USER_EMAIL", False))
     USER_PASSWORD = str(os.getenv("USER_PASSWORD", False))
-    SECRET_KEY = str(os.getenv("SECRET_KEY", ""))
+    SECRET_KEY = os.getenv("SECRET_KEY", "").strip('"').strip("'")
     ALGORITHM = str(os.getenv("ALGORITHM", "HS256"))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1340)

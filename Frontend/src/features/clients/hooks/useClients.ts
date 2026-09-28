@@ -28,7 +28,6 @@ export function useClients() {
   const [metrics, setMetrics] = useState<ClientMetricsResponse>(
     {
       totalClients: 0,
-      activeClient: 0,
       emailService: 0,
       sftpService: 0,
     }
@@ -60,7 +59,7 @@ export function useClients() {
   const fetchClientsMetrics = async () => {
     try {
       const data = await clientService.getMetrics();
-      console.log(data);
+
 
       setMetrics(data);
     } catch (err) {
