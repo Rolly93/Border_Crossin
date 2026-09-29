@@ -20,12 +20,15 @@ export function usePaginatedList<T>(
       setError(null);
       const response = await fetchFn(targetPage, pageSize);
 
+
       const items: T[] = Array.isArray(response) ? response : response.data;
       const nextAvailable = Array.isArray(response) ? false : (response?.hasNextPage ?? false);
+
 
       setHasMore(nextAvailable);
       setData((prev) => (targetPage === 1 ? items : [...prev, ...items]));
       setPage(targetPage);
+
     } catch (err: any) {
       setError(err?.message || 'Failed to fetch data');
     } finally {

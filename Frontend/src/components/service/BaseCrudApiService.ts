@@ -5,7 +5,8 @@ export abstract class BaseCrudApiService<T> extends BaseApiService
   implements IBaseService<T> {
 
   async getAll(): Promise<T[]> {
-    const response = await this.api.get<T[]>(`${this.resourcePath}`);
+
+    const response = await this.api.get<T[]>(`/${this.resourcePath}`);
 
     return response.data
 
@@ -18,7 +19,6 @@ export abstract class BaseCrudApiService<T> extends BaseApiService
 
   async insert(data: T): Promise<T> {
     try {
-      console.log(`${this.resourcePath}/create`, data);
 
       const response = await this.api.post<T>(`${this.resourcePath}/create`, data);
       return response.data;

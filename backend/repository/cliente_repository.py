@@ -36,7 +36,7 @@ class ClienteRepository(BaseRepository[Client]):
                 ClientResponse(
                     id=client.id,
                     name=client.name,
-                    telefono=client.te,
+                    phonenumber=client.phonenumber,
                     sftService=client.is_ftp,
                     emailService=client.is_email_service,
                     email=active_emails,

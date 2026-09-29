@@ -36,11 +36,11 @@ class JWTService:
         )
 
         to_encode = {
+            "client_ip": ip,
             "sub": str(sub),
             "iat": now,
             "exp": expire,
             "jti": secrets.token_urlsafe(16),
-            "client_ip": ip,
         }
 
         if extra_data:

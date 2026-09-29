@@ -1,5 +1,8 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Query, status
 from schema.client_schema import (
+    ClientModel,
     MetricsClientResponse,
     PaginatedClientResponse,
 )
@@ -13,6 +16,15 @@ router = APIRouter(
 )
 
 
+@router.get("/all", status_code=status.HTTP_200_OK, response_model=List[ClientModel])
+async def get_all_clients(
+    service: ClientSvc,
+    current_user: CurrentUser,
+):
+    client = service.get_clients()
+    return service.get_clients()
+
+
 @router.get("/", status_code=status.HTTP_200_OK, response_model=PaginatedClientResponse)
 async def client_dashboard(
     service: ClientSvc,
@@ -20,9 +32,8 @@ async def client_dashboard(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=10, ge=1, le=100),
 ) -> PaginatedClientResponse:
-    paginate = service.get_all_clients(page=page, limit=limit)
-    print(paginate)
-    return paginate
+
+    return service.get_all_clients(page=page, limit=limit)
 
 
 @router.get(
@@ -32,8 +43,7 @@ async def get_clients(
     service: ClientSvc,
     current_user: CurrentUser,
 ):
-    metrics = service.get_metrics()
-    return metrics
+    return service.get_metrics()
 
 
 @router.post(

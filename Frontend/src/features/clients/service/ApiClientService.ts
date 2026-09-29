@@ -14,6 +14,14 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
   constructor() {
     super('client');
   }
+
+  override async getAll(): Promise<ICliente[]> {
+    const response = await this.api.get<ICliente[]>(`/${this.resourcePath}/all`);
+
+    return response.data
+
+  }
+
   async getMetrics(): Promise<MetricsResponse> {
     try {
       const response = await this.api.get<MetricsResponse>(`${this.resourcePath}/metrics`);
@@ -36,10 +44,13 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
 
 
   async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<ICliente>> {
-    const response = await this.api.get<PaginatedResponse<ICliente>>(`/${this.resourcePath}`, {
+    const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
       params: { page: page, limit: limit },
     });
+    console.log(response);
+
     if (response.status === 200) {
+
       return response.data;
     }
     return {

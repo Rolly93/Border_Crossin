@@ -39,7 +39,7 @@ class ClienteService:
         self._db.client_exist(data.name)
         new_client = Client(
             name=data.name,
-            phonenumber=data.telefono,
+            phonenumber=data.phonenumber,
             sftService=data.sftService,
             emailService=data.emailService,
         )
@@ -91,8 +91,7 @@ class ClienteService:
 
     def get_clients(self) -> List[ClientModel]:
         clients = self._db.get_clients()
-
-        return [ClientModel.model_validate(client) for client in clients]
+        return [c for c in clients]
 
     def get_metrics(self) -> MetricsClientResponse:
         sftp_data = self._sftp_service.get_all_sftp_data()
@@ -101,8 +100,8 @@ class ClienteService:
         client_data = self._db.get_clients()
 
         metrics = MetricsClientResponse(
-            total_clients=len(client_data),
-            email_service=len(email_data),
-            sftp_service=len(sftp_data),
+            totalClients=len(client_data),
+            emailService=len(email_data),
+            sftpService=len(sftp_data),
         )
         return metrics

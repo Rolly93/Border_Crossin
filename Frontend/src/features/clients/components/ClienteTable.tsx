@@ -75,7 +75,6 @@ export function ClientTable() {
     deleteCliente(id)
   }
 
-  console.log(metrics);
 
 
   return (

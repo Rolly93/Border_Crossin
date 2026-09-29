@@ -38,6 +38,8 @@ export function useClients() {
   const getClientList = async (): Promise<ClientOption[] | null> => {
     try {
       const data = await clientService.getAll();
+      console.log(data);
+
       const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
       const clienteName = safeData.map((c: any) => ({
         name: c.name,
@@ -47,7 +49,7 @@ export function useClients() {
       setClientsName(clienteName);
 
       return clienteName
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting client names:", error)
       throw error;
     }

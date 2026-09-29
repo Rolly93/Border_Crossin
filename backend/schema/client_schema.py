@@ -6,29 +6,21 @@ import re
 
 
 class MetricsClientResponse(BaseModel):
-    total_clients: int
-    email_service: int
-    sftp_service: int
+    totalClients: int
+    emailService: int
+    sftpService: int
 
 
 class ClientModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: Optional[int]
     name: str
-    telefono: Optional[str]
+    phonenumber: Optional[str]
     sftService: bool
     emailService: bool
 
     email: Optional[list[EmailStr]] = None
     name: str = Field(..., min_length=2, max_length=100)
-
-    @field_validator("name")
-    @classmethod
-    def validate_company_name(cls, v: str) -> str:
-        v = re.sub(r"/s+", " ", v)
-        if not re.search(r"[a-zA-Z0-9\u00C0-\u024F]", v):
-            raise ValueError("Company name must contain letters or numbers")
-        return v
 
 
 class ClientRequest(ClientModel):
