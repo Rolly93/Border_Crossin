@@ -10,15 +10,14 @@ interface ClientOption {
 }
 export function useClients() {
 
-  const fetchFn = useCallback((page: number, size: number) => clientService.getPaginated(page, size), []
-  )
+  const fetchFn = useCallback((page: number, size: number) => clientService.getPaginated(page, size), [])
 
   const {
     data: clients,
     setData: setClients, hasMore,
     loading,
     error,
-    setError,
+    setError, fetchPage,
     fetchNextPage, setLoading
 
   } = usePaginatedList<ICliente>(fetchFn);
@@ -38,7 +37,6 @@ export function useClients() {
   const getClientList = async (): Promise<ClientOption[] | null> => {
     try {
       const data = await clientService.getAll();
-      console.log(data);
 
       const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
       const clienteName = safeData.map((c: any) => ({
@@ -101,20 +99,17 @@ export function useClients() {
   const updateClient = async (id: number, updatedData: ICliente) => {
     try {
       const updated = await clientService.update(id, updatedData)
-      setClients((prev) =>
-        prev.map((c) => (c.id === id ? updated : c)));
       await fetchClientsMetrics();
       return updated
     } catch (error: any) {
-      console.error("Error updating client:", error.message)
+      console.error("Error updating client:", error)
     }
   }
 
   const deleteCliente = async (id: number) => {
     try {
       const clientDelete = await clientService.delete(id)
-
-      setClients((prev) => prev.filter((c) => (c.id !== clientDelete.id)))
+      setClients((prev) => prev.filter((c) => c && c.id !== id));
       await fetchClientsMetrics();
       return clientDelete
     } catch (error) {
@@ -131,7 +126,7 @@ export function useClients() {
     loading,
     error,
     hasMore,
-    fetchNextPage,
+    fetchNextPage, fetchPage,
     addClient,
     updateClient,
     deleteCliente, setError,

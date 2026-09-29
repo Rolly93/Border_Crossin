@@ -47,7 +47,6 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
     const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
       params: { page: page, limit: limit },
     });
-    console.log(response);
 
     if (response.status === 200) {
 

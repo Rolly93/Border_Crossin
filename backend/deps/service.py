@@ -2,7 +2,7 @@ from fastapi import Depends
 from typing import Annotated
 from sqlalchemy.orm import Session
 from utility.employee_service import EmployeeService
-from databse import get_db
+from database import get_db
 from utility.shipment_service import ShipmentService
 from utility.user_service import UserService
 from utility.cliente_service import ClienteService

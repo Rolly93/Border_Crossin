@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 interface PaginatedResponse<T> {
   data: T[];
@@ -6,8 +6,7 @@ interface PaginatedResponse<T> {
 }
 
 export function usePaginatedList<T>(
-  fetchFn: (page: number, pageSize: number) => Promise<PaginatedResponse<T> | T[]>,
-  pageSize = 10
+  fetchFn: (page: number, pageSize: number) => Promise<PaginatedResponse<T> | T[]>, pageSize = 10
 ) {
   const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -36,11 +35,20 @@ export function usePaginatedList<T>(
     }
   }, [fetchFn, pageSize]);
 
+
+
   const fetchNextPage = useCallback(() => {
     if (!loading && hasMore) {
-      fetchPage(page + 1);
+      setPage((prevPage) => {
+        fetchPage(prevPage + 1);
+        return prevPage;
+      });
     }
-  }, [loading, hasMore, page, fetchPage]);
+  }, [loading, hasMore, fetchPage]);
+
+  useEffect(() => {
+    fetchPage(1);
+  }, [fetchPage]);
 
   const reset = useCallback(() => {
     setPage(1);

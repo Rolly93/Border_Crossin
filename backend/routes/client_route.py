@@ -2,9 +2,9 @@ from typing import List
 
 from fastapi import APIRouter, Depends, Query, status
 from schema.client_schema import (
-    ClientModel,
     MetricsClientResponse,
     PaginatedClientResponse,
+    ClientOptionResponse,
 )
 from deps.service import ClientSvc, get_client_service
 from deps.auth import CurrentUser, get_current_user
@@ -16,13 +16,14 @@ router = APIRouter(
 )
 
 
-@router.get("/all", status_code=status.HTTP_200_OK, response_model=List[ClientModel])
+@router.get(
+    "/all", status_code=status.HTTP_200_OK, response_model=List[ClientOptionResponse]
+)
 async def get_all_clients(
     service: ClientSvc,
     current_user: CurrentUser,
 ):
-    client = service.get_clients()
-    return service.get_clients()
+    return service.get_client_dropdown_options()
 
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=PaginatedClientResponse)
@@ -54,17 +55,27 @@ async def new_client(
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):
-    return service.register_client(data=data)
+    return service.create_client(data=data)
 
 
-@router.patch(
+@router.put(
     "/update",
     status_code=status.HTTP_200_OK,
 )
 async def update_client(
     data: ClientRequest,
+    client_id: int,
     service: ClienteService = Depends(get_client_service),
 ):
-    if not data.id:
+    if not client_id:
         return
-    return service.update_client_info(client_id=data.id, data=data)
+    return service.update_client_info(client_id=client_id, data=data)
+
+
+@router.delete("/delete/{client_id}", status_code=status.HTTP_200_OK)
+async def delete(
+    client_id: int,
+    service: ClienteService = Depends(get_client_service),
+):
+    deleted_client = service.delete_client(client_id=client_id)
+    return deleted_client

@@ -12,7 +12,10 @@ export abstract class BaseCrudApiService<T> extends BaseApiService
 
   }
   async update(id: number, data: T): Promise<T> {
-    const response = await this.api.put<T>(`${this.resourcePath}/${id}/update/`, data)
+
+    const response = await this.api.put<T>(`${this.resourcePath}/update`, data, {
+      params: { client_id: id }
+    })
 
     return response.data
   }
@@ -51,9 +54,7 @@ export abstract class BaseCrudApiService<T> extends BaseApiService
   }
   async delete(id: number): Promise<T> {
 
-    const respose = await this.api.delete<T>(`${this.resourcePath}/delete`, {
-      data: { id }
-    })
+    const respose = await this.api.delete<T>(`${this.resourcePath}/delete/${id}`)
     return respose.data
   }
 

@@ -36,7 +36,14 @@ class SftpInactivateRequest(SftpResponse):
     pass
 
 
-class SftpConfigurationRequest(SftpResponse): ...
+class SftpConfigurationRequest(BaseModel):
+    host: str
+    client_id: int
+    username: str
+    port: int
+    root_folder: str
+    remote_folder: str
+    encrypted_password: str
 
 
 class sftpSendFile(SftpResponse):

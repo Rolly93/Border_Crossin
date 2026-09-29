@@ -19,7 +19,7 @@ export function ClientTable() {
     loading,
     hasMore,
     error,
-    fetchNextPage,
+    fetchNextPage, fetchPage,
     addClient,
     updateClient, setError,
     deleteCliente, metrics } = useClients()
@@ -49,6 +49,8 @@ export function ClientTable() {
   };
 
   function handleSaveClient(formData: any) {
+    console.log(formData);
+
     const clienData: ICliente = {
       id: formData.id || null,
       name: formData.companyName,
@@ -91,8 +93,11 @@ export function ClientTable() {
           <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
             Agregar Cliente
           </AtomButton>
-          <AtomButton variant="default" leftSection={<IconRefresh size={16} />}>
-            Actualizar
+          <AtomButton
+            variant="default"
+            leftSection={<IconRefresh size={16} />}
+            onClick={() => fetchPage(1)}
+          >            Actualizar
           </AtomButton>
         </Group>
       </Group>

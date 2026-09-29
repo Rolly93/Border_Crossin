@@ -10,7 +10,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from databse import Base
+from database import Base
 from schema import EventCategory
 from datetime import date, datetime
 
@@ -59,13 +59,22 @@ class Client(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
-    sftService: Mapped[bool] = mapped_column(Boolean, default=False)
-    emailService: Mapped[bool] = mapped_column(Boolean, default=False)
-    phonenumber: Mapped[str] = mapped_column(Integer, unique=True, nullable=True)
+    sftService: Mapped[bool | None] = mapped_column(
+        Boolean, default=False, nullable=True
+    )
+    emailService: Mapped[bool | None] = mapped_column(
+        Boolean, default=False, nullable=True
+    )
+    phonenumber: Mapped[str | None] = mapped_column(
+        String(50), unique=False, nullable=True
+    )
+    still_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     sftp_services = relationship("SftpService", back_populates="client")
     shipment_assigns = relationship("ShipmentAssign", back_populates="client")
-    email_recipients = relationship("ClientEmailRecipient", back_populates="client")
+    email_recipients = relationship(
+        "ClientEmailRecipient", back_populates="client", cascade="all, delete-orphan"
+    )
 
 
 class SftpService(Base):
@@ -252,7 +261,7 @@ class ShipmentEventModel(Base):
     )
     capture_by_id: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    last_modify: Mapped[Date] = mapped_column(
+    last_modify: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.current_timestamp()
     )
     new_seal: Mapped[str] = mapped_column(String(50), default="N/A")

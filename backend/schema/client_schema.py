@@ -11,36 +11,39 @@ class MetricsClientResponse(BaseModel):
     sftpService: int
 
 
+class ClientOptionResponse(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
 class ClientModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    id: Optional[int]
-    name: str
+    id: Optional[int] = None
     phonenumber: Optional[str]
     sftService: bool
     emailService: bool
-
     email: Optional[list[EmailStr]] = None
     name: str = Field(..., min_length=2, max_length=100)
 
 
-class ClientRequest(ClientModel):
-    ...
-    """
-    Client Request Scshema
-
-    Fields:
-    - name (str): Full name of the client
-    - email (str): Contact email address
-    - sftp_service (bool) : contract SFTP service?
-    - email_service (bool) : contract email service?
-    """
+class ClientRequest(BaseModel):
+    phonenumber: Optional[str] = "N/A"
+    sftService: Optional[bool] = False
+    emailService: Optional[bool] = False
+    email: Optional[list[EmailStr]] = None
+    name: str = Field(min_length=2, max_length=100)
 
 
 class EmailConfigurationRequest(BaseModel):
     email: List[EmailStr]
 
 
-class ClienteServiceResponse(ClientRequest):
+class ClienteServiceResponse(BaseModel):
+    id: int
+    name: str
     sftService: SftpConfigurationRequest | None
     emailService: EmailConfigurationRequest | None
 
@@ -66,8 +69,8 @@ class ClientPaginateData(BaseModel):
     id: int
     name: str
     telefono: Optional[str]
-    emailService: bool
-    sftService: bool
+    sftService: Optional[bool] = False
+    emailService: Optional[bool] = False
     email: Optional[List[EmailStr]] | None
 
 
