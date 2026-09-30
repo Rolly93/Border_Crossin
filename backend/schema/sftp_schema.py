@@ -37,6 +37,7 @@ class SftpInactivateRequest(SftpResponse):
 
 
 class SftpConfigurationRequest(BaseModel):
+    id: int
     host: str
     client_id: int
     username: str

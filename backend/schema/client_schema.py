@@ -69,6 +69,7 @@ class ClientPaginateData(BaseModel):
     id: int
     name: str
     telefono: Optional[str]
+    still_active: Optional[bool] = False
     sftService: Optional[bool] = False
     emailService: Optional[bool] = False
     email: Optional[List[EmailStr]] | None

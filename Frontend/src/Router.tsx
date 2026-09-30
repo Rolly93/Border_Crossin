@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import { DashBoard } from './pages/DashBoard';
 import { SftpConnection } from './pages/SftpConnection';
 import { Layout } from './components/layout/Layout';
@@ -24,6 +24,7 @@ const router = createBrowserRouter([
       {
         element: <Layout />,
         children: [
+          { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: '/dashboard', element: <DashBoard />, },
           { path: '/sftp_connection', element: <SftpConnection /> },
           { path: '/employee', element: <EmployeePage /> },

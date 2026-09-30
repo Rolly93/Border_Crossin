@@ -177,7 +177,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                 <form onSubmit={form.onSubmit(handleSubmit)}>
                     <Stack>
                         <TextInput
-                            label="Contact list name *"
+                            label="Company Name"
                             placeholder="Nombre de la empresa"
                             {...form.getInputProps('companyName')}
                         />

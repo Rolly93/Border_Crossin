@@ -8,6 +8,7 @@ export interface ClientMetricsResponse {
 }
 
 export interface IClientService extends IBaseService<ICliente> {
+  active(id: number): Promise<ICliente>
   getMetrics(): Promise<ClientMetricsResponse>;
   getPaginated(page: number, limit: number): Promise<PaginatedResponse<ICliente>>
 }

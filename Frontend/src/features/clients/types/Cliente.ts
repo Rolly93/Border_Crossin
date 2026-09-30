@@ -3,7 +3,7 @@ export interface ICliente {
     id: number;
     name: string;
     telefono: string;
-    estatus: boolean;
+    still_active: boolean;
     sftService: boolean;
     emailService: boolean;
     email?: string[] | null

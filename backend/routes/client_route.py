@@ -79,3 +79,12 @@ async def delete(
 ):
     deleted_client = service.delete_client(client_id=client_id)
     return deleted_client
+
+
+@router.put("/reactive/{client_id}", status_code=status.HTTP_200_OK)
+async def reactive(
+    client_id: int,
+    service: ClienteService = Depends(get_client_service),
+):
+    reactive_client = service.reactive_client(client_id=client_id)
+    return reactive_client

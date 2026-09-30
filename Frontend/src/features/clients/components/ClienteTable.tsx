@@ -22,7 +22,7 @@ export function ClientTable() {
     fetchNextPage, fetchPage,
     addClient,
     updateClient, setError,
-    deleteCliente, metrics } = useClients()
+    deleteCliente, reActiveCliente, metrics } = useClients()
 
   const observer = useRef<IntersectionObserver | null>(null)
   const lastElementRef = useCallback((node: HTMLTableRowElement | null) => {
@@ -48,26 +48,22 @@ export function ClientTable() {
     openModal();
   };
 
-  function handleSaveClient(formData: any) {
-    console.log(formData);
-
+  async function handleSaveClient(formData: any) {
     const clienData: ICliente = {
       id: formData.id || null,
       name: formData.companyName,
       telefono: formData.phoneNumber,
       email: formData.email,
-      estatus: true,
+      still_active: true,
       sftService: formData.sftService,
       emailService: formData.emailService,
     };
 
     if (selectedClient) {
-      updateClient(selectedClient.id, clienData)
+      return await updateClient(selectedClient.id, clienData);
     } else {
-
-      addClient(clienData)
+      return await addClient(clienData);
     }
-
   }
 
   function handelDeleteClient(id: number) {
@@ -75,6 +71,13 @@ export function ClientTable() {
       return;
     }
     deleteCliente(id)
+  }
+  function handelReactive(id: number) {
+    if (!id) {
+      return;
+    }
+    reActiveCliente(id)
+
   }
 
 
@@ -137,6 +140,7 @@ export function ClientTable() {
                 cliente={cliente}
                 onClick={handleSelectClient}
                 onDelete={handelDeleteClient}
+                onActivate={handelReactive}
               />)
             }))}
             {loading && <TableSkeletonRows rows={4} columns={6} />}

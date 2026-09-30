@@ -70,7 +70,9 @@ class Client(Base):
     )
     still_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    sftp_services = relationship("SftpService", back_populates="client")
+    sftp_services = relationship(
+        "SftpService", back_populates="client", cascade="all, delete-orphan"
+    )
     shipment_assigns = relationship("ShipmentAssign", back_populates="client")
     email_recipients = relationship(
         "ClientEmailRecipient", back_populates="client", cascade="all, delete-orphan"

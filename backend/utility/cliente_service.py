@@ -11,7 +11,6 @@ from schema.sftp_schema import SftpConfiRequst
 from schema import (
     ClientRequest,
     ClienteServiceResponse,
-    ClientModel,
     SftpConfigurationRequest,
     EmailConfigurationRequest,
 )
@@ -31,12 +30,12 @@ class ClienteService:
         return self._sftp_service.insert_sftp_service(new_connection)
 
     def create_client(self, data: ClientRequest) -> Client:
-        """
-        Delegates schema parsing, parent record creation, and child email setup
-        to ClienteRepository.create_new_client.
-        """
-        print("2nd entry", data)
-        return self._db.create_new_client(data)
+        new_client = self._db.create_new_client(data)
+
+        emails_to_add = data.email if data.email else []
+        if new_client.emailService and emails_to_add:
+            self._db.add_emails_to_client(new_client.id, emails_to_add)
+        return new_client
 
     def update_client_info(self, client_id: int, data: ClientRequest) -> Client:
         client = self._db.get_client_by_id(client_id)
@@ -50,6 +49,8 @@ class ClienteService:
         client.phonenumber = data.phonenumber
         client.sftService = data.sftService
         client.emailService = data.emailService
+        if client.emailService and data.email:
+            self._db.add_emails_to_client(client_id, data.email)
 
         return self._db.save(client)
 
@@ -67,7 +68,7 @@ class ClienteService:
         sftp_service: SftpConfigurationRequest | None = None
         email_service: EmailConfigurationRequest | None = None
 
-        if service_type in ["sftp_service", "sft_service"]:
+        if service_type == "sftp_service":
             sftp_data = self._sftp_service.get_sftp_data(client.id)
             if sftp_data:
                 sftp_service = SftpConfigurationRequest.model_validate(
@@ -94,7 +95,30 @@ class ClienteService:
         return self._db.get_clients_names()
 
     def delete_client(self, client_id: int):
-        return self._db.delete_client(client_id)
+        client_to_inactive = self._db.get_client_by_id(client_id)
+        if client_to_inactive is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Client with id {client_id} not found",
+            )
+
+        self._db.toggle_client_status(client_to_inactive.id, False)
+        self._email_repo.toggle_client_emails(client_to_inactive.id, False)
+        self._db.save(client_to_inactive)
+        return
+
+    def reactive_client(self, client_id: int):
+        client_to_reactive = self._db.get_client_by_id(client_id)
+        if client_to_reactive is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Client with id {client_id} not found",
+            )
+
+        self._db.toggle_client_status(client_to_reactive.id, True)
+        self._email_repo.toggle_client_emails(client_to_reactive.id, True)
+        self._db.save(client_to_reactive)
+        return
 
     def get_metrics(self) -> MetricsClientResponse:
         sftp_data = self._sftp_service.get_all_sftp_data()

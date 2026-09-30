@@ -62,10 +62,10 @@ export function useClients() {
 
 
       setMetrics(data);
-    } catch (err) {
+    } catch (error: any) {
 
-      setError("Error al cargar datos");
-      throw err
+      setError(`Error al cargar datos ${error.message}`);
+      throw error
     }
   };
 
@@ -80,44 +80,63 @@ export function useClients() {
 
   const addClient = async (newClientData: ICliente): Promise<ICliente> => {
     try {
-      console.log(newClientData);
 
       const createClient = await clientService.insert(newClientData)
-
-      setClients((prev) => [createClient, ...prev])
+      await fetchPage(1);
       await fetchClientsMetrics();
       return createClient;
-    } catch (err: any) {
-      console.error("Error creating client:", err)
-      setError(err.message)
-      throw err;
+    } catch (error: any) {
+      console.error("Error creating client:", error)
+      setError(error.message)
+      throw error;
 
     }
 
   }
+
+
 
   const updateClient = async (id: number, updatedData: ICliente) => {
     try {
-      const updated = await clientService.update(id, updatedData)
-      await fetchClientsMetrics();
-      return updated
-    } catch (error: any) {
-      console.error("Error updating client:", error)
-    }
-  }
+      const updated = await clientService.update(id, updatedData);
+      await fetchPage(1);
 
+      await fetchClientsMetrics();
+      return updated;
+    } catch (error: any) {
+      console.error("Error updating client:", error);
+      setError(error.message);
+      throw error;
+    }
+  };
   const deleteCliente = async (id: number) => {
     try {
       const clientDelete = await clientService.delete(id)
-      setClients((prev) => prev.filter((c) => c && c.id !== id));
+      await fetchPage(1);
       await fetchClientsMetrics();
       return clientDelete
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating client:", error)
+      setError(error.message)
+      throw error
     }
 
   }
 
+  const reActiveCliente
+    = async (id: number) => {
+      try {
+        const clientDelete = await clientService.active(id)
+        await fetchPage(1);
+        await fetchClientsMetrics();
+        return clientDelete
+      } catch (error: any) {
+        console.error("Error updating client:", error)
+        setError(error.message)
+        throw error
+      }
+
+    }
 
 
 
@@ -130,7 +149,7 @@ export function useClients() {
     addClient,
     updateClient,
     deleteCliente, setError,
-    metrics,
+    metrics, reActiveCliente,
     clientsName
   } as const;
 }

@@ -26,32 +26,24 @@ class ClienteRepository(BaseRepository[Client]):
         results = self._db.execute(stmt).all()
         return [{"id": row.id, "name": row.name} for row in results]
 
-    def delete_client(self, id: int):
-        stmt = self._db.query(Client).where(Client.id == id).first()
-        self.delete(stmt)
+    def toggle_client_status(self, id: int, status: bool):
+        self._db.query(Client).where(Client.id == id).update(
+            {"still_active": status}, synchronize_session=False
+        )
 
     def add_emails_to_client(self, client_id: int, client_emails: list[str]):
-        """Delegates completely to EmailRepository."""
-        if not client_emails:
-            return
 
-        self._emailrepo.add_email(client_id, client_emails)
+        self._emailrepo.sync_client_emails(client_id, client_emails)
 
     def create_new_client(self, client_data: ClientRequest) -> Client:
         """
         Creates a client and handles initial email recipient setup cleanly.
         """
-
-        emails_to_add = client_data.email if client_data.email else []
-
         client_dict = client_data.model_dump(exclude={"email"})
         new_client = Client(**client_dict)
 
         saved_client = self.save(new_client)
-        print("client data", client_data)
-        if saved_client.emailService and emails_to_add:
-            self.add_emails_to_client(saved_client.id, emails_to_add)
-            self._db.refresh(saved_client)
+        self._db.refresh(saved_client)
 
         return saved_client
 
@@ -95,6 +87,7 @@ class ClienteRepository(BaseRepository[Client]):
             formatted_clients.append(
                 ClientPaginateData(
                     id=client.id,
+                    still_active=client.still_active,
                     name=client.name,
                     telefono=str(client.phonenumber) if client.phonenumber else None,
                     emailService=client.emailService,

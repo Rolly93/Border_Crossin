@@ -22,6 +22,14 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
 
   }
 
+  async active(id: number): Promise<ICliente> {
+
+    const response = await this.api.put<ICliente>(`/${this.resourcePath}/reactive/${id}`);
+
+    return response.data
+
+
+  }
   async getMetrics(): Promise<MetricsResponse> {
     try {
       const response = await this.api.get<MetricsResponse>(`${this.resourcePath}/metrics`);
@@ -47,6 +55,7 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
     const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
       params: { page: page, limit: limit },
     });
+    console.log(response.data);
 
     if (response.status === 200) {
 
