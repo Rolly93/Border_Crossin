@@ -3,7 +3,7 @@ import { useForm } from '@mantine/form';
 import {
   TextInput,
   Select,
-  Button,
+
   Paper,
   Title,
   Alert,
@@ -13,17 +13,19 @@ import { DateInput } from '@mantine/dates';
 import { validateRFC } from '@/components/utils/businessRules';
 import { EmployeeFormProps, IEmployeeFormsValues } from '../type/employee.interface';
 import { useEmployee } from '../hook/useEmployee';
+import { AtomButton } from '@/components/atoms/AtomButton';
 
-export function EmployeeForm({ onSuccess, onSetRfc }: EmployeeFormProps) {
+export function EmployeeForm({ onSuccess, onSetRfc, onClose, employee }: EmployeeFormProps) {
   const navigate = useNavigate();
   const { createNewEmployee, error, loading, setError } = useEmployee()
   const form = useForm<IEmployeeFormsValues>({
     initialValues: {
-      firstName: '',
-      lastName: '',
-      role: '',
-      rfc: '',
-      dateOfBirth: new Date(),
+      firstName: employee?.firstName || '',
+      lastName: employee?.lastName || '',
+      hireDate: employee?.hireDate || '',
+      role: employee?.role || '',
+      rfc: employee?.rfc || '',
+      dateOfBirth: employee?.dateOfBirth || new Date(),
     }
   });
 
@@ -35,19 +37,20 @@ export function EmployeeForm({ onSuccess, onSetRfc }: EmployeeFormProps) {
         ...values,
         dateOfBirth: values.dateOfBirth ? new Date(values.dateOfBirth) : new Date(),
       };
+
       const { isValid, errors } = validateRFC(formattedValues);
 
       if (!isValid && errors.length > 0) {
         setError(errors);
         return;
       }
+
+
       await createNewEmployee(values)
+
       if (onSuccess && onSetRfc) {
         onSuccess()
         onSetRfc(values.rfc)
-      } else {
-
-        navigate('/sftp_connection');
       }
     } catch (err: any) {
       setError(err.message);
@@ -99,20 +102,23 @@ export function EmployeeForm({ onSuccess, onSetRfc }: EmployeeFormProps) {
           placeholder="Select job role"
           required
           mb="xl"
-          data={[
-            { value: 'operator', label: 'Operator' },
-            { value: 'csr', label: 'Csr' },
-          ]}
+          data={
+            onSuccess ? [{ value: 'csr', label: 'Csr' },
+            ] :
+              [
+                { value: 'operator', label: 'Operator' },
+                { value: 'csr', label: 'Csr' },
+              ]}
           {...form.getInputProps('role')}
         />
 
         <Group justify="flex-end">
-          <Button variant="default" onClick={() => navigate(-1)}>
+          <AtomButton variant="default" onClick={() => onSuccess ? navigate(-1) : onclose} >
             Cancel
-          </Button>
-          <Button type="submit" loading={loading}>
+          </AtomButton>
+          <AtomButton type="submit" loading={loading}>
             Save Employee
-          </Button>
+          </AtomButton>
         </Group>
       </form>
     </Paper>

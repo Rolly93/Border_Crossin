@@ -8,8 +8,7 @@ export interface IEmployee {
   dateOfBirth: Date;
   rfc: string;
   role: string;
-  token?: string;
-  detail?: string;
+  hireDate?: string;
 
 }
 
@@ -25,6 +24,8 @@ export interface IEmployeeFormsValues extends IEmployeeCreate {
 export interface EmployeeFormProps {
   onSuccess?: () => void;
   onSetRfc?: (rfc: string) => void;
+  onClose?: () => void
+  employee?: IEmployeeCreate
 }
 
 

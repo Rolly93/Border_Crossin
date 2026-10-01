@@ -2,13 +2,14 @@ import {
   PasswordInput,
   Alert,
   Select,
-  Button,
   Stack,
   Group,
   Checkbox,
 } from '@mantine/core';
 import { AtomTextInput } from '@/components/atoms/AtomTextInput';
 import { useLoginForm } from '../hook/useLoginForm';
+import { AtomButton } from '@/components/atoms/AtomButton';
+import { useNavigate } from 'react-router-dom';
 
 interface NewuserFormProps {
   onSuccess?: () => void;
@@ -17,7 +18,7 @@ interface NewuserFormProps {
 
 export function NewuserForm({ onSuccess, onRfc }: NewuserFormProps) {
   const { loading, error, setUserData, userData, setError, signIn } = useLoginForm();
-
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -91,10 +92,12 @@ export function NewuserForm({ onSuccess, onRfc }: NewuserFormProps) {
             setUserData((prev) => ({ ...prev, isAdmin: isChecked }));
           }}
         />
-
-        <Button type="submit" loading={loading} fullWidth mt="sm" size="md">
+        <AtomButton variant="default" onClick={() => onSuccess ? navigate('/login') : onclose} >
+          Cancel
+        </AtomButton>
+        <AtomButton type="submit" loading={loading} fullWidth mt="sm" size="md" >
           Create User Account
-        </Button>
+        </AtomButton>
       </Stack>
     </form>
   );
