@@ -21,7 +21,6 @@ export function NewuserForm({ onSuccess, onRfc }: NewuserFormProps) {
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       await signIn(userData);
 
