@@ -135,8 +135,8 @@ class UnitTruck(Base):
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     assigned_to: Mapped[int] = mapped_column(Integer, ForeignKey("employee.id"))
-    assigned_day: Mapped[date] = mapped_column(
-        Date, nullable=False, server_default=func.current_timestamp()
+    assigned_day: Mapped[DateTime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp()
     )
 
     assigned_employee = relationship("Employee", back_populates="trucks")
@@ -150,8 +150,8 @@ class Trailer(Base):
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     seal: Mapped[str] = mapped_column(String(50), nullable=False, default="N/A")
-    assigned_day: Mapped[date] = mapped_column(
-        Date, nullable=False, server_default=func.current_timestamp()
+    assigned_day: Mapped[DateTime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp()
     )
 
     shipment_assigns = relationship("ShipmentAssign", back_populates="trailer")
@@ -221,8 +221,8 @@ class ShipmentAssign(Base):
     )
     unit_truck_id: Mapped[int] = mapped_column(Integer, ForeignKey("unit_truck.id"))
 
-    assigned_day: Mapped[date] = mapped_column(
-        Date, nullable=False, server_default=func.current_timestamp()
+    assigned_day: Mapped[DateTime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp()
     )
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
