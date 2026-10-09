@@ -8,7 +8,7 @@ class UserRepository(BaseRepository[User]):
     def __init__(self, db: Session):
         self._db = db
 
-    def get_email(self, email: str) -> User:
+    def get_email(self, email: str) -> User | None:
         return self._db.query(User).filter(User.email == email).first()
 
     def get_valid_admin(self, id: int) -> bool:
@@ -19,9 +19,9 @@ class UserRepository(BaseRepository[User]):
         )
 
     def get_all_users(self) -> list[User] | None:
-        return self._db.query(User).first()
+        return self._db.query(User).all()
 
-    def get_username(self, username: str) -> User:
+    def get_username(self, username: str) -> User | None:
         return self._db.query(User).filter(User.username == username).first()
 
     def create_user(self, data: User) -> User:
