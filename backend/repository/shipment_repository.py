@@ -11,8 +11,9 @@ from repository.base_repository import BaseRepository
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
     def __init__(self, db: Session):
         super().__init__(db, model=ShipmentAssign)
-        self._db = db
 
+        self._db_shipment_event = ShipmentEventModel
+        self._db = db
     def get_by_tracking(self, tracking_number: str) -> ShipmentAssign | None:
         return (
             self._db.query(ShipmentAssign)
@@ -21,14 +22,14 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         )
 
     def delete_shipment(
-        self, shipment_to_inactive: ShipmentAssign, who_deleted: str
+        self, shipment_to_inactive: ShipmentAssign, who_deleted: int
     ) -> str | None:
         shipment_to_inactive.is_active = False
 
         for event in shipment_to_inactive.events:
             event.is_active = False
             event.last_modify = datetime.now(timezone.utc)
-            event.capure_by_id = who_deleted
+            event.capture_by_id = who_deleted
 
         self.save(shipment_to_inactive)
 
@@ -41,18 +42,18 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         shipment_id = (
             self._db.query(ShipmentAssign).filter(ShipmentAssign.id == id).first()
         )
-        if not id:
+        if not shipment_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Shipment with {id} not found",
             )
         return shipment_id
 
-    def update_shipment(self, id: int, shipment_data: ShipmentUpdate):
+    def update_shipment(self, id: int, shipment_data: ShipmentUpdate) -> ShipmentUpdate:
         shipment = self.get_shipment(id)
 
-        data_update = shipment_data.model_dump(exclude_unset=True)
-        for k, v in data_update.items():
+        data_update = shipment_data
+        for k, v in data_update:
             if k == "events" and v is not None:
                 shipment.events = [
                     ShipmentEventModel(**event)
@@ -63,7 +64,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
                 setattr(shipment, k, v)
         self._db.commit()
         self._db.refresh(shipment)
-        return shipment
+        return data_update
 
     def get_all_shipments(self, page: int = 1, limit: int = 10) -> List[ShipmentAssign]:
         shipments = (

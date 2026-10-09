@@ -33,7 +33,7 @@ class ClienteService:
         new_client = self._db.create_new_client(data)
 
         emails_to_add = data.email if data.email else []
-        if new_client.emailService and emails_to_add:
+        if emails_to_add:
             self._db.add_emails_to_client(new_client.id, emails_to_add)
         return new_client
 
@@ -47,9 +47,7 @@ class ClienteService:
 
         client.name = data.name
         client.phonenumber = data.phonenumber
-        client.sftService = data.sftService
-        client.emailService = data.emailService
-        if client.emailService and data.email:
+        if data.email:
             self._db.add_emails_to_client(client_id, data.email)
 
         return self._db.save(client)
