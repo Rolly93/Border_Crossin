@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { IEmployee } from '../type/employee.interface';
+import { IEmployeeRequest, IEmployeeResponse } from '../type/employee.interface';
 import { employeeService } from '../service/EmployeeService';
 import { usePaginatedList } from '@/components/hook/usePaginaterList';
 export function useEmployee() {
@@ -15,9 +15,9 @@ export function useEmployee() {
     setError,
     fetchNextPage, setLoading
 
-  } = usePaginatedList<IEmployee>(fetchFn);
+  } = usePaginatedList<IEmployeeResponse>(fetchFn);
 
-  const updateEmployee = async (id: number, updatedData: IEmployee) => {
+  const updateEmployee = async (id: number, updatedData: IEmployeeRequest) => {
     try {
       const updateEmployee = await employeeService.update(id, updatedData)
       setEmployeeData((prev) =>
@@ -40,7 +40,7 @@ export function useEmployee() {
     }
 
   }
-  const createNewEmployee = async (employeeData: IEmployee) => {
+  const createNewEmployee = async (employeeData: IEmployeeRequest) => {
 
     try {
       setLoading(true)

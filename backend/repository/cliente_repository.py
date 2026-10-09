@@ -90,8 +90,6 @@ class ClienteRepository(BaseRepository[Client]):
                     still_active=client.still_active,
                     name=client.name,
                     telefono=str(client.phonenumber) if client.phonenumber else None,
-                    emailService=client.emailService,
-                    sftService=client.sftService,
                     email=active_emails,
                 )
             )

@@ -51,5 +51,5 @@ async def delete_shipment(
     current_user: CurrentUser,
     service: ShipmentSvc,
 ):
-    shipment_deleted = service.delete_shipmnet(id, current_user.sub)
+    shipment_deleted = service.delete_shipmnet(id, int(current_user.sub))
     return {"status": "success", "data": shipment_deleted}

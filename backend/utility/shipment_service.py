@@ -30,7 +30,7 @@ class ShipmentService:
         self._shipment_db.create(db_shipment)
         return db_shipment
 
-    def delete_shipmnet(self, id: int, user: str) -> str | None:
+    def delete_shipmnet(self, id: int, user: int) -> str | None:
 
         shipment_found = self._shipment_db.get_shipment(id)
 

@@ -1,5 +1,5 @@
 import { Modal, Table } from "@mantine/core";
-import { IEmployee } from "../type/employee.interface";
+import { IEmployeeRequest, IEmployeeResponse } from "../type/employee.interface";
 import { useState, useRef, useCallback } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
@@ -10,7 +10,7 @@ import { EmployeeForm } from "./EmployeeForm";
 export function EmployeeTable() {
   const { employeeData, loading, hasMore, fetchNextPage } = useEmployee();
   const observer = useRef<IntersectionObserver | null>(null)
-  const [selectedEmployee, setSelectedEmployee] = useState<IEmployee>()
+  const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeResponse | IEmployeeRequest>()
   const [csrModal, { open: openCsrModal, close: closeCsrModal }] = useDisclosure()
   const [driverModal, { open: opendriverModal, close: closedriverModal }] = useDisclosure()
 
@@ -27,7 +27,7 @@ export function EmployeeTable() {
 
   }, [loading, hasMore, fetchNextPage])
 
-  async function handelSelectedEmployee(onSelectEmployee: IEmployee) {
+  async function handelSelectedEmployee(onSelectEmployee: IEmployeeResponse) {
     const role = onSelectEmployee.role.toLowerCase()
 
     switch (role) {

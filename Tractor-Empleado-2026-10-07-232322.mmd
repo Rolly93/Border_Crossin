@@ -1,0 +1,54 @@
+
+flowchart LR
+ subgraph SUB_EMBARQUE["Embarque"]
+        referencia_cliente["referencia"]
+  end
+
+ subgraph SUB_SERVICE_EMAIL["Servicio de Correo"]
+        cliente_id["cliente id"]
+        email["correo"]
+
+  end
+
+ subgraph SUB_CRUCE["Cruce"]
+        status["status"]
+        trailer["trailer"]
+        fecha_hora["fecha y hora"]
+        notas["notas"]
+  end
+  
+ subgraph SUB_CLIENTE["Cliente"]
+        nombre_cliente["nombre"]
+        telefono_cliente["numero"]
+  end
+
+ subgraph SUB_SFTP_CONECCION["Conexion SFTP"]
+        sftp_service("Servicio_SFTP")
+  end
+
+ subgraph SUB_EMPLEADO["Empleado"]
+        nombre_empleado["nombre"]
+        rfc["rcf"]
+        apellido_empleado["apellido"]
+        cumpleanos["Cumpleanos"]
+  end
+  subgraph SUB_USUARIO["Usuario"]
+  usuario["username"]
+  password["password"]
+  end
+
+ subgraph SUB_UNIDAD["Datos de Unidad"]
+        numero_unida["numero de unidad"]
+        tag_id["Tag"]
+        placa_unidad["Placa"]
+  end
+
+  subgraph SUB_OPERADOR["Driver Details"]
+  gafet_id["Gafet"]
+  vigencia_gafet["Vigencia gafet"]
+  licencia_id["gafet"]
+  vigencia_licencia["Vigencia Licencia"]
+  end
+
+
+  SUB_EMPLEADO --->|"Registra"|SUB_OPERADOR

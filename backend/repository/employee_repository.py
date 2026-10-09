@@ -19,4 +19,4 @@ class EmployeeRepository:
         return data
 
     def get_all_users(self) -> list[Employee] | None:
-        return self._db.query(Employee).first()
+        return self._db.query(Employee).all()

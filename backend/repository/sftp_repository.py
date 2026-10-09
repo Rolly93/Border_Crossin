@@ -40,7 +40,7 @@ class SftpRepository(BaseRepository[SftpService]):
         sftp_data = self._db.query(SftpService).all()
         return sftp_data
 
-    def insert_sftp_service(self, sftp_data: SftpConfiRequst) -> SftpResponse:
+    def insert_sftp_service(self, sftp_data: SftpConfiRequst) -> SftpService:
         encrypt_paswd = encrypt_password(sftp_data.encrypted_password)
         sftp_data.encrypted_password = encrypt_paswd
         data_dict = sftp_data.model_dump(exclude_unset=True)

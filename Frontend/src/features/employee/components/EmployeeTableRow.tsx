@@ -1,10 +1,10 @@
 import { Table } from "@mantine/core";
 import { forwardRef } from "react";
-import { IEmployee } from "../type/employee.interface";
+import { IEmployeeResponse } from "../type/employee.interface";
 
 interface EmployeeTableRowProps {
-  employee: IEmployee;
-  onClick: (employee: IEmployee) => void;
+  employee: IEmployeeResponse;
+  onClick: (employee: IEmployeeResponse) => void;
 
 }
 
