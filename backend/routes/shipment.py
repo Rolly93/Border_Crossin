@@ -40,9 +40,16 @@ async def update_shipment(
     current_user: CurrentUser,
     service: ShipmentSvc,
 ):
-    updated = service.update_shipment(id, shipment_data)
+    updated = service.update_shipment(id, shipment_data, int(current_user.sub))
 
-    return {"status": "success", "data": updated}
+    return {
+        "status": "success",
+        "data": {
+            "id": updated.id,
+            "tracking_number": updated.tracking_number,
+            "events_total": len(updated.events),
+        },
+    }
 
 
 @router.patch("/{id}/delete")

@@ -37,8 +37,12 @@ class ShipmentService:
         shipment_delete = self._shipment_db.delete_shipment(shipment_found, user)
         return shipment_delete
 
-    def update_shipment(self, shipment_id: int, shipment_data: ShipmentUpdate):
-        shipment_update = self._shipment_db.update_shipment(shipment_id, shipment_data)
+    def update_shipment(
+        self, shipment_id: int, shipment_data: ShipmentUpdate, user_id: int
+    ):
+        shipment_update = self._shipment_db.update_shipment(
+            shipment_id, shipment_data, user_id
+        )
         self.sftp_service(shipment_update)
 
         return shipment_update

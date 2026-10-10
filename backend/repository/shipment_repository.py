@@ -49,22 +49,43 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             )
         return shipment_id
 
-    def update_shipment(self, id: int, shipment_data: ShipmentUpdate) -> ShipmentUpdate:
+    def update_shipment(
+        self, id: int, shipment_data: ShipmentUpdate, user_id: int
+    ) -> ShipmentAssign:
         shipment = self.get_shipment(id)
 
-        data_update = shipment_data
-        for k, v in data_update:
-            if k == "events" and v is not None:
-                shipment.events = [
-                    ShipmentEventModel(**event)
-                    for event in v
-                    if event.get("dateTime") is not None
-                ]
-            else:
-                setattr(shipment, k, v)
+        # Campos del embarque (cliente se guarda en client_id)
+        column_map = {"cliente": "client_id"}
+        for field, value in shipment_data.model_dump(
+            exclude={"events"}, exclude_unset=True
+        ).items():
+            column = column_map.get(field, field)
+            if value is not None and hasattr(shipment, column):
+                setattr(shipment, column, value)
+
+        # Los eventos se AGREGAN al historial; no se reemplazan para no
+        # borrar eventos ya enviados (sftp_send los referencia).
+        events = (
+            shipment_data.events
+            if isinstance(shipment_data.events, list)
+            else [shipment_data.events]
+        )
+        for e in events:
+            if e.dateTime is None:
+                continue
+            shipment.events.append(
+                ShipmentEventModel(
+                    category=e.category.value,
+                    event_time=e.dateTime,
+                    notes=e.notes,
+                    trip_assigned_id=id,
+                    capture_by_id=user_id,
+                )
+            )
+
         self._db.commit()
         self._db.refresh(shipment)
-        return data_update
+        return shipment
 
     def get_all_shipments(self, page: int = 1, limit: int = 10) -> List[ShipmentAssign]:
         shipments = (
