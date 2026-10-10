@@ -7,7 +7,11 @@ from stdnum.mx import rfc as rfc_validator
 
 from model.db_model import Employee
 from repository import EmployeeRepository, UserRepository
-from schema.employee_schema import EmployeeRequest
+from schema.employee_schema import (
+    EmployeeListItem,
+    EmployeeRequest,
+    PaginatedEmployeeResponse,
+)
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
 
@@ -29,6 +33,28 @@ class EmployeeService:
                 detail=f"Invalid RFC format: {rfc_value}",
             )
         return clean_rfc
+
+    def get_all_employees(self, page: int = 1, limit: int = 10) -> PaginatedEmployeeResponse:
+        employees, total_records = self._employee_repo.get_paginated(page, limit)
+        offset = (page - 1) * limit
+        return PaginatedEmployeeResponse(
+            data=[
+                EmployeeListItem(
+                    id=e.id,
+                    firstName=e.name,
+                    lastName=e.last_name,
+                    role=e.role,
+                    rfc=e.rfc,
+                    hireDate=e.hire_date,
+                    stillEmployee=e.still_employee,
+                )
+                for e in employees
+            ],
+            totalRecords=total_records,
+            hasNextPage=(offset + limit) < total_records,
+            page=page,
+            limit=limit,
+        )
 
     def create_employee(self, data: EmployeeRequest) -> Employee:
         clean_rfc = self.validate_rfc(data.rfc)

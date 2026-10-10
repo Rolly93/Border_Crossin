@@ -1,3 +1,4 @@
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from model.db_model import Employee
 
@@ -20,3 +21,14 @@ class EmployeeRepository:
 
     def get_all_users(self) -> list[Employee] | None:
         return self._db.query(Employee).all()
+
+    def get_paginated(self, page: int = 1, limit: int = 10) -> tuple[list[Employee], int]:
+        offset = (page - 1) * limit
+        total_records = self._db.scalar(select(func.count()).select_from(Employee))
+        stmt = (
+            select(Employee)
+            .order_by(Employee.id)
+            .offset(offset)
+            .limit(limit)
+        )
+        return list(self._db.scalars(stmt).all()), total_records or 0

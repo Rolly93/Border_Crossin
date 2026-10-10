@@ -1,13 +1,28 @@
 from typing import Optional, Union
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Query, Request, status
 
-from schema.employee_schema import EmployeeRequest
+from schema.employee_schema import EmployeeRequest, PaginatedEmployeeResponse
 from schema import TokenPayload, InitialTokenPayload
-from deps.auth import get_client_ip, get_current_user, get_optional_current_user
+from deps.auth import CurrentUser, get_client_ip, get_current_user, get_optional_current_user
 from deps.service import get_user_service, EmployeeSvc
 from utility.employee_service import EmployeeService
 
 router = APIRouter(prefix="/employees", tags=["employee"])
+
+
+@router.get(
+    "/",
+    summary="List Employees",
+    status_code=status.HTTP_200_OK,
+    response_model=PaginatedEmployeeResponse,
+)
+async def list_employees(
+    service: EmployeeSvc,
+    current_user: CurrentUser,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=100),
+) -> PaginatedEmployeeResponse:
+    return service.get_all_employees(page=page, limit=limit)
 
 
 @router.post(
