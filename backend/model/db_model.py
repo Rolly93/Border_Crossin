@@ -44,9 +44,6 @@ class Employee(Base):
     user: Mapped[Optional["User"]] = relationship(
         "User", back_populates="employee", uselist=False
     )
-    trucks: Mapped[List["UnitTruck"]] = relationship(
-        "UnitTruck", back_populates="assigned_employee"
-    )
     driver_details: Mapped[Optional["DriverDetails"]] = relationship(
         "DriverDetails", back_populates="employee", uselist=False
     )
@@ -182,9 +179,6 @@ class UnitTruck(Base):
     )
 
     # Relaciones
-    assigned_employee: Mapped[Optional["Employee"]] = relationship(
-        "Employee", back_populates="trucks"
-    )
     shipment_assigns: Mapped[List["ShipmentAssign"]] = relationship(
         "ShipmentAssign", back_populates="truck"
     )
