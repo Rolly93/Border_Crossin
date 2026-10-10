@@ -2,8 +2,6 @@ import logging
 from sqlalchemy.orm import Session
 from typing import List
 
-from service.xml_factory import XMLServiceFactory
-from service.xml_service import XMLService
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
 from model.db_model import ShipmentAssign, ShipmentEventModel
@@ -60,23 +58,8 @@ class ShipmentService:
             return []
 
         scac = SystemConfigRepository(self.db).get_scac()
-        if not scac:
-            logger.error(
-                "Sin SCAC configurado: eventos %s guardados sin envío SFTP",
-                [e.id for e in events],
-            )
-            return []
-
-        try:
-            xml_strategy = XMLServiceFactory.get_xml_service(client_data.name)
-        except ValueError as err:
-            logger.error("Cliente sin generador XML: %s", err)
-            return []
-
-        dispatcher = ShipmentDispatchService(
-            self.db, XMLService(xml_strategy), client_data.sftService, scac
-        )
-        return dispatcher.dispatch_events(shipment, events)
+        dispatcher = ShipmentDispatchService(self.db, client_data.sftService, scac)
+        return dispatcher.dispatch_events(events)
 
     def email_service(self, shipment: ShipmentUpdate):
         pass

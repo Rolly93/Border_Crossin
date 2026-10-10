@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from deps.auth import decrypt_password
 from model.db_model import SftpSend
 from repository.sftp_repository import SftpRepository
+from repository.system_config_repository import SystemConfigRepository
 from schema.sftp_schema import SftpConfigurationRequest
 from service.sftp_sender import send_batch
 
@@ -25,6 +26,13 @@ class SftpSendService:
         return [self._to_dict(row) for row in rows]
 
     def resend(self, send_ids: List[int]) -> List[dict]:
+        scac = SystemConfigRepository(self._db).get_scac()
+        if not scac:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Configura el SCAC del sistema antes de reenviar",
+            )
+
         sends = self._repo.get_sends_by_ids(send_ids)
 
         found = {s.id for s in sends}
@@ -62,7 +70,7 @@ class SftpSendService:
             for send in group:
                 send.retries = 0
             self._db.commit()
-            send_batch(self._db, config, group)
+            send_batch(self._db, config, group, scac)
 
         return [self._to_dict(s) for s in sends]
 
