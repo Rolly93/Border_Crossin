@@ -348,3 +348,12 @@ class SftpSend(Base):
     shipment_event: Mapped["ShipmentEventModel"] = relationship(
         "ShipmentEventModel", back_populates="sftp_sends"
     )
+
+
+class SystemConfig(Base):
+    """Configuración global del sistema. Guarda el SCAC pedido al iniciar."""
+
+    __tablename__ = "system_config"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    scac: Mapped[str] = mapped_column(String(4), nullable=False)

@@ -51,10 +51,9 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
 
     def update_shipment(
         self, id: int, shipment_data: ShipmentUpdate, user_id: int
-    ) -> ShipmentAssign:
+    ):
         shipment = self.get_shipment(id)
 
-        # Campos del embarque (cliente se guarda en client_id)
         column_map = {"cliente": "client_id"}
         for field, value in shipment_data.model_dump(
             exclude={"events"}, exclude_unset=True
@@ -63,29 +62,32 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             if value is not None and hasattr(shipment, column):
                 setattr(shipment, column, value)
 
-        # Los eventos se AGREGAN al historial; no se reemplazan para no
-        # borrar eventos ya enviados (sftp_send los referencia).
+        # Los eventos se AGREGAN al historial (no se reemplazan): sftp_send
+        # referencia eventos existentes y el cascade borraría su historial.
         events = (
             shipment_data.events
             if isinstance(shipment_data.events, list)
             else [shipment_data.events]
         )
+        new_events: list[ShipmentEventModel] = []
         for e in events:
             if e.dateTime is None:
                 continue
-            shipment.events.append(
-                ShipmentEventModel(
-                    category=e.category.value,
-                    event_time=e.dateTime,
-                    notes=e.notes,
-                    trip_assigned_id=id,
-                    capture_by_id=user_id,
-                )
+            new_event = ShipmentEventModel(
+                category=e.category.value,
+                event_time=e.dateTime,
+                notes=e.notes,
+                trip_assigned_id=id,
+                capture_by_id=user_id,
             )
+            shipment.events.append(new_event)
+            new_events.append(new_event)
 
         self._db.commit()
         self._db.refresh(shipment)
-        return shipment
+        for event in new_events:
+            self._db.refresh(event)
+        return shipment, new_events
 
     def get_all_shipments(self, page: int = 1, limit: int = 10) -> List[ShipmentAssign]:
         shipments = (

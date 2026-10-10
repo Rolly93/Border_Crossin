@@ -1,13 +1,17 @@
+import logging
 from sqlalchemy.orm import Session
 from typing import List
 
 from service.xml_factory import XMLServiceFactory
 from service.xml_service import XMLService
+from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
-from model.db_model import ShipmentAssign
+from model.db_model import ShipmentAssign, ShipmentEventModel
+from repository.system_config_repository import SystemConfigRepository
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
 from repository import ShipmentRepository
-from service import ShipmentDispatchService
+
+logger = logging.getLogger(__name__)
 
 
 class ShipmentService:
@@ -15,7 +19,6 @@ class ShipmentService:
         self.db = db
         self._shipment_db = ShipmentRepository(db)
         self._client_service = ClienteService(db)
-        self._orchestrator_service = ShipmentDispatchService
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -25,13 +28,11 @@ class ShipmentService:
         return [ShipmentResponse.model_validate(s) for s in raw_shipments]
 
     def create_shipment(self, shipment: ShipmentCreate):
-
         db_shipment = ShipmentAssign(**shipment.model_dump())
         self._shipment_db.create(db_shipment)
         return db_shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:
-
         shipment_found = self._shipment_db.get_shipment(id)
 
         shipment_delete = self._shipment_db.delete_shipment(shipment_found, user)
@@ -39,32 +40,43 @@ class ShipmentService:
 
     def update_shipment(
         self, shipment_id: int, shipment_data: ShipmentUpdate, user_id: int
-    ):
-        shipment_update = self._shipment_db.update_shipment(
+    ) -> ShipmentAssign:
+        shipment, new_events = self._shipment_db.update_shipment(
             shipment_id, shipment_data, user_id
         )
-        self.sftp_service(shipment_update)
+        self.sftp_service(shipment, new_events)
+        return shipment
 
-        return shipment_update
+    def sftp_service(
+        self, shipment: ShipmentAssign, events: List[ShipmentEventModel]
+    ) -> list:
+        if not events:
+            return []
 
-    def sftp_service(self, shipment: ShipmentUpdate):
-        client_id = shipment.cliente
-        client_data = self._client_service.get_client_service(client_id, "sftp_service")
+        client_data = self._client_service.get_client_service(
+            shipment.client_id, "sftp_service"
+        )
         if not client_data or not client_data.sftService:
-            return
+            return []
 
-        files_send: List[str] = []
-        if client_data.sftService:
-
-            xml_strategy = XMLServiceFactory.get_xml_service(client_data.name)
-            orchestrator_service = self._orchestrator_service(
-                sftp_config=client_data.sftService,
-                xml_svc=XMLService(xml_strategy),
-                shipment=shipment,
+        scac = SystemConfigRepository(self.db).get_scac()
+        if not scac:
+            logger.error(
+                "Sin SCAC configurado: eventos %s guardados sin envío SFTP",
+                [e.id for e in events],
             )
-            files_send = orchestrator_service.dispatch_file_xml()
+            return []
 
-        return files_send
+        try:
+            xml_strategy = XMLServiceFactory.get_xml_service(client_data.name)
+        except ValueError as err:
+            logger.error("Cliente sin generador XML: %s", err)
+            return []
+
+        dispatcher = ShipmentDispatchService(
+            self.db, XMLService(xml_strategy), client_data.sftService, scac
+        )
+        return dispatcher.dispatch_events(shipment, events)
 
     def email_service(self, shipment: ShipmentUpdate):
         pass

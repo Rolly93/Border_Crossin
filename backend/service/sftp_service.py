@@ -1,3 +1,5 @@
+import os
+
 import paramiko
 from fastapi import HTTPException, status
 
@@ -45,43 +47,21 @@ class SFTPService:
                 detail=f"Error inesperado al conectar: { e}",
             )
 
-    def upload_file(self, _roo_folder: str):
-        """Envio de Documentos via SFTP
-
-        Args:
-            local_path (str):ubicacion real del archivo EJEM : "test/route/my_shipment.xml"
-            remote_path (str): a donde se estara depostiando : EJEM: /upload/test_xml.xm
-
-        Raises:
-            f: Error de E/S (Ruta remota valida?)
-            f: Error al subir archivo
-            f: Error: Generico
-        """
-        try:
-            if self.sftp:
-                self.sftp.put(_roo_folder, self._remote_folder)
-        except FileExistsError as e:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"El archivo local no fue encontrado en la ruta: {_roo_folder}",
-            )
-        except IOError as io_error:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Error de E/S (¿Ruta remota válida?): {io_error}",
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error al subir archivo: {e}",
-            )
+    def upload_file(self, local_path: str) -> str:
+        """Sube local_path a remote_folder y devuelve la ruta remota."""
+        if self.sftp is None:
+            raise RuntimeError("No hay una sesión SFTP activa")
+        remote_path = f"{self._remote_folder.rstrip('/')}/{os.path.basename(local_path)}"
+        self.sftp.put(local_path, remote_path)
+        return remote_path
 
     def close(self):
         if self.sftp:
             self.sftp.close()
         if self.trasport:
             self.trasport.close()
-        print(f"Conexion Cerrada!!")
+        self.sftp = None
+        self.trasport = None
 
     def delete_file(self, filename: str):
         try:

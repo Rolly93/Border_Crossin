@@ -34,7 +34,7 @@ class BaseXMLTransformer(ABC):
         """Converts internal event data to the client's expected XML dictionary structure."""
         pass
 
-    def format_filename(self, data: EventPayload) -> str:
+    def format_filename(self, data: EventPayload, scac: str) -> str:
         """Converts internal filename format."""
         return ""
 
@@ -69,7 +69,7 @@ class ExpeditorsXMLService(BaseXMLTransformer):
         if not dt:
             raise InvalidEventDateTimeError("Event dateTime is required but was None.")
 
-        return dt.strftime("%y-%m-%dT%H:%M:%S")
+        return dt.strftime("%Y-%m-%dT%H:%M:%S")
 
     def _event_code(self, event: EventCategory) -> str:
         raw_event = event.value if isinstance(event, Enum) else event
@@ -96,10 +96,10 @@ class ExpeditorsXMLService(BaseXMLTransformer):
                 )
 
     def format_filename(self, data: EventPayload, scac: str) -> str:
-        now_str = datetime.now().strftime("%Y%m%dT%H%M%S")
+        now_str = datetime.now().strftime("%Y%m%d%H%M%S")
         reference = self.validate_reference(data.customer_tracking)
         eventcode = self._event_code(data.event)
-        return f"{scac}_{reference}_{eventcode}_{now_str}.xml"
+        return f"{scac.upper()}_{reference}_{eventcode}_{now_str}.xml"
 
     def transform_event(self, data: EventPayload) -> Dict[str, Any]:
         valid_ref = self.validate_reference(data.customer_tracking)

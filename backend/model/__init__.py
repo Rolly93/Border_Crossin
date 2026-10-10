@@ -11,4 +11,5 @@ from .db_model import (
     ShipmentEventModel,
     EmailService,
     ClientEmailRecipient,
+    SystemConfig,
 )
