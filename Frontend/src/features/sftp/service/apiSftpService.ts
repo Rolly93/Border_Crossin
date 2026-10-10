@@ -7,11 +7,19 @@ export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration> {
     super('sftp');
   }
 
-  async getConnection(id: number): Promise<ISftpConfiguration> {
-    const response = await this.api.get<ISftpConfiguration>(`/${this.resourcePath}/connection`)
-    if (!response.status) { throw new Error('Error en el servidor') }
-
-    return response.data
+  async getConnection(clientId: number): Promise<ISftpConfiguration | null> {
+    const response = await this.api.get<ISftpConfiguration | null>(
+      `/${this.resourcePath}/connection`,
+      { params: { client_id: clientId } }
+    );
+    return response.data;
   }
 
+  async update(id: number, data: ISftpConfiguration): Promise<ISftpConfiguration> {
+    const response = await this.api.put<ISftpConfiguration>(
+      `/${this.resourcePath}/update/${id}`,
+      data
+    );
+    return response.data;
+  }
 }

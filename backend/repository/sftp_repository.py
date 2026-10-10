@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from repository.base_repository import BaseRepository
 from model.db_model import SftpService, SftpSend, ShipmentAssign, ShipmentEventModel
 from schema import SftpResponse, SftpConfiRequst, SftpConfigurationRequest
+from schema.sftp_schema import SftpConfigIn
 from deps.auth import encrypt_password, decrypt_password
 
 
@@ -17,7 +18,7 @@ class SftpRepository(BaseRepository[SftpService]):
     def get_sftp_data(self, client_id: int) -> SftpConfigurationRequest | None:
         raw_sftp_config = (
             self._db.query(SftpService)
-            .filter(SftpService.client_id == client_id)
+            .filter(SftpService.client_id == client_id, SftpService.is_active.is_(True))
             .first()
         )
         if not raw_sftp_config:
@@ -69,3 +70,49 @@ class SftpRepository(BaseRepository[SftpService]):
 
     def get_sends_by_ids(self, send_ids: List[int]) -> List[SftpSend]:
         return self._db.query(SftpSend).filter(SftpSend.id.in_(send_ids)).all()
+
+    def get_active_config(self, client_id: int) -> SftpService | None:
+        return (
+            self._db.query(SftpService)
+            .filter(SftpService.client_id == client_id, SftpService.is_active.is_(True))
+            .first()
+        )
+
+    def get_config(self, config_id: int) -> SftpService | None:
+        return self._db.query(SftpService).filter(SftpService.id == config_id).first()
+
+    def create_config(
+        self, data: SftpConfigIn, password: str, configure_by_id: int
+    ) -> SftpService:
+        row = SftpService(
+            client_id=data.idClient,
+            host=data.host,
+            port=data.port,
+            username=data.username,
+            encrypted_password=encrypt_password(password),
+            root_folder=data.root_folder,
+            remote_folder=data.remote_folder,
+            configure_by_id=configure_by_id,
+            is_active=True,
+        )
+        return self.save(row)
+
+    def update_config(
+        self, row: SftpService, data: SftpConfigIn, password: str | None
+    ) -> SftpService:
+        row.host = data.host
+        row.port = data.port
+        row.username = data.username
+        row.root_folder = data.root_folder
+        row.remote_folder = data.remote_folder
+        # Contraseña vacía en la edición = conservar la actual.
+        if password:
+            row.encrypted_password = encrypt_password(password)
+        self._db.commit()
+        self._db.refresh(row)
+        return row
+
+    def deactivate_config(self, row: SftpService) -> None:
+        # Desactivar en lugar de borrar: sftp_send referencia esta configuración.
+        row.is_active = False
+        self._db.commit()

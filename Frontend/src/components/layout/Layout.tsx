@@ -6,6 +6,8 @@ import { useGlobalNotifications } from '@/features/notfications/hooks/useGlobalN
 import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
 import { AtomButton } from '../atoms/AtomButton';
 import { useAuth } from '@/features/login/context/AuthContext';
+import { useScacSetup } from '@/features/system/useScacSetup';
+import { ScacSetupModal } from '../Modal/ScacSetupModal';
 export function Layout() {
   const [opened, { toggle, close }] = useDisclosure();
   const location = useLocation();
@@ -15,6 +17,7 @@ export function Layout() {
     close();
   }, [location, close])
   useGlobalNotifications()
+  const { needsSetup, saveScac } = useScacSetup()
 
 
   const handleLogout = async () => {
@@ -72,6 +75,8 @@ export function Layout() {
       <AppShell.Main>
         <Outlet />
       </AppShell.Main>
+
+      <ScacSetupModal opened={needsSetup} onSave={saveScac} />
     </AppShell>
   );
 }

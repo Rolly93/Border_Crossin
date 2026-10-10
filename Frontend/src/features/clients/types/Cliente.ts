@@ -22,5 +22,7 @@ export interface ISftpConfiguration {
     username: string;
     password: string;
     port: number;
-    host: string
+    host: string;
+    root_folder?: string;
+    remote_folder?: string;
 }

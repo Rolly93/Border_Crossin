@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SftpModel(BaseModel):
@@ -49,3 +49,28 @@ class SftpConfigurationRequest(BaseModel):
 
 class sftpSendFile(SftpResponse):
     retries: int
+
+
+class SftpConfigIn(BaseModel):
+    """Datos de la configuración SFTP que envía el formulario."""
+
+    idClient: int
+    host: str = Field(min_length=1, max_length=200)
+    port: int = Field(default=22, ge=1, le=65535)
+    username: str = Field(min_length=1, max_length=200)
+    password: Optional[str] = None
+    root_folder: str = Field(min_length=1, max_length=200)
+    remote_folder: str = Field(min_length=1, max_length=200)
+
+
+class SftpConfigOut(BaseModel):
+    """Configuración que se devuelve al frontend. La contraseña nunca sale."""
+
+    id: int
+    idClient: int
+    host: str
+    port: int
+    username: str
+    password: str = ""
+    root_folder: str
+    remote_folder: str

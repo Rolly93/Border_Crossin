@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useTranslation } from "react-i18next";
 import { AtomTextInput } from "../atoms/AtomTextInput";
 import { useSftp } from "@/features/sftp/useSftp";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { AtomButton } from "../atoms/AtomButton";
 
@@ -12,68 +12,82 @@ interface IsftModalProps {
     onClose: () => void;
     clientId: number | undefined
 }
+
 export type SftpFormValues = {
     username: string;
     password: string;
     port: string;
     host: string;
+    root_folder: string;
+    remote_folder: string;
 };
 
 interface SftpFromsProps {
     initialData: Partial<ISftpConfiguration>;
-    clientId?: number;
-    onSaveSuccess?: () => void;
     onSubmit: (values: SftpFormValues) => Promise<void> | void;
     onDelete?: () => Promise<void> | void;
 }
+
 const DEFAULT_SFTP_CONFIG: Partial<ISftpConfiguration> = {
     username: "",
     password: "",
     port: undefined,
     host: "",
+    root_folder: "",
+    remote_folder: "",
 };
 
 export default function SftModal({ opened, onClose, clientId }: IsftModalProps) {
-    const { sftpConfig, getSftpConfig, error, loading, updateSftpConfig, createSftpConfig } = useSftp()
-    const { t, i18n } = useTranslation()
-
+    const { sftpConfig, getSftpConfig, error, loading, updateSftpConfig, createSftpConfig, deleteSftpConfig } = useSftp()
+    const [localError, setLocalError] = useState<string | null>(null)
 
     useEffect(() => {
         if (opened && clientId !== undefined) {
+            setLocalError(null)
             getSftpConfig(clientId);
         }
     }, [opened, clientId, getSftpConfig]);
 
     const handelDelete = async () => {
-
+        if (!sftpConfig?.id) return
+        if (!window.confirm("¿Desactivar la configuración SFTP de este cliente?")) return
+        try {
+            await deleteSftpConfig(sftpConfig.id)
+            onClose()
+        } catch (err: any) {
+            setLocalError(err?.response?.data?.detail ?? err?.message ?? "No se pudo eliminar")
+        }
     }
+
     const handelSubmit = async (values: SftpFormValues) => {
-        const sftpPayload = {
+        const payload: ISftpConfiguration = {
+            id: sftpConfig?.id || undefined,
+            idClient: Number(clientId),
+            host: values.host,
+            port: Number(values.port),
             username: values.username,
             password: values.password,
-            port: Number(values.port),
-            host: values.host,
-            id: sftpConfig?.id || undefined,
-            idClient: Number(clientId)
-
+            root_folder: values.root_folder,
+            remote_folder: values.remote_folder,
         }
-        if (sftpConfig?.id) {
-            await updateSftpConfig(sftpPayload)
-        } else {
-            await createSftpConfig(sftpPayload)
+        try {
+            if (sftpConfig?.id) {
+                await updateSftpConfig(payload)
+            } else {
+                await createSftpConfig(payload)
+            }
+            onClose()
+        } catch (err: any) {
+            setLocalError(err?.response?.data?.detail ?? err?.message ?? "No se pudo guardar")
         }
-        onClose()
     }
-
-
-
 
     return (
         <Drawer offset={8} radius="md" opened={opened} onClose={onClose} >
 
             <LoadingOverlay visible={loading} zIndex={1000} overlayProps={{ radius: 'sm', blur: 2 }} />
 
-            {error && <div style={{ color: "red", marginBottom: 12 }}>{error}</div>}
+            {(error || localError) && <div style={{ color: "red", marginBottom: 12 }}>{localError || error}</div>}
 
             {!loading && (
                 <SftpForm
@@ -87,17 +101,17 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
 }
 
 
-
 function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
-    const { t } = useTranslation();
     const isEditMode = Boolean(initialData?.id);
     const form = useForm<SftpFormValues>({
         mode: "uncontrolled",
         initialValues: {
             username: initialData.username || "",
-            password: initialData.password || "",
+            password: "",
             port: initialData.port ? String(initialData.port) : "",
             host: initialData.host || "",
+            root_folder: initialData.root_folder || "",
+            remote_folder: initialData.remote_folder || "",
         },
     });
 
@@ -106,25 +120,38 @@ function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
             <Stack gap={'xl'} >
                 <Title order={2}>SFTP Configuration</Title>
                 <AtomTextInput
-                    label={t('modal.labels.username')}
-                    placeholder={t('modal.placeholders.username')}
+                    label="Usuario"
+                    placeholder="usuario SFTP"
                     required
                     {...form.getInputProps('username')} />
                 <AtomTextInput
-                    label={t('modal.labels.password')}
-                    placeholder={t('modal.placeholders.password')}
-                    required
+                    label="Contraseña"
+                    placeholder={isEditMode ? "Dejar vacía para conservar la actual" : "contraseña SFTP"}
+                    type="password"
+                    required={!isEditMode}
                     {...form.getInputProps('password')} />
                 <AtomTextInput
-                    label={t('modal.labels.port')}
-                    placeholder={t('modal.placeholders.port')}
+                    label="Puerto"
+                    placeholder="22"
                     required
                     {...form.getInputProps('port')} />
                 <AtomTextInput
-                    label={t('modal.labels.host')}
-                    placeholder={t('modal.placeholders.host')}
+                    label="Host"
+                    placeholder="sftp.ejemplo.com"
                     required
                     {...form.getInputProps('host')}
+                />
+                <AtomTextInput
+                    label="Carpeta local (XML de respaldo)"
+                    placeholder="C:/xml/cliente"
+                    required
+                    {...form.getInputProps('root_folder')}
+                />
+                <AtomTextInput
+                    label="Carpeta remota (destino SFTP)"
+                    placeholder="/upload"
+                    required
+                    {...form.getInputProps('remote_folder')}
                 />
                 <Group justify="flex-end" mt="xl">
                     {isEditMode ? (
