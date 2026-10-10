@@ -45,8 +45,6 @@ export function useSftp() {
 
   const createSftpConfig = async (newSftp: ISftpConfiguration): Promise<ISftpConfiguration> => {
     try {
-      console.log(newSftp);
-
       const createNewSftp = await sftpService.insert(newSftp)
 
       setSftpConfig(createNewSftp);
