@@ -1,9 +1,4 @@
 import { ISftpService } from "@/components/service/IBaseService";
-import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { ApiSftpService } from "./apiSftpService";
-import { MockSftpService } from "./MockSftpService";
 
-const ip = import.meta.env.VITE_API_URL || false
-
-export const sftpService: ISftpService = ip ?
-  new ApiSftpService() : new MockSftpService();
+export const sftpService: ISftpService = new ApiSftpService();
