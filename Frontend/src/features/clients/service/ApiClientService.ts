@@ -1,6 +1,6 @@
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { ICliente } from "../types/Cliente";
-import { IClientService } from "../types/IClientService";
+import { IClientOption, IClientService } from "../types/IClientService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
 
 interface MetricsResponse {
@@ -20,6 +20,11 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
 
     return response.data
 
+  }
+
+  async getOptions(): Promise<IClientOption[]> {
+    const response = await this.api.get<IClientOption[]>(`/${this.resourcePath}/all`);
+    return response.data;
   }
 
   async active(id: number): Promise<ICliente> {

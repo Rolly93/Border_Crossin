@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from repository.base_repository import BaseRepository
 from repository.email_repository import EmailRepository
-from model.db_model import Client
+from model.db_model import Client, SftpService
 from schema.client_schema import ClientPaginateData, PaginatedClientResponse
 from schema import ClientRequest, ClientResponse
 
@@ -21,10 +21,23 @@ class ClienteRepository(BaseRepository[Client]):
         super().__init__(db, Client)
         self._emailrepo = EmailRepository(db)
 
-    def get_clients_names(self) -> list[dict[str, str | int]]:
-        stmt = select(Client.id, Client.name).where(Client.still_active == True)
+    def get_clients_names(self) -> list[dict[str, str | int | bool]]:
+        has_sftp = (
+            select(SftpService.id)
+            .where(
+                SftpService.client_id == Client.id,
+                SftpService.is_active.is_(True),
+            )
+            .exists()
+        )
+        stmt = select(
+            Client.id, Client.name, has_sftp.label("has_sftp")
+        ).where(Client.still_active == True)
         results = self._db.execute(stmt).all()
-        return [{"id": row.id, "name": row.name} for row in results]
+        return [
+            {"id": row.id, "name": row.name, "has_sftp": bool(row.has_sftp)}
+            for row in results
+        ]
 
     def toggle_client_status(self, id: int, status: bool):
         self._db.query(Client).where(Client.id == id).update(

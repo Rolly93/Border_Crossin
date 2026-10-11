@@ -14,6 +14,7 @@ class MetricsClientResponse(BaseModel):
 class ClientOptionResponse(BaseModel):
     id: int
     name: str
+    has_sftp: bool = False
 
     class Config:
         from_attributes = True

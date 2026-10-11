@@ -1,10 +1,10 @@
-// pages/Home.page.tsx
 import { Container } from '@mantine/core';
-import { ClientTable } from '@/features/clients/components/ClienteTable';
+import { SftpClientList } from '@/features/sftp/components/SftpClientList';
+
 export function SftpConnection() {
   return (
     <Container size="responsive">
-      <ClientTable />
+      <SftpClientList />
     </Container>
   );
 }
