@@ -6,6 +6,5 @@ export interface NotificationEvent {
 
 export interface INotificationStreamService {
   subscribe(onMessage: (data: NotificationEvent) => void): () => void;
-  emitMockEvent?(event: NotificationEvent): void;
 
 }

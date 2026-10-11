@@ -1,9 +1,5 @@
 import { ApiNotificationStreamService } from "./ApiNotificationStreamService"
 import { INotificationStreamService } from "./INotificationStreamService"
-import { MockNotificationStreamService } from "./MockNotificationStreamService"
 
-const ip = import.meta.env.VITE_API_URL || false
-
-export const notificationsStreamService: INotificationStreamService = ip
-  ? new ApiNotificationStreamService(ip)
-  : MockNotificationStreamService.getInstance();
+export const notificationsStreamService: INotificationStreamService =
+  new ApiNotificationStreamService(import.meta.env.VITE_API_URL)
