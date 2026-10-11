@@ -8,6 +8,7 @@ from model.db_model import ShipmentAssign, ShipmentEventModel
 from repository.system_config_repository import SystemConfigRepository
 from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
 from repository import ShipmentRepository
+from utility.reference_rule_service import ReferenceRuleService
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,13 @@ class ShipmentService:
     def update_shipment(
         self, shipment_id: int, shipment_data: ShipmentUpdate, user_id: int
     ) -> ShipmentAssign:
+        current = self._shipment_db.get_shipment(shipment_id)
+        ReferenceRuleService(self.db).validate(
+            client_id=shipment_data.cliente,
+            operation=shipment_data.type_operation or current.type_operation,
+            reference=shipment_data.customer_tracking or current.customer_tracking,
+        )
+
         shipment, new_events = self._shipment_db.update_shipment(
             shipment_id, shipment_data, user_id
         )

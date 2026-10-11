@@ -1,6 +1,7 @@
 from typing import List, Optional
 from datetime import datetime, date
 from sqlalchemy import (
+    UniqueConstraint,
     Integer,
     String,
     Boolean,
@@ -116,6 +117,25 @@ class Client(Base):
     email_recipients: Mapped[List["ClientEmailRecipient"]] = relationship(
         "ClientEmailRecipient", back_populates="client"
     )
+
+
+class ClientReferenceRule(Base):
+    """Prefijos de referencia permitidos por cliente y tipo de operación."""
+
+    __tablename__ = "client_reference_rule"
+    __table_args__ = (
+        UniqueConstraint(
+            "client_id", "operation_type", "prefix", name="uq_client_reference_rule"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    client_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("client.id", ondelete="CASCADE"), nullable=False
+    )
+    operation_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    prefix: Mapped[str] = mapped_column(String(10), nullable=False)
+    reference_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
 
 class ClientEmailRecipient(Base):

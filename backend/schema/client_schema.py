@@ -82,3 +82,17 @@ class PaginatedClientResponse(BaseModel):
     hasNextPage: bool
     page: int
     limit: int
+
+
+class ClientNameResponse(BaseModel):
+    id: int
+    name: str
+
+
+class ReferenceRuleOut(BaseModel):
+    id: int
+    operation_type: str
+    prefix: str
+    reference_length: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)

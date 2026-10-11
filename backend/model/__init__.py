@@ -12,4 +12,5 @@ from .db_model import (
     EmailService,
     ClientEmailRecipient,
     SystemConfig,
+    ClientReferenceRule,
 )

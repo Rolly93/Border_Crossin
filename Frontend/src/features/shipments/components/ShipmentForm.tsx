@@ -1,16 +1,18 @@
 
+import { useEffect, useState } from 'react';
 import { useForm } from '@mantine/form';
 import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/core';
 import { ShipmentFormProps } from '@/features/shipments/types/ShipmentFormProps';
 import { setupShipmentWatchers } from '../validation/ShipmentFormRules';
 import { ShipmentValidator } from '../validation/ShipmentValidator';
 import { useTranslation } from 'react-i18next';
-import { useClients } from '@/features/clients/hooks/useClients';
+import { clientService } from '@/features/clients/service/clientService';
+import { IClientNameOption } from '@/features/clients/types/IClientService';
 import { notifications } from '@mantine/notifications';
 import { ValidateClientReference } from '@/components/utils/businessRules';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
-  const { clientsName } = useClients()
+  const [clientOptions, setClientOptions] = useState<IClientNameOption[]>([])
   const { t, i18n } = useTranslation()
   const form = useForm({
     mode: 'controlled',
@@ -45,6 +47,21 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
   setupShipmentWatchers(form)
 
+  // La lista de clientes depende del tipo de operación seleccionado.
+  const operation = form.values.type_operation
+  useEffect(() => {
+    let active = true
+    if (!operation) {
+      setClientOptions([])
+      return
+    }
+    clientService
+      .getByOperation(operation)
+      .then((list) => { if (active) setClientOptions(list) })
+      .catch(() => { if (active) setClientOptions([]) })
+    return () => { active = false }
+  }, [operation])
+
 
 
 
@@ -61,13 +78,16 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
   const handleSubmit = async (values: typeof form.values) => {
     try {
-      const selectedClient = clientsName.find((c) => c.id === Number(values.cliente));
+      const clientId = Number(values.cliente);
+      const selectedClient = clientOptions.find((c) => c.id === clientId);
       const clientName = selectedClient?.name || '';
+      const rules = clientId ? await clientService.getReferenceRules(clientId) : [];
 
       const { isValid, field, error } = ValidateClientReference({
         onClientName: clientName,
         onReferenceClient: values.customer_tracking,
         onTypeOperation: values.type_operation,
+        rules,
       });
 
       if (!isValid && field && error) {
@@ -112,7 +132,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
             <Select
               label={t('shipment.labels.cliente')}
               placeholder={t('shipment.placeholders.cliente')}
-              data={clientsName.map((client) => ({
+              data={clientOptions.map((client) => ({
                 value: client.id,
                 label: client.name,
               }))}
@@ -129,6 +149,10 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
               searchable
               required
               {...form.getInputProps('type_operation')}
+              onChange={(value) => {
+                form.setFieldValue('type_operation', value ?? '');
+                form.setFieldValue('cliente', '');
+              }}
             />
           </Group>
 

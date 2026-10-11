@@ -1,7 +1,10 @@
+import type { IClientReferenceRule } from '@/features/clients/types/IClientService';
+
 export interface IValidateClientProps {
   onClientName?: string;
   onReferenceClient?: string;
   onTypeOperation?: string;
+  rules?: IClientReferenceRule[];
 }
 export interface ValidationResult {
   isValid: boolean;
@@ -9,34 +12,42 @@ export interface ValidationResult {
   error?: string;
 }
 
+/**
+ * Valida la referencia contra las reglas del cliente (vienen del backend).
+ * Sin reglas, cualquier referencia es válida.
+ */
 export const ValidateClientReference = ({
   onClientName = '',
   onReferenceClient = '',
   onTypeOperation = '',
+  rules = [],
 }: IValidateClientProps): ValidationResult => {
   const reference = String(onReferenceClient || '').trim().toLowerCase();
-  const clientName = String(onClientName || '').trim().toLowerCase();
+  const clientName = String(onClientName || '').trim();
   const typeOperation = String(onTypeOperation || '').trim().toLowerCase();
 
   if (!clientName) return { isValid: false, field: 'cliente', error: 'Cliente es requerido' };
   if (!typeOperation) return { isValid: false, field: 'type_operation', error: 'Tipo de operación requerido' };
   if (!reference) return { isValid: false, field: 'customer_tracking', error: 'Referencia requerida' };
 
-  if (clientName === 'expeditors') {
-    if (typeOperation === 'importacion' && !reference.startsWith('12b')) {
-      return { isValid: false, field: 'customer_tracking', error: 'Referencia de Expeditors debe empezar con "12B" para importaciones' };
-    }
+  if (rules.length === 0) return { isValid: true };
 
-    if (typeOperation === 'exportacion' && !reference.startsWith('82b') && !reference.startsWith('92b')) {
-      return { isValid: false, field: 'customer_tracking', error: 'Referencia de Expeditors debe empezar con "82B" o "92B" para exportación' };
-    }
-
-    if (reference.length !== 10) {
-      return { isValid: false, field: 'customer_tracking', error: 'Referencia de Expeditors debe contener 10 caracteres' };
-    }
+  const opRules = rules.filter((rule) => rule.operation_type === typeOperation);
+  if (opRules.length === 0) {
+    return { isValid: false, field: 'type_operation', error: `${clientName} no opera ${typeOperation}` };
   }
 
-  return { isValid: true };
+  const matches = opRules.some(
+    (rule) =>
+      reference.startsWith(rule.prefix.toLowerCase()) &&
+      (rule.reference_length === null || reference.length === rule.reference_length)
+  );
+  if (matches) return { isValid: true };
+
+  const prefixes = [...new Set(opRules.map((rule) => rule.prefix.toUpperCase()))].join(' o ');
+  const length = opRules.find((rule) => rule.reference_length)?.reference_length;
+  const error = `La referencia debe empezar con ${prefixes}` + (length ? ` y tener ${length} caracteres` : '');
+  return { isValid: false, field: 'customer_tracking', error };
 };
 
 export interface RFCData {

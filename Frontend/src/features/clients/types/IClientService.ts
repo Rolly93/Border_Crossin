@@ -13,9 +13,23 @@ export interface IClientOption {
   has_sftp: boolean;
 }
 
+export interface IClientNameOption {
+  id: number;
+  name: string;
+}
+
+export interface IClientReferenceRule {
+  id: number;
+  operation_type: string;
+  prefix: string;
+  reference_length: number | null;
+}
+
 export interface IClientService extends IBaseService<ICliente> {
   active(id: number): Promise<ICliente>
   getOptions(): Promise<IClientOption[]>
+  getByOperation(operation: string): Promise<IClientNameOption[]>
+  getReferenceRules(clientId: number): Promise<IClientReferenceRule[]>
   getMetrics(): Promise<ClientMetricsResponse>;
   getPaginated(page: number, limit: number): Promise<PaginatedResponse<ICliente>>
 }

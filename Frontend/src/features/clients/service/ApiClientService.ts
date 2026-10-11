@@ -1,6 +1,11 @@
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { ICliente } from "../types/Cliente";
-import { IClientOption, IClientService } from "../types/IClientService";
+import {
+  IClientNameOption,
+  IClientOption,
+  IClientReferenceRule,
+  IClientService,
+} from "../types/IClientService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
 
 interface MetricsResponse {
@@ -20,6 +25,20 @@ export class ApiClientService extends BaseCrudApiService<ICliente> implements IC
 
     return response.data
 
+  }
+
+  async getByOperation(operation: string): Promise<IClientNameOption[]> {
+    const response = await this.api.get<IClientNameOption[]>(`/${this.resourcePath}/by-operation`, {
+      params: { operation_type: operation },
+    });
+    return response.data;
+  }
+
+  async getReferenceRules(clientId: number): Promise<IClientReferenceRule[]> {
+    const response = await this.api.get<IClientReferenceRule[]>(
+      `/${this.resourcePath}/${clientId}/reference-rules`
+    );
+    return response.data;
   }
 
   async getOptions(): Promise<IClientOption[]> {

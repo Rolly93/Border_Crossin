@@ -1,5 +1,7 @@
 from typing import List
 
+from sqlalchemy.orm import Session
+
 from fastapi import APIRouter, Depends, Query, status
 from schema.client_schema import (
     MetricsClientResponse,
@@ -10,10 +12,39 @@ from deps.service import ClientSvc, get_client_service
 from deps.auth import CurrentUser, get_current_user
 from schema import ClientRequest
 from utility.cliente_service import ClienteService
+from utility.reference_rule_service import ReferenceRuleService
+from database import get_db
+from schema.client_schema import ClientNameResponse, ReferenceRuleOut
 
 router = APIRouter(
     prefix="/client", tags=["client"], dependencies=[Depends(get_current_user)]
 )
+
+
+@router.get(
+    "/by-operation",
+    status_code=status.HTTP_200_OK,
+    response_model=List[ClientNameResponse],
+)
+async def clients_by_operation(
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+    operation_type: str = Query(..., description="importacion | exportacion"),
+):
+    return ReferenceRuleService(db).clients_for_operation(operation_type)
+
+
+@router.get(
+    "/{client_id}/reference-rules",
+    status_code=status.HTTP_200_OK,
+    response_model=List[ReferenceRuleOut],
+)
+async def client_reference_rules(
+    client_id: int,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    return ReferenceRuleService(db).rules_for_client(client_id)
 
 
 @router.get(
