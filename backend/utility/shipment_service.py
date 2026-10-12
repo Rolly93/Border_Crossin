@@ -15,7 +15,13 @@ from model.db_model import (
     UnitTruck,
 )
 from repository.system_config_repository import SystemConfigRepository
-from schema.shipment_shcema import ShipmentCreateRequest, ShipmentUpdate, ShipmentResponse
+from schema.shipment_shcema import (
+    EventCategory,
+    ShipmentCreateRequest,
+    ShipmentEvent,
+    ShipmentResponse,
+    ShipmentUpdate,
+)
 from repository import ShipmentRepository
 from utility.reference_rule_service import ReferenceRuleService
 
@@ -33,7 +39,29 @@ class ShipmentService:
     ) -> List[ShipmentResponse]:
         raw_shipments = self._shipment_db.get_all_shipments(page, limit)
 
-        return [ShipmentResponse.model_validate(s) for s in raw_shipments]
+        return [self._to_response(s) for s in raw_shipments]
+
+    @staticmethod
+    def _to_response(s: ShipmentAssign) -> ShipmentResponse:
+        # truck y trailer son relaciones ORM; el esquema espera su texto (número / placas).
+        valid_categories = {c.value for c in EventCategory}
+        events = [
+            ShipmentEvent(category=e.category, dateTime=e.event_time, notes=e.notes)
+            for e in s.events
+            if e.event_time and e.category in valid_categories
+        ]
+        return ShipmentResponse(
+            id=s.id,
+            tracking_number=s.tracking_number,
+            customer_tracking=s.customer_tracking,
+            type_operation=s.type_operation,
+            origen=s.origen,
+            destination=s.destination,
+            cliente=str(s.client_id),
+            truck=s.truck.unit_number if s.truck else None,
+            trailer=s.trailer.plates if s.trailer else None,
+            events=events,
+        )
 
     def create_shipment(self, data: ShipmentCreateRequest, user_id: int) -> ShipmentAssign:
         client = self.db.get(Client, data.cliente)
