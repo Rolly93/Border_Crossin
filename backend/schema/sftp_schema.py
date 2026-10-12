@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class SftpModel(BaseModel):
@@ -61,6 +61,24 @@ class SftpConfigIn(BaseModel):
     password: Optional[str] = None
     root_folder: str = Field(min_length=1, max_length=200)
     remote_folder: str = Field(min_length=1, max_length=200)
+
+    @field_validator("host", "username", "root_folder", "remote_folder", mode="before")
+    @classmethod
+    def strip_and_require(cls, value):
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                raise ValueError("no puede estar vacío")
+        return value
+
+    @field_validator("host")
+    @classmethod
+    def host_only(cls, value: str) -> str:
+        if any(ch.isspace() for ch in value) or "://" in value or "/" in value:
+            raise ValueError(
+                "debe ser solo el nombre o IP del servidor, sin http:// ni rutas (ej. sftp.cliente.com)"
+            )
+        return value
 
 
 class SftpConfigOut(BaseModel):

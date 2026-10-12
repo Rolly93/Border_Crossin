@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -43,13 +43,23 @@ def get_connection(
     return SftpConfigService(db).get_for_client(client_id)
 
 
+def _user_id(current_user) -> int:
+    # El token de primer uso lleva el RFC como sub; no es un usuario de la tabla user.
+    if not current_user.sub.isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inicia sesión con tu usuario para configurar SFTP",
+        )
+    return int(current_user.sub)
+
+
 @router.post("/create", status_code=201)
 def create_connection(
     data: SftpConfigIn,
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
-    return SftpConfigService(db).create(data, int(current_user.sub))
+    return SftpConfigService(db).create(data, _user_id(current_user))
 
 
 @router.put("/update/{config_id}")

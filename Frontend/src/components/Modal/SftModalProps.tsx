@@ -6,6 +6,7 @@ import { useSftp } from "@/features/sftp/hooks/useSftp";
 import { useEffect, useState } from "react";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { AtomButton } from "../atoms/AtomButton";
+import { getErrorMessage } from "../utils/errorMessage";
 
 interface IsftModalProps {
     opened: boolean;
@@ -55,7 +56,7 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
             await deleteSftpConfig(sftpConfig.id)
             onClose()
         } catch (err: any) {
-            setLocalError(err?.response?.data?.detail ?? err?.message ?? "No se pudo eliminar")
+            setLocalError(getErrorMessage(err, "No se pudo eliminar"))
         }
     }
 
@@ -63,12 +64,12 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
         const payload: ISftpConfiguration = {
             id: sftpConfig?.id || undefined,
             idClient: Number(clientId),
-            host: values.host,
+            host: values.host.trim(),
             port: Number(values.port),
-            username: values.username,
+            username: values.username.trim(),
             password: values.password,
-            root_folder: values.root_folder,
-            remote_folder: values.remote_folder,
+            root_folder: values.root_folder.trim(),
+            remote_folder: values.remote_folder.trim(),
         }
         try {
             if (sftpConfig?.id) {
@@ -78,7 +79,7 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
             }
             onClose()
         } catch (err: any) {
-            setLocalError(err?.response?.data?.detail ?? err?.message ?? "No se pudo guardar")
+            setLocalError(getErrorMessage(err, "No se pudo guardar"))
         }
     }
 
@@ -113,10 +114,29 @@ function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
             root_folder: initialData.root_folder || "",
             remote_folder: initialData.remote_folder || "",
         },
+        validate: {
+            username: (v) => (v.trim() ? null : "Usuario requerido"),
+            password: (v) => (!isEditMode && !v ? "Contraseña requerida" : null),
+            port: (v) => {
+                const n = Number(v);
+                return Number.isInteger(n) && n >= 1 && n <= 65535
+                    ? null
+                    : "Puerto debe ser un número entre 1 y 65535";
+            },
+            host: (v) => {
+                if (!v.trim()) return "Host requerido";
+                if (/\s/.test(v) || v.includes("://") || v.includes("/")) {
+                    return "Solo el nombre o IP del servidor (sin http:// ni rutas)";
+                }
+                return null;
+            },
+            root_folder: (v) => (v.trim() ? null : "Carpeta local requerida"),
+            remote_folder: (v) => (v.trim() ? null : "Carpeta remota requerida"),
+        },
     });
 
     return (
-        <form onSubmit={form.onSubmit((values) => { onSubmit(values) })}>
+        <form onSubmit={form.onSubmit((values) => { onSubmit(values) })} noValidate>
             <Stack gap={'xl'} >
                 <Title order={2}>SFTP Configuration</Title>
                 <AtomTextInput

@@ -3,6 +3,7 @@ import { notifications } from "@mantine/notifications";
 import { useDebouncedValue } from "@/components/hook/useDebouncedValue";
 import { sftpService } from "../service/sftpService";
 import { ISftpSend } from "../types/ISftpSend";
+import { getErrorMessage } from "@/components/utils/errorMessage";
 
 export const MAX_AUTO_RETRIES = 3;
 
@@ -30,7 +31,7 @@ export function useSftpSends() {
       setSends(data);
       setSelected(new Set());
     } catch (err: any) {
-      setError(err.response?.data?.detail ?? err.message ?? "No se pudieron cargar los envíos");
+      setError(getErrorMessage(err, "No se pudieron cargar los envíos"));
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ export function useSftpSends() {
     } catch (err: any) {
       notifications.show({
         title: "Error al reenviar",
-        message: err.response?.data?.detail ?? err.message,
+        message: getErrorMessage(err, "No se pudo reenviar"),
         color: "red",
       });
     } finally {
