@@ -11,6 +11,7 @@ import { ClientTableRow } from "./ClientTableRow";
 import { useClients } from "../hooks/useClients";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
+import { useAuth } from "@/features/login/context/AuthContext";
 
 
 export function ClientTable() {
@@ -18,6 +19,7 @@ export function ClientTable() {
   const [createdClient, setCreatedClient] = useState<{ id: number; name: string } | null>(null);
   const navigate = useNavigate();
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
+  const { isAdmin } = useAuth();
   const { clients,
     loading,
     hasMore,
@@ -98,9 +100,11 @@ export function ClientTable() {
         <Group>
 
 
-          <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
-            Agregar Cliente
-          </AtomButton>
+          {isAdmin && (
+            <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
+              Agregar Cliente
+            </AtomButton>
+          )}
           <AtomButton
             variant="default"
             leftSection={<IconRefresh size={16} />}
@@ -146,6 +150,7 @@ export function ClientTable() {
                 onClick={handleSelectClient}
                 onDelete={handelDeleteClient}
                 onActivate={handelReactive}
+                canManage={isAdmin}
               />)
             }))}
             {loading && <TableSkeletonRows rows={4} columns={6} />}

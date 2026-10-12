@@ -9,6 +9,7 @@ import { ProtectedRouter } from './features/login/components/ProtectedRoute';
 import { AuthProvider } from './features/login/context/AuthContext';
 import { FirstTimeLog } from './features/login/components/FirstTimeCreate';
 import { EmployeePage } from './pages/EmployeePage';
+import { UnitPage } from './pages/UnitPage';
 const router = createBrowserRouter([
   {
     path: '/login',
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
           { path: '/sftp_connection', element: <SftpConnection /> },
           { path: '/sftp_sends', element: <SftpSends /> },
           { path: '/employee', element: <EmployeePage /> },
+          { path: '/units', element: <UnitPage /> },
         ]
       },
     ],

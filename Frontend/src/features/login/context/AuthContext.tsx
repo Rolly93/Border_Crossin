@@ -1,9 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { authService, AuthService } from '../service/ApiLoginService';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
+import { authService } from '../service/ApiLoginService';
+import { decodeJwtPayload } from '../utils/jwtPayload';
 
 interface AuthContextType {
   token: string | null;
+  isAdmin: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -12,19 +13,21 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(localStorage.getItem('jwt_token'));
+
+  const isAdmin = useMemo(() => decodeJwtPayload(token)?.is_admin === true, [token]);
+
   const login = (newToken: string) => {
     localStorage.setItem('jwt_token', newToken);
     setToken(newToken);
   };
 
   const logout = () => {
-    authService.logout()
+    authService.logout();
     setToken(null);
-
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, isAdmin, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

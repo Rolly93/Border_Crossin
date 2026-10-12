@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { IEmployeeRequest, IEmployeeResponse } from '../type/employee.interface';
+import { IEmployeeRequest, IEmployeeResponse, INewEmployeeRequest } from '../type/employee.interface';
 import { employeeService } from '../service/EmployeeService';
 import { usePaginatedList } from '@/components/hook/usePaginaterList';
 export function useEmployee() {
@@ -56,5 +56,18 @@ export function useEmployee() {
     }
   }
 
-  return { employeeData, loading, error, hasMore, createNewEmployee, fetchNextPage, setError, updateEmployee, deleteEmployee } as const;
+  /** Alta de empleado tipo cargo (con cuenta) u operador (con licencia). */
+  const createEmployeeAccount = async (payload: INewEmployeeRequest) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const created = await employeeService.createEmployee(payload)
+      setEmployeeData((prev) => [created, ...prev])
+      return created
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { employeeData, loading, error, hasMore, createNewEmployee, createEmployeeAccount, fetchNextPage, setError, updateEmployee, deleteEmployee } as const;
 }

@@ -1,5 +1,11 @@
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
-import { IEmployeeRequest, IEmployeeService, IEmployeeResponse } from "../type/employee.interface";
+import {
+  IEmployeeRequest,
+  IEmployeeService,
+  IEmployeeResponse,
+  IOperatorOption,
+  INewEmployeeRequest,
+} from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
 
 export class ApiEmployeeService
@@ -18,6 +24,13 @@ export class ApiEmployeeService
 
     return responseData;
   }
+
+  /** Alta de empleado tipo cargo u operador (cuenta o licencia según el tipo). */
+  async createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse> {
+    const response = await this.api.post<IEmployeeResponse>(`${this.resourcePath}/create`, data);
+    return response.data;
+  }
+
   async getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>> {
     const response = await this.api.get<PaginatedResponse<IEmployeeResponse>>(`${this.resourcePath}/`, {
       params: { page, limit },
@@ -33,5 +46,10 @@ export class ApiEmployeeService
       data: response.data.data
     }
 
+  }
+
+  async getOperators(): Promise<IOperatorOption[]> {
+    const response = await this.api.get<IOperatorOption[]>(`${this.resourcePath}/operators`);
+    return response.data;
   }
 }

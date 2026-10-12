@@ -1,18 +1,21 @@
-import { Modal, Table } from "@mantine/core";
-import { IEmployeeRequest, IEmployeeResponse } from "../type/employee.interface";
-import { useState, useRef, useCallback } from "react";
+import { Group, Table, Title } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
+import { useRef, useCallback } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
+import { AtomButton } from "@/components/atoms/AtomButton";
+import { useAuth } from "@/features/login/context/AuthContext";
 import { useEmployee } from "../hook/useEmployee";
+import { useNewEmployeeForm } from "../hook/useNewEmployeeForm";
 import { EmployeeTableRow } from "./EmployeeTableRow";
-import { EmployeeForm } from "./EmployeeForm";
+import { NewEmployeeModal } from "./NewEmployeeModal";
 
 export function EmployeeTable() {
-  const { employeeData, loading, hasMore, fetchNextPage } = useEmployee();
-  const observer = useRef<IntersectionObserver | null>(null)
-  const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeResponse | IEmployeeRequest>()
-  const [csrModal, { open: openCsrModal, close: closeCsrModal }] = useDisclosure()
-  const [driverModal, { open: opendriverModal, close: closedriverModal }] = useDisclosure()
+  const { isAdmin } = useAuth();
+  const { employeeData, loading, hasMore, fetchNextPage, createEmployeeAccount } = useEmployee();
+  const employeeForm = useNewEmployeeForm(createEmployeeAccount);
+  const [newModal, { open: openNewModal, close: closeNewModal }] = useDisclosure(false);
+  const observer = useRef<IntersectionObserver | null>(null);
 
   const lastElementRef = useCallback((node: HTMLTableRowElement | null) => {
     if (loading) { return }
@@ -27,30 +30,20 @@ export function EmployeeTable() {
 
   }, [loading, hasMore, fetchNextPage])
 
-  async function handelSelectedEmployee(onSelectEmployee: IEmployeeResponse) {
-    const role = onSelectEmployee.role.toLowerCase()
-
-    switch (role) {
-      case 'csr': openCsrModal()
-
-        break;
-      case 'driver': opendriverModal()
-
-      default:
-        break;
-    }
-
-  }
-
   return (
     <>
-      <Modal opened={csrModal}
-        onClose={closeCsrModal}
-        title='Registrar Nuevo CSR'
-        centered
-        size={'lg'}>
-        <EmployeeForm onClose={closeCsrModal} />
-      </Modal>
+      <Group justify="space-between" mt="md">
+        <Title order={3}>Empleados</Title>
+        {/* Solo administradores dan de alta empleados; el backend también lo valida. */}
+        {isAdmin && (
+          <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={openNewModal}>
+            Nuevo empleado
+          </AtomButton>
+        )}
+      </Group>
+
+      <NewEmployeeModal opened={newModal} onClose={closeNewModal} employeeForm={employeeForm} />
+
       <Table.ScrollContainer minWidth={760} h={500}>
         <Table highlightOnHover
           horizontalSpacing={'md'}
@@ -61,7 +54,6 @@ export function EmployeeTable() {
 
           <Table.Thead>
             <Table.Tr>
-
               <Table.Th>Nombre</Table.Th>
               <Table.Th>Apellido</Table.Th>
               <Table.Th>Cargo</Table.Th>
@@ -79,11 +71,12 @@ export function EmployeeTable() {
                 employee={employee}
                 ref={isLastElement ? lastElementRef : null}
                 key={employee.id}
-                onClick={handelSelectedEmployee}
+                onClick={() => { }}
               />)
             }))}
-            {loading && <TableSkeletonRows rows={4} columns={6} />}
+            {loading && <TableSkeletonRows rows={4} columns={5} />}
           </Table.Tbody>
         </Table>
-      </Table.ScrollContainer></>)
+      </Table.ScrollContainer>
+    </>)
 }

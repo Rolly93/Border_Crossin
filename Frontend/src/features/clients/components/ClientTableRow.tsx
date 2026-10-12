@@ -8,11 +8,12 @@ interface ClientTableRowProps {
   cliente: ICliente;
   onClick: (client: ICliente) => void
   onDelete: (id: number) => void
+  canManage: boolean
   onActivate: (id: number) => void
 }
 
 
-export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProps>(({ cliente, onClick, onDelete, onActivate }, ref) => {
+export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProps>(({ cliente, onClick, onDelete, onActivate, canManage }, ref) => {
   const emailCount = cliente.email?.length ?? 0;
 
   return (
@@ -24,7 +25,7 @@ export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProp
       <Table.Td>{cliente.emailService ? "Si" : "No"}</Table.Td>
       <Table.Td>{emailCount > 0 ? emailCount : "N/A"}</Table.Td>
       <Table.Td>
-        <AtmoAction
+        {canManage && <AtmoAction
           icon={IconTrash}
           color="red"
           variant={'subtle'}
@@ -34,14 +35,14 @@ export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProp
             onDelete(cliente.id);
           }}
         />
-        <AtmoAction
+        {canManage && <AtmoAction
           icon={IconRefresh}
           color="green"
           title="Reactive Cliente"
           onClick={(e) => {
             e.stopPropagation();
             onActivate(cliente.id)
-          }} />
+          }} />}
       </Table.Td>
     </Table.Tr>
 

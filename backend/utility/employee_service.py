@@ -191,8 +191,16 @@ class EmployeeService:
         self._validate_account(data)
         new_employee = self.create_employee(data)
         self._attach_account(new_employee, data, current_user)
+        # Misma forma que un renglón de GET /employees/, para agregarlo a la tabla.
         return {
             "status": "201",
             "detail": "Employee registered successfully",
             "name": new_employee.name,
+            "id": new_employee.id,
+            "firstName": new_employee.name,
+            "lastName": new_employee.last_name,
+            "role": new_employee.role,
+            "rfc": new_employee.rfc,
+            "hireDate": new_employee.hire_date,
+            "stillEmployee": new_employee.still_employee,
         }
