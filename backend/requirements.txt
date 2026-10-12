@@ -11,7 +11,7 @@ typing-inspect
 pydantic
 pydantic-settings
 sqlalchemy
-psycopg2
+psycopg2-binary
 pymysql
 
 python-stdnum
