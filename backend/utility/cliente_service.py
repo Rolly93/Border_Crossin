@@ -120,11 +120,10 @@ class ClienteService:
 
     def get_metrics(self) -> MetricsClientResponse:
         sftp_data = self._sftp_service.get_all_sftp_data()
-        email_data = self._email_repo.get_all_email_data()
         all_clients = self._db.get_clients_names()
 
         return MetricsClientResponse(
             totalClients=len(all_clients),
-            emailService=len(email_data),
+            emailService=self._email_repo.count_clients_with_active_email(),
             sftpService=len(sftp_data),
         )

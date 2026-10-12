@@ -86,7 +86,8 @@ async def new_client(
     data: ClientRequest,
     service: ClienteService = Depends(get_client_service),
 ):
-    return service.create_client(data=data)
+    client = service.create_client(data=data)
+    return {"id": client.id, "name": client.name}
 
 
 @router.put(

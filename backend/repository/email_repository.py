@@ -2,6 +2,7 @@ from typing import Any, List
 from sqlalchemy.orm import Session
 
 from repository.base_repository import BaseRepository
+from sqlalchemy import distinct, func, select
 from model.db_model import ClientEmailRecipient
 
 
@@ -40,6 +41,7 @@ class EmailRepository(BaseRepository[ClientEmailRecipient]):
         if new_records:
             self._db.add_all(new_records)
 
+        self._db.commit()
         return list(incoming_emails)
 
     def toggle_client_emails(self, client_id: int, status: bool):
@@ -48,4 +50,13 @@ class EmailRepository(BaseRepository[ClientEmailRecipient]):
             .filter(ClientEmailRecipient.client_id == client_id)
             .update({"is_active": status}, synchronize_session=False)
         )
+        self._db.commit()
         return updated_count
+
+    def count_clients_with_active_email(self) -> int:
+        """Clientes (no correos) con al menos un correo activo."""
+        return self._db.scalar(
+            select(func.count(distinct(ClientEmailRecipient.client_id))).where(
+                ClientEmailRecipient.is_active == True
+            )
+        ) or 0

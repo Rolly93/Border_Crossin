@@ -38,7 +38,9 @@ class SftpRepository(BaseRepository[SftpService]):
         return super().update(id_sftp, sftp_data)
 
     def get_all_sftp_data(self) -> List[SftpService]:
-        sftp_data = self._db.query(SftpService).all()
+        sftp_data = (
+            self._db.query(SftpService).filter(SftpService.is_active.is_(True)).all()
+        )
         return sftp_data
 
     def insert_sftp_service(self, sftp_data: SftpConfiRequst) -> SftpService:

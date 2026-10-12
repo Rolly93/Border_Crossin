@@ -1,5 +1,6 @@
 import { Table } from "@mantine/core";
-import { Title, Text, Group } from '@mantine/core';
+import { Title, Text, Group, Modal } from '@mantine/core';
+import { useNavigate } from "react-router-dom";
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import ClientModalProps from "./ClientModalProps";
 import { useState, useRef, useCallback } from "react";
@@ -14,6 +15,8 @@ import { AtomButton } from "@/components/atoms/AtomButton";
 
 export function ClientTable() {
   const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
+  const [createdClient, setCreatedClient] = useState<{ id: number; name: string } | null>(null);
+  const navigate = useNavigate();
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
   const { clients,
     loading,
@@ -62,7 +65,9 @@ export function ClientTable() {
     if (selectedClient) {
       return await updateClient(selectedClient.id, clienData);
     } else {
-      return await addClient(clienData);
+      const created = await addClient(clienData);
+      setCreatedClient({ id: created.id, name: created.name });
+      return created;
     }
   }
 
@@ -148,6 +153,19 @@ export function ClientTable() {
         </Table>
       </Table.ScrollContainer>
 
+      <Modal opened={createdClient !== null} onClose={() => setCreatedClient(null)} title="Cliente creado" centered>
+        <Text size="sm" mb="md">
+          {createdClient?.name} se registró correctamente. ¿Quieres configurar su conexión SFTP ahora?
+        </Text>
+        <Group justify="flex-end">
+          <AtomButton variant="default" onClick={() => setCreatedClient(null)}>Más tarde</AtomButton>
+          <AtomButton color="teal" onClick={() => {
+            const id = createdClient?.id;
+            setCreatedClient(null);
+            navigate(`/sftp_connection?client=${id}`);
+          }}>Configurar SFTP</AtomButton>
+        </Group>
+      </Modal>
       <ClientModalProps
         onSelectClient={selectedClient}
         opened={modalOpened}

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Alert, Badge, Button, Group, Loader, Stack, Table, Text, Title } from "@mantine/core";
 import SftModal from "@/components/Modal/SftModalProps";
 import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
@@ -12,6 +13,16 @@ export function SftpClientList() {
     setSelectedId(id);
     setOpened(true);
   };
+
+  // Si llega ?client=ID (desde el aviso al crear un cliente), abre su configuración.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const requested = Number(searchParams.get("client"));
+    if (requested && clients.some((c) => c.id === requested)) {
+      openConfig(requested);
+      setSearchParams({}, { replace: true });
+    }
+  }, [clients, searchParams, setSearchParams]);
 
   // Al cerrar el modal se recarga el estado, por si se creó o eliminó una configuración.
   const closeConfig = () => {

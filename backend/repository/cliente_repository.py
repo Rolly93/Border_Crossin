@@ -81,7 +81,10 @@ class ClienteRepository(BaseRepository[Client]):
 
         stmt = (
             select(Client)
-            .options(selectinload(Client.email_recipients))
+            .options(
+                selectinload(Client.email_recipients),
+                selectinload(Client.sftp_services),
+            )
             .offset(offset)
             .limit(limit)
         )
@@ -104,6 +107,8 @@ class ClienteRepository(BaseRepository[Client]):
                     name=client.name,
                     telefono=str(client.phonenumber) if client.phonenumber else None,
                     email=active_emails,
+                    emailService=bool(active_emails),
+                    sftService=any(s.is_active for s in client.sftp_services),
                 )
             )
 
