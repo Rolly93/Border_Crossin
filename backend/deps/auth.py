@@ -87,6 +87,25 @@ OptionalCurrentUser = Annotated[
     Depends(get_optional_current_user),
 ]
 
+def require_admin(current_user: CurrentUser):
+    if not getattr(current_user, "is_admin", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Se requieren privilegios de administrador",
+        )
+    return current_user
+
+
+def get_user_id(current_user) -> int:
+    # El token de primer uso lleva el RFC como sub; no es un usuario de la tabla user.
+    if not str(current_user.sub).isdigit():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inicia sesión con tu usuario",
+        )
+    return int(current_user.sub)
+
+
 fernet = Fernet(
     config.SECRET_KEY.encode()
     if isinstance(config.SECRET_KEY, str)

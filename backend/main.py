@@ -8,6 +8,7 @@ from routes.notification_router import router as notifications_router
 from routes.shipment import router as shipment_router
 from routes.sftp_route import router as sftp_router
 from routes.system_route import router as system_router
+from routes.unit_route import router as unit_router
 from routes.user import router as user_router
 
 Base.metadata.create_all(bind=engine)
@@ -29,6 +30,8 @@ app.include_router(client_router)
 app.include_router(employee_router)
 app.include_router(sftp_router)
 app.include_router(system_router)
+app.include_router(unit_router)
+
 if __name__ == "__main__":
     import uvicorn
 

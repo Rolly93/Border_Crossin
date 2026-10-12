@@ -1,11 +1,12 @@
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import Optional, Union
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from stdnum.mx import rfc as rfc_validator
 
-from model.db_model import Employee
+from model.db_model import DriverDetails, Employee, User
+from utility.user_service import UserService
 from repository import EmployeeRepository, UserRepository
 from schema.employee_schema import (
     EmployeeListItem,
@@ -56,6 +57,88 @@ class EmployeeService:
             limit=limit,
         )
 
+    def _validate_account(self, data: EmployeeRequest) -> None:
+        """Valida todo antes de crear el empleado, para no dejar registros a medias."""
+        if data.employeeType == "cargo":
+            if not (data.username and data.email and data.password):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Un cargo requiere usuario, correo y contraseña",
+                )
+            if len(data.password) < 8:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="La contraseña debe tener al menos 8 caracteres",
+                )
+            if self._user_repo.get_username(data.username.strip()):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Ese nombre de usuario ya existe",
+                )
+            if self._user_repo.get_email(str(data.email)):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Ese correo ya está registrado",
+                )
+            return
+
+        if not (data.licenseNumber and data.licenseExpiration):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Un operador requiere número de licencia y vencimiento",
+            )
+        if data.licenseExpiration <= date.today():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La licencia del operador está vencida",
+            )
+        if self._db.query(DriverDetails).filter(
+            DriverDetails.license_number == data.licenseNumber.strip()
+        ).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ese número de licencia ya está registrado",
+            )
+        if data.gafetId and self._db.query(DriverDetails).filter(
+            DriverDetails.gafet_id == data.gafetId.strip()
+        ).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ese gafete ya está asignado a otro operador",
+            )
+
+    def _attach_account(self, employee: Employee, data: EmployeeRequest, current_user) -> None:
+        if data.employeeType == "cargo":
+            self._db.add(User(
+                username=data.username.strip(),
+                email=str(data.email),
+                hashed_password=UserService.hash_password(data.password),
+                is_admin=data.isAdmin,
+                employee_id=employee.id,
+            ))
+        else:
+            self._db.add(DriverDetails(
+                employee_id=employee.id,
+                license_number=data.licenseNumber.strip(),
+                expiration_date=data.licenseExpiration,
+                hire_by=int(current_user.sub),
+                gafet_id=data.gafetId.strip() if data.gafetId else None,
+            ))
+        self._db.commit()
+
+    def list_operators(self) -> list[dict]:
+        rows = (
+            self._db.query(DriverDetails)
+            .join(Employee, Employee.id == DriverDetails.employee_id)
+            .filter(Employee.still_employee.is_(True))
+            .order_by(Employee.name)
+            .all()
+        )
+        return [
+            {"id": d.employee_id, "name": f"{d.employee.name} {d.employee.last_name}"}
+            for d in rows
+        ]
+
     def create_employee(self, data: EmployeeRequest) -> Employee:
         clean_rfc = self.validate_rfc(data.rfc)
 
@@ -105,7 +188,9 @@ class EmployeeService:
                 detail="Authentication required to register additional employees.",
             )
 
+        self._validate_account(data)
         new_employee = self.create_employee(data)
+        self._attach_account(new_employee, data, current_user)
         return {
             "status": "201",
             "detail": "Employee registered successfully",

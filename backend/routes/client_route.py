@@ -9,7 +9,7 @@ from schema.client_schema import (
     ClientOptionResponse,
 )
 from deps.service import ClientSvc, get_client_service
-from deps.auth import CurrentUser, get_current_user
+from deps.auth import CurrentUser, get_current_user, require_admin
 from schema import ClientRequest
 from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
@@ -81,6 +81,7 @@ async def get_clients(
 @router.post(
     "/create",
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(require_admin)],
 )
 async def new_client(
     data: ClientRequest,
@@ -93,6 +94,7 @@ async def new_client(
 @router.put(
     "/update",
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_admin)],
 )
 async def update_client(
     data: ClientRequest,
@@ -104,7 +106,7 @@ async def update_client(
     return service.update_client_info(client_id=client_id, data=data)
 
 
-@router.delete("/delete/{client_id}", status_code=status.HTTP_200_OK)
+@router.delete("/delete/{client_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(require_admin)])
 async def delete(
     client_id: int,
     service: ClienteService = Depends(get_client_service),
@@ -113,7 +115,7 @@ async def delete(
     return deleted_client
 
 
-@router.put("/reactive/{client_id}", status_code=status.HTTP_200_OK)
+@router.put("/reactive/{client_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(require_admin)])
 async def reactive(
     client_id: int,
     service: ClienteService = Depends(get_client_service),

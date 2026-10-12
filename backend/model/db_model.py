@@ -1,6 +1,7 @@
 from typing import List, Optional
 from datetime import datetime, date
 from sqlalchemy import (
+    Index,
     UniqueConstraint,
     Integer,
     String,
@@ -187,10 +188,12 @@ class SftpService(Base):
 # ==============================================================================
 class UnitTruck(Base):
     __tablename__ = "unit_truck"
+    __table_args__ = (Index("uq_unit_truck_unit_number", "unit_number", unique=True),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
-    state: Mapped[str] = mapped_column(String(50), nullable=False)
+    unit_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    state: Mapped[str] = mapped_column(String(50), nullable=False, default="ACTIVA")
     tag_id: Mapped[Optional[str]] = mapped_column(
         String(24), nullable=True, unique=True, default="N/A"
     )
@@ -202,6 +205,34 @@ class UnitTruck(Base):
     shipment_assigns: Mapped[List["ShipmentAssign"]] = relationship(
         "ShipmentAssign", back_populates="truck"
     )
+    assignments: Mapped[List["UnitAssignment"]] = relationship(
+        "UnitAssignment", back_populates="unit", order_by="UnitAssignment.assigned_at.desc()"
+    )
+
+
+class UnitAssignment(Base):
+    """Historial de asignación de una unidad a un operador."""
+
+    __tablename__ = "unit_assignment"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    unit_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("unit_truck.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    driver_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("driver_details.employee_id"), nullable=False, index=True
+    )
+    assigned_by: Mapped[int] = mapped_column(
+        Integer, ForeignKey("user.id"), nullable=False
+    )
+    assigned_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp()
+    )
+    released_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    # Relaciones
+    unit: Mapped["UnitTruck"] = relationship("UnitTruck", back_populates="assignments")
+    driver: Mapped["DriverDetails"] = relationship("DriverDetails")
 
 
 class Trailer(Base):

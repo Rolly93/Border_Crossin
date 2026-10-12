@@ -6,6 +6,7 @@ from .db_model import (
     SftpSend,
     DriverDetails,
     UnitTruck,
+    UnitAssignment,
     Trailer,
     ShipmentAssign,
     ShipmentEventModel,

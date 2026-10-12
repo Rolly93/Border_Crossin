@@ -1,7 +1,7 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 from fastapi import APIRouter, Depends, Query, Request, status
 
-from schema.employee_schema import EmployeeRequest, PaginatedEmployeeResponse
+from schema.employee_schema import EmployeeRequest, OperatorOption, PaginatedEmployeeResponse
 from schema import TokenPayload, InitialTokenPayload
 from deps.auth import CurrentUser, get_client_ip, get_current_user, get_optional_current_user
 from deps.service import get_user_service, EmployeeSvc
@@ -43,6 +43,19 @@ async def register_employee(
         data=data, ip=ip, current_user=current_user
     )
     return new_employee
+
+
+@router.get(
+    "/operators",
+    summary="List Operators",
+    status_code=status.HTTP_200_OK,
+    response_model=List[OperatorOption],
+)
+async def list_operators(
+    service: EmployeeSvc,
+    current_user: CurrentUser,
+):
+    return service.list_operators()
 
 
 @router.post(
