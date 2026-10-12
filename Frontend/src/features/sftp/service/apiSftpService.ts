@@ -1,5 +1,6 @@
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
+import { ISftpSend, SftpSendFilters } from "../types/ISftpSend";
 
 
 export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration> {
@@ -12,6 +13,24 @@ export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration> {
       `/${this.resourcePath}/connection`,
       { params: { client_id: clientId } }
     );
+    return response.data;
+  }
+
+  async getSends(filters: SftpSendFilters): Promise<ISftpSend[]> {
+    const response = await this.api.get<ISftpSend[]>(`/${this.resourcePath}/sends`, {
+      params: {
+        client_id: filters.client_id,
+        reference: filters.reference,
+        status: filters.status,
+      },
+    });
+    return response.data;
+  }
+
+  async resend(sendIds: number[]): Promise<ISftpSend[]> {
+    const response = await this.api.post<ISftpSend[]>(`/${this.resourcePath}/resend`, {
+      send_ids: sendIds,
+    });
     return response.data;
   }
 

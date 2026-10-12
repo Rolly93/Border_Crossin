@@ -18,4 +18,6 @@ export interface IBaseService<T> {
 
 export interface ISftpService extends IBaseService<ISftpConfiguration> {
   getConnection(id: number): Promise<ISftpConfiguration | null>;
+  getSends(filters: import("@/features/sftp/types/ISftpSend").SftpSendFilters): Promise<import("@/features/sftp/types/ISftpSend").ISftpSend[]>;
+  resend(sendIds: number[]): Promise<import("@/features/sftp/types/ISftpSend").ISftpSend[]>;
 }

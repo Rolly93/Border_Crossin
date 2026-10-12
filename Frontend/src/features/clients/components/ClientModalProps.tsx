@@ -4,9 +4,6 @@ import { useForm, isEmail } from "@mantine/form";
 import { useEffect, useState } from "react";
 import { IconFileText, IconMail, IconPlus, IconX } from "@tabler/icons-react";
 import ActionCard from "../../../components/ui/ActionCard";
-import SftModal from "../../../components/Modal/SftModalProps";
-import { useDisclosure } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { AtmoAction } from "@/components/atoms/AtomActionIcon";
 
@@ -20,14 +17,11 @@ interface ClienteModalProps {
 }
 
 export default function ClientModalProps({ onSelectClient, opened, onClose, onSave, onError, onSetError }: ClienteModalProps) {
-    const [sftpOpened, { open: openSftp, close: closeSftp }] = useDisclosure(false);
     const [newEmail, setNewEmail] = useState("");
     const [recipients, setRecipients] = useState<string[]>([]);
     const [emailError, setEmailError] = useState<string | null>(null);
-    const clientId = onSelectClient?.id
     const [service, setService] = useState({
         email: onSelectClient?.emailService,
-        sftp: onSelectClient?.sftService,
     });
 
     const form = useForm({
@@ -60,14 +54,13 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
             setRecipients(loadedEmails);
             setService({
                 email: Boolean(onSelectClient.emailService),
-                sftp: Boolean(onSelectClient.sftService)
             });
         }
 
         else {
             form.reset()
             setRecipients([]);
-            setService({ email: false, sftp: false });
+            setService({ email: false });
         }
 
 
@@ -107,7 +100,6 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
         const finalData = {
             ...values,
             email: recipients,
-            sftService: service.sftp,
             emailService: service.email
         };
         try {
@@ -132,18 +124,6 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
 
     };
 
-    function handelModal() {
-        if (service.sftp && onSelectClient?.id) { openSftp() }
-
-        else if (service.sftp && !onSelectClient?.id) {
-            notifications.show({
-                title: "Cliente no registrado",
-                message: "Debes de guardar primero la informacion del cliente antes de configurar la conezion SFTP",
-                color: 'warning'
-            })
-        }
-    }
-
     return (
         <>
 
@@ -154,15 +134,6 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                     </Alert>
                 )}                <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing={'md'}>
 
-                    <ActionCard
-                        title="SFT Service"
-                        icon={<IconFileText size={20} />}
-                        color="grape"
-                        statusText={service.sftp ? "Activo" : "Inactivo"}
-                        onHandelModal={handelModal}
-                        onToggle={() => { toggleService('sftp'); }}
-                        checked={service.sftp}
-                    />
                     <ActionCard
                         title="Email Notification"
                         icon={<IconMail size={20} />}
@@ -250,10 +221,6 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                     </Stack>
                 </form>
             </Modal>
-            <SftModal
-                clientId={clientId}
-                opened={sftpOpened}
-                onClose={closeSftp} />
         </>
     );
 }

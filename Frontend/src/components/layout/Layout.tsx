@@ -56,6 +56,11 @@ export function Layout() {
           label='Sftp Connection'
           active={location.pathname === '/sftp_connection'} />
 
+        <NavLink component={Link}
+          to="/sftp_sends"
+          label='Envíos XML'
+          active={location.pathname === '/sftp_sends'} />
+
 
         <NavLink component={Link}
           to="/employee"
