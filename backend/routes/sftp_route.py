@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from database import get_db
-from deps.auth import CurrentUser, get_current_user
+from deps.auth import CurrentUser, get_current_user, require_admin
 from schema.sftp_schema import SftpConfigIn
 from utility.sftp_config_service import SftpConfigService
 from utility.sftp_send_service import SftpSendService
@@ -53,7 +53,7 @@ def _user_id(current_user) -> int:
     return int(current_user.sub)
 
 
-@router.post("/create", status_code=201)
+@router.post("/create", status_code=201, dependencies=[Depends(require_admin)])
 def create_connection(
     data: SftpConfigIn,
     current_user: CurrentUser,
@@ -62,7 +62,7 @@ def create_connection(
     return SftpConfigService(db).create(data, _user_id(current_user))
 
 
-@router.put("/update/{config_id}")
+@router.put("/update/{config_id}", dependencies=[Depends(require_admin)])
 def update_connection(
     config_id: int,
     data: SftpConfigIn,
@@ -71,6 +71,6 @@ def update_connection(
     return SftpConfigService(db).update(config_id, data)
 
 
-@router.delete("/delete/{config_id}")
+@router.delete("/delete/{config_id}", dependencies=[Depends(require_admin)])
 def delete_connection(config_id: int, db: Session = Depends(get_db)):
     return SftpConfigService(db).delete(config_id)

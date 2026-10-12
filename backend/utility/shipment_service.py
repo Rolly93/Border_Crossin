@@ -4,9 +4,18 @@ from typing import List
 
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
-from model.db_model import ShipmentAssign, ShipmentEventModel
+from fastapi import HTTPException, status
+
+from model.db_model import (
+    Client,
+    ShipmentAssign,
+    ShipmentEventModel,
+    Trailer,
+    UnitAssignment,
+    UnitTruck,
+)
 from repository.system_config_repository import SystemConfigRepository
-from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
+from schema.shipment_shcema import ShipmentCreateRequest, ShipmentUpdate, ShipmentResponse
 from repository import ShipmentRepository
 from utility.reference_rule_service import ReferenceRuleService
 
@@ -26,10 +35,65 @@ class ShipmentService:
 
         return [ShipmentResponse.model_validate(s) for s in raw_shipments]
 
-    def create_shipment(self, shipment: ShipmentCreate):
-        db_shipment = ShipmentAssign(**shipment.model_dump())
-        self._shipment_db.create(db_shipment)
-        return db_shipment
+    def create_shipment(self, data: ShipmentCreateRequest, user_id: int) -> ShipmentAssign:
+        client = self.db.get(Client, data.cliente)
+        if not client or not client.still_active:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Cliente no encontrado o inactivo")
+
+        if self.db.query(ShipmentAssign).filter(
+            ShipmentAssign.tracking_number == data.tracking_number
+        ).first():
+            raise HTTPException(status.HTTP_409_CONFLICT, "Ese número de embarque ya existe")
+
+        ReferenceRuleService(self.db).validate(
+            client_id=data.cliente,
+            operation=data.type_operation,
+            reference=data.customer_tracking,
+        )
+
+        # La unidad debe estar activa y tener un operador vigente: el operador es quien maneja.
+        unit = self.db.query(UnitTruck).filter(UnitTruck.unit_number == data.truck).first()
+        if not unit:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Unidad {data.truck} no encontrada")
+        if unit.state != "ACTIVA":
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"La unidad {data.truck} no está activa (estado: {unit.state})",
+            )
+        assignment = (
+            self.db.query(UnitAssignment)
+            .filter(UnitAssignment.unit_id == unit.id, UnitAssignment.released_at.is_(None))
+            .first()
+        )
+        if not assignment:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                f"La unidad {data.truck} no tiene operador asignado",
+            )
+
+        trailer = self.db.query(Trailer).filter(Trailer.plates == data.trailer).first()
+        if not trailer:
+            trailer = Trailer(plates=data.trailer, state="ACTIVA")
+            self.db.add(trailer)
+            self.db.flush()
+
+        shipment = ShipmentAssign(
+            tracking_number=data.tracking_number,
+            customer_tracking=data.customer_tracking,
+            type_operation=data.type_operation,
+            driver_id=assignment.driver_id,
+            client_id=data.cliente,
+            assigned_by=user_id,
+            trailer_id=trailer.id,
+            unit_truck_id=unit.id,
+            origen=data.origen,
+            destination=data.destination,
+            is_active=True,
+        )
+        self.db.add(shipment)
+        self.db.commit()
+        self.db.refresh(shipment)
+        return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:
         shipment_found = self._shipment_db.get_shipment(id)

@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, status, HTTPException
-from schema.shipment_shcema import ShipmentCreate, ShipmentUpdate, ShipmentResponse
-from deps.auth import CurrentUser
+from schema.shipment_shcema import ShipmentCreateRequest, ShipmentUpdate, ShipmentResponse
+from deps.auth import CurrentUser, get_user_id
 from deps.service import ShipmentSvc
 
 router = APIRouter(
@@ -20,17 +20,33 @@ async def shipment_dashboard(
     return service.get_all_shipments(page=page, limit=limit)
 
 
+def _shipment_to_dict(s) -> dict:
+    return {
+        "id": s.id,
+        "tracking_number": s.tracking_number,
+        "customer_tracking": s.customer_tracking,
+        "type_operation": s.type_operation,
+        "origen": s.origen,
+        "destination": s.destination,
+        "cliente": s.client_id,
+        "truck": s.truck.unit_number if s.truck else None,
+        "trailer": s.trailer.plates if s.trailer else None,
+        "status": "success",
+        "events": [],
+    }
+
+
 @router.post(
     "/create",
     status_code=status.HTTP_201_CREATED,
 )
 async def create_shipment(
-    shipment: ShipmentCreate,
+    shipment: ShipmentCreateRequest,
     current_user: CurrentUser,
     service: ShipmentSvc,
 ):
-    created = service.create_shipment(shipment)
-    return {"status": "success", "data": created}
+    created = service.create_shipment(shipment, get_user_id(current_user))
+    return _shipment_to_dict(created)
 
 
 @router.put("/{id}/update")

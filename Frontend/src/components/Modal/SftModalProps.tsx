@@ -1,4 +1,4 @@
-import { Button, Drawer, Group, LoadingOverlay, Stack, Title } from "@mantine/core";
+import { Button, Drawer, Group, LoadingOverlay, Stack, Text, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useTranslation } from "react-i18next";
 import { AtomTextInput } from "../atoms/AtomTextInput";
@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { AtomButton } from "../atoms/AtomButton";
 import { getErrorMessage } from "../utils/errorMessage";
+import { useAuth } from "@/features/login/context/AuthContext";
 
 interface IsftModalProps {
     opened: boolean;
@@ -27,6 +28,7 @@ interface SftpFromsProps {
     initialData: Partial<ISftpConfiguration>;
     onSubmit: (values: SftpFormValues) => Promise<void> | void;
     onDelete?: () => Promise<void> | void;
+    canEdit: boolean;
 }
 
 const DEFAULT_SFTP_CONFIG: Partial<ISftpConfiguration> = {
@@ -39,6 +41,8 @@ const DEFAULT_SFTP_CONFIG: Partial<ISftpConfiguration> = {
 };
 
 export default function SftModal({ opened, onClose, clientId }: IsftModalProps) {
+    // Alta, cambios y baja son solo de administrador; el CSR solo consulta.
+    const { isAdmin } = useAuth();
     const { sftpConfig, getSftpConfig, error, loading, updateSftpConfig, createSftpConfig, deleteSftpConfig } = useSftp()
     const [localError, setLocalError] = useState<string | null>(null)
 
@@ -96,13 +100,14 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
                     initialData={sftpConfig || DEFAULT_SFTP_CONFIG}
                     onSubmit={handelSubmit}
                     onDelete={handelDelete}
+                    canEdit={isAdmin}
                 />
             )}
         </Drawer>)
 }
 
 
-function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
+function SftpForm({ initialData, onSubmit, onDelete, canEdit }: SftpFromsProps) {
     const isEditMode = Boolean(initialData?.id);
     const form = useForm<SftpFormValues>({
         mode: "uncontrolled",
@@ -139,6 +144,13 @@ function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
         <form onSubmit={form.onSubmit((values) => { onSubmit(values) })} noValidate>
             <Stack gap={'xl'} >
                 <Title order={2}>SFTP Configuration</Title>
+                {!canEdit && (
+                    <Text size="sm" c="dimmed">
+                        Solo lectura. Los cambios los realiza un administrador.
+                    </Text>
+                )}
+                <fieldset disabled={!canEdit} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
+                <Stack gap={'xl'}>
                 <AtomTextInput
                     label="Usuario"
                     placeholder="usuario SFTP"
@@ -173,19 +185,23 @@ function SftpForm({ initialData, onSubmit, onDelete }: SftpFromsProps) {
                     required
                     {...form.getInputProps('remote_folder')}
                 />
-                <Group justify="flex-end" mt="xl">
-                    {isEditMode ? (
-                        <AtomButton variant="outline" color='red' onClick={onDelete} >
-                            Eliminar
+                {canEdit && (
+            <Group justify="flex-end" mt="xl">
+                        {isEditMode ? (
+                            <AtomButton variant="outline" color='red' onClick={onDelete} >
+                                Eliminar
+                            </AtomButton>
+                        ) : (
+                            <div />
+                        )}
+    
+                        <AtomButton type={'submit'} color='teal'  >
+                            GUARDAR
                         </AtomButton>
-                    ) : (
-                        <div />
-                    )}
-
-                    <AtomButton type={'submit'} color='teal'  >
-                        GUARDAR
-                    </AtomButton>
-                </Group>
+                    </Group>
+                )}
+            </Stack>
+            </fieldset>
             </Stack>
         </form>
     );

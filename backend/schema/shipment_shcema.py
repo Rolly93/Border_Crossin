@@ -1,6 +1,6 @@
 from typing import Annotated, List, Optional, Literal, Self
 from enum import Enum
-from pydantic import BaseModel, ConfigDict, BeforeValidator
+from pydantic import AliasChoices, BaseModel, ConfigDict, BeforeValidator, Field
 from datetime import datetime
 
 toUppercase = Annotated[
@@ -54,6 +54,24 @@ class ShipmentBase(BaseModel):
 
 class ShipmentCreate(ShipmentBase):
     pass
+
+
+class ShipmentCreateRequest(BaseModel):
+    """Cuerpo de POST /shipment/create. Lo que manda el formulario de embarque."""
+
+    tracking_number: toUppercase = Field(min_length=1, max_length=100)
+    customer_tracking: toUppercase = Field(min_length=1, max_length=100)
+    type_operation: str = Field(min_length=1, max_length=50)
+    cliente: int = Field(gt=0, description="ID del cliente")
+    origen: str = Field(min_length=1, max_length=200)
+    # El formulario manda `destino`; se acepta también `destination`.
+    destination: str = Field(
+        min_length=1,
+        max_length=200,
+        validation_alias=AliasChoices("destination", "destino"),
+    )
+    truck: str = Field(min_length=1, max_length=20, description="Número de unidad")
+    trailer: toUppercase = Field(min_length=1, max_length=50, description="Placas del remolque")
 
 
 class ShipmentResponse(ShipmentCreate):
