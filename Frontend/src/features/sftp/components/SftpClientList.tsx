@@ -1,31 +1,12 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Alert, Badge, Button, Group, Loader, Stack, Table, Text, Title } from "@mantine/core";
 import SftModal from "@/components/Modal/SftModalProps";
-import { clientService } from "@/features/clients/service/clientService";
-import { IClientOption } from "@/features/clients/types/IClientService";
+import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
 
 export function SftpClientList() {
-  const [clients, setClients] = useState<IClientOption[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { options: clients, loading, error, reload } = useClientOptions();
   const [selectedId, setSelectedId] = useState<number | undefined>(undefined);
   const [opened, setOpened] = useState<boolean>(false);
-
-  const loadClients = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      setClients(await clientService.getOptions());
-    } catch (err: any) {
-      setError(err.message || "No se pudieron cargar los clientes");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadClients();
-  }, [loadClients]);
 
   const openConfig = (id: number) => {
     setSelectedId(id);
@@ -35,7 +16,7 @@ export function SftpClientList() {
   // Al cerrar el modal se recarga el estado, por si se creó o eliminó una configuración.
   const closeConfig = () => {
     setOpened(false);
-    loadClients();
+    reload();
   };
 
   return (

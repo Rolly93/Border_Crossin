@@ -51,6 +51,10 @@ export function Layout() {
           label="Dashboard"
           active={location.pathname === '/dashboard'} />
 
+        <NavLink component={Link} to="/clients"
+          label="Clientes"
+          active={location.pathname === '/clients'} />
+
         <NavLink component={Link}
           to="/sftp_connection"
           label='Sftp Connection'

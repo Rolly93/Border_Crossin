@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Badge, Button, Checkbox, Group, Loader, Select, Stack, Table, Text, TextInput, Title } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { clientService } from "@/features/clients/service/clientService";
-import { IClientOption } from "@/features/clients/types/IClientService";
-import { sftpService } from "../service/sftpService";
-import { ISftpSend } from "../types/ISftpSend";
+import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
+import { MAX_AUTO_RETRIES, useSftpSends } from "../hooks/useSftpSends";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos" },
@@ -12,94 +8,13 @@ const STATUS_OPTIONS = [
   { value: "pending", label: "Pendientes" },
   { value: "sent", label: "Enviados" },
 ];
-
 const STATUS_COLOR: Record<string, string> = { failed: "red", pending: "yellow", sent: "green" };
 const STATUS_LABEL: Record<string, string> = { failed: "Fallido", pending: "Pendiente", sent: "Enviado" };
-const MAX_AUTO_RETRIES = 3;
 
 export function SftpSendsPanel() {
-  const [clients, setClients] = useState<IClientOption[]>([]);
-  const [clientId, setClientId] = useState<string | null>(null);
-  const [reference, setReference] = useState("");
-  const [debouncedReference, setDebouncedReference] = useState("");
-  const [status, setStatus] = useState<string | null>("failed");
-  const [sends, setSends] = useState<ISftpSend[]>([]);
-  const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [loading, setLoading] = useState<boolean>(false);
-  const [resending, setResending] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    clientService.getOptions().then(setClients).catch(() => setClients([]));
-  }, []);
-
-  // Espera a que el usuario deje de escribir antes de consultar.
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedReference(reference.trim()), 400);
-    return () => clearTimeout(timer);
-  }, [reference]);
-
-  const loadSends = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await sftpService.getSends({
-        client_id: clientId ? Number(clientId) : undefined,
-        reference: debouncedReference || undefined,
-        status: status || undefined,
-      });
-      setSends(data);
-      setSelected(new Set());
-    } catch (err: any) {
-      setError(err.response?.data?.detail ?? err.message ?? "No se pudieron cargar los envíos");
-    } finally {
-      setLoading(false);
-    }
-  }, [clientId, debouncedReference, status]);
-
-  useEffect(() => {
-    loadSends();
-  }, [loadSends]);
-
-  const clientNames = useMemo(() => new Map(clients.map((c) => [c.id, c.name])), [clients]);
-  const failedIds = sends.filter((s) => s.status === "failed").map((s) => s.id);
-  const selectedIds = [...selected];
-  const selectedFailed = selectedIds.filter((id) => failedIds.includes(id));
-  const skipped = selectedIds.length - selectedFailed.length;
-
-  const toggleOne = (id: number) =>
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-
-  const toggleAll = () =>
-    setSelected(selected.size === sends.length ? new Set() : new Set(sends.map((s) => s.id)));
-
-  const resend = async (ids: number[]) => {
-    if (ids.length === 0) return;
-    setResending(true);
-    try {
-      const result = await sftpService.resend(ids);
-      const sent = result.filter((r) => r.status === "sent").length;
-      notifications.show({
-        title: "Reenvío terminado",
-        message: `${sent} de ${result.length} archivos enviados`,
-        color: sent === result.length ? "green" : "orange",
-      });
-    } catch (err: any) {
-      notifications.show({
-        title: "Error al reenviar",
-        message: err.response?.data?.detail ?? err.message,
-        color: "red",
-      });
-    } finally {
-      setResending(false);
-      await loadSends();
-    }
-  };
+  const { options: clients } = useClientOptions();
+  const { sends, loading, error, resending, filters, selection, retrySelected, retryFailed, failedCount } = useSftpSends();
+  const clientNames = new Map(clients.map((c) => [c.id, c.name]));
 
   return (
     <Stack>
@@ -113,40 +28,40 @@ export function SftpSendsPanel() {
           label="Cliente"
           placeholder="Todos"
           data={clients.map((c) => ({ value: String(c.id), label: c.name }))}
-          value={clientId}
-          onChange={setClientId}
+          value={filters.clientId}
+          onChange={filters.setClientId}
           clearable
           searchable
         />
         <TextInput
           label="Referencia"
-          placeholder="Ej. 12B..."
-          value={reference}
-          onChange={(e) => setReference(e.currentTarget.value)}
+          placeholder="Ej. 12b, 82B..."
+          value={filters.reference}
+          onChange={(e) => filters.setReference(e.currentTarget.value)}
         />
         <Select
           label="Estado"
           data={STATUS_OPTIONS}
-          value={status ?? ""}
-          onChange={(value) => setStatus(value || null)}
+          value={filters.status ?? ""}
+          onChange={(value) => filters.setStatus(value || null)}
         />
       </Group>
 
       <Group justify="space-between">
-        <Text size="sm">{sends.length} archivos · {selectedFailed.length} seleccionados para reintento</Text>
+        <Text size="sm">{sends.length} archivos · {selection.selectedFailed.length} seleccionados para reintento</Text>
         <Group>
           <Button
             variant="light"
-            onClick={() => resend(selectedFailed)}
-            disabled={selectedFailed.length === 0 || resending}
+            onClick={retrySelected}
+            disabled={selection.selectedFailed.length === 0 || resending}
             loading={resending}
           >
             Reintentar seleccionados
           </Button>
           <Button
             color="red"
-            onClick={() => resend(failedIds)}
-            disabled={failedIds.length === 0 || resending}
+            onClick={retryFailed}
+            disabled={failedCount === 0 || resending}
             loading={resending}
           >
             Reintentar fallidos
@@ -154,9 +69,9 @@ export function SftpSendsPanel() {
         </Group>
       </Group>
 
-      {skipped > 0 && (
+      {selection.skippedCount > 0 && (
         <Alert color="yellow">
-          {skipped} seleccionado(s) no están fallidos y se omitirán al reintentar.
+          {selection.skippedCount} seleccionado(s) no están fallidos y se omitirán al reintentar.
         </Alert>
       )}
 
@@ -173,9 +88,9 @@ export function SftpSendsPanel() {
               <Table.Th>
                 <Checkbox
                   aria-label="Seleccionar todos"
-                  checked={selected.size === sends.length && sends.length > 0}
-                  indeterminate={selected.size > 0 && selected.size < sends.length}
-                  onChange={toggleAll}
+                  checked={selection.allSelected}
+                  indeterminate={selection.someSelected}
+                  onChange={selection.toggleAll}
                 />
               </Table.Th>
               <Table.Th>Archivo</Table.Th>
@@ -192,8 +107,8 @@ export function SftpSendsPanel() {
                 <Table.Td>
                   <Checkbox
                     aria-label={`Seleccionar ${send.filename}`}
-                    checked={selected.has(send.id)}
-                    onChange={() => toggleOne(send.id)}
+                    checked={selection.selected.has(send.id)}
+                    onChange={() => selection.toggleOne(send.id)}
                   />
                 </Table.Td>
                 <Table.Td>{send.filename}</Table.Td>

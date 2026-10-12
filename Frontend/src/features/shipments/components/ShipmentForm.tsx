@@ -1,18 +1,16 @@
 
-import { useEffect, useState } from 'react';
 import { useForm } from '@mantine/form';
 import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/core';
 import { ShipmentFormProps } from '@/features/shipments/types/ShipmentFormProps';
 import { setupShipmentWatchers } from '../validation/ShipmentFormRules';
 import { ShipmentValidator } from '../validation/ShipmentValidator';
 import { useTranslation } from 'react-i18next';
-import { clientService } from '@/features/clients/service/clientService';
-import { IClientNameOption } from '@/features/clients/types/IClientService';
+import { useClientsByOperation } from '@/features/clients/hooks/useClientsByOperation';
+import { useClientReferenceRules } from '@/features/clients/hooks/useClientReferenceRules';
 import { notifications } from '@mantine/notifications';
 import { ValidateClientReference } from '@/components/utils/businessRules';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
-  const [clientOptions, setClientOptions] = useState<IClientNameOption[]>([])
   const { t, i18n } = useTranslation()
   const form = useForm({
     mode: 'controlled',
@@ -49,18 +47,8 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
   // La lista de clientes depende del tipo de operación seleccionado.
   const operation = form.values.type_operation
-  useEffect(() => {
-    let active = true
-    if (!operation) {
-      setClientOptions([])
-      return
-    }
-    clientService
-      .getByOperation(operation)
-      .then((list) => { if (active) setClientOptions(list) })
-      .catch(() => { if (active) setClientOptions([]) })
-    return () => { active = false }
-  }, [operation])
+  const { clients: clientOptions } = useClientsByOperation(operation)
+  const { getRules } = useClientReferenceRules()
 
 
 
@@ -81,7 +69,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
       const clientId = Number(values.cliente);
       const selectedClient = clientOptions.find((c) => c.id === clientId);
       const clientName = selectedClient?.name || '';
-      const rules = clientId ? await clientService.getReferenceRules(clientId) : [];
+      const rules = clientId ? await getRules(clientId) : [];
 
       const { isValid, field, error } = ValidateClientReference({
         onClientName: clientName,

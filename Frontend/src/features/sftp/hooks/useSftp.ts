@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { ISftpConfiguration } from "../clients/types/Cliente";
-import { sftpService } from "./service/sftpService";
+import { ISftpConfiguration } from "@/features/clients/types/Cliente";
+import { sftpService } from "../service/sftpService";
 
 
 export function useSftp() {

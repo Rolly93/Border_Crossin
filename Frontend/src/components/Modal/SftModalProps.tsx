@@ -2,7 +2,7 @@ import { Button, Drawer, Group, LoadingOverlay, Stack, Title } from "@mantine/co
 import { useForm } from "@mantine/form";
 import { useTranslation } from "react-i18next";
 import { AtomTextInput } from "../atoms/AtomTextInput";
-import { useSftp } from "@/features/sftp/useSftp";
+import { useSftp } from "@/features/sftp/hooks/useSftp";
 import { useEffect, useState } from "react";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { AtomButton } from "../atoms/AtomButton";

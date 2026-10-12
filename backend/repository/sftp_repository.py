@@ -63,7 +63,7 @@ class SftpRepository(BaseRepository[SftpService]):
         if client_id is not None:
             query = query.filter(SftpService.client_id == client_id)
         if reference:
-            query = query.filter(ShipmentAssign.customer_tracking == reference)
+            query = query.filter(ShipmentAssign.customer_tracking.icontains(reference.strip(), autoescape=True))
         if status:
             query = query.filter(SftpSend.status == status)
         return query.order_by(SftpSend.id.desc()).all()
