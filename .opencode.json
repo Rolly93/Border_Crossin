@@ -1,0 +1,4 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-3-5-sonnet"
+}
