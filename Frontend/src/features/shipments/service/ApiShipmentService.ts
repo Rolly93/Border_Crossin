@@ -1,6 +1,7 @@
 import { Shipment } from "@/features/shipments/types/Shipment";
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
+<<<<<<< Updated upstream
 import { getErrorMessage } from "@/components/utils/errorMessage";
 
 /** Lo que espera POST /shipment/create (ver ShipmentCreateRequest en el backend). */
@@ -29,8 +30,11 @@ interface ShipmentCreateResponse {
     status?: string;
     events: Shipment["events"];
 }
+=======
+import { ShipmentUpdate } from "../types/Shipment";
+>>>>>>> Stashed changes
 
-export class ApiShipmentService extends BaseCrudApiService<Shipment> {
+export class ApiShipmentService extends BaseCrudApiService<Shipment, ShipmentUpdate> {
     constructor() {
         super('shipment')
     }
@@ -69,7 +73,6 @@ export class ApiShipmentService extends BaseCrudApiService<Shipment> {
     }
 
     async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<Shipment>> {
-
         const response = await this.api.get<PaginatedResponse<Shipment>>(`/${this.resourcePath}/`, {
             params: { page, limit },
         });
@@ -83,6 +86,17 @@ export class ApiShipmentService extends BaseCrudApiService<Shipment> {
             limit: response.data.limit,
             data: response.data.data
         }
+    }
 
+    // Backend: PUT /shipment/{id}/update
+    async update(id: number, data: ShipmentUpdate): Promise<Shipment> {
+        const response = await this.api.put<Shipment>(`/${this.resourcePath}/${id}/update`, data);
+        return response.data;
+    }
+
+    // Backend: PATCH /shipment/{id}/delete
+    async delete(id: number): Promise<Shipment> {
+        const response = await this.api.patch<Shipment>(`/${this.resourcePath}/${id}/delete`);
+        return response.data;
     }
 }

@@ -7,13 +7,24 @@ paramiko
 fastapi-mail
 fastapi-utils
 typing-inspect
+pyjwt
 
 pydantic
 pydantic-settings
+<<<<<<< Updated upstream
 sqlalchemy
+<<<<<<< Updated upstream
 psycopg2-binary
 pymysql
+=======
+pymysql
+psycopg2-binary
+>>>>>>> Stashed changes
 
 python-stdnum
 fastapi-restful
 boto3
+=======
+flask_login
+sqlalchemy
+>>>>>>> Stashed changes

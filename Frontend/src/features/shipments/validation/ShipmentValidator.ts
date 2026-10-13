@@ -30,6 +30,10 @@ export class ShipmentValidator {
     return (this.data.tracking_number?.trim().length || 0) < 5 ? 'No. Embarque Invalido' : null;
   }
 
+  public validateCustomerTracking(): string | null {
+    return (this.data.customer_tracking?.trim().length || 0) < 5 ? 'No. Cliente Invalido' : null;
+  }
+
   public validateTruck(): string | null {
     return (this.data.truck?.trim().length || 0) < 2 ? 'Undiad Invalida' : null;
   }

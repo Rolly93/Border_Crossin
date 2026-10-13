@@ -26,3 +26,25 @@ export interface ISftpConfiguration {
     root_folder?: string;
     remote_folder?: string;
 }
+
+export interface ISftpSend {
+    id: number;
+    filename: string;
+    status: string;
+    retries: number;
+    sftp_log: string | null;
+    sent_to: number;
+    client_id: number;
+    reference: string;
+    shipment_event_id: number;
+}
+
+export interface ISftpSendFilters {
+    client_id?: number;
+    reference?: string;
+    status?: string;
+}
+
+export interface ResendRequest {
+    send_ids: number[];
+}

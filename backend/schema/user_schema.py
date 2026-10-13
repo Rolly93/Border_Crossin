@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
@@ -38,3 +39,30 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     isAdmin: bool = Field(..., alias="isAdmin")
+=======
+from pydantic import BaseModel
+from typing import Text
+
+
+class UserModel(BaseModel):
+    status: Text
+    id: int | None = None
+    email: str
+
+
+class LoginRequest(UserModel):
+    password: str | None = None
+
+
+class LoginResponse(LoginRequest):
+    is_admin: bool
+
+
+class NewUser(LoginRequest):
+    username: str
+    role: str
+
+
+class NewUserResponse(UserModel):
+    detail: str
+>>>>>>> Stashed changes

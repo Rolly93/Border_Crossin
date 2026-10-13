@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Table } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Shipment } from '@/features/shipments/types/Shipment';
+import { Shipment, ShipmentUpdate } from '@/features/shipments/types/Shipment';
 import { ShipmentRow } from './ShipmentRow';
 import { shipmentService } from '@/features/shipments/service/shipmentService';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,23 @@ interface ShipmentTableProps {
   shipments: Shipment[];
   loading: boolean;
   error: string | null;
-  onUpdateShipment: (id: number, data: Shipment) => void;
+  onUpdateShipment: (id: number, data: ShipmentUpdate) => void;
   onLastElement?: (node: HTMLTableRowElement | null) => void;
+}
+
+function shipmentToUpdate(shipment: Shipment): ShipmentUpdate {
+  return {
+    tracking_number: shipment.tracking_number,
+    customer_tracking: shipment.customer_tracking,
+    cliente: parseInt(shipment.cliente, 10) || 0,
+    truck: shipment.truck,
+    vehicle_type: shipment.vehicle_type,
+    trailer: shipment.trailer,
+    origen: shipment.origen,
+    destination: shipment.destino,
+    type_operation: shipment.type_operation,
+    events: shipment.events,
+  };
 }
 
 export default function ShipmentTable({ shipments, loading, error, onUpdateShipment, onLastElement }: ShipmentTableProps) {
@@ -32,9 +47,10 @@ export default function ShipmentTable({ shipments, loading, error, onUpdateShipm
   const handleUpdateSubmit = async (updatedValues: Shipment) => {
     try {
       setIsSaving(true);
-      await shipmentService.update(updatedValues.id, updatedValues);
+      const updateData = shipmentToUpdate(updatedValues);
+      await shipmentService.update(updatedValues.id, updateData);
 
-      onUpdateShipment(updatedValues.id, updatedValues);
+      onUpdateShipment(updatedValues.id, updateData);
 
       close();
     } catch (err) {

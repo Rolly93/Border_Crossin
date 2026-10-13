@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from deps.auth import get_client_ip, get_optional_current_user
+from deps.auth import get_client_ip, get_current_user, get_optional_current_user
 from deps.service import get_user_service
 from fastapi import APIRouter, Depends, Request, status
 from schema import InitialTokenPayload, TokenPayload
@@ -38,3 +38,12 @@ async def new_user(
     ),
 ):
     return service.register_new_user(data=data, rfc=rfc, current_user=current_user)
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+async def logout(
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    # En JWT stateless, el logout es principalmente cliente-side (borrar token).
+    # Este endpoint existe para auditoría o futura lista negra de tokens.
+    return {"status": "success", "detail": "Logged out successfully"}

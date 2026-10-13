@@ -1,8 +1,8 @@
 import { BaseApiService } from "./BaseApiService";
 import { IBaseService } from "./IBaseService";
 
-export abstract class BaseCrudApiService<T> extends BaseApiService
-  implements IBaseService<T> {
+export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseApiService
+  implements IBaseService<T, UpdateT> {
 
   async getAll(): Promise<T[]> {
 
@@ -11,7 +11,7 @@ export abstract class BaseCrudApiService<T> extends BaseApiService
     return response.data
 
   }
-  async update(id: number, data: T): Promise<T> {
+  async update(id: number, data: UpdateT): Promise<T> {
 
     const response = await this.api.put<T>(`${this.resourcePath}/update`, data, {
       params: { client_id: id }

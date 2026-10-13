@@ -1,24 +1,95 @@
 services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: border_crossing_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - border_network
+
+  # Backend API
   backend:
-    build: ./backend
-    container_name: backend_api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: border_crossing_backend
+    env_file:
+      - .env
+    environment:
+      # Database (overrides from .env for Docker networking)
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_DRIVER: mysql+pymysql
+      DATABASE_URL: mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
-    env_file:
-      - .env
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - border_network
+    command: >
+      sh -c "sleep 5 && python -m scripts.init_db && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
+  # Frontend UI
   frontend:
-    build: ./frontend
-    container_name: frontend_ui
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: border_crossing_frontend
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules # Important to keep container modules separate
-    env_file:
-      - .env
+      - "5173:80"
     depends_on:
       - backend
+    networks:
+      - border_network
+
+  # SFTP Server (optional - for testing)
+  sftp:
+    image: atmoz/sftp:latest
+    container_name: border_crossing_sftp
+    environment:
+      SFTP_USERS: "testSFTP:testSFTP93X:1001"
+    ports:
+      - "2222:22"
+    volumes:
+      - sftp_data:/home/testSFTP
+    networks:
+      - border_network
+
+  # MailHog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: border_crossing_mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - border_network
+
+volumes:
+  mysql_data:
+  sftp_data:
+
+networks:
+  border_network:
+    driver: bridge

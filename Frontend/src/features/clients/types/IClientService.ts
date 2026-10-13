@@ -25,7 +25,15 @@ export interface IClientReferenceRule {
   reference_length: number | null;
 }
 
-export interface IClientService extends IBaseService<ICliente> {
+export interface ClientRequest {
+  phonenumber?: string;
+  sftService?: boolean;
+  emailService?: boolean;
+  email?: string[] | null;
+  name: string;
+}
+
+export interface IClientService extends IBaseService<ICliente, ClientRequest> {
   active(id: number): Promise<ICliente>
   getOptions(): Promise<IClientOption[]>
   getByOperation(operation: string): Promise<IClientNameOption[]>

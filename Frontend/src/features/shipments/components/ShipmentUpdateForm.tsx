@@ -60,8 +60,8 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
       const eventErrors = validator.validateEventChronology() || {};
       return {
 
-        customer_tracking: validator.validateCustomertracking(),
-        tracking_number: validator.validateCustomertracking(),
+        customer_tracking: validator.validateCustomerTracking(),
+        tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
         destino: validator.validateDestination(),

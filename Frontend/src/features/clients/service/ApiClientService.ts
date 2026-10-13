@@ -5,6 +5,7 @@ import {
   IClientOption,
   IClientReferenceRule,
   IClientService,
+  ClientRequest,
 } from "../types/IClientService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
 
@@ -15,7 +16,7 @@ interface MetricsResponse {
   sftpService: number;
 
 }
-export class ApiClientService extends BaseCrudApiService<ICliente> implements IClientService {
+export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest> implements IClientService {
   constructor() {
     super('client');
   }

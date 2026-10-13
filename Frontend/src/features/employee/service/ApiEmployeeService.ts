@@ -9,7 +9,7 @@ import {
 import { PaginatedResponse } from "@/components/service/IBaseService";
 
 export class ApiEmployeeService
-  extends BaseCrudApiService<IEmployeeResponse>
+  extends BaseCrudApiService<IEmployeeResponse, IEmployeeRequest>
   implements IEmployeeService {
   constructor() {
     super('/employees');

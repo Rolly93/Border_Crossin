@@ -9,7 +9,6 @@ export interface Shipment extends ShipmentCreate {
 }
 
 
-
 export interface ShipmentEvent {
     category: EventCategory;
     dateTime: Date | null;
@@ -42,11 +41,24 @@ export interface ShipmentCreate {
 
 }
 
+export interface ShipmentUpdate {
+    tracking_number?: string;
+    customer_tracking?: string;
+    cliente: number;
+    truck?: string;
+    vehicle_type?: string;
+    trailer?: string;
+    origen?: string;
+    destination?: string;
+    type_operation?: string;
+    events: ShipmentEvent[] | ShipmentEvent;
+}
 
 
-
-export interface IShipmentService extends IBaseService<Shipment> {
+export interface IShipmentService extends IBaseService<Shipment, ShipmentUpdate> {
 
     getPaginated(page: number, limit: number): Promise<PaginatedResponse<Shipment>>;
+    update(id: number, data: ShipmentUpdate): Promise<Shipment>;
+    delete(id: number): Promise<Shipment>;
 
 }

@@ -54,7 +54,7 @@ export interface IOperatorOption {
   name: string;
 }
 
-export interface IEmployeeService extends IBaseService<IEmployeeResponse> {
+export interface IEmployeeService extends IBaseService<IEmployeeResponse, IEmployeeRequest> {
   getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>>
   getOperators(): Promise<IOperatorOption[]>
   createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>

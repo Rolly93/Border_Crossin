@@ -1,8 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
-import { Shipment } from "@/types/Shipment";
+import { Shipment, ShipmentUpdate } from "@/features/shipments/types/Shipment";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
 
 const PAGE_SIZE = 10;
+
+function shipmentToUpdate(shipment: Shipment): ShipmentUpdate {
+  return {
+    tracking_number: shipment.tracking_number,
+    customer_tracking: shipment.customer_tracking,
+    cliente: parseInt(shipment.cliente, 10) || 0,
+    truck: shipment.truck,
+    vehicle_type: shipment.vehicle_type,
+    trailer: shipment.trailer,
+    origen: shipment.origen,
+    destination: shipment.destino,
+    type_operation: shipment.type_operation,
+    events: shipment.events,
+  };
+}
 
 export function useShipments() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -48,7 +63,7 @@ export function useShipments() {
     }
   }, [loading, hasMore, page, fetchShipments]);
 
-  const updateShipment = async (id: number, shipmentData: Shipment) => {
+  const updateShipment = async (id: number, shipmentData: ShipmentUpdate) => {
     try {
       const updated = await shipmentService.update(id, shipmentData);
       setShipments((prev) =>

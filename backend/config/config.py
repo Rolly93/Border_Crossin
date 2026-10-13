@@ -1,28 +1,28 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-import os
 from dataclasses import dataclass
+
+# Load .env file if it exists (for local development)
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
 
 
 class Env:
-    """docstring for Env."""
+    """Environment configuration."""
 
     def __init__(self):
         super(Env, self).__init__()
 
-    env_path = Path(__file__).resolve().parent.parent / ".env"
-    load_dotenv(dotenv_path=env_path)
-
-    VITE_API_URL = os.getenv("VITE_API_URL", "http://localhost:8000/api")
+    VITE_API_URL = os.getenv("VITE_API_URL", "http://localhost:8000")
     PORT = int(os.getenv("PORT", 8000))
-    VITE_USE_MOCK = bool(os.getenv("VITE_USE_MOCK", False))
-    USER_EMAIL = str(os.getenv("USER_EMAIL", False))
-    USER_PASSWORD = str(os.getenv("USER_PASSWORD", False))
+    USER_EMAIL = os.getenv("USER_EMAIL", "admin@test.com")
+    USER_PASSWORD = os.getenv("USER_PASSWORD", "1234")
     SECRET_KEY = os.getenv("SECRET_KEY", "").strip('"').strip("'")
-    ALGORITHM = str(os.getenv("ALGORITHM", "HS256"))
+    ALGORITHM = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 1340)
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 480)
     )
 
 
