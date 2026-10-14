@@ -1,3 +1,4 @@
+import { SftpSendStatus } from "@/features/sftp/types/ISftpSend";
 
 export interface ICliente {
     id: number;
@@ -42,7 +43,7 @@ export interface ISftpSend {
 export interface ISftpSendFilters {
     client_id?: number;
     reference?: string;
-    status?: string;
+    status?: SftpSendStatus;
 }
 
 export interface ResendRequest {

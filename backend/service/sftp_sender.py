@@ -20,6 +20,8 @@ MAX_RETRIES = 3
 def build_event_xml(send: SftpSend, scac: str, root_folder: str) -> str:
     """Genera el XML del evento del envío, reconstruyéndolo desde la base de datos."""
     event = send.shipment_event
+    if not event.event_time:
+        raise ValueError(f"El evento {event.id} no tiene fecha/hora")
     trip = event.trip
     payload = EventPayload(
         customer_tracking=trip.customer_tracking,

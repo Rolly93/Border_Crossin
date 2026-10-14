@@ -97,6 +97,14 @@ class ShipmentUpdate(BaseModel):
     events: List[ShipmentEvent] | ShipmentEvent
 
 
+class PaginatedShipmentResponse(BaseModel):
+    data: List[ShipmentResponse]
+    totalRecords: int
+    hasNextPage: bool
+    page: int
+    limit: int
+
+
 class EventPayload(BaseModel):
     tracking_number: Optional[toUppercase] = None
     customer_tracking: Optional[toUppercase]

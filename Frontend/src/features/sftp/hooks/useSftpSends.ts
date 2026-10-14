@@ -23,7 +23,7 @@ export function useSftpSends() {
     try {
       setLoading(true);
       setError(null);
-      const data = await sftpService.getSends({
+      const data = await sftpService.listSends({
         client_id: clientId ? Number(clientId) : undefined,
         reference: debouncedReference || undefined,
         status: status || undefined,

@@ -5,15 +5,6 @@ Prioridad:
 1. DATABASE_URL: URL completa (cualquier motor). Si existe, gana siempre.
 2. DB_BACKEND: sqlite | mysql | postgres | supabase
 3. Sin nada: SQLite local (./bordercrossing.db)
-
-Variables por motor (DB_BACKEND):
-- sqlite:    SQLITE_PATH (opcional, por defecto ./bordercrossing.db)
-- mysql:     DB_HOST, DB_PORT (3306), DB_NAME, DB_USER, DB_PASSWORD
-- postgres:  DB_HOST, DB_PORT (5432), DB_NAME, DB_USER, DB_PASSWORD, DB_SSLMODE (opcional)
-- supabase:  DB_HOST, DB_PORT (5432 directo o 6543 pooler), DB_NAME (postgres),
-             DB_USER, DB_PASSWORD; SSL es obligatorio y siempre se activa.
-
-Compatibilidad: si defines DB_HOST sin DB_BACKEND, se usa MySQL como antes.
 """
 
 import os
@@ -39,33 +30,45 @@ def _sqlite_url() -> URL:
 
 
 def _server_url(backend: str) -> URL:
-    """Construye la URL de un motor cliente. URL.create escapa contraseñas con símbolos."""
+    """Construye la URL de un motor cliente usando un diccionario de configuración."""
+
     host = _env("DB_HOST")
     if not host:
         raise ValueError(f"DB_BACKEND={backend} requiere DB_HOST")
 
-    if backend == "mysql":
-        drivername = _env("DB_DRIVER", "mysql+pymysql")
-        port = int(_env("DB_PORT", "3306"))
-        query = {}
-    else:  # postgres o supabase
-        drivername = _env("DB_DRIVER", "postgresql+psycopg2")
-        port = int(_env("DB_PORT", "5432"))
-        query = {}
-        if backend == "supabase":
-            query["sslmode"] = "require"
-        elif _env("DB_SSLMODE"):
-            query["sslmode"] = _env("DB_SSLMODE")
+    backend_configs = {
+        "mysql": {
+            "drivername": _env("DB_DRIVER", "mysql+pymysql"),
+            "port": int(_env("DB_PORT") or "3306"),
+            "default_db": "",
+            "query": {},
+        },
+        "postgres": {
+            "drivername": _env("DB_DRIVER", "postgresql+psycopg2"),
+            "port": int(_env("DB_PORT") or "5432"),
+            "default_db": "postgres",
+            "query": {"sslmode": _env("DB_SSLMODE")} if _env("DB_SSLMODE") else {},
+        },
+        "supabase": {
+            "drivername": _env("DB_DRIVER", "postgresql+psycopg2"),
+            "port": int(_env("DB_PORT") or "5432"),
+            "default_db": "postgres",
+            "query": {"sslmode": "require"},
+        },
+    }
 
-    default_db = "postgres" if backend in ("postgres", "supabase") else ""
+    cfg = backend_configs.get(backend)
+    if not cfg:
+        raise ValueError(f"Backend no configurado: {backend}")
+
     return URL.create(
-        drivername=drivername,
+        drivername=cfg["drivername"],
         username=_env("DB_USER", ""),
         password=os.getenv("DB_PASSWORD", ""),
         host=host,
-        port=port,
-        database=_env("DB_NAME", default_db),
-        query=query,
+        port=cfg["port"],
+        database=_env("DB_NAME", cfg["default_db"]),
+        query=cfg["query"],
     )
 
 
@@ -76,18 +79,26 @@ def build_database_url() -> URL:
 
     backend = (_env("DB_BACKEND") or "").lower()
     if not backend:
-        backend = "mysql" if _env("DB_HOST") else "sqlite"  # compatibilidad con la versión anterior
+        backend = "mysql" if _env("DB_HOST") else "sqlite"
 
-    if backend == "sqlite":
-        return _sqlite_url()
-    if backend in ("mysql", "postgres", "supabase"):
-        return _server_url(backend)
+    # Normalizar alias
     if backend == "postgresql":
-        return _server_url("postgres")
+        backend = "postgres"
 
-    raise ValueError(
-        f"DB_BACKEND desconocido: '{backend}'. Valores válidos: {', '.join(SUPPORTED_BACKENDS)}"
-    )
+    # Diccionario de funciones despachadoras para evitar ifs en cascada
+    backend_dispatch = {
+        "sqlite": _sqlite_url,
+        "mysql": lambda: _server_url("mysql"),
+        "postgres": lambda: _server_url("postgres"),
+        "supabase": lambda: _server_url("supabase"),
+    }
+    builder = backend_dispatch.get(backend)
+    if not builder:
+        raise ValueError(
+            f"DB_BACKEND desconocido: '{backend}'. Valores válidos: {', '.join(SUPPORTED_BACKENDS)}"
+        )
+
+    return builder()
 
 
 DATABASE_URL = build_database_url()
@@ -96,12 +107,9 @@ _is_sqlite = DATABASE_URL.get_backend_name() == "sqlite"
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
-    # FastAPI ejecuta dependencias síncronas en hilos distintos; SQLite necesita esto.
     connect_args={"check_same_thread": False} if _is_sqlite else {},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Visible al arrancar para saber a qué base se conectó (sin contraseña).
 print(f"[db] Conectando a: {DATABASE_URL.render_as_string(hide_password=True)}")
 
 

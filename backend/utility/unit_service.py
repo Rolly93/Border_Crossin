@@ -57,6 +57,10 @@ class UnitService:
 
     def history_item(self, assignment_id: int) -> AssignmentOut:
         assignment = self._db.get(UnitAssignment, assignment_id)
+
+        if not assignment:
+            raise _error(status.HTTP_404_NOT_FOUND, "Asignación no encontrada")
+
         return AssignmentOut(
             id=assignment.id,
             driverId=assignment.driver_id,

@@ -15,5 +15,5 @@ export interface ISftpSend {
 export interface SftpSendFilters {
   client_id?: number;
   reference?: string;
-  status?: string;
+  status?: SftpSendStatus;
 }

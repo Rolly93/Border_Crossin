@@ -89,8 +89,8 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             self._db.refresh(event)
         return shipment, new_events
 
-    def get_all_shipments(self, page: int = 1, limit: int = 10) -> List[ShipmentAssign]:
-        shipments = (
-            self._db.query(ShipmentAssign).offset((page - 1) * limit).limit(limit).all()
-        )
-        return shipments
+    def get_all_shipments(self, page: int = 1, limit: int = 10) -> tuple[List[ShipmentAssign], int]:
+        query = self._db.query(ShipmentAssign)
+        total = query.count()
+        shipments = query.offset((page - 1) * limit).limit(limit).all()
+        return shipments, total

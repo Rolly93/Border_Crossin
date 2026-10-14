@@ -15,7 +15,6 @@ def get_unit_service(db: Session = Depends(get_db)) -> UnitService:
 
 UnitSvc = Annotated[UnitService, Depends(get_unit_service)]
 
-# Lectura: cualquier usuario autenticado. Escritura: solo administradores.
 router = APIRouter(
     prefix="/unit",
     tags=["unit"],
@@ -25,6 +24,7 @@ router = APIRouter(
 
 @router.get("/", response_model=List[UnitOut], status_code=status.HTTP_200_OK)
 async def list_units(service: UnitSvc):
+    print("unit list")
     return service.list_units()
 
 

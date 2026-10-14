@@ -65,6 +65,7 @@ class UserService:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
+        print(user)
 
         if not user:
             self.verify_password("dummy_password", DUMMY_HASH)

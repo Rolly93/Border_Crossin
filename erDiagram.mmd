@@ -1,0 +1,138 @@
+erDiagram
+    EMPLOYEE ||--o| USER : "tiene cuenta de sistema"
+    EMPLOYEE ||--o| DRIVER_DETAILS : "perfil de chofer (1:1)"
+
+    USER ||--o{ TRIP_ASSIGNED : "crea/asigna"
+    USER ||--o{ SHIPMENT_EVENTS : "captura"
+    USER ||--o{ SFTP_SERVICE : "configura"
+
+    CLIENT ||--o{ CLIENT_EMAIL_RECIPIENT : "registra destinatarios"
+    CLIENT ||--o{ SFTP_SERVICE : "posee credenciales"
+    CLIENT ||--o{ TRIP_ASSIGNED : "solicita viajes"
+
+    DRIVER_DETAILS ||--o{ TRIP_ASSIGNED : "conduce"
+    UNIT_TRUCK ||--o{ TRIP_ASSIGNED : "asignado a"
+    TRAILER ||--o{ TRIP_ASSIGNED : "asignado a"
+
+    TRIP_ASSIGNED ||--o{ SHIPMENT_EVENTS : "genera historial"
+    TRIP_ASSIGNED ||--o{ EMAIL_SERVICE : "desencadena notificaciones"
+
+    SHIPMENT_EVENTS ||--o{ SFTP_SEND : "transmite archivos"
+    SFTP_SERVICE ||--o{ SFTP_SEND : "recibe envios"
+
+    EMPLOYEE {
+        int id PK
+        string name
+        string last_name
+        string role
+        date hire_date
+        string rfc
+        boolean still_employee
+    }
+
+    DRIVER_DETAILS {
+        int employee_id PK, FK
+        string license_number
+        date expiration_date
+        int hire_by FK
+        string gafet_id
+    }
+
+    USER {
+        int id PK
+        string username
+        string email
+        string hashed_password
+        boolean is_admin
+        int employee_id FK
+    }
+
+    CLIENT {
+        int id PK
+        string name
+        string phonenumber
+        boolean still_active
+    }
+
+    CLIENT_EMAIL_RECIPIENT {
+        int id PK
+        int client_id FK
+        string email
+        boolean is_active
+    }
+
+    UNIT_TRUCK {
+        int id PK
+        string plates
+        string state
+        string tag_id
+    }
+
+    TRAILER {
+        int id PK
+        string plates
+        string state
+    }
+
+    TRIP_ASSIGNED {
+        int id PK
+        string tracking_number
+        string customer_tracking
+        string type_operation
+        int driver_id FK
+        int client_id FK
+        int assigned_by FK
+        int trailer_id FK
+        int unit_truck_id FK
+        string initial_seal
+        datetime assigned_day
+        boolean is_active
+        string origen
+        string destination
+    }
+
+    SHIPMENT_EVENTS {
+        int id PK
+        enum category
+        string event_type
+        datetime event_time
+        datetime captured_at
+        string notes
+        int trip_assigned_id FK
+        int capture_by_id FK
+        boolean is_active
+        datetime last_modify
+        string new_seal
+    }
+
+    SFTP_SERVICE {
+        int id PK
+        string host
+        string username
+        string encrypted_password
+        int port
+        string root_folder
+        string remote_folder
+        int client_id FK
+        int configure_by_id FK
+    }
+
+    SFTP_SEND {
+        int id PK
+        int shipment_event_id FK
+        string filename
+        string local_path
+        string status
+        int sent_to FK
+        text sftp_log
+        int retries
+    }
+
+    EMAIL_SERVICE {
+        int id PK
+        string recipient_email
+        string status
+        int trip_assigned_id FK
+        datetime created_at
+        datetime sent_at
+    }

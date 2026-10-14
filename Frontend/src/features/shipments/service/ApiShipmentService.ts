@@ -1,7 +1,7 @@
 import { Shipment } from "@/features/shipments/types/Shipment";
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
-<<<<<<< Updated upstream
+import { ShipmentUpdate } from "../types/Shipment";
 import { getErrorMessage } from "@/components/utils/errorMessage";
 
 /** Lo que espera POST /shipment/create (ver ShipmentCreateRequest en el backend). */
@@ -30,9 +30,6 @@ interface ShipmentCreateResponse {
     status?: string;
     events: Shipment["events"];
 }
-=======
-import { ShipmentUpdate } from "../types/Shipment";
->>>>>>> Stashed changes
 
 export class ApiShipmentService extends BaseCrudApiService<Shipment, ShipmentUpdate> {
     constructor() {

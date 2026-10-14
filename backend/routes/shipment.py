@@ -1,6 +1,5 @@
-from typing import List
 from fastapi import APIRouter, status, HTTPException
-from schema.shipment_shcema import ShipmentCreateRequest, ShipmentUpdate, ShipmentResponse
+from schema.shipment_shcema import ShipmentCreateRequest, ShipmentUpdate, ShipmentResponse, PaginatedShipmentResponse
 from deps.auth import CurrentUser, get_user_id
 from deps.service import ShipmentSvc
 
@@ -10,7 +9,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[ShipmentResponse])
+@router.get("/", response_model=PaginatedShipmentResponse)
 async def shipment_dashboard(
     service: ShipmentSvc,
     current_user: CurrentUser,

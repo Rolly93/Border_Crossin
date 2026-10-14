@@ -34,7 +34,7 @@ export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProp
             e.stopPropagation();
             onDelete(cliente.id);
           }}
-        />
+        />}
         {canManage && <AtmoAction
           icon={IconRefresh}
           color="green"

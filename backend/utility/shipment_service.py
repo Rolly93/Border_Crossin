@@ -21,6 +21,7 @@ from schema.shipment_shcema import (
     ShipmentEvent,
     ShipmentResponse,
     ShipmentUpdate,
+    PaginatedShipmentResponse,
 )
 from repository import ShipmentRepository
 from utility.reference_rule_service import ReferenceRuleService
@@ -36,17 +37,25 @@ class ShipmentService:
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
-    ) -> List[ShipmentResponse]:
-        raw_shipments = self._shipment_db.get_all_shipments(page, limit)
+    ) -> PaginatedShipmentResponse:
+        raw_shipments, total = self._shipment_db.get_all_shipments(page, limit)
 
-        return [self._to_response(s) for s in raw_shipments]
+        return PaginatedShipmentResponse(
+            data=[self._to_response(s) for s in raw_shipments],
+            totalRecords=total,
+            hasNextPage=(page * limit) < total,
+            page=page,
+            limit=limit,
+        )
 
     @staticmethod
     def _to_response(s: ShipmentAssign) -> ShipmentResponse:
         # truck y trailer son relaciones ORM; el esquema espera su texto (número / placas).
         valid_categories = {c.value for c in EventCategory}
         events = [
-            ShipmentEvent(category=e.category, dateTime=e.event_time, notes=e.notes)
+            ShipmentEvent(
+                category=EventCategory(e.category), dateTime=e.event_time, notes=e.notes
+            )
             for e in s.events
             if e.event_time and e.category in valid_categories
         ]
