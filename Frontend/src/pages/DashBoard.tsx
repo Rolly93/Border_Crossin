@@ -1,5 +1,5 @@
 import Headers from '@/components/Header/Header';
-import { Container } from '@mantine/core';
+import { Container, Stack, Title, Text } from '@mantine/core';
 
 import { useShipments } from '@/features/shipments/hooks/useShipments';
 import { Shipment } from '@/types/Shipment';
@@ -7,11 +7,10 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import ShipmentTable from '@/features/shipments/components/ShipmentTable';
 
 export function DashBoard() {
-
   const { shipments, loading, error, addShipment, updateShipment, hasMore, fetchNextPage } = useShipments();
   const [isCreating, setIsCreating] = useState(false);
   const [search, setSearch] = useState('');
-  const observer = useRef<IntersectionObserver | null>(null)
+  const observer = useRef<IntersectionObserver | null>(null);
 
   const filterShipments = useMemo(() => {
     const query = search.toLocaleLowerCase().trim();
@@ -25,7 +24,7 @@ export function DashBoard() {
         shipment.truck?.toString().toLocaleLowerCase().includes(query)
       );
     }));
-  }, [search, shipments])
+  }, [search, shipments]);
 
   const lastElementRef = useCallback(
     (node: HTMLTableRowElement | null) => {
@@ -46,18 +45,27 @@ export function DashBoard() {
     [loading, hasMore, fetchNextPage, search]
   );
 
-
   const handleCreateSubmit = async (newValues: Shipment) => {
-    addShipment(newValues)
+    addShipment(newValues);
   };
 
   return (
-    <Container size="responsive">
+    <Container size="xl">
+      <Stack gap="md" mb="lg">
+        <Title order={3} fw={800} c="navy">
+          Dashboard
+        </Title>
+        <Text size="sm" c="slate">
+          Seguimiento de envíos en tiempo real
+        </Text>
+      </Stack>
+
       <Headers
         onAddShipment={handleCreateSubmit}
         isCreating={isCreating}
         searchValue={search}
-        onSearchChange={setSearch} />
+        onSearchChange={setSearch}
+      />
 
       <ShipmentTable
         shipments={filterShipments}

@@ -40,6 +40,15 @@ def upgrade_unit_schema(engine: Engine) -> None:
             conn.execute(text("ALTER TABLE unit_truck ADD COLUMN unit_number VARCHAR(20) NULL"))
             logger.info("Esquema: columna unit_truck.unit_number agregada")
 
+        if "tag_id" not in columns:
+            conn.execute(text("ALTER TABLE unit_truck ADD COLUMN tag_id VARCHAR(24) NULL"))
+            logger.info("Esquema: columna unit_truck.tag_id agregada")
+
+        if "assigned_to" in columns:
+            # Hacer nullable para permitir crear unidades sin asignar
+            conn.execute(text("ALTER TABLE unit_truck MODIFY assigned_to INT NULL"))
+            logger.info("Esquema: columna unit_truck.assigned_to ahora nullable")
+
         rows = conn.execute(text("SELECT id, state FROM unit_truck")).fetchall()
         for row_id, state in rows:
             normalized = _normalize_state(state)
@@ -48,6 +57,14 @@ def upgrade_unit_schema(engine: Engine) -> None:
                     text("UPDATE unit_truck SET state = :s WHERE id = :id"),
                     {"s": normalized, "id": row_id},
                 )
+
+    # --- SFTP Service table migrations ---
+    if "sftp_service" in inspector.get_table_names():
+        sftp_columns = {c["name"] for c in inspector.get_columns("sftp_service")}
+        with engine.begin() as conn:
+            if "is_active" not in sftp_columns:
+                conn.execute(text("ALTER TABLE sftp_service ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE"))
+                logger.info("Esquema: columna sftp_service.is_active agregada")
 
     existing_indexes = {idx["name"] for idx in inspect(engine).get_indexes("unit_truck")}
     if UNIT_NUMBER_INDEX not in existing_indexes:

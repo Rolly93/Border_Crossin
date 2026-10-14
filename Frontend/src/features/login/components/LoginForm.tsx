@@ -3,12 +3,17 @@ import {
   PasswordInput,
   Paper,
   Title,
-  Alert, Text, Anchor
+  Alert,
+  Text,
+  Anchor,
+  Stack,
 } from '@mantine/core';
 import { useLoginForm } from '../hook/useLoginForm';
 import { AtomButton } from '@/components/atoms/AtomButton';
 import { useNavigate, Link } from 'react-router-dom';
 import { FormEvent } from 'react';
+import { IconTruck, IconLock } from '@tabler/icons-react';
+
 export function LoginForm() {
   const {
     userData, setUserData,
@@ -16,9 +21,10 @@ export function LoginForm() {
     loading,
     Login,
   } = useLoginForm();
-  const navigate = useNavigate()
-  async function handelSubmit(values: FormEvent<HTMLFormElement>) {
-    values.preventDefault()
+  const navigate = useNavigate();
+
+  async function handleSubmit(values: FormEvent<HTMLFormElement>) {
+    values.preventDefault();
     const credentials = {
       username: userData.username,
       password: userData.password,
@@ -28,64 +34,75 @@ export function LoginForm() {
       const result = await Login(credentials);
 
       if (result?.access_token) {
-        localStorage.setItem("token", result.access_token);
-        navigate("/dashboard");
+        localStorage.setItem('token', result.access_token);
+        navigate('/dashboard');
+      } else {
+        console.error('Login failed: No access token returned from server');
       }
-      else {
-        console.error("Login failed: No access token returned from server");
-      }
-    } catch (error: any) {
-      console.error("Login failed:", error.response?.data?.detail || error.message);
+    } catch (err: any) {
+      console.error('Login failed:', err.response?.data?.detail || err.message);
     }
   }
 
-
-
   return (
     <>
-      <Title ta="center" order={2}>
-        Welcome Back
-      </Title>
+      <Stack gap="md" align="center" mb="xl">
+        <div style={{
+          width: 56, height: 56,
+          borderRadius: 12,
+          background: 'linear-gradient(135deg, var(--mantine-color-navy-6), var(--mantine-color-navy-8))',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <IconTruck size={28} color="white" />
+        </div>
+        <Title order={2} fw={800} c="navy">
+          XBorder
+        </Title>
+        <Text c="slate" size="sm">
+          Sistema de seguimiento transfronterizo
+        </Text>
+      </Stack>
 
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <form onSubmit={handelSubmit}>
-          {error && (
-            <Alert color="red" mb="md" title="Login Failed">
-              {error}
-            </Alert>
-          )}
+      <Paper withBorder shadow="sm" p="xl" radius="md" style={{ maxWidth: 400, width: '100%' }}>
+        <form onSubmit={handleSubmit}>
+          <Stack gap="md">
+            {error && (
+              <Alert color="rose" title="Error de acceso" radius="sm">
+                {error}
+              </Alert>
+            )}
 
-          <TextInput
-            label="username"
-            placeholder="usarname"
-            value={userData.username}
-            onChange={(e) => setUserData((prev) => {
-              return { ...prev, username: e.target.value }
-            })}
-            required
-          />
+            <TextInput
+              label="Usuario"
+              placeholder="admin@test.com"
+              value={userData.username}
+              onChange={(e) => setUserData((prev) => ({ ...prev, username: e.target.value }))}
+              required
+              leftSection={<IconLock size={18} color="var(--mantine-color-slate-4)" />}
+              autoComplete="username"
+            />
 
+            <PasswordInput
+              label="Contraseña"
+              placeholder="••••••••"
+              value={userData.password}
+              onChange={(e) => setUserData((prev) => ({ ...prev, password: e.target.value }))}
+              required
+              leftSection={<IconLock size={18} color="var(--mantine-color-slate-4)" />}
+              autoComplete="current-password"
+            />
 
-          <PasswordInput
-            label="Password"
-            placeholder="Your password"
-            value={userData.password}
-            onChange={(e) => setUserData((prev) => {
-              return { ...prev, password: e.target.value }
-            })} required
-            mt="md"
-          />
+            <AtomButton type="submit" fullWidth size="md" loading={loading} mt="sm">
+              Iniciar sesión
+            </AtomButton>
 
-          <AtomButton type="submit" fullWidth mt="xl" loading={loading}>
-            Sign In
-          </AtomButton>
-          <Text c="dimmed" size="sm" ta="center" mt="md">
-            Don't have an account yet?{' '}
-            <Anchor component={Link} to="/onetime" size="sm" fw={500}>
-              Create account
-            </Anchor>
-          </Text>
-
+            <Text c="slate" size="sm" ta="center">
+              ¿Primera vez?{' '}
+              <Anchor component={Link} to="/onetime" size="sm" fw={600} c="amber">
+                Crear cuenta
+              </Anchor>
+            </Text>
+          </Stack>
         </form>
       </Paper>
     </>

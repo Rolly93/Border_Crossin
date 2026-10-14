@@ -1,4 +1,4 @@
-import { ISftpConfiguration, ISftpSend, ISftpSendFilters, ResendRequest } from "@/features/clients/types/Cliente";
+import { ISftpConfiguration, ISftpSend, SftpSendFilters, ResendRequest } from '@/features/clients/types/Cliente';
 
 export interface PaginatedResponse<T> {
   data: T[];
@@ -16,8 +16,9 @@ export interface IBaseService<T, UpdateT = Partial<T>> {
   delete(id: number): Promise<T>;
 }
 
+
 export interface ISftpService extends IBaseService<ISftpConfiguration, Partial<ISftpConfiguration>> {
   getConnection(id: number): Promise<ISftpConfiguration | null>;
-  listSends(filters?: ISftpSendFilters): Promise<ISftpSend[]>;
+  listSends(filters?: SftpSendFilters): Promise<ISftpSend[]>;
   resend(sendIds: number[]): Promise<ISftpSend[]>;
 }

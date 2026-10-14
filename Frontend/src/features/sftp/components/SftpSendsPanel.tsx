@@ -1,6 +1,7 @@
-import { Alert, Badge, Button, Checkbox, Group, Loader, Select, Stack, Table, Text, TextInput, Title } from "@mantine/core";
-import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
-import { MAX_AUTO_RETRIES, useSftpSends } from "../hooks/useSftpSends";
+import { Alert, Badge, Button, Checkbox, Group, Loader, Select, Stack, Table, Text, TextInput, Title } from '@mantine/core';
+import { useClientOptions } from '@/features/clients/hooks/useClientOptions';
+import { MAX_AUTO_RETRIES, useSftpSends } from '../hooks/useSftpSends';
+import { SftpSendStatus } from '../types/ISftpSend';
 
 const STATUS_OPTIONS = [
   { value: "", label: "Todos" },
@@ -42,8 +43,8 @@ export function SftpSendsPanel() {
         <Select
           label="Estado"
           data={STATUS_OPTIONS}
-          value={filters.status ?? ""}
-          onChange={(value) => filters.setStatus(value || null)}
+          value={filters.status ?? ''}
+          onChange={(value) => filters.setStatus((value as SftpSendStatus) || null)}
         />
       </Group>
 

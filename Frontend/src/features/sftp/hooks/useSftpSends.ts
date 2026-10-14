@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { notifications } from "@mantine/notifications";
-import { useDebouncedValue } from "@/components/hook/useDebouncedValue";
-import { sftpService } from "../service/sftpService";
-import { ISftpSend } from "../types/ISftpSend";
-import { getErrorMessage } from "@/components/utils/errorMessage";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { notifications } from '@mantine/notifications';
+import { useDebouncedValue } from '@/components/hook/useDebouncedValue';
+import { sftpService } from '../service/sftpService';
+import { ISftpSend, SftpSendStatus, SftpSendFilters } from '../types/ISftpSend';
+import { getErrorMessage } from '@/components/utils/errorMessage';
 
 export const MAX_AUTO_RETRIES = 3;
 
 export function useSftpSends() {
   const [clientId, setClientId] = useState<string | null>(null);
-  const [reference, setReference] = useState<string>("");
-  const [status, setStatus] = useState<string | null>("failed");
+  const [reference, setReference] = useState<string>('');
+  const [status, setStatus] = useState<SftpSendStatus | null>(null);
   const debouncedReference = useDebouncedValue(reference.trim());
 
   const [sends, setSends] = useState<ISftpSend[]>([]);
@@ -23,15 +23,16 @@ export function useSftpSends() {
     try {
       setLoading(true);
       setError(null);
-      const data = await sftpService.listSends({
+      const filters: SftpSendFilters = {
         client_id: clientId ? Number(clientId) : undefined,
         reference: debouncedReference || undefined,
         status: status || undefined,
-      });
+      };
+      const data = await sftpService.listSends(filters);
       setSends(data);
       setSelected(new Set());
-    } catch (err: any) {
-      setError(getErrorMessage(err, "No se pudieron cargar los envíos"));
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'No se pudieron cargar los envíos'));
     } finally {
       setLoading(false);
     }
@@ -42,7 +43,7 @@ export function useSftpSends() {
   }, [load]);
 
   const failedIds = useMemo(
-    () => sends.filter((s) => s.status === "failed").map((s) => s.id),
+    () => sends.filter((s) => s.status === 'failed').map((s) => s.id),
     [sends]
   );
   const selectedFailed = useMemo(
@@ -73,17 +74,17 @@ export function useSftpSends() {
     setResending(true);
     try {
       const result = await sftpService.resend(ids);
-      const sent = result.filter((r) => r.status === "sent").length;
+      const sent = result.filter((r) => r.status === 'sent').length;
       notifications.show({
-        title: "Reenvío terminado",
+        title: 'Reenvío terminado',
         message: `${sent} de ${result.length} archivos enviados`,
-        color: sent === result.length ? "green" : "orange",
+        color: sent === result.length ? 'green' : 'orange',
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       notifications.show({
-        title: "Error al reenviar",
-        message: getErrorMessage(err, "No se pudo reenviar"),
-        color: "red",
+        title: 'Error al reenviar',
+        message: getErrorMessage(err, 'No se pudo reenviar'),
+        color: 'red',
       });
     } finally {
       setResending(false);

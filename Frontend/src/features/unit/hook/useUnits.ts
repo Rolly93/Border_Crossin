@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
-import { getErrorMessage } from "@/components/utils/errorMessage";
-import { unitService } from "../service/ApiUnitService";
-import { IUnit, IUnitInput } from "../type/unit.interface";
+import { useCallback, useEffect, useState } from 'react';
+import { getErrorMessage } from '@/components/utils/errorMessage';
+import { unitService } from '../service/ApiUnitService';
+import { IUnit, IUnitInput } from '../type/unit.interface';
+import { AxiosError } from 'axios';
 
 /**
  * Estado de la lista de unidades y sus acciones.
@@ -17,8 +18,15 @@ export function useUnits() {
     try {
       setUnits(await unitService.list());
       setError(null);
-    } catch (err) {
-      setError(getErrorMessage(err, "No se pudieron cargar las unidades"));
+    } catch (err: unknown) {
+      const axiosError = err as AxiosError;
+      const status = axiosError.response?.status;
+      if (status === 404 || status === 204) {
+        setUnits([]);
+        setError(null);
+      } else {
+        setError(getErrorMessage(err, 'No se pudieron cargar las unidades'));
+      }
     } finally {
       setLoading(false);
     }
@@ -44,16 +52,16 @@ export function useUnits() {
   );
 
   const createUnit = (input: IUnitInput) =>
-    run(() => unitService.create(input), "No se pudo crear la unidad");
+    run(() => unitService.create(input), 'No se pudo crear la unidad');
 
   const updateUnit = (id: number, input: IUnitInput) =>
-    run(() => unitService.update(id, input), "No se pudo actualizar la unidad");
+    run(() => unitService.update(id, input), 'No se pudo actualizar la unidad');
 
   const assignDriver = (unitId: number, driverId: number) =>
-    run(() => unitService.assign(unitId, driverId), "No se pudo asignar el operador");
+    run(() => unitService.assign(unitId, driverId), 'No se pudo asignar el operador');
 
   const releaseDriver = (unitId: number) =>
-    run(() => unitService.release(unitId), "No se pudo liberar la unidad");
+    run(() => unitService.release(unitId), 'No se pudo liberar la unidad');
 
   return {
     units,

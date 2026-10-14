@@ -1,0 +1,69 @@
+/**
+ * Font imports for XBorder Design System
+ * 
+ * Inter — UI font: clean, legible, professional
+ * JetBrains Mono — Data font: tracking numbers, codes, timestamps
+ * 
+ * Loaded via @import to avoid FOIT (Flash of Invisible Text)
+ * Using font-display: swap for performance
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* 
+  CSS custom properties for font families — 
+  accessible to Mantine theme and custom components
+*/
+:root {
+  --font-ui: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus visible — keyboard navigation clarity */
+:focus-visible {
+  outline: 2px solid var(--mantine-color-amber-6);
+  outline-offset: 2px;
+}
+
+/* Selection colors */
+::selection {
+  background-color: var(--mantine-color-amber-3);
+  color: var(--mantine-color-amber-9);
+}
+
+/* Scrollbar styling — subtle, on-brand */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--mantine-color-slate-1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--mantine-color-slate-4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mantine-color-slate-5);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--mantine-color-slate-4) var(--mantine-color-slate-1);
+}
