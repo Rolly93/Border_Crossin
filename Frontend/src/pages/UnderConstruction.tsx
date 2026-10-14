@@ -36,7 +36,7 @@ export const UnderConstruction: React.FC<UnderConstructionProps> = ({
   return (
     <Box
       style={{
-        backgroundColor: 'var(--mantine-color-default)',
+        backgroundColor: 'var(--mantine-color-gray-0)',
         minHeight: 'calc(100vh - 120px)',
         display: 'flex',
         alignItems: 'center',
@@ -45,7 +45,7 @@ export const UnderConstruction: React.FC<UnderConstructionProps> = ({
         position: 'relative',
         overflow: 'hidden',
         borderRadius: 'var(--mantine-radius-md)',
-        border: '1px solid var(--mantine-color-default-border)',
+        border: '1px solid var(--mantine-color-gray-3)',
       }}
     >
       <Box

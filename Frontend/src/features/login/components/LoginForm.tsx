@@ -34,7 +34,7 @@ export function LoginForm() {
       const result = await Login(credentials);
 
       if (result?.access_token) {
-        localStorage.setItem('token', result.access_token);
+        localStorage.setItem('jwt_token', result.access_token);
         navigate('/dashboard');
       } else {
         console.error('Login failed: No access token returned from server');
