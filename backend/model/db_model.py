@@ -23,6 +23,7 @@ from sqlalchemy.orm import (
 
 hire_date: date = date.today()
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -96,6 +97,10 @@ class DriverDetails(Base):
     shipment_assigns: Mapped[List["ShipmentAssign"]] = relationship(
         "ShipmentAssign", back_populates="driver"
     )
+
+    @property
+    def id(self) -> int:
+        return self.employee_id
 
 
 # ==============================================================================
@@ -202,7 +207,9 @@ class UnitTruck(Base):
         "ShipmentAssign", back_populates="truck"
     )
     assignments: Mapped[List["UnitAssignment"]] = relationship(
-        "UnitAssignment", back_populates="unit", order_by="UnitAssignment.assigned_at.desc()"
+        "UnitAssignment",
+        back_populates="unit",
+        order_by="UnitAssignment.assigned_at.desc()",
     )
 
 
@@ -213,7 +220,10 @@ class UnitAssignment(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     unit_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("unit_truck.id", ondelete="CASCADE"), nullable=False, index=True
+        Integer,
+        ForeignKey("unit_truck.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     driver_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("driver_details.employee_id"), nullable=False, index=True

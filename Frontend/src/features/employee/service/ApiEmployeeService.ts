@@ -31,6 +31,8 @@ export class ApiEmployeeService
     return response.data;
   }
 
+
+
   async getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>> {
     const response = await this.api.get<PaginatedResponse<IEmployeeResponse>>(`${this.resourcePath}/`, {
       params: { page, limit },

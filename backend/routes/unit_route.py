@@ -24,7 +24,7 @@ router = APIRouter(
 
 @router.get("/", response_model=List[UnitOut], status_code=status.HTTP_200_OK)
 async def list_units(service: UnitSvc):
-    print("unit list")
+
     return service.list_units()
 
 

@@ -26,9 +26,10 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Fecha local como YYYY-MM-DD (el backend espera `date`, no datetime). */
 export function toIsoDate(value: Date): string {
-  const y = value.getFullYear();
-  const m = String(value.getMonth() + 1).padStart(2, '0');
-  const d = String(value.getDate()).padStart(2, '0');
+  const dataObj = typeof value === "string" ? new Date(value) : value
+  const y = dataObj.getFullYear();
+  const m = String(dataObj.getMonth() + 1).padStart(2, '0');
+  const d = String(dataObj.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
 
