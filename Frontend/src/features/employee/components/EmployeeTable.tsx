@@ -1,21 +1,55 @@
 import { Group, Table, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { useAuth } from "@/features/login/context/AuthContext";
 import { useEmployee } from "../hook/useEmployee";
-import { useNewEmployeeForm } from "../hook/useNewEmployeeForm";
+import { useEmployeeForm } from "../hook/useEmployeeForm";
 import { EmployeeTableRow } from "./EmployeeTableRow";
-import { NewEmployeeModal } from "./NewEmployeeModal";
+import { EmployeeModal } from "./EmployeeModal";
+import { IEmployeeResponse } from "../type/employee.interface";
+import { employeeService } from "../service/EmployeeService";
+
+
 
 export function EmployeeTable() {
   const { isAdmin } = useAuth();
-  const { employeeData, loading, hasMore, fetchNextPage, createEmployeeAccount } = useEmployee();
-  const employeeForm = useNewEmployeeForm(createEmployeeAccount);
-  const [newModal, { open: openNewModal, close: closeNewModal }] = useDisclosure(false);
+  // 1. Destructure updateEmployeeAccount here
+  const { employeeData, loading, hasMore, fetchNextPage, createEmployeeAccount, updateEmployeeAccount, getEmployeeData } = useEmployee();
+
+  const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
+  const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeResponse | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
+
+  // 2. Single declaration of employeeForm using the object options
+  const employeeForm = useEmployeeForm({
+    initialEmployee: selectedEmployee,
+    onSubmitAction: async (payload, id) => {
+      if (id) {
+        return await updateEmployeeAccount(id, payload);
+      } else {
+        return await createEmployeeAccount(payload);
+      }
+    },
+    onSuccess: () => {
+      // Refresh your table/data here if needed
+    }
+  });
+
+  const handleOpenCreate = () => {
+    setSelectedEmployee(null);
+    openModal();
+  };
+
+  const handleOpenEdit = (employee: IEmployeeResponse) => {
+    setSelectedEmployee(employee);
+    const employeeToEdith = getEmployeeData(employee.id!, employee.role); // pending to sen the cargo
+
+
+    openModal();
+  };
 
   const lastElementRef = useCallback((node: HTMLTableRowElement | null) => {
     if (loading) { return }
@@ -28,21 +62,21 @@ export function EmployeeTable() {
     })
     if (node) { return observer.current.observe(node) }
 
-  }, [loading, hasMore, fetchNextPage])
+  }, [loading, hasMore, fetchNextPage]);
 
   return (
     <>
       <Group justify="space-between" mt="md">
         <Title order={3}>Empleados</Title>
-        {/* Solo administradores dan de alta empleados; el backend también lo valida. */}
         {isAdmin && (
-          <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={openNewModal}>
+          <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleOpenCreate}>
             Nuevo empleado
           </AtomButton>
         )}
       </Group>
 
-      <NewEmployeeModal opened={newModal} onClose={closeNewModal} employeeForm={employeeForm} />
+      {/* 3. Use modalOpened state here */}
+      <EmployeeModal opened={modalOpened} onClose={closeModal} employeeForm={employeeForm} />
 
       <Table.ScrollContainer minWidth={760} h={500}>
         <Table highlightOnHover
@@ -71,12 +105,13 @@ export function EmployeeTable() {
                 employee={employee}
                 ref={isLastElement ? lastElementRef : null}
                 key={employee.id}
-                onClick={() => { }}
+                onClick={() => handleOpenEdit(employee)}
               />)
             }))}
             {loading && <TableSkeletonRows rows={4} columns={5} />}
           </Table.Tbody>
         </Table>
       </Table.ScrollContainer>
-    </>)
+    </>
+  );
 }

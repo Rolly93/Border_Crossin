@@ -2,12 +2,12 @@ import { Alert, Checkbox, Group, Modal, PasswordInput, SegmentedControl, Stack, 
 import { DateInput } from '@mantine/dates';
 import { AtomButton } from '@/components/atoms/AtomButton';
 import { EmployeeType } from '../type/employee.interface';
-import { useNewEmployeeForm } from '../hook/useNewEmployeeForm';
+import { useEmployeeForm } from '../hook/useEmployeeForm';
 
-interface NewEmployeeModalProps {
+interface EmployeeModalProps {
   opened: boolean;
   onClose: () => void;
-  employeeForm: ReturnType<typeof useNewEmployeeForm>;
+  employeeForm: ReturnType<typeof useEmployeeForm>;
 }
 
 const TYPE_OPTIONS: { value: EmployeeType; label: string }[] = [
@@ -15,8 +15,8 @@ const TYPE_OPTIONS: { value: EmployeeType; label: string }[] = [
   { value: 'operador', label: 'Operador (con licencia y unidad)' },
 ];
 
-export function NewEmployeeModal({ opened, onClose, employeeForm }: NewEmployeeModalProps) {
-  const { form, submit, submitError, submitting, clearSubmitError, isOperator } = employeeForm;
+export function EmployeeModal({ opened, onClose, employeeForm }: EmployeeModalProps) {
+  const { form, submit, submitError, submitting, clearSubmitError, isOperator, isEditing } = employeeForm;
 
   const handleClose = () => {
     clearSubmitError();
@@ -24,8 +24,8 @@ export function NewEmployeeModal({ opened, onClose, employeeForm }: NewEmployeeM
   };
 
   return (
-    <Modal opened={opened} onClose={handleClose} title="Nuevo empleado" centered size="lg">
-      <form onSubmit={(e) => { e.preventDefault(); submit().then((created) => { if (created) handleClose(); }); }}>
+    <Modal opened={opened} onClose={handleClose} title={isEditing ? "Editar empleado" : "Nuevo empleado"} centered size="lg">
+      <form onSubmit={(e) => { e.preventDefault(); submit().then((res) => { if (res) handleClose(); }); }}>
         <Stack gap="sm">
           {submitError && (
             <Alert color="red" withCloseButton onClose={clearSubmitError}>
@@ -58,10 +58,19 @@ export function NewEmployeeModal({ opened, onClose, employeeForm }: NewEmployeeM
                 <TextInput label="Correo" required type="email" {...form.getInputProps('email')} />
               </Group>
               <Group grow>
-                <PasswordInput label="Contraseña" required autoComplete="new-password"
-                  description="Mínimo 8 caracteres" {...form.getInputProps('password')} />
-                <PasswordInput label="Confirmar contraseña" required autoComplete="new-password"
-                  {...form.getInputProps('confirmPassword')} />
+                <PasswordInput
+                  label="Contraseña"
+                  required={!isEditing}
+                  autoComplete="new-password"
+                  description={isEditing ? "Dejar en blanco para mantener la actual" : "Mínimo 8 caracteres"}
+                  {...form.getInputProps('password')}
+                />
+                <PasswordInput
+                  label="Confirmar contraseña"
+                  required={!isEditing}
+                  autoComplete="new-password"
+                  {...form.getInputProps('confirmPassword')}
+                />
               </Group>
               <Checkbox label="Es administrador (puede dar de alta y baja clientes y empleados)"
                 {...form.getInputProps('isAdmin', { type: 'checkbox' })} />
@@ -71,7 +80,7 @@ export function NewEmployeeModal({ opened, onClose, employeeForm }: NewEmployeeM
           {isOperator && (
             <Group grow>
               <TextInput label="Número de licencia" required {...form.getInputProps('licenseNumber')} />
-              <DateInput label="Vencimiento de licencia" required minDate={new Date()}
+              <DateInput label="Vencimiento de licencia" required
                 {...form.getInputProps('licenseExpiration')} />
               <TextInput label="Gafete" {...form.getInputProps('gafetId')} />
             </Group>

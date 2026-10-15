@@ -5,8 +5,12 @@ import {
   IEmployeeResponse,
   IOperatorOption,
   INewEmployeeRequest,
+  TEmployeeResponseMap,
+
+  EmployeeType,
 } from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
+import { extend } from "dayjs";
 
 export class ApiEmployeeService
   extends BaseCrudApiService<IEmployeeResponse, IEmployeeRequest>
@@ -15,6 +19,18 @@ export class ApiEmployeeService
     super('/employees');
   }
 
+
+  async getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]> {
+    const responseData = await this.api.get<TEmployeeResponseMap[T]>(`${this.resourcePath}/employee/${id}`,
+      { params: { cargoType } }
+    );
+
+    if (responseData.status === 200) {
+      return responseData.data
+
+    }
+    throw new Error('No se pudo obtener el empleado');
+  }
   override async insert(data: IEmployeeRequest): Promise<IEmployeeRequest> {
     const responseData = (await super.insert(data as unknown as IEmployeeRequest)) as IEmployeeRequest;
 

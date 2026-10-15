@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { IEmployeeRequest, IEmployeeResponse, INewEmployeeRequest } from '../type/employee.interface';
+import { EmployeeType, IEmployeeRequest, IEmployeeResponse, INewEmployeeRequest } from '../type/employee.interface';
 import { employeeService } from '../service/EmployeeService';
 import { usePaginatedList } from '@/components/hook/usePaginaterList';
 export function useEmployee() {
@@ -25,6 +25,16 @@ export function useEmployee() {
       return updateEmployee
     } catch (error) {
       console.error("Error updating client:", error)
+    }
+  }
+
+  const getEmployeeData = async (id: number, cargoType: EmployeeType) => {
+    try {
+      const employeeData = await employeeService.getEmployee(id, cargoType)
+      return employeeData
+    } catch (error) {
+      console.error("Error fetching employee data", error);
+
     }
   }
 
@@ -69,5 +79,5 @@ export function useEmployee() {
     }
   }
 
-  return { employeeData, loading, error, hasMore, createNewEmployee, createEmployeeAccount, fetchNextPage, setError, updateEmployee, deleteEmployee } as const;
+  return { employeeData, loading, error, hasMore, createNewEmployee, createEmployeeAccount, fetchNextPage, setError, updateEmployee, deleteEmployee, getEmployeeData } as const;
 }

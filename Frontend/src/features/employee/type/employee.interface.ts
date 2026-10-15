@@ -1,4 +1,5 @@
 import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
+import { extend } from "dayjs";
 
 
 export interface IEmployeeRequest {
@@ -48,14 +49,51 @@ export interface INewEmployeeRequest {
   licenseExpiration?: string; // YYYY-MM-DD
   gafetId?: string;
 }
+export interface IEMployeeBaseResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  rfc: string;
+  role: string;
+  employeeType: EmployeeType;
+}
+
+
+
+export interface IEmployeeUserResponse extends IEmployeeRequest {
+  username: string;
+  email: string;
+  password: string;
+  isAdmin: boolean;
+}
+
+
+export interface IEmployeeDriverResponse extends IEmployeeRequest {
+  licenseNumber: string;
+  licenseExpiration: string;
+  gafetId: string;
+}
+
 
 export interface IOperatorOption {
   id: number;
   name: string;
 }
 
+export interface IEmployeeFormRequest extends INewEmployeeRequest {
+  id?: number;
+}
+
+export type TEmployeeResponseMap = {
+  cargo: IEmployeeUserResponse;
+  operador: IEmployeeDriverResponse
+
+}
+
 export interface IEmployeeService extends IBaseService<IEmployeeResponse, IEmployeeRequest> {
   getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>>
   getOperators(): Promise<IOperatorOption[]>
   createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>
+  getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]>
 }
