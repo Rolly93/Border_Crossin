@@ -1,16 +1,21 @@
 from datetime import date, timedelta
+from multiprocessing import Value
+from os import name
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from model.db_model import DriverDetails, Employee, User
 from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.employee_schema import (
+    EmployeeCreateUnion,
     EmployeeListItem,
     EmployeeRequest,
+    EmployeeRequestDash,
     PaginatedEmployeeResponse,
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from stdnum.mx import rfc as rfc_validator
 
 
@@ -33,8 +38,18 @@ class EmployeeService:
             )
         return clean_rfc
 
-    def get_driver_by_id(self, id: int) -> DriverDetails:
-        return self._driver_repo.get_by_id(id)
+    def get_driver_by_id(self, id: int) -> tuple[DriverDetails, Employee]:
+
+        stmt = (
+            select(DriverDetails)
+            .options(joinedload(DriverDetails.employee_id))
+            .join(target=DriverDetails.employee)
+            .where(Employee.id == id, Employee.still_employee.is_(True))
+        )
+        if not (result := self._db.execute(statement=stmt).first()):
+            raise ValueError(f"Driver with {id} not found")
+        driver_details, employee = result
+        return driver_details, employee
 
     def get_all_employees(
         self, page: int = 1, limit: int = 10
@@ -60,9 +75,8 @@ class EmployeeService:
             limit=limit,
         )
 
-    def _validate_account(self, data: EmployeeRequest) -> None:
+    def _validate_account(self, data: EmployeeCreateUnion) -> None:
         """Valida todo antes de crear el empleado, para no dejar registros a medias."""
-        print(data)
         if data.employeeType == "cargo":
             # Database validations (repo checks)
             if self._user_repo.get_username(data.username.strip()):
@@ -101,7 +115,10 @@ class EmployeeService:
                 )
 
     def _attach_account(
-        self, employee: Employee, data: EmployeeRequest, current_user
+        self,
+        employee: Employee,
+        data: EmployeeCreateUnion,
+        current_user: TokenPayload | InitialTokenPayload,
     ) -> None:
         if data.employeeType == "cargo":
             from utility.user_service import UserService
@@ -132,7 +149,7 @@ class EmployeeService:
 
         return drivers
 
-    def create_employee(self, data: EmployeeRequest) -> Employee:
+    def create_employee(self, data: EmployeeCreateUnion) -> Employee:
         clean_rfc = self.validate_rfc(data.rfc)
 
         if self._employee_repo.get_employee(clean_rfc):
@@ -153,10 +170,10 @@ class EmployeeService:
 
     def register_employee_service(
         self,
-        data: EmployeeRequest,
+        data: EmployeeCreateUnion,
         ip: str,
         current_user: TokenPayload | InitialTokenPayload,
-    ) -> dict:
+    ) -> EmployeeRequestDash:
 
         has_users = bool(self._user_repo.get_all_users())
 
@@ -181,19 +198,21 @@ class EmployeeService:
                 detail="Authentication required to register additional employees.",
             )
 
-        self._validate_account(data)
+        if has_users:
+            self._validate_account(data)
+
         new_employee = self.create_employee(data)
         self._attach_account(new_employee, data, current_user)
         # Misma forma que un renglón de GET /employees/, para agregarlo a la tabla.
-        return {
-            "status": "201",
-            "detail": "Employee registered successfully",
-            "name": new_employee.name,
-            "id": new_employee.id,
-            "firstName": new_employee.name,
-            "lastName": new_employee.last_name,
-            "role": new_employee.role,
-            "rfc": new_employee.rfc,
-            "hireDate": new_employee.hire_date,
-            "stillEmployee": new_employee.still_employee,
-        }
+        return EmployeeRequestDash(
+            status="201",
+            detail="Employee registered successfully",
+            id=new_employee.id,
+            firstName=new_employee.name,
+            lastName=new_employee.last_name,
+            role=new_employee.role,
+            hireDate=new_employee.hire_date,
+            stillEmployee=new_employee.still_employee,
+            rfc=new_employee.rfc,
+            dateOfBirth=new_employee.date_birth,
+        )

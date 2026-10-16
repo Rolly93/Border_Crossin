@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AuthtenticationService } from '../service/LoginService';
-import { ISignIn, LoginCredentials } from '../type/ILoginService';
+import { ISignIn, ISignInPayload, LoginCredentials } from '../type/ILoginService';
 
 export function useLoginForm() {
   const [userData, setUserData] = useState<ISignIn>({
@@ -40,7 +40,7 @@ export function useLoginForm() {
     }
   };
 
-  const signIn = async (employeeData: ISignIn) => {
+  const signIn = async (employeeData: ISignInPayload) => {
     setError('');
     setLoading(true);
 

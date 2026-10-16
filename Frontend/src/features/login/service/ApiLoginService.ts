@@ -1,5 +1,5 @@
 import { BaseApiService } from "@/components/service/BaseApiService";
-import { ILoginService, ISignIn, LoginCredentials, LoginResponse } from "../type/ILoginService";
+import { ILoginService, ISignIn, ISignInPayload, LoginCredentials, LoginResponse } from "../type/ILoginService";
 
 
 
@@ -26,8 +26,8 @@ export class AuthService extends BaseApiService implements ILoginService {
     }
 
   }
-  async signIn(credentials: ISignIn): Promise<void> {
-    console.log(`${this.resourcePath}/create`, credentials);
+  async signIn(credentials: ISignInPayload): Promise<void> {
+    console.log(credentials);
 
     await this.api.post(`${this.resourcePath}/create`, credentials);
   }

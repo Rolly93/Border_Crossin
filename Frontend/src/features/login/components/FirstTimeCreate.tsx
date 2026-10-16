@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Container, Paper, Stepper, Title, Text } from '@mantine/core';
 import { EmployeeForm } from "@/features/employee/components/EmployeeForm";
 import { NewuserForm } from "./NewUserForm";
-import { Navigate, replace, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export function FirstTimeLog() {
   const [activeStep, setActiveStep] = useState(0);

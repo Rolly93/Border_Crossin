@@ -2,21 +2,15 @@ import { createTheme, MantineColorsTuple } from '@mantine/core';
 
 /**
  * XBorder Design System
- * 
+ *
  * Subject: Cross-border logistics (Mexico ↔ USA) — industrial, precise, high-stakes
  * Audience: Dispatchers, operators, admins who need dense, scannable data
- * 
- * Palette rationale:
- * - Navy-900 base: Authority, night operations, precision
- * - Amber-500 accent: Border signage, warning lights, trade gold — the one color that means "attention" in logistics
- * - Slate scale: Neutral UI chrome, reduced eye strain for long shifts
- * - Status colors: Semantic, not decorative (success=emerald, warning=amber, error=rose, info=sky)
  */
 
 // Custom color scales (10-step Mantine format)
 const navy: MantineColorsTuple = [
-  '#f0f4f8', '#d9e2ec', '#bcccdc', '#9fb3c8', '#829ab1', // 0-4 light
-  '#627d98', '#486581', '#334e68', '#243b53', '#102a43',  // 5-9 dark
+  '#f0f4f8', '#d9e2ec', '#bcccdc', '#9fb3c8', '#829ab1',
+  '#627d98', '#486581', '#334e68', '#243b53', '#102a43',
 ];
 
 const slate: MantineColorsTuple = [
@@ -55,7 +49,7 @@ export const theme = createTheme({
     sky,
   },
 
-  // Typography: Inter for UI, JetBrains Mono for tracking numbers/codes
+  // Typography
   fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
   fontFamilyMonospace: 'JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, monospace',
   headings: {
@@ -71,7 +65,6 @@ export const theme = createTheme({
     },
   },
 
-  // Tighter default radius — not everything needs pill rounding
   defaultRadius: 'sm',
   radius: {
     xs: '2px',
@@ -81,7 +74,6 @@ export const theme = createTheme({
     xl: '16px',
   },
 
-  // Spacing scale — slightly denser for data-heavy UI
   spacing: {
     xs: '4px',
     sm: '8px',
@@ -91,7 +83,6 @@ export const theme = createTheme({
     xxl: '32px',
   },
 
-  // Shadows: Sharper, more intentional — not the soft "SaaS card" default
   shadows: {
     xs: '0 1px 2px 0 rgb(15 23 42 / 0.08)',
     sm: '0 1px 3px 0 rgb(15 23 42 / 0.1), 0 1px 2px -1px rgb(15 23 42 / 0.1)',
@@ -100,7 +91,6 @@ export const theme = createTheme({
     xl: '0 20px 25px -5px rgb(15 23 42 / 0.1), 0 8px 10px -6px rgb(15 23 42 / 0.1)',
   },
 
-  // Component defaults — override Mantine's generic defaults
   components: {
     Button: {
       defaultProps: {
@@ -112,12 +102,12 @@ export const theme = createTheme({
       },
       styles: {
         root: {
-          '&[data-variant="filled"]': {
+          '&[dataVariant="filled"]': {
             '&:hover': {
               backgroundColor: 'var(--mantine-color-navy-7)',
             },
           },
-          '&[data-color="amber"]': {
+          '&[dataColor="amber"]': {
             backgroundColor: 'var(--mantine-color-amber-6)',
             color: '#fff',
             '&:hover': {
@@ -127,31 +117,21 @@ export const theme = createTheme({
         },
       },
     },
+
     TextInput: {
       defaultProps: {
         radius: 'sm',
         size: 'sm',
-        variants: {
-          default: {
-            backgroundColor: 'var(--mantine-color-slate-0)',
-            borderColor: 'var(--mantine-color-slate-3)',
-            '&:hover': {
-              borderColor: 'var(--mantine-color-slate-4)',
-            },
-            '&:focus, &[data-focus]': {
-              borderColor: 'var(--mantine-color-amber-6)',
-              boxShadow: '0 0 0 2px var(--mantine-color-amber-2)',
-            },
-          },
-        },
       },
     },
+
     Select: {
       defaultProps: {
         radius: 'sm',
         size: 'sm',
       },
     },
+
     Table: {
       defaultProps: {
         highlightOnHover: true,
@@ -166,25 +146,27 @@ export const theme = createTheme({
           fontSize: '0.7rem',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          color: 'var(--mantine-color-slate-5)',
-          backgroundColor: 'var(--mantine-color-slate-0)',
-          borderBottom: '2px solid var(--mantine-color-slate-2)',
           paddingTop: '10px',
           paddingBottom: '10px',
+          // Adaptable a Dark/Light mode
+          color: 'var(--mantine-color-dimmed)',
+          backgroundColor: 'var(--mantine-color-body)',
+          borderBottom: '2px solid var(--mantine-color-default-border)',
         },
         td: {
           fontSize: '0.8125rem',
           paddingTop: '8px',
           paddingBottom: '8px',
-          borderBottom: '1px solid var(--mantine-color-slate-1)',
+          borderBottom: '1px solid var(--mantine-color-default-border)',
         },
         tr: {
-          '&:last-child td': {
+          '&:lastOfType td': {
             borderBottom: 'none',
           },
         },
       },
     },
+
     Card: {
       defaultProps: {
         radius: 'md',
@@ -193,16 +175,20 @@ export const theme = createTheme({
       },
       styles: {
         root: {
-          borderColor: 'var(--mantine-color-slate-2)',
-          backgroundColor: 'var(--mantine-color-white)',
+          borderColor: 'var(--mantine-color-default-border)',
+          backgroundColor: 'var(--mantine-color-body)',
         },
       },
     },
+
     Modal: {
       defaultProps: {
         radius: 'md',
         centered: true,
-        overlayProps: { opacity: 0.5, blur: 2 },
+        overlayProps: {
+          backgroundOpacity: 0.5,
+          style: { backdropFilter: 'blur(4px)' },
+        }
       },
       styles: {
         content: {
@@ -214,6 +200,7 @@ export const theme = createTheme({
         },
       },
     },
+
     Badge: {
       defaultProps: {
         radius: 'xs',
@@ -221,6 +208,7 @@ export const theme = createTheme({
         fw: 600,
       },
     },
+
     Alert: {
       defaultProps: {
         radius: 'sm',
@@ -232,6 +220,7 @@ export const theme = createTheme({
         },
       },
     },
+
     Paper: {
       defaultProps: {
         radius: 'md',
@@ -241,10 +230,12 @@ export const theme = createTheme({
       },
       styles: {
         root: {
-          borderColor: 'var(--mantine-color-slate-2)',
+          borderColor: 'var(--mantine-color-default-border)',
+          backgroundColor: 'var(--mantine-color-body)',
         },
       },
     },
+
     NavLink: {
       defaultProps: {
         radius: 'sm',
@@ -253,16 +244,22 @@ export const theme = createTheme({
       },
       styles: {
         root: {
-          '&[data-active]': {
-            backgroundColor: 'var(--mantine-color-amber-1)',
-            color: 'var(--mantine-color-amber-8)',
-            '&:hover': {
-              backgroundColor: 'var(--mantine-color-amber-2)',
+          '&[dataActive]': {
+            // Estilos para Light Mode
+            '[dataMantineColorScheme="light"] &': {
+              backgroundColor: 'var(--mantine-color-amber-1)',
+              color: 'var(--mantine-color-amber-9)',
+            },
+            // Estilos para Dark Mode
+            '[dataMantineColorScheme="dark"] &': {
+              backgroundColor: 'var(--mantine-color-amber-9)',
+              color: 'var(--mantine-color-amber-1)',
             },
           },
         },
       },
     },
+
     AppShell: {
       defaultProps: {
         header: { height: 56 },
@@ -271,27 +268,23 @@ export const theme = createTheme({
       },
       styles: {
         header: {
-          backgroundColor: 'var(--mantine-color-white)',
-          borderBottom: '1px solid var(--mantine-color-slate-2)',
+          backgroundColor: 'var(--mantine-color-body)',
+          borderBottom: '1px solid var(--mantine-color-default-border)',
         },
         navbar: {
-          backgroundColor: 'var(--mantine-color-white)',
-          borderRight: '1px solid var(--mantine-color-slate-2)',
+          backgroundColor: 'var(--mantine-color-body)',
+          borderRight: '1px solid var(--mantine-color-default-border)',
         },
         main: {
-          backgroundColor: 'var(--mantine-color-slate-0)',
+          // Fondo del canvas principal
+          '[dataMantineColorScheme="light"] &': {
+            backgroundColor: 'var(--mantine-color-slate-0)',
+          },
+          '[dataMantineColorScheme="dark"] &': {
+            backgroundColor: 'var(--mantine-color-dark-8)',
+          },
         },
       },
-    },
-  },
-
-  // Global styles injection
-  other: {
-    '*': {
-      boxSizing: 'border-box',
-    },
-    body: {
-      fontFeatureSettings: '"cv02", "cv03", "cv04", "cv11"',
     },
   },
 });

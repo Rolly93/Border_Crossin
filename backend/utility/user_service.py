@@ -132,7 +132,6 @@ class UserService:
     def register_new_user(
         self,
         data: NewUser,
-        rfc: Optional[str],
         current_user: Optional[Union[TokenPayload, InitialTokenPayload]],
     ) -> dict:
         has_users = self.user_already_exists()
@@ -144,7 +143,7 @@ class UserService:
                 detail="Only administrators can create new users",
             )
 
-        target_rfc = current_user.sub if not has_users and current_user else rfc
+        target_rfc = current_user.sub if not has_users and current_user else data.rfc
 
         if not target_rfc:
             raise HTTPException(
@@ -163,27 +162,34 @@ class UserService:
         }
 
     def get_employee_info(
-        self, id: int, cargoType: Literal["cargo", "operador"]
+        self, id: int, cargoType: Literal["csr", "operador"]
     ) -> EmployeeResponseUnion:
-        em_re = None
 
-        if cargoType == "cargo":
-            em_re = self._user_repo.get_user_by_id(id)
+        if cargoType == "csr":
+            u, e = self._user_repo.get_user_by_id(id)
             return EmployeeUserResponse(
-                id=em_re.id,
-                username=em_re.username,
-                email=em_re.email,
-                isAdmin=em_re.is_admin,
-                employeeId=em_re.employee_id,
+                id=e.id,
+                username=u.username,
+                email=u.email,
+                isAdmin=u.is_admin,
+                password=u.hashed_password,
+                firstName=e.name,
+                lastName=e.last_name,
+                role=e.role,
+                rfc=e.rfc,
+                dateOfBirth=e.date_birth,
             )
 
         if cargoType == "operador":
-            em_re = self._employee_service.get_driver_by_id(id)
+            d, e = self._employee_service.get_driver_by_id(id)
             return EmployeeDriverResponse(
-                id=em_re.id,
-                licenseNumber=em_re.license_number,
-                expirationDate=em_re.expiration_date,
-                gafetId=em_re.gafet_id,
+                id=e.id,
+                firstName=e.name,
+                lastName=e.last_name,
+                role=e.role,
+                rfc=e.rfc,
+                dateOfBirth=e.date_birth,
+                licenseNumber=d.license_number,
+                licenseExpiration=d.expiration_date,
+                gafetId=d.gafet_id,
             )
-
-        return em_re

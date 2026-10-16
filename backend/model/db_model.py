@@ -40,6 +40,7 @@ class Employee(Base):
     role: Mapped[str] = mapped_column(
         String(50), nullable=False, default="costumer representative"
     )
+    date_birth: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     hire_date: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     rfc: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     still_employee: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

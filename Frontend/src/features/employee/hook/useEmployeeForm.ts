@@ -112,6 +112,10 @@ export function useEmployeeForm({
     };
   };
 
+  const resetForm = () => {
+    form.reset();
+    setSubmitError(null);
+  };
   const form = useForm<EmployeeFormValues>({
     initialValues: getInitialValues(),
     validate: (values) => {

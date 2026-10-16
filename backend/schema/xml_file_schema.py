@@ -1,11 +1,12 @@
-from typing import Optional
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
-from enum import Enum
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, Optional
+
 from exeption import *
 
-from schema.shipment_shcema import EventPayload, EventCategory
+from schema.shipment_shcema import EventCategory, EventPayload
+
 
 class XmlRequest:
     customer_tracking: str

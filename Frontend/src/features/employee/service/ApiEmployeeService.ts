@@ -10,7 +10,6 @@ import {
   EmployeeType,
 } from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
-import { extend } from "dayjs";
 
 export class ApiEmployeeService
   extends BaseCrudApiService<IEmployeeResponse, IEmployeeRequest>
@@ -21,7 +20,7 @@ export class ApiEmployeeService
 
 
   async getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]> {
-    const responseData = await this.api.get<TEmployeeResponseMap[T]>(`${this.resourcePath}/employee/${id}`,
+    const responseData = await this.api.get<TEmployeeResponseMap[T]>(`${this.resourcePath}/${id}`,
       { params: { cargoType } }
     );
 

@@ -17,6 +17,7 @@ class NewUser(UserBase):
     password: str
     role: str
     isAdmin: bool = False
+    ref: str = None
 
 
 class UserModel(UserBase):

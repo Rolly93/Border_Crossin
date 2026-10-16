@@ -1,4 +1,3 @@
-import React from "react";
 import { Table, Skeleton } from "@mantine/core";
 
 export const TableSkeletonRows = ({ rows = 5, columns = 6, height = 20, radius = 'xl' }) => {

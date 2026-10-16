@@ -1,4 +1,4 @@
-from typing import Annotated, List, Optional, Union
+from typing import List, Optional, Union
 
 from deps.auth import (
     CurrentUser,
@@ -10,7 +10,9 @@ from deps.service import EmployeeSvc, get_user_service
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from schema import EmployeeResponseUnion, InitialTokenPayload, TokenPayload
 from schema.employee_schema import (
+    EmployeeBaseRequest,
     EmployeeRequest,
+    EmployeeUserRequest,
     OperatorOption,
     PaginatedEmployeeResponse,
 )
@@ -42,7 +44,7 @@ async def list_employees(
 )
 async def register_employee(
     rq: Request,
-    data: EmployeeRequest,
+    data: EmployeeBaseRequest,
     service: EmployeeSvc,
     current_user: Optional[Union[TokenPayload, InitialTokenPayload]] = Depends(
         get_optional_current_user
@@ -91,13 +93,13 @@ async def resgister_driver(
 async def get_employee_data(
     rq: Request,
     id: int,
-    cargoType: str = Query(..., description="Type of employee: 'cargo' or 'operador'"),
+    cargoType: str = Query(..., description="Type of employee: 'csr' or 'operador'"),
     service: UserService = Depends(get_user_service),
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    if cargoType not in {"cargo", "operador"}:
+    if cargoType not in {"csr", "operador"}:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid cargoType. Must be 'cargo' or 'operador'.",
+            detail="Invalid cargoType. Must be 'csr' or 'operador'.",
         )
-    return service.get_employee_info(id=id, cargoType=cargoType)
+    return service.get_employee_info(id=id, cargoType=str(cargoType))

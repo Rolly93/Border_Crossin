@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -16,8 +16,16 @@ class EmployeeBaseRequest(BaseModel):
     dateOfBirth: date
 
 
+class EmployeeRequestDash(EmployeeBaseRequest):
+    id: int
+    status: str
+    detail: str
+    hireDate: date
+    stillEmployee: bool
+
+
 class EmployeeUserRequest(EmployeeBaseRequest):
-    employeeType: Literal["cargo"] = "cargo"
+    employeeType: Literal["csr"] = "csr"
     username: str
     email: str
     password: str
@@ -37,7 +45,7 @@ class EmployeeRequest(EmployeeBase):
     role: str
     rfc: str
     dateOfBirth: date
-    employeeType: Literal["cargo", "operador"] = "cargo"
+    employeeType: Literal["csr", "operador"] = "csr"
     # Cargo: cuenta de usuario
     username: str | None
     email: Optional[EmailStr] = None

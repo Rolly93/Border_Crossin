@@ -8,7 +8,7 @@ import { AtomButton } from '../atoms/AtomButton';
 import { useAuth } from '@/features/login/context/AuthContext';
 import { useScacSetup } from '@/features/system/useScacSetup';
 import { ScacSetupModal } from '../Modal/ScacSetupModal';
-import { IconTruck, IconBuilding, IconRoute, IconFileText, IconUsers, IconSettings, IconLogout, IconDashboard, IconKey } from '@tabler/icons-react';
+import { IconTruck, IconBuilding, IconRoute, IconFileText, IconUsers, IconSettings, IconLogout, IconDashboard } from '@tabler/icons-react';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: IconDashboard },
@@ -19,12 +19,13 @@ const NAV_ITEMS = [
   { to: '/units', label: 'Unidades', icon: IconTruck },
 ] as const;
 
+// Estilos limpios exclusivamente con propiedades en camelCase
 const sectionLabelStyle = {
   fontSize: '0.65rem',
   fontWeight: 700,
   textTransform: 'uppercase' as const,
   letterSpacing: '0.08em',
-  color: 'var(--mantine-color-slate-5)',
+  color: 'var(--mantine-color-dimmed)',
   marginBottom: '8px',
   paddingLeft: '8px',
 };
@@ -34,11 +35,11 @@ export function Layout() {
   const location = useLocation();
   const { logout } = useAuth();
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     close();
   }, [location, close]);
-  
+
   useGlobalNotifications();
   const { needsSetup, saveScac } = useScacSetup();
 
@@ -64,7 +65,7 @@ export function Layout() {
             <Text
               fw={800}
               fz="lg"
-              c="navy"
+              c="amber"
               tt="uppercase"
               style={{ letterSpacing: '0.08em' }}
             >
@@ -81,7 +82,6 @@ export function Layout() {
         <Text
           size="xs"
           fw={700}
-          c="slate"
           tt="uppercase"
           mb="sm"
           px="sm"
@@ -89,7 +89,7 @@ export function Layout() {
         >
           Navegación
         </Text>
-        
+
         {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
@@ -102,11 +102,14 @@ export function Layout() {
           />
         ))}
 
-        <AppShell.Section pt="md" mt="md" style={{ borderTop: '1px solid var(--mantine-color-slate-2)' }}>
+        <AppShell.Section
+          pt="md"
+          mt="md"
+          style={{ borderTop: '1px solid var(--mantine-color-default-border)' }}
+        >
           <Text
             size="xs"
             fw={700}
-            c="slate"
             tt="uppercase"
             mb="sm"
             px="sm"

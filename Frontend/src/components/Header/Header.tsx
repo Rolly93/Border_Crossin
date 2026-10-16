@@ -6,25 +6,26 @@ import { AtomButton } from "../atoms/AtomButton";
 interface HeadersProps {
   onAddShipment: (data: any) => Promise<void>;
   isCreating: boolean;
-
   searchValue: string;
   onSearchChange: (value: string) => void;
 }
+
 export default function Headers({ onAddShipment, isCreating, searchValue, onSearchChange }: HeadersProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleFormSubmit = async (data: any) => {
     await onAddShipment(data);
     console.log(data);
-
     close();
   };
 
   return (
-    <Group justify={"space-between"} gap={"xl"}>
-      <Input placeholder="Search shipments..."
+    <Group justify="space-between" gap="xl">
+      <Input
+        placeholder="Search shipments..."
         value={searchValue}
-        onChange={(event) => onSearchChange(event.currentTarget.value)} />
+        onChange={(event) => onSearchChange(event.currentTarget.value)}
+      />
 
       <AtomButton variant="default" onClick={open}>
         Add Shipment
@@ -36,7 +37,8 @@ export default function Headers({ onAddShipment, isCreating, searchValue, onSear
         title="Add New Shipment"
         size="lg"
       >
-        <Box style={{ position: 'relative' }}>
+        {/* Usamos pos="relative" prop de Mantine en lugar de un objeto style plano */}
+        <Box pos="relative">
           <LoadingOverlay visible={isCreating} overlayProps={{ blur: 2 }} />
 
           <ShipmentForm onSubmit={handleFormSubmit} onCancel={close} />

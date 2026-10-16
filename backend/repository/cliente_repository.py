@@ -1,14 +1,15 @@
-from typing import List, Optional
 from enum import Enum
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload, joinedload
+from typing import Optional
+
 from fastapi import HTTPException
+from model.db_model import Client, SftpService
+from schema import ClientRequest
+from schema.client_schema import ClientPaginateData, PaginatedClientResponse
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
 from repository.base_repository import BaseRepository
 from repository.email_repository import EmailRepository
-from model.db_model import Client, SftpService
-from schema.client_schema import ClientPaginateData, PaginatedClientResponse
-from schema import ClientRequest, ClientResponse
 
 
 class ClientServiceType(str, Enum):
@@ -30,9 +31,9 @@ class ClienteRepository(BaseRepository[Client]):
             )
             .exists()
         )
-        stmt = select(
-            Client.id, Client.name, has_sftp.label("has_sftp")
-        ).where(Client.still_active == True)
+        stmt = select(Client.id, Client.name, has_sftp.label("has_sftp")).where(
+            Client.still_active == True
+        )
         results = self._db.execute(stmt).all()
         return [
             {"id": row.id, "name": row.name, "has_sftp": bool(row.has_sftp)}

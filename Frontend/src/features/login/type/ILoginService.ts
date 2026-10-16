@@ -20,8 +20,20 @@ export interface ISignIn extends LoginCredentials {
   role: string
 
 }
+export interface SignInWithRfc extends ISignIn {
+  hasRfc: true;
+  rfc: string;
+}
+
+export interface SignInWithoutRfc extends ISignIn {
+  hasRfc: false;
+  rfc?: never;
+}
+
+export type ISignInPayload = SignInWithRfc | SignInWithoutRfc;
+
 export interface ILoginService {
   login(credentials: LoginCredentials): Promise<LoginResponse>;
   logout(): Promise<void>;
-  signIn(credentials: ISignIn): Promise<void>
+  signIn(credentials: ISignInPayload): Promise<void>
 }

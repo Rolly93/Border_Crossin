@@ -20,6 +20,8 @@ export function EmployeeModal({ opened, onClose, employeeForm }: EmployeeModalPr
 
   const handleClose = () => {
     clearSubmitError();
+    employeeForm.form.clearErrors();
+
     onClose();
   };
 

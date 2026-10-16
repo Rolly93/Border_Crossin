@@ -9,10 +9,23 @@ import { useEmployee } from "../hook/useEmployee";
 import { useEmployeeForm } from "../hook/useEmployeeForm";
 import { EmployeeTableRow } from "./EmployeeTableRow";
 import { EmployeeModal } from "./EmployeeModal";
-import { IEmployeeResponse } from "../type/employee.interface";
-import { employeeService } from "../service/EmployeeService";
+import { EmployeeType, IEmployeeResponse } from "../type/employee.interface";
 
-
+const DEFAULT_FORM_VALUES = {
+  employeeType: 'cargo' as EmployeeType,
+  firstName: '',
+  lastName: '',
+  dateOfBirth: null,
+  rfc: '',
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  isAdmin: false,
+  licenseNumber: '',
+  licenseExpiration: null,
+  gafetId: '',
+};
 
 export function EmployeeTable() {
   const { isAdmin } = useAuth();
@@ -40,13 +53,38 @@ export function EmployeeTable() {
 
   const handleOpenCreate = () => {
     setSelectedEmployee(null);
+
+    employeeForm.form.setInitialValues(DEFAULT_FORM_VALUES);
+    employeeForm.form.setValues(DEFAULT_FORM_VALUES);
+    employeeForm.form.clearErrors();
+
     openModal();
   };
-
-  const handleOpenEdit = (employee: IEmployeeResponse) => {
+  const handleOpenEdit = async (employee: IEmployeeResponse) => {
     setSelectedEmployee(employee);
-    const employeeToEdith = getEmployeeData(employee.id!, employee.role); // pending to sen the cargo
+    const employeeToEdit = await getEmployeeData(employee.id!, employee.role as EmployeeType);
+    if (!employeeToEdit) return null;
 
+    const formValues = {
+      employeeType: (employeeToEdit.role === 'operator' ? 'operador' : 'cargo') as EmployeeType,
+      firstName: employeeToEdit.firstName || '',
+      lastName: employeeToEdit.lastName || '',
+      dateOfBirth: employeeToEdit.dateOfBirth ? new Date(employeeToEdit.dateOfBirth) : null,
+      rfc: employeeToEdit.rfc || '',
+      username: employeeToEdit.username || '',
+      email: employeeToEdit.email || '',
+      password: '',
+      confirmPassword: '',
+      isAdmin: employeeToEdit.isAdmin || false,
+      licenseNumber: employeeToEdit.licenseNumber || '',
+      licenseExpiration: employeeToEdit.licenseExpiration ? new Date(employeeToEdit.licenseExpiration) : null,
+      gafetId: employeeToEdit.gafetId || '',
+    };
+
+    // Set initial values and current values together
+    employeeForm.form.setInitialValues(formValues);
+    employeeForm.form.setValues(formValues);
+    employeeForm.form.clearErrors();
 
     openModal();
   };

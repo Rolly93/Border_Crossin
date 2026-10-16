@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
+from model.db_model import Employee, User
+from sqlalchemy import and_, exists, select
+from sqlalchemy.orm import Session, joinedload
+
 from repository.base_repository import BaseRepository
-from model.db_model import User
-from sqlalchemy import and_, exists
 
 
 class UserRepository(BaseRepository[User]):
@@ -28,5 +29,13 @@ class UserRepository(BaseRepository[User]):
         db_user = self.save(data)
         return db_user
 
-    def get_user_by_id(self, user_id: int) -> User | None:
-        return self._db.query(User).filter(User.id == user_id).first()
+    def get_user_by_id(self, user_id: int) -> tuple[User, Employee]:
+        stmt = (
+            select(User, Employee)
+            .join(Employee, User.employee_id == Employee.id, isouter=True)
+            .where(User.id == user_id, Employee.still_employee.is_(True))
+        )
+        if not (result := self._db.execute(statement=stmt).first()):
+            raise ValueError(f"User with {user_id} not found")
+        user, employee = result
+        return user, employee
