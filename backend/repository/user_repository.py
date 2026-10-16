@@ -26,5 +26,7 @@ class UserRepository(BaseRepository[User]):
 
     def create_user(self, data: User) -> User:
         db_user = self.save(data)
-
         return db_user
+
+    def get_user_by_id(self, user_id: int) -> User | None:
+        return self._db.query(User).filter(User.id == user_id).first()

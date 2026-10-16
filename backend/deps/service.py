@@ -1,7 +1,8 @@
-from fastapi import Depends
 from typing import Annotated, Any
-from sqlalchemy.orm import Session
+
 from database import get_db
+from fastapi import Depends
+from sqlalchemy.orm import Session
 
 
 def get_shipment_service(db: Session = Depends(get_db)):

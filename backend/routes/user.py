@@ -1,8 +1,14 @@
-from typing import Optional, Union
-from deps.auth import get_client_ip, get_current_user, get_optional_current_user
+from typing import Annotated, Optional, Union
+
+from deps.auth import (
+    CurrentUser,
+    get_client_ip,
+    get_current_user,
+    get_optional_current_user,
+)
 from deps.service import get_user_service
-from fastapi import APIRouter, Depends, Request, status
-from schema import InitialTokenPayload, TokenPayload
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from schema import EmployeeResponseUnion, InitialTokenPayload, TokenPayload
 from schema.user_schema import (
     LoginRequest,
     LoginResponse,
@@ -31,7 +37,7 @@ async def login_post(
 )
 async def new_user(
     data: NewUser,
-    rfc: Optional[str] = None,
+    rfc: str,
     service: UserService = Depends(get_user_service),
     current_user: Optional[Union[TokenPayload, InitialTokenPayload]] = Depends(
         get_optional_current_user

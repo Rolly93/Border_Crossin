@@ -1,9 +1,7 @@
-from datetime import datetime
 from typing import Optional
-
+from datetime import datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from schema.unit_schema import AssignmentOut, UnitIn, UnitOut
 
@@ -21,15 +19,16 @@ class UnitService:
 
     # ---------- helpers ----------
     def _get_unit(self, unit_id: int) -> UnitTruck:
-        unit = self._db.get(UnitTruck, unit_id)
-        if not unit:
+        if unit := self._db.get(UnitTruck, unit_id):
             raise _error(status.HTTP_404_NOT_FOUND, "Unidad no encontrada")
         return unit
 
-    def _open_assignment(self, unit_id: int) -> Optional[UnitAssignment]:
+    def _open_assignment(self, unit_id: int) -> UnitAssignment | None:
         return (
             self._db.query(UnitAssignment)
-            .filter(UnitAssignment.unit_id == unit_id, UnitAssignment.released_at.is_(None))
+            .filter(
+                UnitAssignment.unit_id == unit_id, UnitAssignment.released_at.is_(None)
+            )
             .first()
         )
 
@@ -37,8 +36,10 @@ class UnitService:
         employee = self._db.get(Employee, driver_id)
         return f"{employee.name} {employee.last_name}" if employee else ""
 
-    def _validate_unique(self, data: UnitIn, exclude_id: Optional[int] = None) -> None:
-        number_q = self._db.query(UnitTruck).filter(UnitTruck.unit_number == data.unitNumber)
+    def _validate_unique(self, data: UnitIn, exclude_id: int | None) -> None:
+        number_q = self._db.query(UnitTruck).filter(
+            UnitTruck.unit_number == data.unitNumber
+        )
         if exclude_id:
             number_q = number_q.filter(UnitTruck.id != exclude_id)
         if number_q.first():
@@ -49,16 +50,18 @@ class UnitService:
             if exclude_id:
                 tag_q = tag_q.filter(UnitTruck.id != exclude_id)
             if tag_q.first():
-                raise _error(status.HTTP_400_BAD_REQUEST, "Ese tag ya está asignado a otra unidad")
+                raise _error(
+                    status.HTTP_400_BAD_REQUEST,
+                    "Ese tag ya está asignado a otra unidad",
+                )
 
     # ---------- queries ----------
     def get_out(self, unit_id: int) -> UnitOut:
         return next(u for u in self.list_units() if u.id == unit_id)
 
     def history_item(self, assignment_id: int) -> AssignmentOut:
-        assignment = self._db.get(UnitAssignment, assignment_id)
 
-        if not assignment:
+        if assignment := self._db.get(UnitAssignment, assignment_id):
             raise _error(status.HTTP_404_NOT_FOUND, "Asignación no encontrada")
 
         return AssignmentOut(
@@ -139,10 +142,8 @@ class UnitService:
         unit.tag_id = data.tag
 
         # Una unidad que no está activa no puede seguir ligada a un operador.
-        if data.state != ACTIVE_STATE:
-            open_a = self._open_assignment(unit_id)
-            if open_a:
-                open_a.released_at = datetime.now()
+        if data.state != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
+            open_a.released_at = datetime.now()
 
         self._db.commit()
         self._db.refresh(unit)
@@ -162,7 +163,10 @@ class UnitService:
 
         driver_busy = (
             self._db.query(UnitAssignment)
-            .filter(UnitAssignment.driver_id == driver_id, UnitAssignment.released_at.is_(None))
+            .filter(
+                UnitAssignment.driver_id == driver_id,
+                UnitAssignment.released_at.is_(None),
+            )
             .first()
         )
         if driver_busy and driver_busy.unit_id != unit_id:
@@ -172,8 +176,8 @@ class UnitService:
             )
 
         now = datetime.now()
-        previous = self._open_assignment(unit_id)
-        if previous:
+
+        if previous := self._open_assignment(unit_id):
             if previous.driver_id == driver_id:
                 return previous  # ya está asignada a este operador
             previous.released_at = now
@@ -193,6 +197,8 @@ class UnitService:
         self._get_unit(unit_id)
         open_a = self._open_assignment(unit_id)
         if not open_a:
-            raise _error(status.HTTP_409_CONFLICT, "La unidad no tiene operador asignado")
+            raise _error(
+                status.HTTP_409_CONFLICT, "La unidad no tiene operador asignado"
+            )
         open_a.released_at = datetime.now()
         self._db.commit()

@@ -1,11 +1,21 @@
-from typing import List, Optional, Union
-from fastapi import APIRouter, Depends, Query, Request, status
+from typing import Annotated, List, Optional, Union
 
-from schema.employee_schema import EmployeeRequest, OperatorOption, PaginatedEmployeeResponse
-from schema import TokenPayload, InitialTokenPayload
-from deps.auth import CurrentUser, get_client_ip, get_current_user, get_optional_current_user
-from deps.service import get_user_service, EmployeeSvc
+from deps.auth import (
+    CurrentUser,
+    get_client_ip,
+    get_current_user,
+    get_optional_current_user,
+)
+from deps.service import EmployeeSvc, get_user_service
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from schema import EmployeeResponseUnion, InitialTokenPayload, TokenPayload
+from schema.employee_schema import (
+    EmployeeRequest,
+    OperatorOption,
+    PaginatedEmployeeResponse,
+)
 from utility.employee_service import EmployeeService
+from utility.user_service import UserService
 
 router = APIRouter(prefix="/employees", tags=["employee"])
 
@@ -39,7 +49,7 @@ async def register_employee(
     ),
 ):
     ip = get_client_ip(rq)
-    new_employee = service.register_employee(
+    new_employee = service.register_employee_service(
         data=data, ip=ip, current_user=current_user
     )
     return new_employee
@@ -70,3 +80,24 @@ async def resgister_driver(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     pass
+
+
+@router.get(
+    "/{id}",
+    summary="Get Employee by ID",
+    status_code=status.HTTP_200_OK,
+    response_model=EmployeeResponseUnion,
+)
+async def get_employee_data(
+    rq: Request,
+    id: int,
+    cargoType: str = Query(..., description="Type of employee: 'cargo' or 'operador'"),
+    service: UserService = Depends(get_user_service),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    if cargoType not in {"cargo", "operador"}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid cargoType. Must be 'cargo' or 'operador'.",
+        )
+    return service.get_employee_info(id=id, cargoType=cargoType)

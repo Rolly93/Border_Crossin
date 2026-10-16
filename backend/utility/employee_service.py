@@ -1,14 +1,8 @@
 from datetime import date, timedelta
-from typing import Optional, Union
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from stdnum.mx import rfc as rfc_validator
-
-from schema.cargo_schema import CargoRequest
 from model.db_model import DriverDetails, Employee, User
-from utility.user_service import UserService
-from repository import EmployeeRepository, UserRepository, DriverRepository
+from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.employee_schema import (
     EmployeeListItem,
     EmployeeRequest,
@@ -16,6 +10,8 @@ from schema.employee_schema import (
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
+from sqlalchemy.orm import Session
+from stdnum.mx import rfc as rfc_validator
 
 
 class EmployeeService:
@@ -36,6 +32,9 @@ class EmployeeService:
                 detail=f"Invalid RFC format: {rfc_value}",
             )
         return clean_rfc
+
+    def get_driver_by_id(self, id: int) -> DriverDetails:
+        return self._driver_repo.get_by_id(id)
 
     def get_all_employees(
         self, page: int = 1, limit: int = 10
@@ -63,6 +62,7 @@ class EmployeeService:
 
     def _validate_account(self, data: EmployeeRequest) -> None:
         """Valida todo antes de crear el empleado, para no dejar registros a medias."""
+        print(data)
         if data.employeeType == "cargo":
             # Database validations (repo checks)
             if self._user_repo.get_username(data.username.strip()):
@@ -104,6 +104,8 @@ class EmployeeService:
         self, employee: Employee, data: EmployeeRequest, current_user
     ) -> None:
         if data.employeeType == "cargo":
+            from utility.user_service import UserService
+
             self._db.add(
                 User(
                     username=data.username.strip(),
@@ -149,11 +151,11 @@ class EmployeeService:
         self._employee_repo.create_employee(new_employee)
         return new_employee
 
-    def register_employee(
+    def register_employee_service(
         self,
         data: EmployeeRequest,
         ip: str,
-        current_user: Optional[Union[TokenPayload, InitialTokenPayload]],
+        current_user: TokenPayload | InitialTokenPayload,
     ) -> dict:
 
         has_users = bool(self._user_repo.get_all_users())

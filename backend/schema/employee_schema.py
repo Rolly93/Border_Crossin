@@ -1,10 +1,34 @@
-from typing import Literal, Optional
-from pydantic import BaseModel, EmailStr
 from datetime import date
+from typing import Annotated, Literal, Optional, Union
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class EmployeeBase(BaseModel):
     id: int | None = None
+
+
+class EmployeeBaseRequest(BaseModel):
+    firstName: str
+    lastName: str
+    role: str
+    rfc: str
+    dateOfBirth: date
+
+
+class EmployeeUserRequest(EmployeeBaseRequest):
+    employeeType: Literal["cargo"] = "cargo"
+    username: str
+    email: str
+    password: str
+    isAdmin: bool
+
+
+class EmployeeDriverRequest(EmployeeBaseRequest):
+    employeeType: Literal["operador"] = "operador"
+    licenseNumber: str
+    licenseExpiration: date
+    gafetId: Optional[str] = None
 
 
 class EmployeeRequest(EmployeeBase):
@@ -15,7 +39,7 @@ class EmployeeRequest(EmployeeBase):
     dateOfBirth: date
     employeeType: Literal["cargo", "operador"] = "cargo"
     # Cargo: cuenta de usuario
-    username: Optional[str] = None
+    username: str | None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
     isAdmin: bool = False
@@ -46,3 +70,22 @@ class PaginatedEmployeeResponse(BaseModel):
     hasNextPage: bool
     page: int
     limit: int
+
+
+class EmployeeUserResponse(EmployeeUserRequest):
+    id: int
+
+
+class EmployeeDriverResponse(EmployeeDriverRequest):
+    id: int
+
+
+EmployeeResponseUnion = Annotated[
+    EmployeeUserResponse | EmployeeDriverResponse,
+    Field(discriminator="employeeType"),
+]
+
+EmployeeCreateUnion = Annotated[
+    EmployeeUserRequest | EmployeeDriverRequest,
+    Field(discriminator="employeeType"),
+]

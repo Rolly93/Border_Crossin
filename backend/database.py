@@ -13,10 +13,12 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.orm import sessionmaker
+from config import Env
 
 load_dotenv()
+env = Env()
 
-DEFAULT_SQLITE_PATH = "./bordercrossing.db"
+DEFAULT_SQLITE_PATH = env.DATABASE_URL
 SUPPORTED_BACKENDS = ("sqlite", "mysql", "postgres", "supabase")
 
 

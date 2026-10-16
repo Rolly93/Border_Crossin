@@ -1,17 +1,23 @@
-from typing import Optional, Union
+from datetime import timedelta
+from typing import Literal, Optional, Union
 
 import bcrypt
-from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
-from stdnum.mx import rfc as rfc_validator
-
 from config.config import Env
+from fastapi import HTTPException, status
 from model.db_model import User
 from repository import EmployeeRepository, UserRepository
+from schema.employee_schema import (
+    EmployeeDriverResponse,
+    EmployeeResponseUnion,
+    EmployeeUserResponse,
+)
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from schema.user_schema import LoginRequest, NewUser
 from service.jwt_service import JWTService
-from datetime import timedelta
+from sqlalchemy.orm import Session
+from stdnum.mx import rfc as rfc_validator
+
+from utility.employee_service import EmployeeService
 
 DUMMY_HASH = "$2b$12$eImiTXuWVxfM37uY4JANjO5E.5R0zJqfG8R6zG1yQ4rZ2gYxK.6Ce"
 
@@ -23,6 +29,7 @@ class UserService:
         self._db = db
         self._user_repo = UserRepository(db)
         self._employee_repo = EmployeeRepository(db)
+        self._employee_service = EmployeeService(db)
         self.jwt = JWTService()
 
     @staticmethod
@@ -154,3 +161,29 @@ class UserService:
             "detail": "User created successfully",
             "email": created_user.email,
         }
+
+    def get_employee_info(
+        self, id: int, cargoType: Literal["cargo", "operador"]
+    ) -> EmployeeResponseUnion:
+        em_re = None
+
+        if cargoType == "cargo":
+            em_re = self._user_repo.get_user_by_id(id)
+            return EmployeeUserResponse(
+                id=em_re.id,
+                username=em_re.username,
+                email=em_re.email,
+                isAdmin=em_re.is_admin,
+                employeeId=em_re.employee_id,
+            )
+
+        if cargoType == "operador":
+            em_re = self._employee_service.get_driver_by_id(id)
+            return EmployeeDriverResponse(
+                id=em_re.id,
+                licenseNumber=em_re.license_number,
+                expirationDate=em_re.expiration_date,
+                gafetId=em_re.gafet_id,
+            )
+
+        return em_re

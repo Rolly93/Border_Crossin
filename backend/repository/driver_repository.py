@@ -1,13 +1,9 @@
-from typing import List, Optional
-from enum import Enum
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload, joinedload
 from fastapi import HTTPException, status
-
-from schema.cargo_schema import DriverDetailsResponse
 from model.db_model import DriverDetails, Employee
-from repository.base_repository import BaseRepository
+from sqlalchemy.orm import Session
+
 from repository import EmployeeRepository
+from repository.base_repository import BaseRepository
 
 
 class DriverRepository(BaseRepository[DriverDetails]):
@@ -15,13 +11,14 @@ class DriverRepository(BaseRepository[DriverDetails]):
         super().__init__(db, DriverDetails)
         self.employee_repo = EmployeeRepository(db)
 
-    def get_by_id(self, id_val: int) -> DriverDetails:
-        driver = (
-            self._db.query(DriverDetails)
-            .filter(self._model.employee_id == id_val)
-            .first()
-        )
-        if not driver:
+    def get_by_id(self, id_val: int) -> DriverDetails | None:
+        if not (
+            driver := (
+                self._db.query(DriverDetails)
+                .filter(self._model.employee_id == id_val)
+                .first()
+            )
+        ):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Operador no esta en la Base de datos",
