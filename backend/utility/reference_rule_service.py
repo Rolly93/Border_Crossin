@@ -51,7 +51,9 @@ class ReferenceRuleService:
             .where(or_(has_rule_for_op, ~has_any_rule))
             .order_by(Client.name)
         )
-        return [{"id": row.id, "name": row.name} for row in self._db.execute(stmt).all()]
+        return [
+            {"id": row.id, "name": row.name} for row in self._db.execute(stmt).all()
+        ]
 
     def validate(self, client_id: int, operation: str, reference: str) -> None:
         rules = self.rules_for_client(client_id)
@@ -68,13 +70,15 @@ class ReferenceRuleService:
 
         ref = (reference or "").strip().lower()
         for rule in op_rules:
-            length_ok = rule.reference_length is None or len(ref) == rule.reference_length
+            length_ok = (
+                rule.reference_length is None or len(ref) == rule.reference_length
+            )
             if ref.startswith(rule.prefix.lower()) and length_ok:
                 return
 
         prefixes = " o ".join(sorted({r.prefix.upper() for r in op_rules}))
         lengths = {r.reference_length for r in op_rules if r.reference_length}
-        message = f'La referencia debe empezar con {prefixes}'
+        message = f"La referencia debe empezar con {prefixes}"
         if lengths:
             message += f" y tener {lengths.pop()} caracteres"
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)

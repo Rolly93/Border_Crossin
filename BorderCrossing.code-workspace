@@ -1,0 +1,27 @@
+{
+    "folders": [
+        {
+            "name": "Backend (Python)",
+            "path": "backend"
+        },
+        {
+            "name": "Frontend",
+            "path": "Frontend"
+        },
+        {
+            "name": "Docker & Configs",
+            "path": ".",
+            "settings": {
+                "files.exclude": {
+                    "**/backend": true,
+                    "**/Frontend": true
+                }
+            }
+        }
+    ],
+    "settings": {
+        "python.analysis.extraPaths": [
+            "${workspaceFolder:Backend (Python)}"
+        ]
+    }
+}

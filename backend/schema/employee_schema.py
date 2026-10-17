@@ -25,15 +25,14 @@ class EmployeeRequestDash(EmployeeBaseRequest):
 
 
 class EmployeeUserRequest(EmployeeBaseRequest):
-    employeeType: Literal["csr"] = "csr"
-    username: str
+    role: Literal["csr"] = Field("csr", validation_alias="employeeType")    username: str
     email: str
     password: str
     isAdmin: bool
 
 
 class EmployeeDriverRequest(EmployeeBaseRequest):
-    employeeType: Literal["operador"] = "operador"
+    role: Literal["operador"] = Field("operador", validation_alias="employeeType")
     licenseNumber: str
     licenseExpiration: date
     gafetId: Optional[str] = None

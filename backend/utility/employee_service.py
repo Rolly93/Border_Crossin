@@ -9,7 +9,6 @@ from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.employee_schema import (
     EmployeeCreateUnion,
     EmployeeListItem,
-    EmployeeRequest,
     EmployeeRequestDash,
     PaginatedEmployeeResponse,
 )
@@ -77,7 +76,8 @@ class EmployeeService:
 
     def _validate_account(self, data: EmployeeCreateUnion) -> None:
         """Valida todo antes de crear el empleado, para no dejar registros a medias."""
-        if data.employeeType == "cargo":
+        print(data)
+        if data.employeeType == "csr" or data.role == "csr":
             # Database validations (repo checks)
             if self._user_repo.get_username(data.username.strip()):
                 raise HTTPException(
@@ -120,7 +120,7 @@ class EmployeeService:
         data: EmployeeCreateUnion,
         current_user: TokenPayload | InitialTokenPayload,
     ) -> None:
-        if data.employeeType == "cargo":
+        if data.employeeType == "csr":
             from utility.user_service import UserService
 
             self._db.add(
@@ -144,7 +144,7 @@ class EmployeeService:
             )
         self._db.commit()
 
-    def list_operators(self) -> list[dict]:
+    def list_operators(self) -> list[dict[str, str | int]]:
         drivers = self._driver_repo.get_drivers_list()
 
         return drivers
@@ -177,7 +177,7 @@ class EmployeeService:
 
         has_users = bool(self._user_repo.get_all_users())
 
-        if not current_user and not has_users:
+        if not current_user.is_admin and not has_users:
             new_employee = self.create_employee(data)
             initial_token = self.jwt.create_access_token(
                 sub=data.rfc,

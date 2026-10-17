@@ -12,7 +12,6 @@ from schema import EmployeeResponseUnion, InitialTokenPayload, TokenPayload
 from schema.employee_schema import (
     EmployeeBaseRequest,
     EmployeeRequest,
-    EmployeeUserRequest,
     OperatorOption,
     PaginatedEmployeeResponse,
 )
@@ -50,6 +49,7 @@ async def register_employee(
         get_optional_current_user
     ),
 ):
+
     ip = get_client_ip(rq)
     new_employee = service.register_employee_service(
         data=data, ip=ip, current_user=current_user

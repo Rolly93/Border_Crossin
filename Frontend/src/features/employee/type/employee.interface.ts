@@ -29,7 +29,7 @@ export interface EmployeeFormProps {
 }
 
 /** Tipo de empleado: cargo (tiene cuenta de usuario) u operador (tiene licencia y unidad). */
-export type EmployeeType = "cargo" | "operador";
+export type EmployeeType = "csr" | "operador";
 
 /** Payload que envía el formulario "Nuevo empleado" al endpoint POST /employees/create. */
 export interface INewEmployeeRequest {

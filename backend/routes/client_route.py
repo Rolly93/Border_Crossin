@@ -1,20 +1,20 @@
 from typing import List
 
-from sqlalchemy.orm import Session
-
+from database import get_db
+from deps.auth import CurrentUser, get_current_user, require_admin
+from deps.service import ClientSvc, get_client_service
 from fastapi import APIRouter, Depends, Query, status
+from schema import ClientRequest
 from schema.client_schema import (
+    ClientNameResponse,
+    ClientOptionResponse,
     MetricsClientResponse,
     PaginatedClientResponse,
-    ClientOptionResponse,
+    ReferenceRuleOut,
 )
-from deps.service import ClientSvc, get_client_service
-from deps.auth import CurrentUser, get_current_user, require_admin
-from schema import ClientRequest
+from sqlalchemy.orm import Session
 from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
-from database import get_db
-from schema.client_schema import ClientNameResponse, ReferenceRuleOut
 
 router = APIRouter(
     prefix="/client", tags=["client"], dependencies=[Depends(get_current_user)]
@@ -106,7 +106,11 @@ async def update_client(
     return service.update_client_info(client_id=client_id, data=data)
 
 
-@router.delete("/delete/{client_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(require_admin)])
+@router.delete(
+    "/delete/{client_id}",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_admin)],
+)
 async def delete(
     client_id: int,
     service: ClienteService = Depends(get_client_service),
@@ -115,7 +119,11 @@ async def delete(
     return deleted_client
 
 
-@router.put("/reactive/{client_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(require_admin)])
+@router.put(
+    "/reactive/{client_id}",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(require_admin)],
+)
 async def reactive(
     client_id: int,
     service: ClienteService = Depends(get_client_service),

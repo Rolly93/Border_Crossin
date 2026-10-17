@@ -25,7 +25,7 @@ class DriverRepository(BaseRepository[DriverDetails]):
             )
         return driver
 
-    def get_drivers_list(self):
+    def get_drivers_list(self) -> list[dict[str, str | int]]:
 
         drivers = (
             self._db.query(DriverDetails)
