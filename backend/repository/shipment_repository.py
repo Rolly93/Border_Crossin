@@ -1,11 +1,11 @@
-from datetime import datetime, timezone
-from typing import List
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 from model.db_model import ShipmentAssign, ShipmentEventModel
-from schema.shipment_shcema import ShipmentUpdate
 from repository.base_repository import BaseRepository
+from schema.shipment_shcema import ShipmentUpdate
 
 
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
@@ -14,6 +14,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
 
         self._db_shipment_event = ShipmentEventModel
         self._db = db
+
     def get_by_tracking(self, tracking_number: str) -> ShipmentAssign | None:
         return (
             self._db.query(ShipmentAssign)
@@ -28,7 +29,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
 
         for event in shipment_to_inactive.events:
             event.is_active = False
-            event.last_modify = datetime.now(timezone.utc)
+            event.last_modify = datetime.now(tz=UTC)
             event.capture_by_id = who_deleted
 
         self.save(shipment_to_inactive)
@@ -49,9 +50,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             )
         return shipment_id
 
-    def update_shipment(
-        self, id: int, shipment_data: ShipmentUpdate, user_id: int
-    ):
+    def update_shipment(self, id: int, shipment_data: ShipmentUpdate, user_id: int):
         shipment = self.get_shipment(id)
 
         column_map = {"cliente": "client_id"}
@@ -89,7 +88,9 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             self._db.refresh(event)
         return shipment, new_events
 
-    def get_all_shipments(self, page: int = 1, limit: int = 10) -> tuple[List[ShipmentAssign], int]:
+    def get_all_shipments(
+        self, page: int = 1, limit: int = 10
+    ) -> tuple[list[ShipmentAssign], int]:
         query = self._db.query(ShipmentAssign)
         total = query.count()
         shipments = query.offset((page - 1) * limit).limit(limit).all()

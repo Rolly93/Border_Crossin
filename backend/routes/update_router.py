@@ -1,10 +1,11 @@
 import os
-import sys
 import shutil
+import sys
 import zipfile
-import requests
+from typing import Any, Dict
 from urllib.parse import urlparse
-from typing import Dict, Any
+
+import requests
 from fastapi import APIRouter, HTTPException, status
 from fastapi_utils.cbv import cbv
 
@@ -21,7 +22,7 @@ class MultiCompanyUpdater:
         self._STATIC_DIR: str = os.path.join(self._BASE_DIR, "static")
 
     @router.get("/api/v1/check")
-    async def check_update(self, company_id: str = "default") -> Dict[str, Any]:
+    async def check_update(self, company_id: str = "default") -> dict[str, Any]:
         """Queries Firebase or custom Remote Config based on Company Tenant ID."""
         try:
             # Query remote config endpoint or a lightweight JSON manifest hosted on CDN
@@ -56,7 +57,11 @@ class MultiCompanyUpdater:
             )
 
         parsed_url = urlparse(download_url)
-        trusted_hosts = {"your-app.web.app", "storage.googleapis.com", "firebasestorage.googleapis.com"}
+        trusted_hosts = {
+            "your-app.web.app",
+            "storage.googleapis.com",
+            "firebasestorage.googleapis.com",
+        }
 
         if (
             parsed_url.scheme != "https"

@@ -1,9 +1,8 @@
-from typing import Any, List
+from sqlalchemy import distinct, func, select
 from sqlalchemy.orm import Session
 
-from repository.base_repository import BaseRepository
-from sqlalchemy import distinct, func, select
 from model.db_model import ClientEmailRecipient
+from repository.base_repository import BaseRepository
 
 
 class EmailRepository(BaseRepository[ClientEmailRecipient]):
@@ -11,7 +10,7 @@ class EmailRepository(BaseRepository[ClientEmailRecipient]):
         super().__init__(db, ClientEmailRecipient)
         self._db = db
 
-    def get_all_email_data(self) -> List[ClientEmailRecipient]:
+    def get_all_email_data(self) -> list[ClientEmailRecipient]:
         email_data = (
             self._db.query(ClientEmailRecipient)
             .where(ClientEmailRecipient.is_active == True)
@@ -19,7 +18,7 @@ class EmailRepository(BaseRepository[ClientEmailRecipient]):
         )
         return email_data
 
-    def sync_client_emails(self, client_id: int, emails: str | List[str]):
+    def sync_client_emails(self, client_id: int, emails: str | list[str]):
         incoming_emails = set([emails] if isinstance(emails, str) else emails)
 
         existing_records = (
@@ -55,8 +54,11 @@ class EmailRepository(BaseRepository[ClientEmailRecipient]):
 
     def count_clients_with_active_email(self) -> int:
         """Clientes (no correos) con al menos un correo activo."""
-        return self._db.scalar(
-            select(func.count(distinct(ClientEmailRecipient.client_id))).where(
-                ClientEmailRecipient.is_active == True
+        return (
+            self._db.scalar(
+                select(func.count(distinct(ClientEmailRecipient.client_id))).where(
+                    ClientEmailRecipient.is_active == True
+                )
             )
-        ) or 0
+            or 0
+        )

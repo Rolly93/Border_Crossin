@@ -1,13 +1,14 @@
-from typing import Any, List
+from typing import Any
 
+from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from deps.auth import decrypt_password, encrypt_password
+from model.db_model import SftpSend, SftpService, ShipmentAssign, ShipmentEventModel
 from repository.base_repository import BaseRepository
-from model.db_model import SftpService, SftpSend, ShipmentAssign, ShipmentEventModel
-from schema import SftpResponse, SftpConfiRequst, SftpConfigurationRequest
+from schema import SftpConfigurationRequest, SftpConfiRequst
 from schema.sftp_schema import SftpConfigIn
-from deps.auth import encrypt_password, decrypt_password
 
 
 class SftpRepository(BaseRepository[SftpService]):
@@ -34,11 +35,19 @@ class SftpRepository(BaseRepository[SftpService]):
             encrypted_password=decrypt_password(raw_sftp_config.encrypted_password),
         )
 
-    def update(self, id_sftp: str | int, sftp_data: BaseModel) -> SftpService | None:
-        return super().update(id_sftp, sftp_data)
+    def update(
+        self, id_val: str | int, obj_in: BaseModel | dict[str, Any]
+    ) -> SftpService:
+        db_obj = super().update(id_val, obj_in)
 
-    def get_all_sftp_data(self) -> List[SftpService]:
-        sftp_data = (
+        if not db_obj:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Connection not Found"
+            )
+        return db_obj
+
+    def get_all_sftp_data(self) -> list[SftpService]:
+        sftp_data: list[SftpService] = (
             self._db.query(SftpService).filter(SftpService.is_active.is_(True)).all()
         )
         return sftp_data
@@ -55,22 +64,30 @@ class SftpRepository(BaseRepository[SftpService]):
         client_id: int | None = None,
         reference: str | None = None,
         status: str | None = None,
-    ) -> List[SftpSend]:
+    ) -> list[SftpSend]:
         query = (
             self._db.query(SftpSend)
             .join(SftpService, SftpSend.sent_to == SftpService.id)
-            .join(ShipmentEventModel, SftpSend.shipment_event_id == ShipmentEventModel.id)
-            .join(ShipmentAssign, ShipmentEventModel.trip_assigned_id == ShipmentAssign.id)
+            .join(
+                ShipmentEventModel, SftpSend.shipment_event_id == ShipmentEventModel.id
+            )
+            .join(
+                ShipmentAssign, ShipmentEventModel.trip_assigned_id == ShipmentAssign.id
+            )
         )
         if client_id is not None:
             query = query.filter(SftpService.client_id == client_id)
         if reference:
-            query = query.filter(ShipmentAssign.customer_tracking.icontains(reference.strip(), autoescape=True))
+            query = query.filter(
+                ShipmentAssign.customer_tracking.icontains(
+                    reference.strip(), autoescape=True
+                )
+            )
         if status:
             query = query.filter(SftpSend.status == status)
         return query.order_by(SftpSend.id.desc()).all()
 
-    def get_sends_by_ids(self, send_ids: List[int]) -> List[SftpSend]:
+    def get_sends_by_ids(self, send_ids: list[int]) -> list[SftpSend]:
         return self._db.query(SftpSend).filter(SftpSend.id.in_(send_ids)).all()
 
     def get_active_config(self, client_id: int) -> SftpService | None:

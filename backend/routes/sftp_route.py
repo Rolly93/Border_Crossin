@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -16,14 +14,14 @@ router = APIRouter(
 
 
 class ResendRequest(BaseModel):
-    send_ids: List[int] = Field(min_length=1)
+    send_ids: list[int] = Field(min_length=1)
 
 
 @router.get("/sends")
 def list_sends(
-    client_id: Optional[int] = Query(default=None),
-    reference: Optional[str] = Query(default=None),
-    status_filter: Optional[str] = Query(default=None, alias="status"),
+    client_id: int | None = Query(default=None),
+    reference: str | None = Query(default=None),
+    status_filter: str | None = Query(default=None, alias="status"),
     db: Session = Depends(get_db),
 ):
     return SftpSendService(db).list_sends(client_id, reference, status_filter)

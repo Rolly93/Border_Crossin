@@ -1,9 +1,8 @@
 import logging
-from typing import List
 
 from sqlalchemy.orm import Session
 
-from model.db_model import ShipmentEventModel, SftpSend
+from model.db_model import SftpSend, ShipmentEventModel
 from schema.sftp_schema import SftpConfigurationRequest
 from service.sftp_sender import send_batch
 
@@ -23,8 +22,8 @@ class ShipmentDispatchService:
         self._config = sftp_config
         self._scac = scac
 
-    def dispatch_events(self, events: List[ShipmentEventModel]) -> List[SftpSend]:
-        sends: List[SftpSend] = []
+    def dispatch_events(self, events: list[ShipmentEventModel]) -> list[SftpSend]:
+        sends: list[SftpSend] = []
         for event in events:
             # Regla existente: solo se envían eventos con comentario.
             if event.notes is None:

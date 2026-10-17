@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -18,14 +16,14 @@ class SftpSendService:
 
     def list_sends(
         self,
-        client_id: Optional[int] = None,
-        reference: Optional[str] = None,
-        status_filter: Optional[str] = None,
-    ) -> List[dict]:
+        client_id: int | None,
+        reference: str | None,
+        status_filter: str | None,
+    ) -> list[dict]:
         rows = self._repo.list_sends(client_id, reference, status_filter)
         return [self._to_dict(row) for row in rows]
 
-    def resend(self, send_ids: List[int]) -> List[dict]:
+    def resend(self, send_ids: list[int]) -> list[dict]:
         scac = SystemConfigRepository(self._db).get_scac()
         if not scac:
             raise HTTPException(
@@ -50,7 +48,7 @@ class SftpSendService:
                 detail=f"Solo se reenvían envíos fallidos. No reenviables: {not_failed}",
             )
 
-        groups: dict[int, List[SftpSend]] = {}
+        groups: dict[int, list[SftpSend]] = {}
         for send in sends:
             groups.setdefault(send.sent_to, []).append(send)
 

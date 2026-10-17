@@ -47,7 +47,7 @@ interface UseEmployeeFormOptions {
 }
 
 const initialValues: EmployeeFormValues = {
-  employeeType: 'cargo',
+  employeeType: 'csr',
   firstName: '',
   lastName: '',
   dateOfBirth: null,
@@ -78,7 +78,7 @@ export function useEmployeeForm({
   const getInitialValues = (): EmployeeFormValues => {
     if (!initialEmployee) {
       return {
-        employeeType: 'cargo',
+        employeeType: 'csr',
         firstName: '',
         lastName: '',
         dateOfBirth: null,
@@ -129,7 +129,7 @@ export function useEmployeeForm({
       if (!rfc) errors.rfc = 'Requerido';
       else if (!RFC_PATTERN.test(rfc)) errors.rfc = 'RFC con formato inválido';
 
-      if (values.employeeType === 'cargo') {
+      if (values.employeeType === 'csr') {
         if (values.username.trim().length < 3) errors.username = 'Mínimo 3 caracteres';
         if (!EMAIL_PATTERN.test(values.email.trim())) errors.email = 'Correo inválido';
 
@@ -160,7 +160,7 @@ export function useEmployeeForm({
       rfc: values.rfc.trim().toUpperCase(),
       role: values.employeeType === 'operador' ? 'operator' : 'csr',
       employeeType: values.employeeType,
-    }; if (values.employeeType === 'cargo') {
+    }; if (values.employeeType === 'csr') {
       const payload: any = {
         ...base,
         username: values.username.trim(),

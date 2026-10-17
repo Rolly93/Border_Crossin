@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -16,6 +16,13 @@ class EmployeeBaseRequest(BaseModel):
     dateOfBirth: date
 
 
+class BoosttrapAdmin(BaseModel):
+    status: str
+    detail: str
+    token: str
+    name: str
+
+
 class EmployeeRequestDash(EmployeeBaseRequest):
     id: int
     status: str
@@ -25,17 +32,18 @@ class EmployeeRequestDash(EmployeeBaseRequest):
 
 
 class EmployeeUserRequest(EmployeeBaseRequest):
-    role: Literal["csr"] = Field("csr", validation_alias="employeeType")    username: str
+    employeeType: Literal["csr"] = "csr"
+    username: str
     email: str
     password: str
     isAdmin: bool
 
 
 class EmployeeDriverRequest(EmployeeBaseRequest):
-    role: Literal["operador"] = Field("operador", validation_alias="employeeType")
+    employeeType: Literal["operador"] = "operador"
     licenseNumber: str
     licenseExpiration: date
-    gafetId: Optional[str] = None
+    gafetId: str
 
 
 class EmployeeRequest(EmployeeBase):
@@ -47,13 +55,13 @@ class EmployeeRequest(EmployeeBase):
     employeeType: Literal["csr", "operador"] = "csr"
     # Cargo: cuenta de usuario
     username: str | None
-    email: Optional[EmailStr] = None
-    password: Optional[str] = None
+    email: EmailStr | None
+    password: str | None
     isAdmin: bool = False
     # Operador: licencia y gafete
-    licenseNumber: Optional[str] = None
-    licenseExpiration: Optional[date] = None
-    gafetId: Optional[str] = None
+    licenseNumber: str | None
+    licenseExpiration: date | None
+    gafetId: str | None
 
 
 class OperatorOption(BaseModel):

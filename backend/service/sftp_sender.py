@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -40,7 +39,7 @@ def build_event_xml(send: SftpSend, scac: str, root_folder: str) -> str:
 def send_batch(
     db: Session,
     config: SftpConfigurationRequest,
-    sends: List[SftpSend],
+    sends: list[SftpSend],
     scac: str,
 ) -> None:
     """Genera el XML si falta, lo sube por una sola conexión y actualiza cada envío."""
@@ -84,6 +83,9 @@ def _send_one(
             db.commit()
             logger.warning(
                 "Envío %s falló (intento %s/%s): %s",
-                send.id, attempt + 1, total_attempts, send.sftp_log,
+                send.id,
+                attempt + 1,
+                total_attempts,
+                send.sftp_log,
             )
             sftp.close()

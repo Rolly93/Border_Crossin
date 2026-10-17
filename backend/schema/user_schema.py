@@ -1,6 +1,4 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
@@ -17,18 +15,18 @@ class NewUser(UserBase):
     password: str
     role: str
     isAdmin: bool = False
-    ref: str = None
+    rfc: str
 
 
 class UserModel(UserBase):
-    id: Optional[int] = None
+    id: int | None
     status: str = "active"
 
 
 class NewUserResponse(BaseModel):
     status: str = "success"
     detail: str
-    token: Optional[str] = None
+    token: str | None
 
 
 class LoginResponse(BaseModel):

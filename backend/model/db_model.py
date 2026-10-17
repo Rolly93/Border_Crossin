@@ -87,7 +87,7 @@ class DriverDetails(Base):
     license_number: Mapped[str] = mapped_column(String(50), unique=True)
     expiration_date: Mapped[date] = mapped_column(Date, nullable=False)
     hire_by: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
-    gafet_id: Mapped[Optional[str]] = mapped_column(
+    gafet_id: Mapped[str] = mapped_column(
         String(24), nullable=True, unique=True, default="N/A"
     )
 

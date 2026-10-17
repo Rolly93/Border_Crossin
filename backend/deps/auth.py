@@ -65,9 +65,9 @@ def get_current_user(
 
 def get_optional_current_user(
     rq: Request,
-    authorization: Optional[str] = Header(None),
-    token: Optional[str] = Query(None),
-) -> Optional[Union[TokenPayload, InitialTokenPayload]]:
+    authorization: str | None = Header(None),
+    token: str | None = Query(None),
+) -> TokenPayload | InitialTokenPayload | None:
     jwt_token = jwt_service.extract_token_from_header(authorization) or token
 
     if not jwt_token or jwt_token.strip().lower() in ("undefined", "null", "none", ""):
@@ -79,13 +79,12 @@ def get_optional_current_user(
         return None
 
 
-CurrentUser = Annotated[
-    Union[TokenPayload, InitialTokenPayload], Depends(get_current_user)
-]
+CurrentUser = Annotated[TokenPayload | InitialTokenPayload, Depends(get_current_user)]
 OptionalCurrentUser = Annotated[
-    Optional[Union[TokenPayload, InitialTokenPayload]],
+    TokenPayload | InitialTokenPayload | None,
     Depends(get_optional_current_user),
 ]
+
 
 def require_admin(current_user: CurrentUser):
     if not getattr(current_user, "is_admin", False):

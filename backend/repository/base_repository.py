@@ -1,7 +1,9 @@
-from typing import Any, Generic, Optional, Protocol, Type, TypeVar
-from sqlalchemy.orm import Session
+from typing import Any, Generic, Protocol, TypeVar
+
+from fastapi import HTTPException , status
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 
 class HasID(Protocol):
@@ -12,7 +14,7 @@ T = TypeVar("T", bound=HasID)
 
 
 class BaseRepository(Generic[T]):
-    def __init__(self, db: Session, model: Type[T]):
+    def __init__(self, db: Session, model: type[T]):
         self._db = db
         self._model = model
 
@@ -30,14 +32,17 @@ class BaseRepository(Generic[T]):
         self._db.delete(instance)
         self._db.commit()
 
-    def get_by_id(self, id_val: str | int) -> Optional[T]:
-        return self._db.query(self._model).filter(self._model.id == id_val).first()
+    def get_by_id(self, id_val: str | int) -> T | None:
+        if not (id:=self._db.query(self._model).filter(self._model.id == id_val).first())
+            raise HTTPException(
+                            status_code=status.HTTP_404_NOT_FOUND,
+                            detail="No se Encontro",
+                        )
+        return id
 
-    def update(
-        self, id_val: str | int, obj_in: BaseModel | dict[str, Any]
-    ) -> Optional[T]:
+    def update(self, id_val: str | int, obj_in: BaseModel | dict[str, Any]) -> T | None:
         db_obj = self.get_by_id(id_val)
-        if not db_obj:
+        if not (db_obj := self.get_by_id(id_val)):
             return None
 
         if isinstance(obj_in, BaseModel):

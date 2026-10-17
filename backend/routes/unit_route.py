@@ -22,7 +22,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[UnitOut], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[UnitOut], status_code=status.HTTP_200_OK)
 async def list_units(service: UnitSvc):
 
     return service.list_units()
@@ -36,7 +36,7 @@ async def list_units(service: UnitSvc):
 )
 async def create_unit(data: UnitIn, service: UnitSvc):
     unit = service.create(data)
-    return service.get_out(unit.id)
+    return service.get_out(unit_id=unit.id)
 
 
 @router.put(
@@ -80,7 +80,7 @@ async def release_driver(unit_id: int, service: UnitSvc):
 
 @router.get(
     "/{unit_id}/history",
-    response_model=List[AssignmentOut],
+    response_model=list[AssignmentOut],
     status_code=status.HTTP_200_OK,
 )
 async def unit_history(unit_id: int, service: UnitSvc):

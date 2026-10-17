@@ -19,7 +19,7 @@ class UnitService:
 
     # ---------- helpers ----------
     def _get_unit(self, unit_id: int) -> UnitTruck:
-        if unit := self._db.get(UnitTruck, unit_id):
+        if not (unit := self._db.get(UnitTruck, unit_id)):
             raise _error(status.HTTP_404_NOT_FOUND, "Unidad no encontrada")
         return unit
 
@@ -36,7 +36,7 @@ class UnitService:
         employee = self._db.get(Employee, driver_id)
         return f"{employee.name} {employee.last_name}" if employee else ""
 
-    def _validate_unique(self, data: UnitIn, exclude_id: int | None) -> None:
+    def _validate_unique(self, data: UnitIn, exclude_id: int | None = None) -> None:
         number_q = self._db.query(UnitTruck).filter(
             UnitTruck.unit_number == data.unitNumber
         )
@@ -61,7 +61,7 @@ class UnitService:
 
     def history_item(self, assignment_id: int) -> AssignmentOut:
 
-        if assignment := self._db.get(UnitAssignment, assignment_id):
+        if not (assignment := self._db.get(UnitAssignment, assignment_id)):
             raise _error(status.HTTP_404_NOT_FOUND, "Asignación no encontrada")
 
         return AssignmentOut(
@@ -120,7 +120,7 @@ class UnitService:
 
     # ---------- commands ----------
     def create(self, data: UnitIn) -> UnitTruck:
-        self._validate_unique(data)
+        self._validate_unique(data=data)
         unit = UnitTruck(
             plates=data.plates,
             unit_number=data.unitNumber,

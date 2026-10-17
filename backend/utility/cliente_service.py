@@ -1,19 +1,20 @@
-from typing import List, Literal
+from typing import Literal
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from model.db_model import Client
-from repository.cliente_repository import ClienteRepository, ClientServiceType
+from repository.cliente_repository import ClienteRepository
 from repository.email_repository import EmailRepository
 from repository.sftp_repository import SftpRepository
+from schema import (
+    ClienteServiceResponse,
+    ClientRequest,
+    EmailConfigurationRequest,
+    SftpConfigurationRequest,
+)
 from schema.client_schema import MetricsClientResponse
 from schema.sftp_schema import SftpConfiRequst
-from schema import (
-    ClientRequest,
-    ClienteServiceResponse,
-    SftpConfigurationRequest,
-    EmailConfigurationRequest,
-)
 
 ServiceType = Literal["sftp_service", "email_service", "sms_service"]
 
@@ -92,7 +93,7 @@ class ClienteService:
     def get_client_dropdown_options(self) -> list[dict[str, str | int]]:
         return self._db.get_clients_names()
 
-    def delete_client(self, client_id: int):
+    def delete_client(self, client_id: int) -> None:
         client_to_inactive = self._db.get_client_by_id(client_id)
         if client_to_inactive is None:
             raise HTTPException(
@@ -103,9 +104,8 @@ class ClienteService:
         self._db.toggle_client_status(client_to_inactive.id, False)
         self._email_repo.toggle_client_emails(client_to_inactive.id, False)
         self._db.save(client_to_inactive)
-        return
 
-    def reactive_client(self, client_id: int):
+    def reactive_client(self, client_id: int) -> None:
         client_to_reactive = self._db.get_client_by_id(client_id)
         if client_to_reactive is None:
             raise HTTPException(
@@ -116,7 +116,6 @@ class ClienteService:
         self._db.toggle_client_status(client_to_reactive.id, True)
         self._email_repo.toggle_client_emails(client_to_reactive.id, True)
         self._db.save(client_to_reactive)
-        return
 
     def get_metrics(self) -> MetricsClientResponse:
         sftp_data = self._sftp_service.get_all_sftp_data()

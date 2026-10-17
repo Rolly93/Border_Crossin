@@ -4,9 +4,13 @@ from os import name
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
+from stdnum.mx import rfc as rfc_validator
+
 from model.db_model import DriverDetails, Employee, User
 from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.employee_schema import (
+    BoosttrapAdmin,
     EmployeeCreateUnion,
     EmployeeListItem,
     EmployeeRequestDash,
@@ -14,8 +18,6 @@ from schema.employee_schema import (
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
-from sqlalchemy.orm import Session, joinedload
-from stdnum.mx import rfc as rfc_validator
 
 
 class EmployeeService:
@@ -77,7 +79,7 @@ class EmployeeService:
     def _validate_account(self, data: EmployeeCreateUnion) -> None:
         """Valida todo antes de crear el empleado, para no dejar registros a medias."""
         print(data)
-        if data.employeeType == "csr" or data.role == "csr":
+        if data.employeeType == "csr":
             # Database validations (repo checks)
             if self._user_repo.get_username(data.username.strip()):
                 raise HTTPException(
@@ -173,7 +175,7 @@ class EmployeeService:
         data: EmployeeCreateUnion,
         ip: str,
         current_user: TokenPayload | InitialTokenPayload,
-    ) -> EmployeeRequestDash:
+    ) -> EmployeeRequestDash | BoosttrapAdmin:
 
         has_users = bool(self._user_repo.get_all_users())
 
@@ -185,12 +187,12 @@ class EmployeeService:
                 extra_data={"is_first_time": True},
                 expires_delta=timedelta(minutes=15),
             )
-            return {
-                "status": "201",
-                "detail": "Employee registered successfully",
-                "token": initial_token,
-                "name": new_employee.name,
-            }
+            return BoosttrapAdmin(
+                status="201",
+                detail="Employee registered successfully",
+                token=initial_token,
+                name=new_employee.name,
+            )
 
         if not current_user or not getattr(current_user, "is_admin", False):
             raise HTTPException(

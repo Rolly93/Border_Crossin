@@ -1,7 +1,7 @@
-from model.db_model import Employee, User
 from sqlalchemy import and_, exists, select
 from sqlalchemy.orm import Session, joinedload
 
+from model.db_model import Employee, User
 from repository.base_repository import BaseRepository
 
 

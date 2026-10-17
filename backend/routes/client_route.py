@@ -1,9 +1,9 @@
-from typing import List
+from fastapi import APIRouter, Depends, Query, status
+from sqlalchemy.orm import Session
 
 from database import get_db
 from deps.auth import CurrentUser, get_current_user, require_admin
 from deps.service import ClientSvc, get_client_service
-from fastapi import APIRouter, Depends, Query, status
 from schema import ClientRequest
 from schema.client_schema import (
     ClientNameResponse,
@@ -12,7 +12,6 @@ from schema.client_schema import (
     PaginatedClientResponse,
     ReferenceRuleOut,
 )
-from sqlalchemy.orm import Session
 from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
 
@@ -24,7 +23,7 @@ router = APIRouter(
 @router.get(
     "/by-operation",
     status_code=status.HTTP_200_OK,
-    response_model=List[ClientNameResponse],
+    response_model=list[ClientNameResponse],
 )
 async def clients_by_operation(
     current_user: CurrentUser,
@@ -37,7 +36,7 @@ async def clients_by_operation(
 @router.get(
     "/{client_id}/reference-rules",
     status_code=status.HTTP_200_OK,
-    response_model=List[ReferenceRuleOut],
+    response_model=list[ReferenceRuleOut],
 )
 async def client_reference_rules(
     client_id: int,
@@ -48,7 +47,7 @@ async def client_reference_rules(
 
 
 @router.get(
-    "/all", status_code=status.HTTP_200_OK, response_model=List[ClientOptionResponse]
+    "/all", status_code=status.HTTP_200_OK, response_model=list[ClientOptionResponse]
 )
 async def get_all_clients(
     service: ClientSvc,

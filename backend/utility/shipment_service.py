@@ -1,10 +1,7 @@
 import logging
-from sqlalchemy.orm import Session
-from typing import List
 
-from service.shipment_dispatch_service import ShipmentDispatchService
-from utility.cliente_service import ClienteService
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 
 from model.db_model import (
     Client,
@@ -14,16 +11,18 @@ from model.db_model import (
     UnitAssignment,
     UnitTruck,
 )
+from repository import ShipmentRepository
 from repository.system_config_repository import SystemConfigRepository
 from schema.shipment_shcema import (
     EventCategory,
+    PaginatedShipmentResponse,
     ShipmentCreateRequest,
     ShipmentEvent,
     ShipmentResponse,
     ShipmentUpdate,
-    PaginatedShipmentResponse,
 )
-from repository import ShipmentRepository
+from service.shipment_dispatch_service import ShipmentDispatchService
+from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
 
 logger = logging.getLogger(__name__)
@@ -72,15 +71,23 @@ class ShipmentService:
             events=events,
         )
 
-    def create_shipment(self, data: ShipmentCreateRequest, user_id: int) -> ShipmentAssign:
+    def create_shipment(
+        self, data: ShipmentCreateRequest, user_id: int
+    ) -> ShipmentAssign:
         client = self.db.get(Client, data.cliente)
         if not client or not client.still_active:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Cliente no encontrado o inactivo")
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Cliente no encontrado o inactivo"
+            )
 
-        if self.db.query(ShipmentAssign).filter(
-            ShipmentAssign.tracking_number == data.tracking_number
-        ).first():
-            raise HTTPException(status.HTTP_409_CONFLICT, "Ese número de embarque ya existe")
+        if (
+            self.db.query(ShipmentAssign)
+            .filter(ShipmentAssign.tracking_number == data.tracking_number)
+            .first()
+        ):
+            raise HTTPException(
+                status.HTTP_409_CONFLICT, "Ese número de embarque ya existe"
+            )
 
         ReferenceRuleService(self.db).validate(
             client_id=data.cliente,
@@ -89,9 +96,13 @@ class ShipmentService:
         )
 
         # La unidad debe estar activa y tener un operador vigente: el operador es quien maneja.
-        unit = self.db.query(UnitTruck).filter(UnitTruck.unit_number == data.truck).first()
+        unit = (
+            self.db.query(UnitTruck).filter(UnitTruck.unit_number == data.truck).first()
+        )
         if not unit:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Unidad {data.truck} no encontrada")
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, f"Unidad {data.truck} no encontrada"
+            )
         if unit.state != "ACTIVA":
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
@@ -99,7 +110,9 @@ class ShipmentService:
             )
         assignment = (
             self.db.query(UnitAssignment)
-            .filter(UnitAssignment.unit_id == unit.id, UnitAssignment.released_at.is_(None))
+            .filter(
+                UnitAssignment.unit_id == unit.id, UnitAssignment.released_at.is_(None)
+            )
             .first()
         )
         if not assignment:
@@ -155,7 +168,7 @@ class ShipmentService:
         return shipment
 
     def sftp_service(
-        self, shipment: ShipmentAssign, events: List[ShipmentEventModel]
+        self, shipment: ShipmentAssign, events: list[ShipmentEventModel]
     ) -> list:
         if not events:
             return []

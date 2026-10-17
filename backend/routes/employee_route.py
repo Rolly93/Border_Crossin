@@ -1,4 +1,6 @@
-from typing import List, Optional, Union
+from enum import Enum
+
+from fastapi import APIRouter, Depends, Query, Request, status
 
 from deps.auth import (
     CurrentUser,
@@ -7,7 +9,6 @@ from deps.auth import (
     get_optional_current_user,
 )
 from deps.service import EmployeeSvc, get_user_service
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from schema import EmployeeResponseUnion, InitialTokenPayload, TokenPayload
 from schema.employee_schema import (
     EmployeeBaseRequest,
@@ -19,6 +20,11 @@ from utility.employee_service import EmployeeService
 from utility.user_service import UserService
 
 router = APIRouter(prefix="/employees", tags=["employee"])
+
+
+class CargoTypeEnum(str, Enum):
+    CSR = "csr"
+    OPERADOR = "operador"
 
 
 @router.get(
@@ -45,7 +51,7 @@ async def register_employee(
     rq: Request,
     data: EmployeeBaseRequest,
     service: EmployeeSvc,
-    current_user: Optional[Union[TokenPayload, InitialTokenPayload]] = Depends(
+    current_user: TokenPayload | InitialTokenPayload = Depends(
         get_optional_current_user
     ),
 ):
@@ -61,7 +67,7 @@ async def register_employee(
     "/operators",
     summary="List Operators",
     status_code=status.HTTP_200_OK,
-    response_model=List[OperatorOption],
+    response_model=list[OperatorOption],
 )
 async def list_operators(
     service: EmployeeSvc,
@@ -93,13 +99,11 @@ async def resgister_driver(
 async def get_employee_data(
     rq: Request,
     id: int,
-    cargoType: str = Query(..., description="Type of employee: 'csr' or 'operador'"),
-    service: UserService = Depends(get_user_service),
-    current_user: TokenPayload = Depends(get_current_user),
+    cargoType: CargoTypeEnum = Query(
+        description="Type of employee: 'csr' or 'operador'"
+    ),
+    service: UserService = Depends(dependency=get_user_service),
+    current_user: TokenPayload = Depends(dependency=get_current_user),
 ):
-    if cargoType not in {"csr", "operador"}:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid cargoType. Must be 'csr' or 'operador'.",
-        )
-    return service.get_employee_info(id=id, cargoType=str(cargoType))
+
+    return service.get_employee_info(id=id, cargoType=cargoType.value)

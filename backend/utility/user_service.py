@@ -1,9 +1,12 @@
 from datetime import timedelta
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import bcrypt
-from config.config import Env
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+from stdnum.mx import rfc as rfc_validator
+
+from config.config import Env
 from model.db_model import User
 from repository import EmployeeRepository, UserRepository
 from schema.employee_schema import (
@@ -14,9 +17,6 @@ from schema.employee_schema import (
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from schema.user_schema import LoginRequest, NewUser
 from service.jwt_service import JWTService
-from sqlalchemy.orm import Session
-from stdnum.mx import rfc as rfc_validator
-
 from utility.employee_service import EmployeeService
 
 DUMMY_HASH = "$2b$12$eImiTXuWVxfM37uY4JANjO5E.5R0zJqfG8R6zG1yQ4rZ2gYxK.6Ce"
@@ -132,7 +132,7 @@ class UserService:
     def register_new_user(
         self,
         data: NewUser,
-        current_user: Optional[Union[TokenPayload, InitialTokenPayload]],
+        current_user: TokenPayload | InitialTokenPayload | None,
     ) -> dict:
         has_users = self.user_already_exists()
         is_admin = getattr(current_user, "is_admin", False)

@@ -1,7 +1,9 @@
+from typing import override
+
 from fastapi import HTTPException, status
-from model.db_model import DriverDetails, Employee
 from sqlalchemy.orm import Session
 
+from model.db_model import DriverDetails, Employee
 from repository import EmployeeRepository
 from repository.base_repository import BaseRepository
 
@@ -11,7 +13,8 @@ class DriverRepository(BaseRepository[DriverDetails]):
         super().__init__(db, DriverDetails)
         self.employee_repo = EmployeeRepository(db)
 
-    def get_by_id(self, id_val: int) -> DriverDetails | None:
+    @override
+    def get_by_id(self, id_val: str | int) -> DriverDetails | None:
         if not (
             driver := (
                 self._db.query(DriverDetails)

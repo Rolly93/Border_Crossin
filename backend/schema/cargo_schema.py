@@ -1,7 +1,7 @@
 from datetime import date
-from typing import Literal, Optional, Union
-from typing_extensions import Annotated
-from pydantic import BaseModel, Field, EmailStr
+from typing import Annotated, Literal
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 class EmployeeBase(BaseModel):
@@ -36,7 +36,7 @@ class DriverDetailsResponse(BaseModel):
 
 
 CargoRequest = Annotated[
-    Union[CargoCreate, OperadorCreate], Field(discriminator="employeeType")
+    CargoCreate | OperadorCreate, Field(discriminator="employeeType")
 ]
 
 
