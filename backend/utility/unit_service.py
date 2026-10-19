@@ -1,7 +1,8 @@
-from typing import Optional
 from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from schema.unit_schema import AssignmentOut, UnitIn, UnitOut
 

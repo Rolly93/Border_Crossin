@@ -1,37 +1,60 @@
-from typing import Annotated, Any
+from collections.abc import Callable
+from typing import Annotated, Protocol, TypeVar
 
-from database import get_db
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
+from database import get_db
+from repository.system_config_repository import SystemConfigRepository
+from utility.cliente_service import ClienteService
+from utility.employee_service import EmployeeService
+from utility.reference_rule_service import ReferenceRuleService
+from utility.sftp_config_service import SftpConfigService
+from utility.sftp_send_service import SftpSendService
+from utility.shipment_service import ShipmentService
+from utility.unit_service import UnitService
+from utility.user_service import UserService
 
-def get_shipment_service(db: Session = Depends(get_db)):
-    from utility.shipment_service import ShipmentService
-
-    return ShipmentService(db)
-
-
-def get_user_service(db: Session = Depends(get_db)):
-    from utility.user_service import UserService
-
-    return UserService(db)
-
-
-def get_client_service(db: Session = Depends(get_db)):
-    from utility.cliente_service import ClienteService
-
-    return ClienteService(db)
+database = ()
+DBSession = Annotated[Session, Depends(dependency=get_db)]
 
 
-def get_employee_service(db: Session = Depends(get_db)):
-    from utility.employee_service import EmployeeService
+class ServiceProtocol(Protocol):
+    def __init__(self, db: DBSession) -> None: ...
 
-    return EmployeeService(db)
+
+T = TypeVar("T", bound=ServiceProtocol)
+
+
+def get_service(service_class: type[T]) -> Callable[[DBSession], T]:
+    """A single generic factory that replaces all individual get_*_service functions."""
+
+    def _dependency(db: DBSession) -> T:
+        return service_class(db=db)
+
+    return _dependency
 
 
 ShipmentSvc = Annotated[
-    Any, Depends(get_shipment_service)
-]  # Or keep type hints using TYPE_CHECKING if needed
-UserSvc = Annotated[Any, Depends(get_user_service)]
-ClientSvc = Annotated[Any, Depends(get_client_service)]
-EmployeeSvc = Annotated[Any, Depends(get_employee_service)]
+    ShipmentService, Depends(dependency=get_service(service_class=ShipmentService))
+]
+UserSvc = Annotated[
+    UserService, Depends(dependency=get_service(service_class=UserService))
+]
+ClientSvc = Annotated[
+    ClienteService, Depends(dependency=get_service(service_class=ClienteService))
+]
+EmployeeSvc = Annotated[
+    EmployeeService, Depends(dependency=get_service(service_class=EmployeeService))
+]
+SftpServiceConfigSvc = Annotated[
+    SftpConfigService, Depends(get_service(SftpConfigService))
+]
+UnitSvc = Annotated[
+    UnitService, Depends(dependency=get_service(service_class=UnitService))
+]
+SftpServiceSend = Annotated[SftpSendService, Depends(get_service(SftpSendService))]
+
+SystemConfigService = Annotated[
+    SystemConfigRepository, Depends(get_service(SystemConfigRepository))
+]

@@ -3,7 +3,6 @@ import os
 import paramiko
 from fastapi import HTTPException, status
 
-from config.config import SFTPConfig
 from schema import SftpConfigurationRequest
 
 
@@ -51,7 +50,9 @@ class SFTPService:
         """Sube local_path a remote_folder y devuelve la ruta remota."""
         if self.sftp is None:
             raise RuntimeError("No hay una sesión SFTP activa")
-        remote_path = f"{self._remote_folder.rstrip('/')}/{os.path.basename(local_path)}"
+        remote_path = (
+            f"{self._remote_folder.rstrip('/')}/{os.path.basename(local_path)}"
+        )
         self.sftp.put(local_path, remote_path)
         return remote_path
 

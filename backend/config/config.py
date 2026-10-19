@@ -1,7 +1,8 @@
 import os
-from dotenv import load_dotenv
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 # Load .env file if it exists (for local development)
 env_path = Path(__file__).resolve().parent.parent / ".env"

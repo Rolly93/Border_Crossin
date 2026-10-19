@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from deps.auth import CurrentUser, get_current_user, require_admin
-from deps.service import ClientSvc, get_client_service
+from deps.service import ClientSvc
 from schema import ClientRequest
 from schema.client_schema import (
     ClientNameResponse,
@@ -12,7 +12,6 @@ from schema.client_schema import (
     PaginatedClientResponse,
     ReferenceRuleOut,
 )
-from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
 
 router = APIRouter(
@@ -84,7 +83,8 @@ async def get_clients(
 )
 async def new_client(
     data: ClientRequest,
-    service: ClienteService = Depends(get_client_service),
+    service: ClientSvc,
+    current_user: CurrentUser,
 ):
     client = service.create_client(data=data)
     return {"id": client.id, "name": client.name}
@@ -98,7 +98,8 @@ async def new_client(
 async def update_client(
     data: ClientRequest,
     client_id: int,
-    service: ClienteService = Depends(get_client_service),
+    service: ClientSvc,
+    current_user: CurrentUser,
 ):
     if not client_id:
         return
@@ -112,7 +113,8 @@ async def update_client(
 )
 async def delete(
     client_id: int,
-    service: ClienteService = Depends(get_client_service),
+    service: ClientSvc,
+    current_user: CurrentUser,
 ):
     deleted_client = service.delete_client(client_id=client_id)
     return deleted_client
@@ -125,7 +127,8 @@ async def delete(
 )
 async def reactive(
     client_id: int,
-    service: ClienteService = Depends(get_client_service),
+    service: ClientSvc,
+    current_user: CurrentUser,
 ):
     reactive_client = service.reactive_client(client_id=client_id)
     return reactive_client

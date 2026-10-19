@@ -15,6 +15,7 @@ from schema import (
 )
 from schema.client_schema import MetricsClientResponse
 from schema.sftp_schema import SftpConfiRequst
+from schema.shipment_shcema import ShipmentCreateRequest
 
 ServiceType = Literal["sftp_service", "email_service", "sms_service"]
 
@@ -25,6 +26,16 @@ class ClienteService:
         self._db = ClienteRepository(db)
         self._sftp_service = SftpRepository(db)
         self._email_repo = EmailRepository(db)
+
+    def get_client(self, data: ShipmentCreateRequest) -> Client:
+        if (
+            not (client := self._db.get_data_of_client(data.cliente))
+            or not client.still_active
+        ):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Cliente no encontrado o inactivo"
+            )
+        return client
 
     def config_sftp(self, sftp_data: SftpConfigurationRequest):
         new_connection = SftpConfiRequst(**sftp_data.model_dump())

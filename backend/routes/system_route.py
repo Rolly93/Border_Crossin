@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy.orm import Session
 
-from database import get_db
-from deps.auth import get_current_user
-from repository.system_config_repository import SystemConfigRepository
+from deps.auth import CurrentUser, get_current_user
+from deps.service import SystemConfigService
 
 router = APIRouter(
     prefix="/system", tags=["system"], dependencies=[Depends(get_current_user)]
@@ -24,11 +22,18 @@ class ScacRequest(BaseModel):
 
 
 @router.get("/config")
-def get_config(db: Session = Depends(get_db)):
-    # scac = null indica que el sistema todavía necesita configurarse.
-    return {"scac": SystemConfigRepository(db).get_scac()}
+def get_config(
+    service: SystemConfigService,
+    current_user: CurrentUser,
+):
+
+    return {"scac": service.get_scac()}
 
 
 @router.put("/config")
-def set_config(data: ScacRequest, db: Session = Depends(get_db)):
-    return {"scac": SystemConfigRepository(db).set_scac(data.scac)}
+def set_config(
+    data: ScacRequest,
+    service: SystemConfigService,
+    current_user: CurrentUser,
+):
+    return {"scac": service.set_scac(data.scac)}

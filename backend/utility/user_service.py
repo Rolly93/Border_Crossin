@@ -172,7 +172,7 @@ class UserService:
                 username=u.username,
                 email=u.email,
                 isAdmin=u.is_admin,
-                password=u.hashed_password,
+                password="*******",
                 firstName=e.name,
                 lastName=e.last_name,
                 role=e.role,

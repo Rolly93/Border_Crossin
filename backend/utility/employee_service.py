@@ -1,6 +1,4 @@
 from datetime import date, timedelta
-from multiprocessing import Value
-from os import name
 
 from fastapi import HTTPException, status
 from sqlalchemy import select

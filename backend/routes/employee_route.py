@@ -1,17 +1,15 @@
 from enum import Enum
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Query, Request, status
 
 from deps.auth import (
     CurrentUser,
-    get_client_ip,
-    get_current_user,
-    get_optional_current_user,
+    OptionalCurrentUser,
 )
-from deps.service import EmployeeSvc, get_user_service
-from schema import EmployeeResponseUnion, InitialTokenPayload, TokenPayload
+from deps.service import EmployeeSvc
+from schema import EmployeeResponseUnion
 from schema.employee_schema import (
-    EmployeeBaseRequest,
+    EmployeeCreateUnion,
     EmployeeRequest,
     OperatorOption,
     PaginatedEmployeeResponse,
@@ -49,14 +47,12 @@ async def list_employees(
 )
 async def register_employee(
     rq: Request,
-    data: EmployeeBaseRequest,
+    data: EmployeeCreateUnion,
     service: EmployeeSvc,
-    current_user: TokenPayload | InitialTokenPayload = Depends(
-        get_optional_current_user
-    ),
+    current_user: OptionalCurrentUser,
 ):
 
-    ip = get_client_ip(rq)
+    ip = current_user.client_ip
     new_employee = service.register_employee_service(
         data=data, ip=ip, current_user=current_user
     )
@@ -84,8 +80,8 @@ async def list_operators(
 async def resgister_driver(
     rq: Request,
     data: EmployeeRequest,
-    service: EmployeeService = Depends(get_user_service),
-    current_user: TokenPayload = Depends(get_current_user),
+    service: EmployeeService,
+    current_user: CurrentUser,
 ):
     pass
 
@@ -99,11 +95,11 @@ async def resgister_driver(
 async def get_employee_data(
     rq: Request,
     id: int,
-    cargoType: CargoTypeEnum = Query(
+    current_user: CurrentUser,
+    service: UserService,
+    cargoType: CargoTypeEnum = Query(  # noqa: B008
         description="Type of employee: 'csr' or 'operador'"
     ),
-    service: UserService = Depends(dependency=get_user_service),
-    current_user: TokenPayload = Depends(dependency=get_current_user),
 ):
 
     return service.get_employee_info(id=id, cargoType=cargoType.value)

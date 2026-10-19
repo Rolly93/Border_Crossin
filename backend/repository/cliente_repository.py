@@ -2,14 +2,14 @@ from enum import Enum
 from typing import Optional
 
 from fastapi import HTTPException
-from model.db_model import Client, SftpService
-from schema import ClientRequest
-from schema.client_schema import ClientPaginateData, PaginatedClientResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from model.db_model import Client, SftpService
 from repository.base_repository import BaseRepository
 from repository.email_repository import EmailRepository
+from schema import ClientRequest
+from schema.client_schema import ClientPaginateData, PaginatedClientResponse
 
 
 class ClientServiceType(str, Enum):
@@ -61,7 +61,7 @@ class ClienteRepository(BaseRepository[Client]):
 
         return saved_client
 
-    def get_client_by_id(self, id_val: int) -> Optional[Client]:
+    def get_client_by_id(self, id_val: int) -> Client | None:
         return self.get_by_id(id_val)
 
     def toggle_service(
@@ -120,3 +120,6 @@ class ClienteRepository(BaseRepository[Client]):
             page=page,
             limit=limit,
         )
+
+    def get_data_of_client(self, client_id: int) -> Client | None:
+        return self._db.get(Client, client_id)

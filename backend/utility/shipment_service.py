@@ -30,9 +30,10 @@ logger = logging.getLogger(__name__)
 
 class ShipmentService:
     def __init__(self, db: Session):
-        self.db = db
-        self._shipment_db = ShipmentRepository(db)
-        self._client_service = ClienteService(db)
+        self.db: Session = db
+        self._shipment_db = ShipmentRepository(self.db)
+        self._client_service = ClienteService(self.db)
+        self._reference_rule = ReferenceRuleService(self.db)
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -74,11 +75,7 @@ class ShipmentService:
     def create_shipment(
         self, data: ShipmentCreateRequest, user_id: int
     ) -> ShipmentAssign:
-        client = self.db.get(Client, data.cliente)
-        if not client or not client.still_active:
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, "Cliente no encontrado o inactivo"
-            )
+        client = self._client_service.get_client(data)
 
         if (
             self.db.query(ShipmentAssign)
@@ -89,7 +86,7 @@ class ShipmentService:
                 status.HTTP_409_CONFLICT, "Ese número de embarque ya existe"
             )
 
-        ReferenceRuleService(self.db).validate(
+        self._reference_rule.validate(
             client_id=data.cliente,
             operation=data.type_operation,
             reference=data.customer_tracking,
@@ -155,7 +152,7 @@ class ShipmentService:
         self, shipment_id: int, shipment_data: ShipmentUpdate, user_id: int
     ) -> ShipmentAssign:
         current = self._shipment_db.get_shipment(shipment_id)
-        ReferenceRuleService(self.db).validate(
+        self._reference_rule.validate(
             client_id=shipment_data.cliente,
             operation=shipment_data.type_operation or current.type_operation,
             reference=shipment_data.customer_tracking or current.customer_tracking,

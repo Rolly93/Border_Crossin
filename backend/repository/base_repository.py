@@ -1,6 +1,6 @@
 from typing import Any, Generic, Protocol, TypeVar
 
-from fastapi import HTTPException , status
+from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -33,11 +33,13 @@ class BaseRepository(Generic[T]):
         self._db.commit()
 
     def get_by_id(self, id_val: str | int) -> T | None:
-        if not (id:=self._db.query(self._model).filter(self._model.id == id_val).first())
+        if not (
+            id := self._db.query(self._model).filter(self._model.id == id_val).first()
+        ):
             raise HTTPException(
-                            status_code=status.HTTP_404_NOT_FOUND,
-                            detail="No se Encontro",
-                        )
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No se Encontro",
+            )
         return id
 
     def update(self, id_val: str | int, obj_in: BaseModel | dict[str, Any]) -> T | None:

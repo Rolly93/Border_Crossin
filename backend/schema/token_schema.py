@@ -7,7 +7,7 @@ class TokenPayload(BaseModel):
     sub: str
     email: str | None
     is_admin: bool = False
-    client_ip: str | None
+    client_ip: str
 
     def check_admin(self) -> bool:
         return self.is_admin

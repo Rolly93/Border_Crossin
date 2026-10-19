@@ -1,19 +1,8 @@
-from typing import Annotated, List
-
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.orm import Session
 
-from database import get_db
 from deps.auth import CurrentUser, get_current_user, get_user_id, require_admin
+from deps.service import UnitSvc
 from schema.unit_schema import AssignIn, AssignmentOut, UnitIn, UnitOut
-from utility.unit_service import UnitService
-
-
-def get_unit_service(db: Session = Depends(get_db)) -> UnitService:
-    return UnitService(db)
-
-
-UnitSvc = Annotated[UnitService, Depends(get_unit_service)]
 
 router = APIRouter(
     prefix="/unit",
@@ -34,7 +23,11 @@ async def list_units(service: UnitSvc):
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_admin)],
 )
-async def create_unit(data: UnitIn, service: UnitSvc):
+async def create_unit(
+    data: UnitIn,
+    service: UnitSvc,
+    current_user: CurrentUser,
+):
     unit = service.create(data)
     return service.get_out(unit_id=unit.id)
 
@@ -45,7 +38,12 @@ async def create_unit(data: UnitIn, service: UnitSvc):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(require_admin)],
 )
-async def update_unit(unit_id: int, data: UnitIn, service: UnitSvc):
+async def update_unit(
+    unit_id: int,
+    data: UnitIn,
+    service: UnitSvc,
+    current_user: CurrentUser,
+) -> UnitOut:
     service.update(unit_id, data)
     return service.get_out(unit_id)
 
@@ -73,7 +71,11 @@ async def assign_driver(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(require_admin)],
 )
-async def release_driver(unit_id: int, service: UnitSvc):
+async def release_driver(
+    unit_id: int,
+    service: UnitSvc,
+    current_user: CurrentUser,
+):
     service.release(unit_id)
     return {"detail": "Unidad liberada"}
 
@@ -83,5 +85,9 @@ async def release_driver(unit_id: int, service: UnitSvc):
     response_model=list[AssignmentOut],
     status_code=status.HTTP_200_OK,
 )
-async def unit_history(unit_id: int, service: UnitSvc):
+async def unit_history(
+    unit_id: int,
+    service: UnitSvc,
+    current_user: CurrentUser,
+):
     return service.history(unit_id)

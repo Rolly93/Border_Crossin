@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 
 from deps.auth import CurrentUser, get_user_id
 from deps.service import ShipmentSvc
@@ -54,7 +54,7 @@ async def create_shipment(
 
 
 @router.put("/{id}/update")
-async def update_shipment(
+async def update_trip(
     id: int,
     shipment_data: ShipmentUpdate,
     current_user: CurrentUser,
@@ -67,7 +67,7 @@ async def update_shipment(
         "data": {
             "id": updated.id,
             "tracking_number": updated.tracking_number,
-            "events_total": len(updated.events),
+            "events_total": len(list(updated.events)),
         },
     }
 
