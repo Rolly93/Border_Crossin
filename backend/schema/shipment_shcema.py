@@ -1,4 +1,4 @@
-from typing import Annotated, List, Optional, Literal, Self
+from typing import Annotated, Literal, Self
 from enum import Enum
 from pydantic import AliasChoices, BaseModel, ConfigDict, BeforeValidator, Field
 from datetime import datetime
@@ -32,7 +32,7 @@ class EventCategory(str, Enum):
 class ShipmentEvent(BaseModel):
     category: EventCategory
     dateTime: datetime
-    notes: Optional[str] = None
+    notes: str | None
 
     class Config:
         from_attributes: Literal[True]
@@ -46,10 +46,10 @@ class ShipmentBase(BaseModel):
     origen: str
     destination: str
 
-    cliente: Optional[str] = None
-    truck: Optional[str] = None
-    trailer: Optional[str] = None
-    vehicle_type: Optional[str] = None
+    cliente: str | None
+    truck: str | None
+    trailer: str | None
+    vehicle_type: str | None
 
 
 class ShipmentCreate(ShipmentBase):
@@ -64,6 +64,9 @@ class ShipmentCreateRequest(BaseModel):
     type_operation: str = Field(min_length=1, max_length=50)
     cliente: int = Field(gt=0, description="ID del cliente")
     origen: str = Field(min_length=1, max_length=200)
+    placas: toUppercase = Field(
+        min_length=1, max_length=50, description="Numero de placas"
+    )
     # El formulario manda `destino`; se acepta también `destination`.
     destination: str = Field(
         min_length=1,
@@ -71,13 +74,15 @@ class ShipmentCreateRequest(BaseModel):
         validation_alias=AliasChoices("destination", "destino"),
     )
     truck: str = Field(min_length=1, max_length=20, description="Número de unidad")
-    trailer: toUppercase = Field(min_length=1, max_length=50, description="Placas del remolque")
+    trailer: toUppercase = Field(
+        min_length=1, max_length=50, description="number de caja"
+    )
 
 
 class ShipmentResponse(ShipmentCreate):
     id: int
-    status: Optional[str] = "success"
-    events: List[ShipmentEvent]
+    status: str | None = "success"
+    events: list[ShipmentEvent]
 
     class Config:
         from_attributes: Literal[True]
@@ -85,20 +90,20 @@ class ShipmentResponse(ShipmentCreate):
 
 
 class ShipmentUpdate(BaseModel):
-    tracking_number: Optional[str] = None
-    customer_tracking: Optional[str] = None
+    tracking_number: str | None = None
+    customer_tracking: str | None
     cliente: int
-    truck: Optional[str] = None
-    vehicle_type: Optional[str] = None
-    trailer: Optional[str] = None
-    origen: Optional[str] = None
-    destination: Optional[str] = None
-    type_operation: Optional[str] = None
-    events: List[ShipmentEvent] | ShipmentEvent
+    truck: str | None
+    vehicle_type: str | None
+    trailer: str | None
+    origen: str | None
+    destination: str | None
+    type_operation: str | None
+    events: list[ShipmentEvent] | ShipmentEvent
 
 
 class PaginatedShipmentResponse(BaseModel):
-    data: List[ShipmentResponse]
+    data: list[ShipmentResponse]
     totalRecords: int
     hasNextPage: bool
     page: int
@@ -106,22 +111,22 @@ class PaginatedShipmentResponse(BaseModel):
 
 
 class EventPayload(BaseModel):
-    tracking_number: Optional[toUppercase] = None
-    customer_tracking: Optional[toUppercase]
+    tracking_number: toUppercase | None
+    customer_tracking: toUppercase | None
     cliente: int
-    truck: Optional[toUppercase] = None
-    vehicle_type: Optional[toUppercase] = None
-    trailer: Optional[toUppercase] = None
-    origen: Optional[toUppercase] = None
+    truck: toUppercase | None
+    vehicle_type: toUppercase | None
+    trailer: toUppercase | None
+    origen: toUppercase | None
     scac_code: toCapitalCase
-    destination: Optional[toUppercase] = None
-    type_operation: Optional[toUppercase] = None
+    destination: toUppercase | None
+    type_operation: toUppercase | None
     event: EventCategory
     dateTime: datetime
-    notes: Optional[str]
+    notes: str | None
 
     @classmethod
-    def from_shipment_update(cls, shipment_data: ShipmentUpdate) -> List[Self]:
+    def from_shipment_update(cls, shipment_data: ShipmentUpdate) -> list[Self]:
         events_list = (
             shipment_data.events
             if isinstance(shipment_data.events, list)

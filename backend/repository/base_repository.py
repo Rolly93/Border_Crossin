@@ -32,17 +32,11 @@ class BaseRepository(Generic[T]):
         self._db.delete(instance)
         self._db.commit()
 
-    def get_by_id(self, id_val: str | int) -> T | None:
-        if not (
-            id := self._db.query(self._model).filter(self._model.id == id_val).first()
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No se Encontro",
-            )
-        return id
+    def get_by_id(self, id_val: int) -> T | None:
 
-    def update(self, id_val: str | int, obj_in: BaseModel | dict[str, Any]) -> T | None:
+        return self._db.get(entity=self._model, ident=id_val)
+
+    def update(self, id_val: int, obj_in: BaseModel | dict[str, Any]) -> T | None:
         db_obj = self.get_by_id(id_val)
         if not (db_obj := self.get_by_id(id_val)):
             return None

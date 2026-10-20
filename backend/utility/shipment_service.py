@@ -13,6 +13,8 @@ from model.db_model import (
 )
 from repository import ShipmentRepository
 from repository.system_config_repository import SystemConfigRepository
+from repository.trailer_repository import TrailerRepository
+from repository.unit_repository import UnitRepository
 from schema.shipment_shcema import (
     EventCategory,
     PaginatedShipmentResponse,
@@ -34,6 +36,8 @@ class ShipmentService:
         self._shipment_db = ShipmentRepository(self.db)
         self._client_service = ClienteService(self.db)
         self._reference_rule = ReferenceRuleService(self.db)
+        self._unit_repo = UnitRepository(self.db)
+        self._trailer_repo = TrailerRepository(self.db)
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -69,6 +73,7 @@ class ShipmentService:
             cliente=str(s.client_id),
             truck=s.truck.unit_number if s.truck else None,
             trailer=s.trailer.plates if s.trailer else None,
+            vehicle_type=None,
             events=events,
         )
 
@@ -77,11 +82,7 @@ class ShipmentService:
     ) -> ShipmentAssign:
         client = self._client_service.get_client(data)
 
-        if (
-            self.db.query(ShipmentAssign)
-            .filter(ShipmentAssign.tracking_number == data.tracking_number)
-            .first()
-        ):
+        if self._shipment_db.get_by_tracking(data.tracking_number):
             raise HTTPException(
                 status.HTTP_409_CONFLICT, "Ese número de embarque ya existe"
             )
@@ -93,10 +94,7 @@ class ShipmentService:
         )
 
         # La unidad debe estar activa y tener un operador vigente: el operador es quien maneja.
-        unit = (
-            self.db.query(UnitTruck).filter(UnitTruck.unit_number == data.truck).first()
-        )
-        if not unit:
+        if not (unit := (self._unit_repo.get_unit_by_number(data.truck))):
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND, f"Unidad {data.truck} no encontrada"
             )
@@ -105,21 +103,16 @@ class ShipmentService:
                 status.HTTP_409_CONFLICT,
                 f"La unidad {data.truck} no está activa (estado: {unit.state})",
             )
-        assignment = (
-            self.db.query(UnitAssignment)
-            .filter(
-                UnitAssignment.unit_id == unit.id, UnitAssignment.released_at.is_(None)
-            )
-            .first()
-        )
-        if not assignment:
+        if not (assignment := self._unit_repo.get_open_assignment(unit.id)):
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
                 f"La unidad {data.truck} no tiene operador asignado",
             )
 
-        trailer = self.db.query(Trailer).filter(Trailer.plates == data.trailer).first()
-        if not trailer:
+        if not (
+            trailer := self._trailer_repo.find_by_trailer(data.placas, data.trailer)
+        ):
+
             trailer = Trailer(plates=data.trailer, state="ACTIVA")
             self.db.add(trailer)
             self.db.flush()
@@ -137,6 +130,7 @@ class ShipmentService:
             destination=data.destination,
             is_active=True,
         )
+
         self.db.add(shipment)
         self.db.commit()
         self.db.refresh(shipment)

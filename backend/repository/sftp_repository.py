@@ -35,9 +35,7 @@ class SftpRepository(BaseRepository[SftpService]):
             encrypted_password=decrypt_password(raw_sftp_config.encrypted_password),
         )
 
-    def update(
-        self, id_val: str | int, obj_in: BaseModel | dict[str, Any]
-    ) -> SftpService:
+    def update(self, id_val: int, obj_in: BaseModel | dict[str, Any]) -> SftpService:
         db_obj = super().update(id_val, obj_in)
 
         if not db_obj:
