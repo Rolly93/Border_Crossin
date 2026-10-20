@@ -58,3 +58,6 @@ SftpServiceSend = Annotated[SftpSendService, Depends(get_service(SftpSendService
 SystemConfigService = Annotated[
     SystemConfigRepository, Depends(get_service(SystemConfigRepository))
 ]
+ReferenceRuleSvc = Annotated[
+    ReferenceRuleService, Depends(get_service(ReferenceRuleService))
+]

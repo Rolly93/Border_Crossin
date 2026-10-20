@@ -4,12 +4,9 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from model.db_model import (
-    Client,
     ShipmentAssign,
     ShipmentEventModel,
     Trailer,
-    UnitAssignment,
-    UnitTruck,
 )
 from repository import ShipmentRepository
 from repository.system_config_repository import SystemConfigRepository
@@ -122,7 +119,7 @@ class ShipmentService:
             customer_tracking=data.customer_tracking,
             type_operation=data.type_operation,
             driver_id=assignment.driver_id,
-            client_id=data.cliente,
+            client_id=client.id,
             assigned_by=user_id,
             trailer_id=trailer.id,
             unit_truck_id=unit.id,

@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
 
-from database import get_db
 from deps.auth import CurrentUser, get_current_user, require_admin
-from deps.service import ClientSvc
+from deps.service import ClientSvc, ReferenceRuleSvc
+from model.db_model import ClientReferenceRule
 from schema import ClientRequest
 from schema.client_schema import (
     ClientNameResponse,
@@ -12,7 +11,6 @@ from schema.client_schema import (
     PaginatedClientResponse,
     ReferenceRuleOut,
 )
-from utility.reference_rule_service import ReferenceRuleService
 
 router = APIRouter(
     prefix="/client", tags=["client"], dependencies=[Depends(get_current_user)]
@@ -26,10 +24,10 @@ router = APIRouter(
 )
 async def clients_by_operation(
     current_user: CurrentUser,
-    db: Session = Depends(get_db),
+    service: ReferenceRuleSvc,
     operation_type: str = Query(..., description="importacion | exportacion"),
 ):
-    return ReferenceRuleService(db).clients_for_operation(operation_type)
+    return service.clients_for_operation(operation_type)
 
 
 @router.get(
@@ -38,11 +36,9 @@ async def clients_by_operation(
     response_model=list[ReferenceRuleOut],
 )
 async def client_reference_rules(
-    client_id: int,
-    current_user: CurrentUser,
-    db: Session = Depends(get_db),
-):
-    return ReferenceRuleService(db).rules_for_client(client_id)
+    client_id: int, current_user: CurrentUser, service: ReferenceRuleSvc
+) -> list[ClientReferenceRule]:
+    return service.rules_for_client(client_id)
 
 
 @router.get(
@@ -72,7 +68,7 @@ async def client_dashboard(
 async def get_clients(
     service: ClientSvc,
     current_user: CurrentUser,
-):
+) -> MetricsClientResponse:
     return service.get_metrics()
 
 
