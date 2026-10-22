@@ -20,10 +20,17 @@ class Env:
     PORT = int(os.getenv("PORT", 8000))
     USER_EMAIL = os.getenv("USER_EMAIL", "admin@test.com")
     USER_PASSWORD = os.getenv("USER_PASSWORD", "1234")
-    SECRET_KEY = os.getenv("SECRET_KEY", "").strip('"').strip("'")
+    
+    # Separate keys for JWT and Fernet (security best practice)
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "").strip('"').strip("'")
+    FERNET_KEY = os.getenv("FERNET_KEY", "").strip('"').strip("'")
+    
+    # Backwards compatibility: fall back to SECRET_KEY if new keys not set
+    SECRET_KEY = JWT_SECRET_KEY or os.getenv("SECRET_KEY", "").strip('"').strip("'")
+    
     ALGORITHM = os.getenv("ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
-        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 480)
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
     )
     DATABASE_URL = os.getenv("DATABASE_URL", "")
 

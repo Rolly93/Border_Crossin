@@ -1,7 +1,7 @@
 import { Container, Stack, Title, Text } from '@mantine/core';
 import { SftpClientList } from '@/features/sftp/components/SftpClientList';
 
-export function SftpConnection() {
+function SftpConnection() {
   return (
     <Container size="xl">
       <Stack gap="md" mb="lg">
@@ -16,3 +16,5 @@ export function SftpConnection() {
     </Container>
   );
 }
+
+export default SftpConnection;

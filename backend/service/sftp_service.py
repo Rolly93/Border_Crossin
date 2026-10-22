@@ -1,5 +1,4 @@
 import os
-
 import paramiko
 from fastapi import HTTPException, status
 
@@ -24,9 +23,26 @@ class SFTPService:
         try:
             if not self.__host:
                 raise ValueError("SFTP_HOST is not define in envarioment variables")
-            self.trasport = paramiko.Transport((self.__host, self.__port))
-            self.trasport.connect(username=self.__user, password=self.__password)
-            self.sftp = paramiko.SFTPClient.from_transport(self.trasport)
+            
+            # Create SSH client with host key verification
+            ssh_client = paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.RejectPolicy())
+            
+            # Load known hosts if file exists
+            known_hosts = os.path.expanduser("~/.ssh/known_hosts")
+            if os.path.exists(known_hosts):
+                ssh_client.load_host_keys(known_hosts)
+            
+            ssh_client.connect(
+                hostname=self.__host,
+                port=self.__port,
+                username=self.__user,
+                password=self.__password,
+                timeout=10,
+            )
+            
+            self.trasport = ssh_client.get_transport()
+            self.sftp = ssh_client.open_sftp()
             print(f"Connectando a SFTP: {self.__host}")
         except paramiko.AuthenticationException as e:
             self.close()

@@ -19,6 +19,7 @@ interface MetricsResponse {
 export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest> implements IClientService {
   constructor() {
     super('client');
+    this.updateIdParamName = 'client_id';
   }
 
   override async getAll(): Promise<ICliente[]> {

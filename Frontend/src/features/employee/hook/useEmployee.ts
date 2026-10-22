@@ -1,10 +1,10 @@
-import { useCallback } from 'react';
-import { EmployeeType, IEmployeeRequest, IEmployeeResponse, IEmployeeService, INewEmployeeRequest, TEmployeeResponseMap } from '../type/employee.interface';
-import { employeeService } from '../service/EmployeeService';
-import { usePaginatedList } from '@/components/hook/usePaginaterList';
+import { useCallback } from "react";
+import { EmployeeType, IEmployeeRequest, IEmployeeResponse, INewEmployeeRequest } from "../type/employee.interface";
+import { employeeService } from "../service/EmployeeService";
+import { usePaginatedList } from "@/components/hook/usePaginaterList";
+
 export function useEmployee() {
-  const fetchFn = useCallback((page: number, size: number) => employeeService.getPaginated(page, size), []
-  )
+  const fetchFn = useCallback((page: number, size: number) => employeeService.getPaginated(page, size), []);
 
   const {
     data: employeeData,
@@ -13,71 +13,83 @@ export function useEmployee() {
     error,
     hasMore,
     setError,
-    fetchNextPage, setLoading
-
+    fetchNextPage,
+    setLoading,
   } = usePaginatedList<IEmployeeResponse>(fetchFn);
 
-  const updateEmployee = async (id: number, updatedData: IEmployeeRequest): TEmployeeResponseMap => {
+  const updateEmployee = async (id: number, updatedData: IEmployeeRequest): Promise<IEmployeeResponse> => {
     try {
-      const updateEmployee = await employeeService.update(id, updatedData)
-      setEmployeeData((prev) =>
-        prev.map((c) => (c.id === id ? updateEmployee : c)));
-      return updateEmployee
+      const updated = await employeeService.update(id, updatedData);
+      setEmployeeData((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      return updated;
     } catch (error) {
-      console.error("Error updating client:", error)
+      console.error("Error updating employee:", error);
+      throw error;
     }
-  }
+  };
 
-  const getEmployeeData = async (id: number, cargoType: EmployeeType) => {
+  const getEmployeeData = async (id: number, cargoType: EmployeeType): Promise<IEmployeeResponse> => {
     try {
-      const employeeData = await employeeService.getEmployee(id, cargoType)
-      return employeeData
+      const employeeData = await employeeService.getEmployee(id, cargoType);
+      return employeeData as IEmployeeResponse;
     } catch (error) {
       console.error("Error fetching employee data", error);
-
+      throw error;
     }
-  }
+  };
 
-
-  const deleteEmployee = async (id: number) => {
+  const deleteEmployee = async (id: number): Promise<IEmployeeResponse> => {
     try {
-      const data = await employeeService.delete(id)
-
-      setEmployeeData((prev) => prev.filter((c) => (c.id !== data.id)))
-      return data
+      const data = await employeeService.delete(id);
+      setEmployeeData((prev) => prev.filter((c) => c.id !== data.id));
+      return data;
     } catch (error) {
-      console.error("Error updating client:", error)
+      console.error("Error deleting employee:", error);
+      throw error;
     }
+  };
 
-  }
-  const createNewEmployee = async (employeeData: IEmployeeRequest) => {
-
+  const createNewEmployee = async (employeeData: IEmployeeRequest): Promise<IEmployeeResponse> => {
     try {
-      setLoading(true)
-      setError(null)
-      const newEmployee = await employeeService.insert(employeeData)
-      setEmployeeData((prev) => [newEmployee, ...prev])
-      return newEmployee
+      setLoading(true);
+      setError(null);
+      const newEmployee = await employeeService.insert(employeeData);
+      setEmployeeData((prev) => [newEmployee, ...prev]);
+      return newEmployee;
     } catch (e: any) {
-      setError(e.message)
-      throw e
+      setError(e.message);
+      throw e;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  /** Alta de empleado tipo cargo (con cuenta) u operador (con licencia). */
-  const createEmployeeAccount = async (payload: INewEmployeeRequest) => {
-    setLoading(true)
-    setError(null)
+  const createEmployeeAccount = async (payload: INewEmployeeRequest): Promise<IEmployeeResponse> => {
+    setLoading(true);
+    setError(null);
     try {
-      const created = await employeeService.createEmployee(payload)
-      setEmployeeData((prev) => [created, ...prev])
-      return created
+      const created = await employeeService.createEmployee(payload);
+      setEmployeeData((prev) => [created, ...prev]);
+      return created;
+    } catch (e: any) {
+      setError(e.message);
+      throw e;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  return { employeeData, loading, error, hasMore, createNewEmployee, createEmployeeAccount, fetchNextPage, setError, updateEmployee, deleteEmployee, getEmployeeData } as const;
+  return {
+    employeeData,
+    loading,
+    error,
+    hasMore,
+    createNewEmployee,
+    createEmployeeAccount,
+    fetchNextPage,
+    setError,
+    updateEmployee,
+    deleteEmployee,
+    getEmployeeData,
+  } as const;
 }

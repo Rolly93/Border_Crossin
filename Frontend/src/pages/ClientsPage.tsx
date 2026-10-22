@@ -1,7 +1,7 @@
 import { Container, Stack, Title, Text } from '@mantine/core';
 import { ClientTable } from '@/features/clients/components/ClienteTable';
 
-export function ClientsPage() {
+function ClientsPage() {
   return (
     <Container size="xl">
       <Stack gap="md" mb="lg">
@@ -16,3 +16,5 @@ export function ClientsPage() {
     </Container>
   );
 }
+
+export default ClientsPage;

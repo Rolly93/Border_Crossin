@@ -6,7 +6,7 @@ from deps.auth import (
     CurrentUser,
     OptionalCurrentUser,
 )
-from deps.service import EmployeeSvc
+from deps.service import EmployeeSvc, UserSvc
 from schema import EmployeeResponseUnion
 from schema.employee_schema import (
     EmployeeCreateUnion,
@@ -14,8 +14,6 @@ from schema.employee_schema import (
     OperatorOption,
     PaginatedEmployeeResponse,
 )
-from utility.employee_service import EmployeeService
-from utility.user_service import UserService
 
 router = APIRouter(prefix="/employees", tags=["employee"])
 
@@ -80,7 +78,7 @@ async def list_operators(
 async def resgister_driver(
     rq: Request,
     data: EmployeeRequest,
-    service: EmployeeService,
+    service: EmployeeSvc,
     current_user: CurrentUser,
 ):
     pass
@@ -96,7 +94,7 @@ async def get_employee_data(
     rq: Request,
     id: int,
     current_user: CurrentUser,
-    service: UserService,
+    service: UserSvc,
     cargoType: CargoTypeEnum = Query(  # noqa: B008
         description="Type of employee: 'csr' or 'operador'"
     ),

@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Container, Paper, Stepper, Title, Text, Stack, Checkbox, Group, PasswordInput, TextInput, SegmentedControl, Alert } from '@mantine/core';
-import { EmployeeForm } from "@/features/employee/components/EmployeeForm";
+import { useEffect, useState } from "react";
+import { Container, Paper, Stepper, Title, Text, Stack, Checkbox, Group, PasswordInput, TextInput, SegmentedControl, Alert } from "@mantine/core";
 import { NewuserForm } from "./NewUserForm";
-import { useNavigate } from 'react-router-dom';
-import { useEmployee } from '@/features/employee/hook/useEmployee';
-import { useEmployeeForm } from '@/features/employee/hook/useEmployeeForm';
-import { AtomButton } from '@/components/atoms/AtomButton';
-import { DateInput } from '@mantine/dates';
+import { useNavigate } from "react-router-dom";
+import { useEmployee } from "@/features/employee/hook/useEmployee";
+import { useEmployeeForm } from "@/features/employee/hook/useEmployeeForm";
+import { AtomButton } from "@/components/atoms/AtomButton";
+import { DateInput } from "@mantine/dates";
 
-export function FirstTimeLog() {
+function FirstTimeLog() {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const navigate = useNavigate()
   const { createEmployeeAccount } = useEmployee();
@@ -56,9 +55,9 @@ export function FirstTimeLog() {
             <SegmentedControl
               fullWidth
               data={[
-                { value: 'csr', label: 'C.S.R (Representante de Cuenta)' },
+                { value: "cargo", label: "C.S.R (Representante de Cuenta)" },
               ]}
-              {...form.getInputProps('employeeType')}
+              {...form.getInputProps("employeeType")}
             />
 
             <Group grow>
@@ -100,3 +99,5 @@ export function FirstTimeLog() {
     </Container>
   );
 }
+
+export default FirstTimeLog;

@@ -1,12 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from deps.auth import decrypt_password
 from model.db_model import SftpSend
 from repository.sftp_repository import SftpRepository
 from repository.system_config_repository import SystemConfigRepository
 from schema.sftp_schema import SftpConfigurationRequest
 from service.sftp_sender import send_batch
+from utility.encryption import decrypt_password
 
 
 class SftpSendService:

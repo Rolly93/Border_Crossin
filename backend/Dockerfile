@@ -19,4 +19,4 @@ COPY . .
 
 # 5. Run FastAPI with Uvicorn
 # Replace 'main:app' with 'your_filename:your_fastapi_instance'
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,6 +1,6 @@
 import { createApiClient } from "@/service/api";
 
-const api = createApiClient(import.meta.env.VITE_API_URL);
+const api = createApiClient();
 
 export interface UpdateCheckResponse {
   update_available: boolean;

@@ -1,55 +1,47 @@
 import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
-import { extend } from "dayjs";
-
 
 export interface IEmployeeRequest {
-
   firstName: string;
   lastName: string;
-  dateOfBirth: Date;
+  dateOfBirth: string;
   rfc: string;
   role: string;
   hireDate?: string;
-  token?: string
-
+  token?: string;
 }
 
 export interface IEmployeeResponse extends IEmployeeRequest {
   id?: number;
 }
 
-export interface IEmployeeFormsValues extends IEmployeeRequest {
-}
+export interface IEmployeeFormsValues extends IEmployeeRequest {}
 
 export interface EmployeeFormProps {
   onSuccess?: () => void;
   onSetRfc?: (rfc: string) => void;
-  onClose?: () => void
-  employee?: IEmployeeRequest
+  onClose?: () => void;
+  employee?: IEmployeeRequest;
 }
 
-/** Tipo de empleado: cargo (tiene cuenta de usuario) u operador (tiene licencia y unidad). */
-export type EmployeeType = "csr" | "operador";
+export type EmployeeType = "cargo" | "operador";
 
-/** Payload que envía el formulario "Nuevo empleado" al endpoint POST /employees/create. */
 export interface INewEmployeeRequest {
   firstName: string;
   lastName: string;
-  dateOfBirth: string; // YYYY-MM-DD
+  dateOfBirth: string;
   rfc: string;
   role: string;
   employeeType: EmployeeType;
-  // cargo
   username?: string;
   email?: string;
   password?: string;
   isAdmin?: boolean;
-  // operador
   licenseNumber?: string;
-  licenseExpiration?: string; // YYYY-MM-DD
+  licenseExpiration?: string;
   gafetId?: string;
 }
-export interface IEMployeeBaseResponse {
+
+export interface IEmployeeBaseResponse {
   id: number;
   firstName: string;
   lastName: string;
@@ -59,22 +51,18 @@ export interface IEMployeeBaseResponse {
   employeeType: EmployeeType;
 }
 
-
-
-export interface IEmployeeUserResponse extends IEmployeeRequest {
+export interface IEmployeeUserResponse extends IEmployeeBaseResponse {
   username: string;
   email: string;
   password: string;
   isAdmin: boolean;
 }
 
-
-export interface IEmployeeDriverResponse extends IEmployeeRequest {
+export interface IEmployeeDriverResponse extends IEmployeeBaseResponse {
   licenseNumber: string;
   licenseExpiration: string;
   gafetId: string;
 }
-
 
 export interface IOperatorOption {
   id: number;
@@ -87,13 +75,12 @@ export interface IEmployeeFormRequest extends INewEmployeeRequest {
 
 export type TEmployeeResponseMap = {
   cargo: IEmployeeUserResponse;
-  operador: IEmployeeDriverResponse
-
-}
+  operador: IEmployeeDriverResponse;
+};
 
 export interface IEmployeeService extends IBaseService<IEmployeeResponse, IEmployeeRequest> {
-  getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>>
-  getOperators(): Promise<IOperatorOption[]>
-  createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>
-  getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]>
+  getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>>;
+  getOperators(): Promise<IOperatorOption[]>;
+  createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>;
+  getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]>;
 }

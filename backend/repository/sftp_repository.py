@@ -4,11 +4,11 @@ from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from deps.auth import decrypt_password, encrypt_password
 from model.db_model import SftpSend, SftpService, ShipmentAssign, ShipmentEventModel
 from repository.base_repository import BaseRepository
 from schema import SftpConfigurationRequest, SftpConfiRequst
 from schema.sftp_schema import SftpConfigIn
+from utility.encryption import decrypt_password, encrypt_password
 
 
 class SftpRepository(BaseRepository[SftpService]):

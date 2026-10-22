@@ -16,7 +16,7 @@ type ModalState =
   | { kind: 'edit'; unit: IUnit }
   | { kind: 'assign'; unit: IUnit };
 
-export function UnitPage() {
+function UnitPage() {
   const { isAdmin } = useAuth();
   const { units, loading, error, setError, refresh, createUnit, updateUnit, assignDriver, releaseDriver } = useUnits();
   const [modal, setModal] = useState<ModalState>({ kind: 'none' });
@@ -99,3 +99,5 @@ export function UnitPage() {
     </Container>
   );
 }
+
+export default UnitPage;

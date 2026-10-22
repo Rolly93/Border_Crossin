@@ -1,5 +1,5 @@
 import { ActionIcon, ActionIconProps } from "@mantine/core";
-import { TablerIcon } from "@tabler/icons-react";
+import type { TablerIcon } from "@tabler/icons-react";
 import React from "react";
 
 interface AtomActionIconProps extends ActionIconProps {

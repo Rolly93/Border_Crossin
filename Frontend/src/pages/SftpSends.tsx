@@ -1,7 +1,7 @@
 import { Container, Stack, Title, Text } from '@mantine/core';
 import { SftpSendsPanel } from '@/features/sftp/components/SftpSendsPanel';
 
-export function SftpSends() {
+function SftpSends() {
   return (
     <Container size="xl">
       <Stack gap="md" mb="lg">
@@ -16,3 +16,5 @@ export function SftpSends() {
     </Container>
   );
 }
+
+export default SftpSends;

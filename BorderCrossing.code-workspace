@@ -10,27 +10,20 @@
         },
         {
             "name": "Docker & Configs",
-            "path": ".",
-            "settings": {
-                "files.exclude": {
-                    "**/backend": true,
-                    "**/Frontend": true
-                }
-            }
+            "path": "."
         }
     ],
     "settings": {
+        "files.exclude": {
+            "backend": true,
+            "Frontend": true,
+            ".agents": true,
+            ".fastapicloud": true,
+            ".opencode": true,
+            ".firebase": true
+        },
         "python.analysis.extraPaths": [
             "${workspaceFolder:Backend (Python)}"
-        ],
-        "python.analysis.inlayHints.callArgumentNames": "all",
-        "python.analysis.inlayHints.functionReturnTypes": true,
-        "python.analysis.inlayHints.pytestParameters": true,
-        "python.analysis.inlayHints.variableTypes": true,
-        "python.analysis.showOnlyDirectDependenciesInAutoImport": true,
-        "python.analysis.typeEvaluation.strictListInference": true,
-        "python.analysis.typeEvaluation.strictDictionaryInference": true,
-        "python.analysis.typeEvaluation.strictSetInference": true,
-        "python.analysis.typeCheckingMode": "standard"
+        ]
     }
 }

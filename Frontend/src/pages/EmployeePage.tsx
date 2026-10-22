@@ -1,7 +1,7 @@
 import { EmployeeTable } from '@/features/employee/components/EmployeeTable';
 import { Container, Stack, Title, Text } from '@mantine/core';
 
-export function EmployeePage() {
+function EmployeePage() {
   return (
     <Container size="xl">
       <Stack gap="md" mb="lg">
@@ -16,3 +16,5 @@ export function EmployeePage() {
     </Container>
   );
 }
+
+export default EmployeePage;

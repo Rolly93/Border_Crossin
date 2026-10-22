@@ -20,7 +20,6 @@ from sqlalchemy.orm import (
     mapped_column,
     relationship,
 )
-from sqlalchemy.orm.properties import MappedColumn
 
 hire_date: date = date.today()
 
@@ -247,7 +246,7 @@ class Trailer(Base):
     __tablename__ = "trailer"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    trailer_number: MappedColumn[str] = mapped_column(String(length=50), nullable=False)
+    trailer_number: Mapped[str] = mapped_column(String(length=50), nullable=False)
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     seal: Mapped[str] = mapped_column(String(50), nullable=False, default="N/A")

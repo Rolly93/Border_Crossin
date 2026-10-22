@@ -6,7 +6,7 @@ import { Shipment } from '@/types/Shipment';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import ShipmentTable from '@/features/shipments/components/ShipmentTable';
 
-export function DashBoard() {
+function DashBoard() {
   const { shipments, loading, error, addShipment, updateShipment, hasMore, fetchNextPage } = useShipments();
   const [isCreating, setIsCreating] = useState(false);
   const [search, setSearch] = useState('');
@@ -77,3 +77,5 @@ export function DashBoard() {
     </Container>
   );
 }
+
+export default DashBoard;

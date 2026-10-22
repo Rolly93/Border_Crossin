@@ -11,10 +11,8 @@ interface EmployeeModalProps {
 }
 
 const TYPE_OPTIONS: { value: EmployeeType; label: string }[] = [
-  { value: 'csr', label: 'C.S.R (Representante de Cuenta)' },
-  { value: 'operador', label: 'Operador (con licencia y unidad)' },
-
-
+  { value: "cargo", label: "C.S.R (Representante de Cuenta)" },
+  { value: "operador", label: "Operador (con licencia y unidad)" },
 ];
 
 export function EmployeeModal({ opened, onClose, employeeForm }: EmployeeModalProps) {

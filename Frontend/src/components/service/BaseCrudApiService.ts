@@ -4,20 +4,18 @@ import { IBaseService } from "./IBaseService";
 export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseApiService
   implements IBaseService<T, UpdateT> {
 
+  protected updateIdParamName = 'id';
+
   async getAll(): Promise<T[]> {
-
     const response = await this.api.get<T[]>(`/${this.resourcePath}`);
-
-    return response.data
-
+    return response.data;
   }
+
   async update(id: number, data: UpdateT): Promise<T> {
-
     const response = await this.api.put<T>(`${this.resourcePath}/update`, data, {
-      params: { client_id: id }
-    })
-
-    return response.data
+      params: { [this.updateIdParamName]: id },
+    });
+    return response.data;
   }
 
   async insert(data: T): Promise<T> {
@@ -53,9 +51,8 @@ export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseAp
     }
   }
   async delete(id: number): Promise<T> {
-
-    const respose = await this.api.delete<T>(`${this.resourcePath}/delete/${id}`)
-    return respose.data
+    const response = await this.api.delete<T>(`${this.resourcePath}/delete/${id}`);
+    return response.data;
   }
 
 

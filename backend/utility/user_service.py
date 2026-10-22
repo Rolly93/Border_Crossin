@@ -91,6 +91,7 @@ class UserService:
             extra_data={
                 "is_admin": user.is_admin,
                 "is_first_time": False,
+                "email": user.email,
             },
             expires_delta=timedelta(hours=8),
         )

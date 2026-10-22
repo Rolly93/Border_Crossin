@@ -122,3 +122,8 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def get_database_url() -> str:
+    """Get the database URL as a string for alembic."""
+    return str(DATABASE_URL.render_as_string(hide_password=False))

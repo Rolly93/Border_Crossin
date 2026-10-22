@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Annotated
 
 import jwt
-from cryptography.fernet import Fernet
 from fastapi import Depends, Header, HTTPException, Query, Request, status
 
 from config import Env
@@ -99,23 +98,6 @@ def get_user_id(current_user: CurrentUser) -> int:
             detail="Inicia sesión con tu usuario",
         )
     return int(current_user.sub)
-
-
-fernet = Fernet(
-    config.SECRET_KEY.encode()
-    if isinstance(config.SECRET_KEY, str)
-    else config.SECRET_KEY
-)
-
-
-def encrypt_password(plan_password: str) -> str:
-    encrypted_bytes = fernet.encrypt(plan_password.encode("utf-8"))
-    return encrypted_bytes.decode("utf-8")
-
-
-def decrypt_password(encrypted_password: str) -> str:
-    decrypted_bytes = fernet.decrypt(encrypted_password.encode("utf-8"))
-    return decrypted_bytes.decode("utf-8")
 
 
 CurrentUser = Annotated[TokenPayload | InitialTokenPayload, Depends(get_current_user)]
