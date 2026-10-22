@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Container,
   Title,
@@ -22,17 +22,6 @@ export const UnderConstruction: React.FC<UnderConstructionProps> = ({
   expectedLaunchDate,
   progress
 }) => {
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setIsSubscribed(true);
-      setEmail('');
-    }
-  };
-
   return (
     <Box
       style={{

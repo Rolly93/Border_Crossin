@@ -13,8 +13,6 @@ export function useFormNotifications({
   title = 'Error de Validación'
 }: UseFormNotificationsProps) {
 
-  const serializedErrors = JSON.stringify(errors);
-
   useEffect(() => {
     const activeErrors = Object.entries(errors)
       .filter(([key, value]) => key.startsWith(prefix) && typeof value === 'string')
@@ -29,5 +27,5 @@ export function useFormNotifications({
         });
       });
     }
-  }, [serializedErrors, prefix, title]);
+  }, [errors, prefix, title]);
 }

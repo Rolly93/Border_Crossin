@@ -63,8 +63,6 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
       return response.data;
     } catch (error: any) {
-      console.error("Error fetching metrics:", error);
-
       const errorMessage =
         error.response?.data?.detail ||
         error.response?.data?.message ||
@@ -81,7 +79,6 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
     const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
       params: { page: page, limit: limit },
     });
-    console.log(response.data);
 
     if (response.status === 200) {
 

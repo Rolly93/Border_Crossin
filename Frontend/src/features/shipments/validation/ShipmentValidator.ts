@@ -87,7 +87,9 @@ export class ShipmentValidator {
       const currentDate = new Date(currentEvent.dateTime!).getTime();
       const nextDate = new Date(nextEvent.dateTime!).getTime();
 
-      if (isNaN(currentDate) || isNaN(nextDate)) continue;
+      if (isNaN(currentDate) || isNaN(nextDate)) {
+        continue;
+      }
 
       if (nextDate < currentDate) {
         const realIndex = currentEvents.findIndex(e => e.category === nextEvent.category);
@@ -142,56 +144,39 @@ export class ShipmentValidator {
     return errors;
   }
 
-  private FieldsName(fieldNAme: string): string {
-    switch (fieldNAme) {
+  private FieldsName(fieldName: string): string {
+    let displayName = fieldName;
+    switch (fieldName) {
       case "pick_up":
-        fieldNAme = " Recoleccion"
-
+        displayName = " Recoleccion";
         break;
-
       case "departure":
-        fieldNAme = " Salida de patio"
-
+        displayName = " Salida de patio";
         break;
-
       case "delay":
-        fieldNAme = " retraso"
-
+        displayName = " retraso";
         break;
-
       case "mex_inspeccion":
-        fieldNAme = " inspeccion Mexican"
-
+        displayName = " inspeccion Mexican";
         break;
-
       case "clear_mex":
-        fieldNAme = "Liberacion Aduana Mexicana"
-
+        displayName = "Liberacion Aduana Mexicana";
         break;
-
       case "usa_inspeccion":
-        fieldNAme = "Inspeccion Aduana Usa"
-
+        displayName = "Inspeccion Aduana Usa";
         break;
-
       case "clear_usa":
-        fieldNAme = "Liberacion Aduana Americana"
-
+        displayName = "Liberacion Aduana Americana";
         break;
-
       case "safety_yard":
-        fieldNAme = "Resguardo de yarda"
-
+        displayName = "Resguardo de yarda";
         break;
-
       case "deliver":
-        fieldNAme = "Entrega"
-
+        displayName = "Entrega";
         break;
-
       default:
         break;
     }
-    return fieldNAme
+    return displayName;
   }
 }

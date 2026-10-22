@@ -26,11 +26,19 @@ export const ValidateClientReference = ({
   const clientName = String(onClientName || '').trim();
   const typeOperation = String(onTypeOperation || '').trim().toLowerCase();
 
-  if (!clientName) return { isValid: false, field: 'cliente', error: 'Cliente es requerido' };
-  if (!typeOperation) return { isValid: false, field: 'type_operation', error: 'Tipo de operación requerido' };
-  if (!reference) return { isValid: false, field: 'customer_tracking', error: 'Referencia requerida' };
+  if (!clientName) {
+    return { isValid: false, field: 'cliente', error: 'Cliente es requerido' };
+  }
+  if (!typeOperation) {
+    return { isValid: false, field: 'type_operation', error: 'Tipo de operación requerido' };
+  }
+  if (!reference) {
+    return { isValid: false, field: 'customer_tracking', error: 'Referencia requerida' };
+  }
 
-  if (rules.length === 0) return { isValid: true };
+  if (rules.length === 0) {
+    return { isValid: true };
+  }
 
   const opRules = rules.filter((rule) => rule.operation_type === typeOperation);
   if (opRules.length === 0) {
@@ -42,11 +50,13 @@ export const ValidateClientReference = ({
       reference.startsWith(rule.prefix.toLowerCase()) &&
       (rule.reference_length === null || reference.length === rule.reference_length)
   );
-  if (matches) return { isValid: true };
+  if (matches) {
+    return { isValid: true };
+  }
 
   const prefixes = [...new Set(opRules.map((rule) => rule.prefix.toUpperCase()))].join(' o ');
   const length = opRules.find((rule) => rule.reference_length)?.reference_length;
-  const error = `La referencia debe empezar con ${prefixes}` + (length ? ` y tener ${length} caracteres` : '');
+  const error = `La referencia debe empezar con ${prefixes}${length ? ` y tener ${length} caracteres` : ''}`;
   return { isValid: false, field: 'customer_tracking', error };
 };
 

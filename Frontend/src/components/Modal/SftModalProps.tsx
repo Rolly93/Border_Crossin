@@ -1,6 +1,5 @@
-import { Button, Drawer, Group, LoadingOverlay, Stack, Text, Title } from "@mantine/core";
+import { Drawer, Group, LoadingOverlay, Stack, Text, Title } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useTranslation } from "react-i18next";
 import { AtomTextInput } from "../atoms/AtomTextInput";
 import { useSftp } from "@/features/sftp/hooks/useSftp";
 import { useEffect, useState } from "react";
@@ -54,15 +53,20 @@ export default function SftModal({ opened, onClose, clientId }: IsftModalProps) 
     }, [opened, clientId, getSftpConfig]);
 
     const handelDelete = async () => {
-        if (!sftpConfig?.id) return
-        if (!window.confirm("¿Desactivar la configuración SFTP de este cliente?")) return
-        try {
-            await deleteSftpConfig(sftpConfig.id)
-            onClose()
-        } catch (err: any) {
-            setLocalError(getErrorMessage(err, "No se pudo eliminar"))
-        }
+    if (!sftpConfig?.id) {
+      return;
     }
+    // eslint-disable-next-line no-alert
+    if (!window.confirm("¿Desactivar la configuración SFTP de este cliente?")) {
+      return;
+    }
+    try {
+      await deleteSftpConfig(sftpConfig.id);
+      onClose();
+    } catch (err: any) {
+      setLocalError(getErrorMessage(err, "No se pudo eliminar"));
+    }
+  };
 
     const handelSubmit = async (values: SftpFormValues) => {
         const payload: ISftpConfiguration = {
@@ -129,12 +133,14 @@ function SftpForm({ initialData, onSubmit, onDelete, canEdit }: SftpFromsProps) 
                     : "Puerto debe ser un número entre 1 y 65535";
             },
             host: (v) => {
-                if (!v.trim()) return "Host requerido";
+                if (!v.trim()) {
+                  return "Host requerido";
+                }
                 if (/\s/.test(v) || v.includes("://") || v.includes("/")) {
-                    return "Solo el nombre o IP del servidor (sin http:// ni rutas)";
+                  return "Solo el nombre o IP del servidor (sin http:// ni rutas)";
                 }
                 return null;
-            },
+              },
             root_folder: (v) => (v.trim() ? null : "Carpeta local requerida"),
             remote_folder: (v) => (v.trim() ? null : "Carpeta remota requerida"),
         },
@@ -142,7 +148,7 @@ function SftpForm({ initialData, onSubmit, onDelete, canEdit }: SftpFromsProps) 
 
     return (
         <form onSubmit={form.onSubmit((values) => { onSubmit(values) })} noValidate>
-            <Stack gap={'xl'} >
+            <Stack gap="xl">
                 <Title order={2}>SFTP Configuration</Title>
                 {!canEdit && (
                     <Text size="sm" c="dimmed">
@@ -150,7 +156,7 @@ function SftpForm({ initialData, onSubmit, onDelete, canEdit }: SftpFromsProps) 
                     </Text>
                 )}
                 <fieldset disabled={!canEdit} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
-                <Stack gap={'xl'}>
+                <Stack gap="xl">
                 <AtomTextInput
                     label="Usuario"
                     placeholder="usuario SFTP"
@@ -195,7 +201,7 @@ function SftpForm({ initialData, onSubmit, onDelete, canEdit }: SftpFromsProps) 
                             <div />
                         )}
     
-                        <AtomButton type={'submit'} color='teal'  >
+                        <AtomButton type="submit" color="teal">
                             GUARDAR
                         </AtomButton>
                     </Group>

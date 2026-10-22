@@ -14,11 +14,11 @@ export function useClients() {
 
   const {
     data: clients,
-    setData: setClients, hasMore,
+    hasMore,
     loading,
     error,
     setError, fetchPage,
-    fetchNextPage, setLoading
+    fetchNextPage
 
   } = usePaginatedList<ICliente>(fetchFn);
 
@@ -35,22 +35,17 @@ export function useClients() {
 
 
   const getClientList = async (): Promise<ClientOption[] | null> => {
-    try {
-      const data = await clientService.getAll();
+    const data = await clientService.getAll();
 
-      const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
-      const clienteName = safeData.map((c: any) => ({
-        name: c.name,
-        id: c.id,
-      }));
+    const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
+    const clienteName = safeData.map((c: any) => ({
+      name: c.name,
+      id: c.id,
+    }));
 
-      setClientsName(clienteName);
+    setClientsName(clienteName);
 
-      return clienteName
-    } catch (error: any) {
-      console.error("Error getting client names:", error)
-      throw error;
-    }
+    return clienteName;
   }
 
   useEffect(() => {
@@ -73,7 +68,8 @@ export function useClients() {
 
   useEffect(() => {
     fetchClientsMetrics();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchClientsMetrics]);
 
 
 
@@ -86,10 +82,8 @@ export function useClients() {
       await fetchClientsMetrics();
       return createClient;
     } catch (error: any) {
-      console.error("Error creating client:", error)
       setError(error.message)
       throw error;
-
     }
 
   }
@@ -104,7 +98,6 @@ export function useClients() {
       await fetchClientsMetrics();
       return updated;
     } catch (error: any) {
-      console.error("Error updating client:", error);
       setError(error.message);
       throw error;
     }
@@ -116,7 +109,6 @@ export function useClients() {
       await fetchClientsMetrics();
       return clientDelete
     } catch (error: any) {
-      console.error("Error updating client:", error)
       setError(error.message)
       throw error
     }
@@ -131,7 +123,6 @@ export function useClients() {
         await fetchClientsMetrics();
         return clientDelete
       } catch (error: any) {
-        console.error("Error updating client:", error)
         setError(error.message)
         throw error
       }

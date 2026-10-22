@@ -11,7 +11,7 @@ import { notifications } from '@mantine/notifications';
 import { ValidateClientReference } from '@/components/utils/businessRules';
 
 export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const form = useForm({
     mode: 'controlled',
     validateInputOnChange: true,
@@ -55,7 +55,7 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
 
 
 
-  const handleValidationError = (errors: typeof form.errors) => {
+  const handleValidationError = (_errors: typeof form.errors) => {
     notifications.show({
       title: 'Error de Datos',
       message: 'Por favor revisa los campos marcados en rojo antes de continuar.',

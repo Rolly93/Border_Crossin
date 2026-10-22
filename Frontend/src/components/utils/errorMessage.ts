@@ -13,19 +13,25 @@ export function getErrorMessage(err: any, fallback = "Ocurrió un error"): strin
     return `${fallback} (el servidor respondió ${err.response.status})`;
   }
 
-  if (typeof detail === "string" && detail) return detail;
+  if (typeof detail === "string" && detail) {
+    return detail;
+  }
 
   if (Array.isArray(detail)) {
     return detail
       .map((item: any) => {
-        if (typeof item === "string") return item;
+        if (typeof item === "string") {
+          return item;
+        }
         const field = Array.isArray(item?.loc) ? item.loc.slice(1).join(".") : "";
         return field ? `${field}: ${item?.msg}` : String(item?.msg ?? fallback);
       })
       .join(", ");
   }
 
-  if (err instanceof Error && err.message) return err.message;
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
 
   return fallback;
 }

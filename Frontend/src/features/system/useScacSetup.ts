@@ -9,11 +9,15 @@ export function useScacSetup() {
     systemConfigService
       .getScac()
       .then((scac) => {
-        if (active) setNeedsSetup(!scac);
+        if (active) {
+          setNeedsSetup(!scac);
+        }
       })
       .catch(() => {
         // Si no se puede consultar, no bloqueamos la aplicación.
-        if (active) setNeedsSetup(false);
+        if (active) {
+          setNeedsSetup(false);
+        }
       });
     return () => {
       active = false;

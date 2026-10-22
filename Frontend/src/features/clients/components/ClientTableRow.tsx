@@ -28,7 +28,7 @@ export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProp
         {canManage && <AtmoAction
           icon={IconTrash}
           color="red"
-          variant={'subtle'}
+          variant="subtle"
           title="Eliminar cliente"
           onClick={(e) => {
             e.stopPropagation();

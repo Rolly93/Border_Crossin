@@ -12,7 +12,7 @@ interface EmbarqueModalProps {
 }
 
 export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, loading }: EmbarqueModalProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const SubmitShipment = async (formData: Shipment) => {
     await onSubmit(formData)
   }

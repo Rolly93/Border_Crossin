@@ -1,11 +1,11 @@
-import react from 'react'
-import { TextInput, TextInputProps } from '@mantine/core'
 import React from 'react';
+import { TextInput, type TextInputProps } from '@mantine/core';
 
 interface AtomTexxtInputProps extends TextInputProps {
   label: string;
   placeholder?: string;
-  required?: boolean
+  required?: boolean;
+  type?: string;
 }
 
 export const AtomTextInput: React.FC<AtomTexxtInputProps> = ({ label, placeholder, required = false, ...rest }) => {

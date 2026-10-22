@@ -1,11 +1,11 @@
-import { ICliente } from "@/features/clients/types/Cliente";
 import { Modal, TextInput, Stack, Group, ScrollArea, Avatar, Text, SimpleGrid, Alert } from "@mantine/core";
 import { useForm, isEmail } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { IconFileText, IconMail, IconPlus, IconX } from "@tabler/icons-react";
+import { IconMail, IconPlus, IconX } from "@tabler/icons-react";
 import ActionCard from "../../../components/ui/ActionCard";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { AtmoAction } from "@/components/atoms/AtomActionIcon";
+import { ICliente } from "@/features/clients/types/Cliente";
 
 interface ClienteModalProps {
     onSelectClient: ICliente | null;
@@ -64,7 +64,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
         }
 
 
-    }, [onSelectClient, opened]);
+    }, [onSelectClient, opened, form]);
 
 
 
@@ -94,7 +94,9 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
 
     const handleSubmit = async (values: typeof form.values) => {
 
-        if (!values.companyName) return
+        if (!values.companyName) {
+          return;
+        }
 
 
         const finalData = {
@@ -109,9 +111,6 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
 
             onClose();
         } catch (err: any) {
-            console.log('Save Failed', err);
-
-
         }
     };
 
@@ -132,7 +131,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                     <Alert color="red" mb="md" onClose={() => onSetError(null)} withCloseButton>
                         {onError}
                     </Alert>
-                )}                <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing={'md'}>
+                )}                <SimpleGrid cols={{ base: 1, sm: 2, lg: 2 }} spacing="md">
 
                     <ActionCard
                         title="Email Notification"
@@ -170,7 +169,9 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                                     error={emailError}
                                     onChange={(e) => {
                                         setNewEmail(e.target.value);
-                                        if (emailError) setEmailError(null);
+                                        if (emailError) {
+                                          setEmailError(null);
+                                        }
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {

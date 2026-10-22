@@ -34,7 +34,6 @@ export function useSftp() {
       setSftpConfig(update);
       return update
     } catch (error: any) {
-      console.error("Error updating SFTP config:", error);
       setError(error.message || "Error updating configuration");
       throw error;
     } finally {
@@ -43,15 +42,10 @@ export function useSftp() {
   }
 
   const createSftpConfig = async (newSftp: ISftpConfiguration): Promise<ISftpConfiguration> => {
-    try {
-      const createNewSftp = await sftpService.insert(newSftp)
+    const createNewSftp = await sftpService.insert(newSftp)
 
-      setSftpConfig(createNewSftp);
-      return createNewSftp;
-    } catch (err) {
-      console.error("Error creating client:", err)
-      throw err;
-    }
+    setSftpConfig(createNewSftp);
+    return createNewSftp;
   }
 
   const deleteSftpConfig = async (id: number): Promise<void> => {

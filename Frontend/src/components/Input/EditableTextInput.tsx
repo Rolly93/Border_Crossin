@@ -16,7 +16,9 @@ export default function EditableTextInput({ label, placeholder, formProps }: Edi
         readOnly={!isEditing}
         onDoubleClick={() => setIsediting(true)}
         onBlur={(event) => {
-            if (formProps?.onBlur) formProps.onBlur(event);
+            if (formProps?.onBlur) {
+              formProps.onBlur(event);
+            }
             setIsediting(false);
         }}
         rightSection={isEditing ? (

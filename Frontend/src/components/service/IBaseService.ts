@@ -1,4 +1,4 @@
-import { ISftpConfiguration, ISftpSend, SftpSendFilters, ResendRequest } from '@/features/clients/types/Cliente';
+import { ISftpConfiguration, ISftpSend, SftpSendFilters } from '@/features/clients/types/Cliente';
 
 export interface PaginatedResponse<T> {
   data: T[];

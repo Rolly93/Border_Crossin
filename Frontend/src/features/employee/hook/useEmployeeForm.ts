@@ -90,24 +90,43 @@ export function useEmployeeForm({
     validate: (values) => {
       const errors: Partial<Record<keyof EmployeeFormValues, string>> = {};
 
-      if (!values.firstName.trim()) errors.firstName = "Requerido";
-      if (!values.lastName.trim()) errors.lastName = "Requerido";
-      if (!values.dateOfBirth) errors.dateOfBirth = "Requerido";
+      if (!values.firstName.trim()) {
+        errors.firstName = "Requerido";
+      }
+      if (!values.lastName.trim()) {
+        errors.lastName = "Requerido";
+      }
+      if (!values.dateOfBirth) {
+        errors.dateOfBirth = "Requerido";
+      }
 
       const rfc = values.rfc.trim().toUpperCase();
-      if (!rfc) errors.rfc = "Requerido";
-      else if (!RFC_PATTERN.test(rfc)) errors.rfc = "RFC con formato inválido";
+      if (!rfc) {
+        errors.rfc = "Requerido";
+      } else if (!RFC_PATTERN.test(rfc)) {
+        errors.rfc = "RFC con formato inválido";
+      }
 
       if (values.employeeType === "cargo") {
-        if (values.username.trim().length < 3) errors.username = "Mínimo 3 caracteres";
-        if (!EMAIL_PATTERN.test(values.email.trim())) errors.email = "Correo inválido";
+        if (values.username.trim().length < 3) {
+          errors.username = "Mínimo 3 caracteres";
+        }
+        if (!EMAIL_PATTERN.test(values.email.trim())) {
+          errors.email = "Correo inválido";
+        }
 
         if (!isEditing || values.password.length > 0) {
-          if (values.password.length < 8) errors.password = "Mínimo 8 caracteres";
-          if (values.confirmPassword !== values.password) errors.confirmPassword = "Las contraseñas no coinciden";
+          if (values.password.length < 8) {
+            errors.password = "Mínimo 8 caracteres";
+          }
+          if (values.confirmPassword !== values.password) {
+            errors.confirmPassword = "Las contraseñas no coinciden";
+          }
         }
       } else {
-        if (!values.licenseNumber.trim()) errors.licenseNumber = "Requerido";
+        if (!values.licenseNumber.trim()) {
+          errors.licenseNumber = "Requerido";
+        }
         if (!values.licenseExpiration) {
           errors.licenseExpiration = "Requerido";
         } else if (values.licenseExpiration <= new Date() && !isEditing) {
@@ -149,13 +168,17 @@ export function useEmployeeForm({
   };
 
   const submit = async (): Promise<IEmployeeResponse | undefined> => {
-    if (form.validate().hasErrors) return undefined;
+    if (form.validate().hasErrors) {
+      return undefined;
+    }
     setSubmitError(null);
     setSubmitting(true);
     try {
       const payload = buildPayload(form.values);
       const result = await onSubmitAction(payload, initialEmployee?.id);
-      if (result) onSuccess?.(result);
+      if (result) {
+        onSuccess?.(result);
+      }
       return result;
     } catch (err) {
       setSubmitError(getErrorMessage(err, "No se pudo guardar la información del empleado"));

@@ -4,21 +4,6 @@ import { shipmentService } from "@/features/shipments/service/shipmentService";
 
 const PAGE_SIZE = 10;
 
-function shipmentToUpdate(shipment: Shipment): ShipmentUpdate {
-  return {
-    tracking_number: shipment.tracking_number,
-    customer_tracking: shipment.customer_tracking,
-    cliente: parseInt(shipment.cliente, 10) || 0,
-    truck: shipment.truck,
-    vehicle_type: shipment.vehicle_type,
-    trailer: shipment.trailer,
-    origen: shipment.origen,
-    destination: shipment.destino,
-    type_operation: shipment.type_operation,
-    events: shipment.events,
-  };
-}
-
 export function useShipments() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -45,7 +30,6 @@ export function useShipments() {
       );
     } catch (err) {
       setError("Failed to load shipments");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -64,40 +48,24 @@ export function useShipments() {
   }, [loading, hasMore, page, fetchShipments]);
 
   const updateShipment = async (id: number, shipmentData: ShipmentUpdate) => {
-    try {
-      const updated = await shipmentService.update(id, shipmentData);
-      setShipments((prev) =>
-        prev.map((item) => (item.id === id ? updated : item))
-      );
-      return updated;
-    } catch (err) {
-      console.error("Error updating shipment:", err);
-      throw err;
-    }
+    const updated = await shipmentService.update(id, shipmentData);
+    setShipments((prev) =>
+      prev.map((item) => (item.id === id ? updated : item))
+    );
+    return updated;
   };
 
   const deleteShipment = async (id: number) => {
-    try {
-      const result = await shipmentService.delete(id);
-      const deletedId = result?.id ?? id;
-      setShipments((prev) => prev.filter((item) => item.id !== deletedId));
-      return result;
-    } catch (err) {
-      console.error("Error deleting shipment:", err);
-      throw err;
-    }
+    const result = await shipmentService.delete(id);
+    const deletedId = result?.id ?? id;
+    setShipments((prev) => prev.filter((item) => item.id !== deletedId));
+    return result;
   };
 
   const addShipment = async (newShipment: Shipment): Promise<Shipment> => {
-    try {
-
-      const createdShipment = await shipmentService.insert(newShipment);
-      setShipments((prev) => [createdShipment, ...prev]);
-      return createdShipment;
-    } catch (err) {
-      console.error("Error creating new shipment:", err);
-      throw err;
-    }
+    const createdShipment = await shipmentService.insert(newShipment);
+    setShipments((prev) => [createdShipment, ...prev]);
+    return createdShipment;
   };
 
   return {

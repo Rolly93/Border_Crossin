@@ -10,16 +10,32 @@ export function useUnitHistory(unitId: number | null) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (unitId === null) return;
+    if (unitId === null) {
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
     unitService
       .history(unitId)
-      .then((rows) => { if (!cancelled) setHistory(rows); })
-      .catch((err) => { if (!cancelled) setError(getErrorMessage(err, "No se pudo cargar el historial")); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .then((rows) => {
+        if (!cancelled) {
+          setHistory(rows);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(getErrorMessage(err, "No se pudo cargar el historial"));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [unitId]);
 
   return { history, loading, error } as const;

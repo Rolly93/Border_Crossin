@@ -31,8 +31,8 @@ function shipmentToUpdate(shipment: Shipment): ShipmentUpdate {
   };
 }
 
-export default function ShipmentTable({ shipments, loading, error, onUpdateShipment, onLastElement }: ShipmentTableProps) {
-  const { t, i18n } = useTranslation()
+export default function ShipmentTable({ shipments, loading, error: _error, onUpdateShipment, onLastElement }: ShipmentTableProps) {
+  const { t } = useTranslation()
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedElement, setSelectedElement] = useState<Shipment | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,7 +54,6 @@ export default function ShipmentTable({ shipments, loading, error, onUpdateShipm
 
       close();
     } catch (err) {
-      console.error("Error saving:", err);
     } finally {
       setIsSaving(false);
     }
@@ -68,8 +67,8 @@ export default function ShipmentTable({ shipments, loading, error, onUpdateShipm
       <Table.ScrollContainer minWidth={1400} maxHeight={500} h={500}  >
         <Table
           highlightOnHover
-          horizontalSpacing={'md'}
-          verticalSpacing={'sm'}
+          horizontalSpacing="md"
+          verticalSpacing="sm"
           layout='fixed' >
           <Table.Thead>
             <Table.Tr>

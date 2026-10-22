@@ -1,4 +1,4 @@
-import { Button, Group, Switch, useMantineColorScheme } from '@mantine/core';
+import { Group, Switch, useMantineColorScheme } from '@mantine/core';
 import { IconSun, IconMoon } from '@tabler/icons-react';
 
 export function ColorSchemeToggle() {

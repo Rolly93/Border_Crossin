@@ -34,7 +34,9 @@ export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseAp
       else if (Array.isArray(responseData?.detail)) {
         errorMessage = responseData.detail
           .map((err: any) => {
-            if (typeof err === 'string') return err;
+            if (typeof err === 'string') {
+              return err;
+            }
             const field = err.loc ? err.loc.slice(1).join('.') : '';
             return field ? `${field}: ${err.msg}` : err.msg;
           })

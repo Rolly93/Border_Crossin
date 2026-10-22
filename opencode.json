@@ -3,7 +3,10 @@
     "servers": {
       "context7": {
         "type": "remote",
-        "url": "https://mcp.context7.com/mcp"
+        "url": "https://mcp.context7.com/mcp",
+        "headers": {
+          "CONTEXT7_API_KEY": "ctx7sk-7c2f1f57-678d-4060-9eed-cda933fe5daa"
+        }
       }
     }
   }

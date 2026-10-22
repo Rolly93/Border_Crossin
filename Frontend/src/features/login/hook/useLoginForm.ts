@@ -1,7 +1,7 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AuthtenticationService } from '../service/LoginService';
+import { AuthenticationService } from '../service/LoginService';
 import { ISignIn, ISignInPayload, LoginCredentials } from '../type/ILoginService';
 
 export function useLoginForm() {
@@ -23,7 +23,7 @@ export function useLoginForm() {
     setLoading(true);
     try {
 
-      const data = await AuthtenticationService.login(credencials);
+      const data = await AuthenticationService.login(credencials);
 
       login(data.access_token);
       navigate('/');
@@ -45,7 +45,7 @@ export function useLoginForm() {
     setLoading(true);
 
     try {
-      const data = await AuthtenticationService.signIn(employeeData);
+      const data = await AuthenticationService.signIn(employeeData);
 
       return data;
     } catch (err: any) {

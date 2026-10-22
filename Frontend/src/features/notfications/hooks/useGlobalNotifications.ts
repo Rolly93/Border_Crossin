@@ -5,8 +5,6 @@ import { useEffect } from "react";
 export function useGlobalNotifications() {
     useEffect(() => {
         const unsubscribe = notificationsStreamService.subscribe((data) => {
-
-            console.log('Evento recibido en React:', data);
             notifications.show({
                 id: `sftp-${data.shipment_id}`,
                 color: data.status === 'SUCCESS' ? 'green' : 'red',
@@ -16,6 +14,5 @@ export function useGlobalNotifications() {
             })
         })
         return () => { unsubscribe(); }
-
     }, [])
 }

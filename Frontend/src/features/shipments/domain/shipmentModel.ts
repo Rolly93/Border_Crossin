@@ -10,7 +10,9 @@ export class ShipmentModel {
 
   public getEventDate(categoryKey: EventCategory): string {
     const event = this.getEvent(categoryKey);
-    if (!event || !event.dateTime) return '--';
+    if (!event || !event.dateTime) {
+      return '--';
+    }
 
     return new Date(event.dateTime)
       .toLocaleString('en-GB', {

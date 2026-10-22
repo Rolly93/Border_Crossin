@@ -452,10 +452,8 @@ export const handlers = [
     return HttpResponse.json(mockEmployees.filter(e => e.cargo === 'operador' && e.is_active).map(e => ({ id: e.id, name: e.name })));
   }),
 
-  http.get('/employees/:id', async ({ params, request }) => {
+  http.get('/employees/:id', async ({ params, request: _request }) => {
     await delay(300);
-    const url = new URL(request.url);
-    const cargoType = url.searchParams.get('cargoType') || 'operador';
     const id = parseInt(getPathId(params), 10);
     const emp = mockEmployees.find(e => e.id === id);
     if (emp) {

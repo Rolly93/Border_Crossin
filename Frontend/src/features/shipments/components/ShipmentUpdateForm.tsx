@@ -38,7 +38,7 @@ const EXPECTED_CATEGORIES = EVENT_FIELDS.map(f => f.key)
 export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSubmit: (values: Shipment) => void, initialShipment?: Shipment }) {
 
 
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const form = useForm<Shipment>({
     mode: 'uncontrolled',
     validateInputOnChange: true,
@@ -118,7 +118,9 @@ export default function ShipmentUpdateForm({ onSubmit, initialShipment }: { onSu
           <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg" maw={900}>
             {EVENT_FIELDS.map((field) => {
               const eventIndex = form.values.events.findIndex(e => e.category === field.key);
-              if (eventIndex === -1) return null;
+              if (eventIndex === -1) {
+                return null;
+              }
               return (
                 <Stack key={field.key}>
                   <DateTimePicker

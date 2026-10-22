@@ -18,35 +18,20 @@ export function useEmployee() {
   } = usePaginatedList<IEmployeeResponse>(fetchFn);
 
   const updateEmployee = async (id: number, updatedData: IEmployeeRequest): Promise<IEmployeeResponse> => {
-    try {
-      const updated = await employeeService.update(id, updatedData);
-      setEmployeeData((prev) => prev.map((c) => (c.id === id ? updated : c)));
-      return updated;
-    } catch (error) {
-      console.error("Error updating employee:", error);
-      throw error;
-    }
+    const updated = await employeeService.update(id, updatedData);
+    setEmployeeData((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    return updated;
   };
 
   const getEmployeeData = async (id: number, cargoType: EmployeeType): Promise<IEmployeeResponse> => {
-    try {
-      const employeeData = await employeeService.getEmployee(id, cargoType);
-      return employeeData as IEmployeeResponse;
-    } catch (error) {
-      console.error("Error fetching employee data", error);
-      throw error;
-    }
+    const employeeData = await employeeService.getEmployee(id, cargoType);
+    return employeeData as IEmployeeResponse;
   };
 
   const deleteEmployee = async (id: number): Promise<IEmployeeResponse> => {
-    try {
-      const data = await employeeService.delete(id);
-      setEmployeeData((prev) => prev.filter((c) => c.id !== data.id));
-      return data;
-    } catch (error) {
-      console.error("Error deleting employee:", error);
-      throw error;
-    }
+    const data = await employeeService.delete(id);
+    setEmployeeData((prev) => prev.filter((c) => c.id !== data.id));
+    return data;
   };
 
   const createNewEmployee = async (employeeData: IEmployeeRequest): Promise<IEmployeeResponse> => {

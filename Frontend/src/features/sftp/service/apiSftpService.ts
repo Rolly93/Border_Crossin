@@ -1,5 +1,5 @@
 import { BaseCrudApiService } from '@/components/service/BaseCrudApiService';
-import { ISftpConfiguration, ISftpSend, SftpSendFilters, ResendRequest } from '@/features/clients/types/Cliente';
+import { ISftpConfiguration, ISftpSend, SftpSendFilters } from '@/features/clients/types/Cliente';
 
 
 export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration, Partial<ISftpConfiguration>> {
@@ -25,9 +25,15 @@ export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration, Parti
 
   async listSends(filters?: SftpSendFilters): Promise<ISftpSend[]> {
     const params: Record<string, string | number> = {};
-    if (filters?.client_id) params.client_id = filters.client_id;
-    if (filters?.reference) params.reference = filters.reference;
-    if (filters?.status) params.status = filters.status;
+    if (filters?.client_id) {
+      params.client_id = filters.client_id;
+    }
+    if (filters?.reference) {
+      params.reference = filters.reference;
+    }
+    if (filters?.status) {
+      params.status = filters.status;
+    }
 
     const response = await this.api.get<ISftpSend[]>(
       `/${this.resourcePath}/sends`,

@@ -1,5 +1,4 @@
-import { Table } from "@mantine/core";
-import { Title, Text, Group, Modal } from '@mantine/core';
+import { Table, Title, Text, Group, Modal } from '@mantine/core';
 import { useNavigate } from "react-router-dom";
 import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import ClientModalProps from "./ClientModalProps";
@@ -66,11 +65,10 @@ export function ClientTable() {
 
     if (selectedClient) {
       return await updateClient(selectedClient.id, clienData);
-    } else {
-      const created = await addClient(clienData);
-      setCreatedClient({ id: created.id, name: created.name });
-      return created;
     }
+    const created = await addClient(clienData);
+    setCreatedClient({ id: created.id, name: created.name });
+    return created;
   }
 
   function handelDeleteClient(id: number) {

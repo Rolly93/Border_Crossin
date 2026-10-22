@@ -17,21 +17,30 @@ export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: 
   const [driverId, setDriverId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!unit) return null;
+  if (!unit) {
+    return null;
+  }
 
   const handleAssign = async () => {
-    if (!driverId) return;
+    if (!driverId) {
+      return;
+    }
     setSubmitting(true);
     const ok = await onAssign(unit.id, Number(driverId));
     setSubmitting(false);
-    if (ok) { setDriverId(null); onClose(); }
+    if (ok) {
+      setDriverId(null);
+      onClose();
+    }
   };
 
   const handleRelease = async () => {
     setSubmitting(true);
     const ok = await onRelease(unit.id);
     setSubmitting(false);
-    if (ok) onClose();
+    if (ok) {
+      onClose();
+    }
   };
 
   const canAssign = unit.state === "ACTIVA";

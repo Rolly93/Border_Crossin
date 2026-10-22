@@ -36,11 +36,8 @@ export function LoginForm() {
       if (result?.access_token) {
         localStorage.setItem('jwt_token', result.access_token);
         navigate('/dashboard');
-      } else {
-        console.error('Login failed: No access token returned from server');
       }
     } catch (err: any) {
-      console.error('Login failed:', err.response?.data?.detail || err.message);
     }
   }
 

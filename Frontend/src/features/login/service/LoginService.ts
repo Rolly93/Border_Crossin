@@ -1,6 +1,5 @@
 import { ILoginService } from "../type/ILoginService";
 import { AuthService } from "./ApiLoginService";
-const ip = import.meta.env.VITE_API_URL || false
 
-export const AuthtenticationService: ILoginService = ip &&
-  new AuthService()
+// Always instantiate the service - MSW will intercept calls when VITE_USE_MOCK=true
+export const AuthenticationService: ILoginService = new AuthService()

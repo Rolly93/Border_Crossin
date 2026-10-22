@@ -48,9 +48,8 @@ export function EmployeeTable() {
     onSubmitAction: async (payload, id) => {
       if (id) {
         return await updateEmployee(id, payload as IEmployeeRequest);
-      } else {
-        return await createEmployeeAccount(payload);
       }
+      return await createEmployeeAccount(payload);
     },
     onSuccess: () => {
       // Refresh your table/data here if needed
@@ -70,7 +69,9 @@ export function EmployeeTable() {
   const handleOpenEdit = async (employee: IEmployeeResponse) => {
     setSelectedEmployee(employee);
     const employeeToEdit = await getEmployeeData(employee.id!, employee.role as EmployeeType);
-    if (!employeeToEdit) return null;
+    if (!employeeToEdit) {
+      return;
+    }
 
     const formValues = {
       employeeType: (employeeToEdit.role === "operador" ? "operador" : "cargo") as EmployeeType,

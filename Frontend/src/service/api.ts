@@ -60,7 +60,7 @@ apiClient.interceptors.response.use(
     if (shouldRetry) {
       originalRequest._retry = true
       originalRequest._retryCount = (originalRequest._retryCount || 0) + 1
-      const delay = Math.min(1000 * Math.pow(2, (originalRequest._retryCount || 0)), 10000)
+      const delay = Math.min(1000 * (2 ** (originalRequest._retryCount || 0)), 10000)
       await new Promise(resolve => setTimeout(resolve, delay))
       return apiClient(originalRequest)
     }

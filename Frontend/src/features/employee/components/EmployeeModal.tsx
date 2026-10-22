@@ -27,7 +27,7 @@ export function EmployeeModal({ opened, onClose, employeeForm }: EmployeeModalPr
 
   return (
     <Modal opened={opened} onClose={handleClose} title={isEditing ? "Editar empleado" : "Nuevo empleado"} centered size="lg">
-      <form onSubmit={(e) => { e.preventDefault(); submit().then((res) => { if (res) handleClose(); }); }}>
+      <form onSubmit={(e) => { e.preventDefault(); submit().then((res) => { if (res) { handleClose(); } }); }}>
         <Stack gap="sm">
           {submitError && (
             <Alert color="red" withCloseButton onClose={clearSubmitError}>

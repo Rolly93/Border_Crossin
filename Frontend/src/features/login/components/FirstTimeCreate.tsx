@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Paper, Stepper, Title, Text, Stack, Checkbox, Group, PasswordInput, TextInput, SegmentedControl, Alert } from "@mantine/core";
-import { NewuserForm } from "./NewUserForm";
+import { Container, Paper, Title, Text, Stack, Checkbox, Group, PasswordInput, TextInput, SegmentedControl, Alert } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useEmployee } from "@/features/employee/hook/useEmployee";
 import { useEmployeeForm } from "@/features/employee/hook/useEmployeeForm";
@@ -22,7 +21,7 @@ function FirstTimeLog() {
 
     }
   });
-  const { form, submit, submitError, submitting, clearSubmitError, isOperator } = employeeForm;
+  const { form, submit, submitError, submitting, clearSubmitError } = employeeForm;
   useEffect(() => {
     if (isComplete) {
       const timer = setTimeout(() => {
@@ -41,7 +40,7 @@ function FirstTimeLog() {
         <Text c="dimmed" size="sm" ta="center" mb={30}>
           Create the primary employee record and administrator account
         </Text>
-        {isComplete ? (<Text ta={'center'} fw={500} c={'green'} py={'xl'}>
+        {isComplete ? (<Text ta="center" fw={500} c="green" py="xl">
           Setup complete! Rederecting to dashboard
         </Text>) : (<form onSubmit={(e) => { e.preventDefault(); submit(); }}>
           <Stack gap="sm">

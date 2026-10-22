@@ -8,13 +8,15 @@ import ShipmentTable from '@/features/shipments/components/ShipmentTable';
 
 function DashBoard() {
   const { shipments, loading, error, addShipment, updateShipment, hasMore, fetchNextPage } = useShipments();
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreating] = useState(false);
   const [search, setSearch] = useState('');
   const observer = useRef<IntersectionObserver | null>(null);
 
   const filterShipments = useMemo(() => {
     const query = search.toLocaleLowerCase().trim();
-    if (!query) return shipments;
+    if (!query) {
+      return shipments;
+    }
 
     return (shipments.filter((shipment) => {
       return (
@@ -28,9 +30,13 @@ function DashBoard() {
 
   const lastElementRef = useCallback(
     (node: HTMLTableRowElement | null) => {
-      if (loading || search.trim().length > 0) return;
+      if (loading || search.trim().length > 0) {
+        return;
+      }
 
-      if (observer.current) observer.current.disconnect();
+      if (observer.current) {
+        observer.current.disconnect();
+      }
 
       observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {

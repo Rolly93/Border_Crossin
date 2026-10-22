@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Container, Group, Title, Stack, Text } from '@mantine/core';
-import { IconPlus, IconRefresh, IconTruck } from '@tabler/icons-react';
+import { IconPlus, IconRefresh } from '@tabler/icons-react';
 import { AtomButton } from '@/components/atoms/AtomButton';
 import { useAuth } from '@/features/login/context/AuthContext';
 import { useUnits } from '@/features/unit/hook/useUnits';

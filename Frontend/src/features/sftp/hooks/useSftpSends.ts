@@ -57,8 +57,11 @@ export function useSftpSends() {
   const toggleOne = useCallback((id: number) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   }, []);
@@ -70,7 +73,9 @@ export function useSftpSends() {
   }, [sends]);
 
   const resend = useCallback(async (ids: number[]) => {
-    if (ids.length === 0) return;
+    if (ids.length === 0) {
+      return;
+    }
     setResending(true);
     try {
       const result = await sftpService.resend(ids);

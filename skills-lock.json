@@ -6,6 +6,24 @@
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "106acf230014cbb43ca34e6410371321b56ca742f9ee0442e8ec05bf02eb0384"
+    },
+    "docker": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/docker/SKILL.md",
+      "computedHash": "ctx7sk-ca3bf8a6-1d1d-4adf-8b75-79b074a7725d"
+    },
+    "fastapi": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/fastapi/SKILL.md",
+      "computedHash": "ctx7sk-7c2f1f57-678d-4060-9eed-cda933fe5daa"
+    },
+    "react-typescript": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-typescript/SKILL.md",
+      "computedHash": "ctx7sk-40e6ee8c-8826-4a64-8ca4-640d86c0ca94"
     }
   }
 }

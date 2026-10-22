@@ -31,7 +31,9 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
 
   // Al abrir en modo edición, carga la unidad seleccionada.
   useEffect(() => {
-    if (!opened) return;
+    if (!opened) {
+      return;
+    }
     form.setValues({
       plates: unit?.plates ?? "",
       unitNumber: unit?.unitNumber ?? "",
@@ -51,7 +53,9 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
       tag: values.tag.trim() || undefined,
     });
     setSubmitting(false);
-    if (ok) onClose();
+    if (ok) {
+      onClose();
+    }
   };
 
   return (
@@ -68,7 +72,7 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
             <TextInput label="Tag" {...form.getInputProps("tag")} />
           </Group>
           <Group justify="flex-end" mt="md">
-            <AtomButton variant="default" onClick={onClose}>Cancelar</AtomButton>
+            <AtomButton variant="default" onClick={() => { onClose(); }}>Cancelar</AtomButton>
             <AtomButton type="submit" loading={submitting}>Guardar</AtomButton>
           </Group>
         </Stack>

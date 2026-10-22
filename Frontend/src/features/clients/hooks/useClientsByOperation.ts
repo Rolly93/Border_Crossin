@@ -16,10 +16,24 @@ export function useClientsByOperation(operation: string) {
     setLoading(true);
     clientService
       .getByOperation(operation)
-      .then((list) => { if (active) setClients(list); })
-      .catch(() => { if (active) setClients([]); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
+      .then((list) => {
+        if (active) {
+          setClients(list);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setClients([]);
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, [operation]);
 
   return { clients, loading } as const;
