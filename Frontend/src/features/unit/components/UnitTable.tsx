@@ -39,8 +39,8 @@ export function UnitTable({ units, loading, isAdmin, onEdit, onAssign, onHistory
                 <Table.Td>{unit.unitNumber ?? "—"}</Table.Td>
                 <Table.Td>{unit.plates}</Table.Td>
                 <Table.Td>
-                  <Badge color={UNIT_STATE_COLOR[unit.state as UnitState] ?? "gray"} variant="light">
-                    {unit.state}
+                  <Badge color={UNIT_STATE_COLOR[unit.status as UnitState] ?? "gray"} variant="light">
+                    {unit.status}
                   </Badge>
                 </Table.Td>
                 <Table.Td>{unit.tag ?? "—"}</Table.Td>

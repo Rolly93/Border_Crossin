@@ -17,7 +17,7 @@ export interface IUnit {
   id: number;
   plates: string;
   unitNumber: string | null;
-  state: UnitState;
+  status: UnitState;
   tag: string | null;
   driverId: number | null;
   driverName: string | null;

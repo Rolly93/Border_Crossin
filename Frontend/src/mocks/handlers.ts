@@ -2,6 +2,7 @@ import { http, HttpResponse, delay, PathParams } from 'msw';
 
 // Base URL of your backend (matches your Axios client configuration)
 const BASE_URL = 'http://127.0.0.1:8000';
+export type UnitState = "ACTIVA" | "MANTENIMIENTO" | "BAJA";
 
 // Type helpers for MSW
 type JsonBody = Record<string, unknown>;
@@ -52,8 +53,9 @@ interface MockSftpSend {
 
 interface MockUnit {
   id: number;
-  unit_number: string;
-  placas: string;
+  unitNumber: string;
+  plates: string;
+  status: UnitState;
   tag: string;
   is_active: boolean;
 }
@@ -111,8 +113,8 @@ const mockSftpSends: MockSftpSend[] = [
 ];
 
 const mockUnits: MockUnit[] = [
-  { id: 1, unit_number: 'TRUCK-001', placas: 'ABC-123', tag: 'TAG-001', is_active: true },
-  { id: 2, unit_number: 'TRUCK-002', placas: 'DEF-456', tag: 'TAG-002', is_active: true },
+  { id: 1, unitNumber: 'TRUCK-001', plates: 'ABC-123', tag: 'TAG-001', is_active: true, status: 'ACTIVA' },
+  { id: 2, unitNumber: 'TRUCK-002', plates: 'DEF-456', tag: 'TAG-002', is_active: true, status: 'MANTENIMIENTO' },
 ];
 
 const mockEmployees: MockEmployee[] = [
