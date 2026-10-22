@@ -1,5 +1,8 @@
 import { http, HttpResponse, delay, PathParams } from 'msw';
 
+// Base URL of your backend (matches your Axios client configuration)
+const BASE_URL = 'http://127.0.0.1:8000';
+
 // Type helpers for MSW
 type JsonBody = Record<string, unknown>;
 
@@ -145,55 +148,52 @@ function getPathId(params: PathParams): string {
 
 export const handlers = [
   // Auth
-  http.post('/user/login', async ({ request }) => {
+  http.post(`${BASE_URL}/user/login`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const username = (body.username ?? '') as string;
     const password = (body.password ?? '') as string;
-    if (username === 'admin@test.com' && password === '1234') {
+    if (username === 'nld-admin' && password === '1234') {
       return HttpResponse.json({ access_token: adminToken, isAdmin: true, token_type: 'bearer' });
     }
-    if (username === 'test@rfc.com' && password === '1234') {
+    if (username === 'nld-rolando' && password === '1234') {
       return HttpResponse.json({ access_token: rfcToken, isAdmin: false, token_type: 'bearer', is_first_time: true });
     }
     return HttpResponse.json({ detail: 'Invalid credentials' }, { status: 401 });
   }),
 
-  http.post('/user/create', async ({ request }) => {
+  http.post(`${BASE_URL}/user/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     return HttpResponse.json({ status: 'success', detail: 'User created', email: body.email ?? '' });
   }),
 
-  http.post('/user/logout', async () => {
+  http.post(`${BASE_URL}/user/logout`, async () => {
     await delay(200);
     return HttpResponse.json({ status: 'success', detail: 'Logged out successfully' });
   }),
-
-  // Clients
-  http.get('/client/all', async ({ request }) => {
+  // Matches GET http://127.0.0.1:8000/client?page=1&limit=10
+  http.get(`${BASE_URL}/client`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
-    if (url.searchParams.has('page')) {
-      const page = parseInt(url.searchParams.get('page') || '1', 10);
-      const limit = parseInt(url.searchParams.get('limit') || '10', 10);
-      return HttpResponse.json({
-        data: mockClients,
-        page,
-        limit,
-        totalRecords: mockClients.length,
-        hasNextPage: false,
-      });
-    }
-    return HttpResponse.json(mockClients.map(c => ({ id: c.id, name: c.name })));
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+
+    return HttpResponse.json({
+      data: mockClients,
+      page,
+      limit,
+      totalRecords: mockClients.length,
+      hasNextPage: false,
+    });
   }),
 
-  http.get('/client/by-operation', async () => {
+  http.get(`${BASE_URL}/client/by-operation`, async () => {
     await delay(300);
     return HttpResponse.json(mockClients.filter(c => c.still_active).map(c => ({ id: c.id, name: c.name })));
   }),
 
-  http.get('/client/:clientId/reference-rules', async ({ params }) => {
+  http.get(`${BASE_URL}/client/:clientId/reference-rules`, async ({ params }) => {
     await delay(300);
     const clientId = parseInt(getPathId(params), 10);
     return HttpResponse.json([
@@ -202,7 +202,7 @@ export const handlers = [
     ]);
   }),
 
-  http.get('/client/metrics', async () => {
+  http.get(`${BASE_URL}/client/metrics`, async () => {
     await delay(300);
     return HttpResponse.json({
       totalClients: mockClients.length,
@@ -212,7 +212,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/client/create', async ({ request }) => {
+  http.post(`${BASE_URL}/client/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const newClient: MockClient = { id: mockClients.length + 1, name: (body.name ?? '') as string, still_active: true, email_service: false, sftp_service: false };
@@ -220,7 +220,7 @@ export const handlers = [
     return HttpResponse.json({ id: newClient.id, name: newClient.name });
   }),
 
-  http.put('/client/update', async ({ request }) => {
+  http.put(`${BASE_URL}/client/update`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const url = new URL(request.url);
@@ -233,7 +233,7 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.delete('/client/delete/:id', async ({ params }) => {
+  http.delete(`${BASE_URL}/client/delete/:id`, async ({ params }) => {
     await delay(500);
     const id = parseInt(getPathId(params), 10);
     const idx = mockClients.findIndex(c => c.id === id);
@@ -244,7 +244,7 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.put('/client/reactive/:id', async ({ params }) => {
+  http.put(`${BASE_URL}/client/reactive/:id`, async ({ params }) => {
     await delay(500);
     const id = parseInt(getPathId(params), 10);
     const idx = mockClients.findIndex(c => c.id === id);
@@ -255,8 +255,9 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
+
   // Shipments
-  http.get('/shipment', async ({ request }) => {
+  http.get(`${BASE_URL}/shipment`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -270,11 +271,17 @@ export const handlers = [
     });
   }),
 
-  http.post('/shipment/create', async ({ request }) => {
+  // Clients - All (Matches GET http://127.0.0.1:8000/client/all)
+  http.get(`${BASE_URL}/client/all`, async () => {
+    await delay(300);
+    return HttpResponse.json(mockClients);
+  }),
+
+  http.post(`${BASE_URL}/shipment/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
-    const newShipment: MockShipment = { 
-      id: mockShipments.length + 1, 
+    const newShipment: MockShipment = {
+      id: mockShipments.length + 1,
       tracking_number: (body.tracking_number ?? '') as string,
       customer_tracking: (body.customer_tracking ?? '') as string,
       type_operation: (body.type_operation ?? '') as string,
@@ -283,14 +290,14 @@ export const handlers = [
       destination: (body.destination ?? '') as string,
       truck: (body.truck ?? '') as string,
       trailer: (body.trailer ?? '') as string,
-      created_at: new Date().toISOString(), 
-      events: [] 
+      created_at: new Date().toISOString(),
+      events: []
     };
     mockShipments.push(newShipment);
     return HttpResponse.json(newShipment);
   }),
 
-  http.put('/shipment/:id/update', async ({ params, request }) => {
+  http.put(`${BASE_URL}/shipment/:id/update`, async ({ params, request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const id = parseInt(getPathId(params), 10);
@@ -302,7 +309,7 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.patch('/shipment/:id/delete', async ({ params }) => {
+  http.patch(`${BASE_URL}/shipment/:id/delete`, async ({ params }) => {
     await delay(500);
     const id = parseInt(getPathId(params), 10);
     const idx = mockShipments.findIndex(s => s.id === id);
@@ -314,7 +321,7 @@ export const handlers = [
   }),
 
   // SFTP
-  http.get('/sftp/connection', async ({ request }) => {
+  http.get(`${BASE_URL}/sftp/connection`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const clientId = parseInt(url.searchParams.get('client_id') || '0', 10);
@@ -322,19 +329,19 @@ export const handlers = [
     return HttpResponse.json(config ?? null);
   }),
 
-  http.post('/sftp/create', async ({ request }) => {
+  http.post(`${BASE_URL}/sftp/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
-    const newConfig: MockSftpConfig = { 
-      id: mockSftpConfigs.length + 1, 
-      ...body, 
-      is_active: true 
+    const newConfig: MockSftpConfig = {
+      id: mockSftpConfigs.length + 1,
+      ...body,
+      is_active: true
     } as MockSftpConfig;
     mockSftpConfigs.push(newConfig);
     return HttpResponse.json(newConfig);
   }),
 
-  http.put('/sftp/update/:id', async ({ params, request }) => {
+  http.put(`${BASE_URL}/sftp/update/:id`, async ({ params, request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const id = parseInt(getPathId(params), 10);
@@ -346,7 +353,7 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.delete('/sftp/delete/:id', async ({ params }) => {
+  http.delete(`${BASE_URL}/sftp/delete/:id`, async ({ params }) => {
     await delay(500);
     const id = parseInt(getPathId(params), 10);
     const idx = mockSftpConfigs.findIndex(c => c.id === id);
@@ -357,7 +364,7 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.get('/sftp/sends', async ({ request }) => {
+  http.get(`${BASE_URL}/sftp/sends`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const clientId = url.searchParams.get('client_id');
@@ -368,7 +375,7 @@ export const handlers = [
     return HttpResponse.json(results);
   }),
 
-  http.post('/sftp/resend', async ({ request }) => {
+  http.post(`${BASE_URL}/sftp/resend`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const sendIds = (body.send_ids ?? []) as number[];
@@ -379,24 +386,24 @@ export const handlers = [
   }),
 
   // Units
-  http.get('/unit', async () => {
+  http.get(`${BASE_URL}/unit`, async () => {
     await delay(300);
     return HttpResponse.json(mockUnits);
   }),
 
-  http.post('/unit/create', async ({ request }) => {
+  http.post(`${BASE_URL}/unit/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
-    const newUnit: MockUnit = { 
-      id: mockUnits.length + 1, 
-      ...body, 
-      is_active: true 
+    const newUnit: MockUnit = {
+      id: mockUnits.length + 1,
+      ...body,
+      is_active: true
     } as MockUnit;
     mockUnits.push(newUnit);
     return HttpResponse.json(newUnit);
   }),
 
-  http.put('/unit/update/:id', async ({ params, request }) => {
+  http.put(`${BASE_URL}/unit/update/:id`, async ({ params, request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     const id = parseInt(getPathId(params), 10);
@@ -408,22 +415,22 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.post('/unit/:id/assign', async ({ params, request }) => {
+  http.post(`${BASE_URL}/unit/:id/assign`, async ({ params, request }) => {
     await delay(500);
     const body = await getJsonBody(request);
-    return HttpResponse.json({ 
-      unit_id: parseInt(getPathId(params), 10), 
-      driver_id: (body.driverId ?? 0) as number, 
-      assigned_at: new Date().toISOString() 
+    return HttpResponse.json({
+      unit_id: parseInt(getPathId(params), 10),
+      driver_id: (body.driverId ?? 0) as number,
+      assigned_at: new Date().toISOString()
     });
   }),
 
-  http.post('/unit/:id/release', async () => {
+  http.post(`${BASE_URL}/unit/:id/release`, async () => {
     await delay(500);
     return HttpResponse.json({ detail: 'Unit released' });
   }),
 
-  http.get('/unit/:id/history', async ({ params }) => {
+  http.get(`${BASE_URL}/unit/:id/history`, async ({ params }) => {
     await delay(300);
     const unitId = parseInt(getPathId(params), 10);
     return HttpResponse.json([
@@ -433,7 +440,7 @@ export const handlers = [
   }),
 
   // Employees
-  http.get('/employees', async ({ request }) => {
+  http.get(`${BASE_URL}/employees`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1', 10);
@@ -447,12 +454,12 @@ export const handlers = [
     });
   }),
 
-  http.get('/employees/operators', async () => {
+  http.get(`${BASE_URL}/employees/operators`, async () => {
     await delay(300);
     return HttpResponse.json(mockEmployees.filter(e => e.cargo === 'operador' && e.is_active).map(e => ({ id: e.id, name: e.name })));
   }),
 
-  http.get('/employees/:id', async ({ params, request: _request }) => {
+  http.get(`${BASE_URL}/employees/:id`, async ({ params, request: _request }) => {
     await delay(300);
     const id = parseInt(getPathId(params), 10);
     const emp = mockEmployees.find(e => e.id === id);
@@ -462,32 +469,58 @@ export const handlers = [
     return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
   }),
 
-  http.post('/employees/create', async ({ request }) => {
+  http.post(`${BASE_URL}/employees/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
-    const newEmp: MockEmployee = { 
-      id: mockEmployees.length + 1, 
-      ...body, 
-      is_active: true 
+    const newEmp: MockEmployee = {
+      id: mockEmployees.length + 1,
+      ...body,
+      is_active: true
     } as MockEmployee;
     mockEmployees.push(newEmp);
     return HttpResponse.json(newEmp);
   }),
 
+  // Event stream / SSE mock// Replace your current /events/stream handler with this:
+  http.get(`${BASE_URL}/events/stream`, () => {
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      start(controller) {
+        // Send an SSE comment heartbeat to keep connection open without triggering notifications
+        controller.enqueue(encoder.encode(': keep-alive\n\n'));
+
+        // Keep stream alive
+        const timer = setInterval(() => {
+          controller.enqueue(encoder.encode(': keep-alive\n\n'));
+        }, 15000);
+
+        return () => clearInterval(timer);
+      },
+    });
+
+    return new HttpResponse(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+  }),
+
   // System
-  http.get('/system/config', async () => {
+  http.get(`${BASE_URL}/system/config`, async () => {
     await delay(300);
     return HttpResponse.json({ scac: 'BCRS' });
   }),
 
-  http.put('/system/config', async ({ request }) => {
+  http.put(`${BASE_URL}/system/config`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
     return HttpResponse.json({ scac: body.scac ?? '' });
   }),
 
   // Update
-  http.get('/api/v1/check', async () => {
+  http.get(`${BASE_URL}/api/v1/check`, async () => {
     await delay(300);
     return HttpResponse.json({
       update_available: false,

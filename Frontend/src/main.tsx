@@ -10,21 +10,21 @@ import { queryClient } from './service/queryClient';
 import './styles/fonts.css';
 
 // Enable MSW mocking in development when VITE_USE_MOCK=true
-if (import.meta.env.VITE_USE_MOCK === 'true') {
-  if (typeof window !== 'undefined') {
-    import('./mocks/browser').then(({ worker }) => {
-      worker.start({
-        onUnhandledRequest: 'bypass',
-      });
-      // console.log('[MSW] Mock Service Worker started');
-    });
+console.log(import.meta.env.VITE_USE_MOCK)
+async function enableMocking() {
+  if (import.meta.env.VITE_USE_MOCK !== 'true') {
+    return;
   }
+  const { worker } = await import('./mocks/browser');
+  await worker.start({ onUnhandledRequest: 'bypass' });
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <QueryClientProvider client={queryClient}>
-    <MantineProvider theme={theme}>
-      <App />
-    </MantineProvider>
-  </QueryClientProvider>
-);
+enableMocking().then(() => {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <QueryClientProvider client={queryClient}>
+      <MantineProvider theme={theme}>
+        <App />
+      </MantineProvider>
+    </QueryClientProvider>
+  );
+});

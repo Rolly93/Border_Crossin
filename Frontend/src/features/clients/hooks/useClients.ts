@@ -51,24 +51,25 @@ export function useClients() {
   useEffect(() => {
     getClientList();
   }, []);
-  const fetchClientsMetrics = async () => {
+
+
+  const fetchClientsMetrics = useCallback(async () => {
     try {
       const data = await clientService.getMetrics();
-
-
       setMetrics(data);
+
     } catch (error: any) {
 
       setError(`Error al cargar datos ${error.message}`);
       throw error
     }
-  };
+  }, [setError]);
 
 
 
   useEffect(() => {
     fetchClientsMetrics();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchClientsMetrics]);
 
 
