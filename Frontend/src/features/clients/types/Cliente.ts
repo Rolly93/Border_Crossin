@@ -19,10 +19,10 @@ export interface IClientCard {
 export interface ISftpConfiguration {
     id?: number;
     idClient: number;
+    host: string;
+    port: number;
     username: string;
     password: string;
-    port: number;
-    host: string;
     root_folder?: string;
     remote_folder?: string;
 }

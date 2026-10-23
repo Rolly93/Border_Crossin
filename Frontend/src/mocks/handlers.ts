@@ -1,21 +1,20 @@
-import { IEmployeeBaseResponse, IEmployeeResponse } from '@/features/employee/type/employee.interface';
+import { ICliente, ISftpConfiguration } from '@/features/clients/types/Cliente';
+import { IEmployeeDriverResponse, IEmployeeResponse, IEmployeeUserResponse, TEmployeeResponseMap } from '@/features/employee/type/employee.interface';
 import { ISftpFileStatus } from '@/features/sftp/types/ISftpSend';
+import { EventCategory } from '@/features/shipments/types/Shipment';
+import { UnitState } from '@/features/unit/type/unit.interface';
 import { http, HttpResponse, delay, PathParams } from 'msw';
+import { log } from 'node:console';
+import { promiseHooks } from 'node:v8';
 
 // Base URL of your backend (matches your Axios client configuration)
 const BASE_URL = 'http://127.0.0.1:8000';//http://127.0.0.1:8000
-export type UnitState = "ACTIVA" | "MANTENIMIENTO" | "BAJA";
 
 // Type helpers for MSW
 type JsonBody = Record<string, unknown>;
 
 // Mock data
-interface MockClient {
-  id: number;
-  name: string;
-  still_active: boolean;
-  email_service: boolean;
-  sftp_service: boolean;
+interface MockClient extends ICliente {
 }
 
 interface MockShipment {
@@ -29,21 +28,14 @@ interface MockShipment {
   truck: string;
   trailer: string;
   created_at: string;
-  events: unknown[];
+  events: EventCategory[];
 }
 
-interface MockSftpConfig {
-  id: number;
-  idClient: number;
-  host: string;
-  port: number;
-  username: string;
-  root_folder: string;
-  remote_folder: string;
+interface MockSftpConfig extends ISftpConfiguration {
   is_active: boolean;
 }
 
-interface MockSftpSend extends ISftpFileStatus {}
+interface MockSftpSend extends ISftpFileStatus { }
 
 interface MockUnit {
   id: number;
@@ -52,18 +44,15 @@ interface MockUnit {
   status: UnitState;
   tag: string;
   is_active: boolean;
+  id_Operador: number | null
 }
 
-interface MockEmployee  extends IEmployeeResponse{
-  id: number;
-  email:string
-
-}
+type MockEmployee = IEmployeeUserResponse | IEmployeeDriverResponse;
 
 const mockClients: MockClient[] = [
-  { id: 1, name: 'Expeditors', still_active: true, email_service: true, sftp_service: false },
-  { id: 2, name: 'DHL', still_active: true, email_service: true, sftp_service: true },
-  { id: 3, name: 'FedEx', still_active: false, email_service: false, sftp_service: false },
+  { id: 1, name: 'Expeditors', still_active: true, emailService: true, sftService: false, telefono: "867123456789", email: ["test@expeditros.com"] },
+  { id: 2, name: 'DHL', still_active: true, emailService: true, sftService: true, telefono: "867987654321", email: [] },
+  { id: 3, name: 'FedEx', still_active: false, emailService: false, sftService: false, telefono: "867741852963", email: ["test@fedex.com", "test2@fedex.com"] },
 ];
 
 const mockShipments: MockShipment[] = [
@@ -96,22 +85,24 @@ const mockShipments: MockShipment[] = [
 ];
 
 const mockSftpConfigs: MockSftpConfig[] = [
-  { id: 1, idClient: 2, host: 'sftp.dhl.com', port: 22, username: 'dhl_user', root_folder: '/inbound', remote_folder: '/outbound', is_active: true },
+  { id: 1, idClient: 2, host: 'sftp.dhl.com', port: 22, username: 'dhl_user', root_folder: '/inbound', remote_folder: '/outbound', is_active: true, password: "" },
 ];
 
 const mockSftpSends: MockSftpSend[] = [
-  { id: 1, client_id: 1,filename:"RAYC_92B1234567_00215T_651.xml", reference: '92B1234567', status: 'sent', created_at: '2026-01-15T10:00:00Z', retries:0 , sftp_log:"Success" },
-  { id: 2, client_id: 2, filename:"DHL_651897.xml",reference: 'REF002', status: 'failed', created_at: '2026-01-16T10:00:00Z', retries:3,sftp_log: 'Connection timeout' },
+  { id: 1, client_id: 1, filename: "RAYC_92B1234567_00215T_651.xml", reference: '92B1234567', status: 'sent', created_at: '2026-01-15T10:00:00Z', retries: 0, sftp_log: "Success" },
+  { id: 2, client_id: 2, filename: "DHL_651897.xml", reference: 'REF002', status: 'failed', created_at: '2026-01-16T10:00:00Z', retries: 3, sftp_log: 'Connection timeout' },
 ];
 
 const mockUnits: MockUnit[] = [
-  { id: 1, unitNumber: 'TRUCK-001', plates: 'ABC-123', tag: 'TAG-001', is_active: true, status: 'ACTIVA' },
-  { id: 2, unitNumber: 'TRUCK-002', plates: 'DEF-456', tag: 'TAG-002', is_active: true, status: 'MANTENIMIENTO' },
+  { id: 1, id_Operador: 3, unitNumber: 'TRUCK-001', plates: 'ABC-123', tag: 'ANAM2022L0001T0000000001', is_active: true, status: 'ACTIVA' },
+  { id: 2, id_Operador: 4, unitNumber: 'TRUCK-002', plates: 'DEF-456', tag: 'ANAM2022L0001T0000000001', is_active: true, status: 'MANTENIMIENTO' },
 ];
 
 const mockEmployees: MockEmployee[] = [
-  { id: 1, firstName: 'John', lastName: "Doe", email: 'john@test.com', role: 'admin', rfc: "rfc32165181" ,dateOfBirth:"10/15/1993",hireDate:"10/15/2010" },
-  { id: 2, firstName: 'Jane', lastName: "Smith", email: 'jane@test.com', role : 'csr', rfc:"rfc3165161" ,hireDate:"10/15/2005",dateOfBirth:"11/20/1998" },
+  { id: 1, firstName: 'John', lastName: "Doe", email: 'john@test.com', username: 'nld-rolando', password: 'hunterX0369*', isAdmin: true, role: 'admin', rfc: "rfc32165181", dateOfBirth: "10/15/1993", hireDate: "10/15/2010", employeeType: "csr" },
+  { id: 2, firstName: 'Jane', lastName: "Smith", email: 'jane@test.com', username: 'janesmith', password: 'password123', isAdmin: false, role: 'csr', rfc: "rfc3165161", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'csr' },
+  { id: 3, firstName: 'Bob', lastName: "Martinez", role: 'operador', rfc: "rfc3165161", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'operador', licenseNumber: "LIC-12345", licenseExpiration: "2030-01-01", gafetId: "ANAMGETR2025062500000001" },
+  { id: 4, firstName: 'Pepe', lastName: "Sanchez", role: 'operador', rfc: "rfc9876541", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'operador', licenseNumber: "LIC-12345", licenseExpiration: "2030-01-01", gafetId: "ANAMGETR2025062500000001" },
 ];
 
 // Simulated JWT tokens
@@ -147,14 +138,37 @@ export const handlers = [
     const body = await getJsonBody(request);
     const username = (body.username ?? '') as string;
     const password = (body.password ?? '') as string;
-    if (username === 'nld-admin' && password === '1234') {
-      return HttpResponse.json({ access_token: adminToken, isAdmin: true, token_type: 'bearer' });
+
+    const foundUser = mockEmployees.find((user) => {
+      if ('username' in user && 'password' in user) {
+        return user.username === username && user.password === password;
+      }
+      return false;
+    });
+
+    if (foundUser) {
+      if ('isAdmin' in foundUser && foundUser.isAdmin) {
+        return HttpResponse.json({
+          access_token: adminToken,
+          isAdmin: true,
+          token_type: 'bearer',
+          is_first_time: false
+        });
+      }
+
+      return HttpResponse.json({
+        access_token: rfcToken,
+        isAdmin: false,
+        token_type: 'bearer',
+        is_first_time: false
+      });
     }
-    if (username === 'nld-rolando' && password === '1234') {
-      return HttpResponse.json({ access_token: rfcToken, isAdmin: false, token_type: 'bearer', is_first_time: true });
-    }
+
+    console.log(username, password);
+
     return HttpResponse.json({ detail: 'Invalid credentials' }, { status: 401 });
   }),
+
 
   http.post(`${BASE_URL}/user/create`, async ({ request }) => {
     await delay(500);
@@ -201,15 +215,15 @@ export const handlers = [
     return HttpResponse.json({
       totalClients: mockClients.length,
       activeClient: mockClients.filter(c => c.still_active).length,
-      emailService: mockClients.filter(c => c.email_service).length,
-      sftpService: mockClients.filter(c => c.sftp_service).length,
+      emailService: mockClients.filter(c => c.emailService).length,
+      sftpService: mockClients.filter(c => c.sftService).length,
     });
   }),
 
   http.post(`${BASE_URL}/client/create`, async ({ request }) => {
     await delay(500);
     const body = await getJsonBody(request);
-    const newClient: MockClient = { id: mockClients.length + 1, name: (body.name ?? '') as string, still_active: true, email_service: false, sftp_service: false };
+    const newClient: MockClient = { id: mockClients.length + 1, name: (body.name ?? '') as string, still_active: true, emailService: false, sftService: false, telefono: "867-123456789" };
     mockClients.push(newClient);
     return HttpResponse.json({ id: newClient.id, name: newClient.name });
   }),
@@ -450,7 +464,7 @@ export const handlers = [
 
   http.get(`${BASE_URL}/employees/operators`, async () => {
     await delay(300);
-    return HttpResponse.json(mockEmployees.filter(e => e.role === 'operador' ).map(e => ({ id: e.id, firstName: e.firstName })));
+    return HttpResponse.json(mockEmployees.filter(e => e.employeeType === 'operador').map(e => ({ id: e.id, firstName: e.firstName })));
   }),
 
   http.get(`${BASE_URL}/employees/:id`, async ({ params, request: _request }) => {

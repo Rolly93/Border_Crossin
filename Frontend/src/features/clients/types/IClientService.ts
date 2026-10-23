@@ -10,7 +10,7 @@ export interface ClientMetricsResponse {
 export interface IClientOption {
   id: number;
   name: string;
-  has_sftp: boolean;
+  sftService: boolean;
 }
 
 export interface IClientNameOption {

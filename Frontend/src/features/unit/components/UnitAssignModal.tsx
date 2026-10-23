@@ -4,7 +4,7 @@ import { AtomButton } from "@/components/atoms/AtomButton";
 import { useOperators } from "@/features/employee/hook/useOperators";
 import { IUnit } from "../type/unit.interface";
 
-interface UnitAssignModalProps {
+interface IUnitAssignModalProps {
   opened: boolean;
   unit: IUnit | null;
   onClose: () => void;
@@ -12,7 +12,7 @@ interface UnitAssignModalProps {
   onRelease: (unitId: number) => Promise<boolean>;
 }
 
-export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: UnitAssignModalProps) {
+export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: IUnitAssignModalProps) {
   const { operators, loading, error } = useOperators(opened);
   const [driverId, setDriverId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -63,7 +63,7 @@ export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: 
         <Select
           label="Nuevo operador"
           placeholder={loading ? "Cargando..." : "Selecciona un operador"}
-          data={operators.map((o) => ({ value: String(o.id), label: o.name }))}
+          data={operators.map((o) => ({ value: String(o.id), label: o.firstName }))}
           value={driverId}
           onChange={setDriverId}
           searchable

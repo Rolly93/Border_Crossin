@@ -41,12 +41,12 @@ export function SftpClientList() {
       ) : clients.length === 0 ? (
         <Text c="dimmed">No hay clientes activos.</Text>
       ) : (
-        <Table striped highlightOnHover>
+        <Table striped highlightOnHover >
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Cliente</Table.Th>
               <Table.Th>Estado SFTP</Table.Th>
-              <Table.Th />
+              <Table.Th >Opciones</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -54,16 +54,14 @@ export function SftpClientList() {
               <Table.Tr key={client.id}>
                 <Table.Td>{client.name}</Table.Td>
                 <Table.Td>
-                  <Badge color={client.has_sftp ? "green" : "gray"} variant="light">
-                    {client.has_sftp ? "Configurado" : "Sin configurar"}
+                  <Badge color={client.sftService ? "green" : "gray"} variant="light">
+                    {client.sftService ? "Configurado" : "Sin configurar"}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Group justify="flex-end">
-                    <Button size="xs" variant="light" onClick={() => openConfig(client.id)}>
-                      {client.has_sftp ? "Editar" : "Configurar"}
-                    </Button>
-                  </Group>
+                  <Button size="xs" variant="light" onClick={() => openConfig(client.id)}>
+                    {client.sftService ? "Editar" : "Configurar"}
+                  </Button>
                 </Table.Td>
               </Table.Tr>
             ))}

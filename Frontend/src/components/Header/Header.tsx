@@ -40,7 +40,7 @@ export default function Headers({ onAddShipment, isCreating, searchValue, onSear
         <Box pos="relative">
           <LoadingOverlay visible={isCreating} overlayProps={{ blur: 2 }} />
 
-          <ShipmentForm onSubmit={handleFormSubmit} onCancel={close} />
+          <ShipmentForm onSubmit={handleFormSubmit} onCancel={close} opened={opened} />
         </Box>
       </Modal>
     </Group>

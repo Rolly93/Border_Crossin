@@ -64,7 +64,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
         }
 
 
-    }, [onSelectClient, opened, form]);
+    }, [opened, onSelectClient?.id]);
 
 
 
@@ -95,7 +95,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     const handleSubmit = async (values: typeof form.values) => {
 
         if (!values.companyName) {
-          return;
+            return;
         }
 
 
@@ -170,7 +170,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
                                     onChange={(e) => {
                                         setNewEmail(e.target.value);
                                         if (emailError) {
-                                          setEmailError(null);
+                                            setEmailError(null);
                                         }
                                     }}
                                     onKeyDown={(e) => {

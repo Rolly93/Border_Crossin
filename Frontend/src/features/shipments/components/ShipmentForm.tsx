@@ -9,8 +9,11 @@ import { useClientsByOperation } from '@/features/clients/hooks/useClientsByOper
 import { useClientReferenceRules } from '@/features/clients/hooks/useClientReferenceRules';
 import { notifications } from '@mantine/notifications';
 import { ValidateClientReference } from '@/components/utils/businessRules';
+import { useOperators } from '@/features/employee/hook/useOperators';
 
-export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormProps) {
+export function ShipmentForm({ initialData, onSubmit, onCancel, opened }: ShipmentFormProps) {
+  const { operators, loading, error } = useOperators(opened);
+
   const { t } = useTranslation()
   const form = useForm({
     mode: 'controlled',
@@ -145,9 +148,10 @@ export function ShipmentForm({ initialData, onSubmit, onCancel }: ShipmentFormPr
           </Group>
 
           <Group grow>
-            <TextInput
+            <Select
               label={t('shipment.labels.truck')}
               required
+              data={operators.map((o) => ({ value: String(o.id), label: o.firstName }))}
               placeholder={t('shipment.placeholders.truck')}
               {...form.getInputProps('truck')}
             />

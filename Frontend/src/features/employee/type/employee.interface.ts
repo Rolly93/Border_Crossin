@@ -14,7 +14,7 @@ export interface IEmployeeResponse extends IEmployeeRequest {
   id?: number;
 }
 
-export interface IEmployeeFormsValues extends IEmployeeRequest {}
+export interface IEmployeeFormsValues extends IEmployeeRequest { }
 
 export interface EmployeeFormProps {
   onSuccess?: () => void;
@@ -67,14 +67,15 @@ export interface IEmployeeDriverResponse extends IEmployeeBaseResponse {
 
 export interface IOperatorOption {
   id: number;
-  name: string;
+  firstName: string;
+  unit?: string
 }
 
 export interface IEmployeeFormRequest extends INewEmployeeRequest {
   id?: number;
 }
 
-export type TEmployeeResponseMap =  IEmployeeUserResponse | IEmployeeDriverResponse;
+export type TEmployeeResponseMap = IEmployeeUserResponse | IEmployeeDriverResponse;
 
 export interface IEmployeeService extends IBaseService<IEmployeeResponse, IEmployeeRequest> {
   getPaginated(page: number, limit: number): Promise<PaginatedResponse<TEmployeeResponseMap>>;
