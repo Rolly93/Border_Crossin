@@ -9,10 +9,10 @@ import { useEmployee } from "../hook/useEmployee";
 import { useEmployeeForm } from "../hook/useEmployeeForm";
 import { EmployeeTableRow } from "./EmployeeTableRow";
 import { EmployeeModal } from "./EmployeeModal";
-import { EmployeeType, IEmployeeResponse, IEmployeeUserResponse, IEmployeeDriverResponse, IEmployeeRequest } from "../type/employee.interface";
+import { EmployeeType, IEmployeeResponse, IEmployeeUserResponse, IEmployeeDriverResponse, IEmployeeRequest, TEmployeeResponseMap, IEmployeeFormRequest } from "../type/employee.interface";
 
 const DEFAULT_FORM_VALUES = {
-  employeeType: "cargo" as EmployeeType,
+  employeeType: "csr" as EmployeeType,
   firstName: "",
   lastName: "",
   dateOfBirth: null,
@@ -40,14 +40,14 @@ export function EmployeeTable() {
   const { employeeData, loading, hasMore, fetchNextPage, createEmployeeAccount, updateEmployee, getEmployeeData } = useEmployee();
 
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeResponse | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<TEmployeeResponseMap | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
 
   const employeeForm = useEmployeeForm({
     initialEmployee: selectedEmployee,
     onSubmitAction: async (payload, id) => {
       if (id) {
-        return await updateEmployee(id, payload as IEmployeeRequest);
+        return await updateEmployee(id, payload as TEmployeeResponseMap);
       }
       return await createEmployeeAccount(payload);
     },
@@ -67,20 +67,20 @@ export function EmployeeTable() {
   };
 
   const handleOpenEdit = async (employee: IEmployeeResponse) => {
-    setSelectedEmployee(employee);
-    const employeeToEdit = await getEmployeeData(employee.id!, employee.role as EmployeeType);
+
+    const employeeToEdit = await getEmployeeData(employee.id!, employee.role as  EmployeeType);
     if (!employeeToEdit) {
       return;
     }
 
     const formValues = {
-      employeeType: (employeeToEdit.role === "operador" ? "operador" : "cargo") as EmployeeType,
+      employeeType: (employeeToEdit.role === "operador" ? "operador" : "csr") as EmployeeType,
       firstName: employeeToEdit.firstName || "",
       lastName: employeeToEdit.lastName || "",
       dateOfBirth: employeeToEdit.dateOfBirth ? new Date(employeeToEdit.dateOfBirth) : null,
       rfc: employeeToEdit.rfc || "",
-      username: isUserResponse(employeeToEdit) ? employeeToEdit.username || "" : "",
-      email: isUserResponse(employeeToEdit) ? employeeToEdit.email || "" : "",
+      username: isUserResponse(employeeToEdit) ? employeeToEdit.username || "sd65f1" : "",
+      email: isUserResponse(employeeToEdit) && employeeToEdit.email || "" ,
       password: "",
       confirmPassword: "",
       isAdmin: isUserResponse(employeeToEdit) ? employeeToEdit.isAdmin || false : false,
@@ -90,6 +90,7 @@ export function EmployeeTable() {
         : null,
       gafetId: isDriverResponse(employeeToEdit) ? employeeToEdit.gafetId || "" : "",
     };
+    console.log(formValues);
 
     employeeForm.form.setInitialValues(formValues);
     employeeForm.form.setValues(formValues);

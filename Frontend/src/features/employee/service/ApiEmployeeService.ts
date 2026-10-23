@@ -17,8 +17,8 @@ export class ApiEmployeeService
     super("employees");
   }
 
-  async getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]> {
-    const response = await this.api.get<{ data: TEmployeeResponseMap[T] }>(`${this.resourcePath}/${id}`, {
+  async getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap> {
+    const response = await this.api.get<{ data: TEmployeeResponseMap }>(`${this.resourcePath}/${id}`, {
       params: { cargoType },
     });
 
@@ -43,8 +43,8 @@ export class ApiEmployeeService
     return response.data;
   }
 
-  async getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>> {
-    const response = await this.api.get<PaginatedResponse<IEmployeeResponse>>(`${this.resourcePath}/`, {
+  async getPaginated(page: number, limit: number): Promise<PaginatedResponse<TEmployeeResponseMap>> {
+    const response = await this.api.get<PaginatedResponse<TEmployeeResponseMap>>(`${this.resourcePath}/`, {
       params: { page, limit },
     });
     if (response.status === 200) {

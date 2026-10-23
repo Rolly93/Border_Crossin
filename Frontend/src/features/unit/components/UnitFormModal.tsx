@@ -37,7 +37,7 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
     form.setValues({
       plates: unit?.plates ?? "",
       unitNumber: unit?.unitNumber ?? "",
-      state: unit?.state ?? "ACTIVA",
+      state: unit?.status ?? "ACTIVA",
       tag: unit?.tag ?? "",
     });
     form.resetDirty();

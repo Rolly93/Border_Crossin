@@ -34,6 +34,7 @@ export function SftpSendsPanel() {
           clearable
           searchable
         />
+
         <TextInput
           label="Referencia"
           placeholder="Ej. 12b, 82B..."

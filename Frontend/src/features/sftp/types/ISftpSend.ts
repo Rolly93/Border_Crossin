@@ -11,6 +11,19 @@ export interface ISftpSend {
   reference: string;
   shipment_event_id: number;
 }
+export interface ISftpFileStatus{
+  filename: string;
+  reference:string
+  retries: number;
+  status: SftpSendStatus;
+  id: number;
+  sftp_log: string | null;
+  client_id: number;
+  created_at:string
+
+
+
+}
 
 export interface SftpSendFilters {
   client_id?: number;

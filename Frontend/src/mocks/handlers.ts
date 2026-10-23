@@ -1,7 +1,9 @@
+import { IEmployeeBaseResponse, IEmployeeResponse } from '@/features/employee/type/employee.interface';
+import { ISftpFileStatus } from '@/features/sftp/types/ISftpSend';
 import { http, HttpResponse, delay, PathParams } from 'msw';
 
 // Base URL of your backend (matches your Axios client configuration)
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'http://127.0.0.1:8000';//http://127.0.0.1:8000
 export type UnitState = "ACTIVA" | "MANTENIMIENTO" | "BAJA";
 
 // Type helpers for MSW
@@ -41,15 +43,7 @@ interface MockSftpConfig {
   is_active: boolean;
 }
 
-interface MockSftpSend {
-  id: number;
-  client_id: number;
-  reference: string;
-  status: 'sent' | 'failed';
-  created_at: string;
-  sent_at?: string;
-  error?: string;
-}
+interface MockSftpSend extends ISftpFileStatus {}
 
 interface MockUnit {
   id: number;
@@ -60,12 +54,10 @@ interface MockUnit {
   is_active: boolean;
 }
 
-interface MockEmployee {
+interface MockEmployee  extends IEmployeeResponse{
   id: number;
-  name: string;
-  email: string;
-  cargo: string;
-  is_active: boolean;
+  email:string
+
 }
 
 const mockClients: MockClient[] = [
@@ -78,7 +70,7 @@ const mockShipments: MockShipment[] = [
   {
     id: 1,
     tracking_number: 'TRK001',
-    customer_tracking: 'CUST001',
+    customer_tracking: '92B1234567',
     type_operation: 'importacion',
     cliente: '1',
     origen: 'Shanghai',
@@ -108,8 +100,8 @@ const mockSftpConfigs: MockSftpConfig[] = [
 ];
 
 const mockSftpSends: MockSftpSend[] = [
-  { id: 1, client_id: 2, reference: 'REF001', status: 'sent', created_at: '2026-01-15T10:00:00Z', sent_at: '2026-01-15T10:05:00Z' },
-  { id: 2, client_id: 2, reference: 'REF002', status: 'failed', created_at: '2026-01-16T10:00:00Z', error: 'Connection timeout' },
+  { id: 1, client_id: 1,filename:"RAYC_92B1234567_00215T_651.xml", reference: '92B1234567', status: 'sent', created_at: '2026-01-15T10:00:00Z', retries:0 , sftp_log:"Success" },
+  { id: 2, client_id: 2, filename:"DHL_651897.xml",reference: 'REF002', status: 'failed', created_at: '2026-01-16T10:00:00Z', retries:3,sftp_log: 'Connection timeout' },
 ];
 
 const mockUnits: MockUnit[] = [
@@ -118,8 +110,8 @@ const mockUnits: MockUnit[] = [
 ];
 
 const mockEmployees: MockEmployee[] = [
-  { id: 1, name: 'John Doe', email: 'john@test.com', cargo: 'operador', is_active: true },
-  { id: 2, name: 'Jane Smith', email: 'jane@test.com', cargo: 'csr', is_active: true },
+  { id: 1, firstName: 'John', lastName: "Doe", email: 'john@test.com', role: 'admin', rfc: "rfc32165181" ,dateOfBirth:"10/15/1993",hireDate:"10/15/2010" },
+  { id: 2, firstName: 'Jane', lastName: "Smith", email: 'jane@test.com', role : 'csr', rfc:"rfc3165161" ,hireDate:"10/15/2005",dateOfBirth:"11/20/1998" },
 ];
 
 // Simulated JWT tokens
@@ -458,7 +450,7 @@ export const handlers = [
 
   http.get(`${BASE_URL}/employees/operators`, async () => {
     await delay(300);
-    return HttpResponse.json(mockEmployees.filter(e => e.cargo === 'operador' && e.is_active).map(e => ({ id: e.id, name: e.name })));
+    return HttpResponse.json(mockEmployees.filter(e => e.role === 'operador' ).map(e => ({ id: e.id, firstName: e.firstName })));
   }),
 
   http.get(`${BASE_URL}/employees/:id`, async ({ params, request: _request }) => {
@@ -477,7 +469,6 @@ export const handlers = [
     const newEmp: MockEmployee = {
       id: mockEmployees.length + 1,
       ...body,
-      is_active: true
     } as MockEmployee;
     mockEmployees.push(newEmp);
     return HttpResponse.json(newEmp);

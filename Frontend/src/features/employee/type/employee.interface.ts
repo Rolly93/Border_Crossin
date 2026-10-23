@@ -23,7 +23,7 @@ export interface EmployeeFormProps {
   employee?: IEmployeeRequest;
 }
 
-export type EmployeeType = "cargo" | "operador";
+export type EmployeeType = "csr" | "operador";
 
 export interface INewEmployeeRequest {
   firstName: string;
@@ -46,6 +46,7 @@ export interface IEmployeeBaseResponse {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
+  hireDate?: string;
   rfc: string;
   role: string;
   employeeType: EmployeeType;
@@ -73,14 +74,11 @@ export interface IEmployeeFormRequest extends INewEmployeeRequest {
   id?: number;
 }
 
-export type TEmployeeResponseMap = {
-  cargo: IEmployeeUserResponse;
-  operador: IEmployeeDriverResponse;
-};
+export type TEmployeeResponseMap =  IEmployeeUserResponse | IEmployeeDriverResponse;
 
 export interface IEmployeeService extends IBaseService<IEmployeeResponse, IEmployeeRequest> {
-  getPaginated(page: number, limit: number): Promise<PaginatedResponse<IEmployeeResponse>>;
+  getPaginated(page: number, limit: number): Promise<PaginatedResponse<TEmployeeResponseMap>>;
   getOperators(): Promise<IOperatorOption[]>;
   createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>;
-  getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap[T]>;
+  getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap>;
 }

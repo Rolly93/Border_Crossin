@@ -43,7 +43,7 @@ export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: 
     }
   };
 
-  const canAssign = unit.state === "ACTIVA";
+  const canAssign = unit.status === "ACTIVA";
 
   return (
     <Modal opened={opened} onClose={onClose} title={`Operador de la unidad ${unit.unitNumber ?? ""}`} centered>

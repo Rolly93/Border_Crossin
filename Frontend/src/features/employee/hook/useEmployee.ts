@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { EmployeeType, IEmployeeRequest, IEmployeeResponse, INewEmployeeRequest } from "../type/employee.interface";
+import { EmployeeType, IEmployeeFormRequest, IEmployeeRequest, IEmployeeResponse, INewEmployeeRequest, TEmployeeResponseMap } from "../type/employee.interface";
 import { employeeService } from "../service/EmployeeService";
 import { usePaginatedList } from "@/components/hook/usePaginaterList";
 
@@ -17,7 +17,7 @@ export function useEmployee() {
     setLoading,
   } = usePaginatedList<IEmployeeResponse>(fetchFn);
 
-  const updateEmployee = async (id: number, updatedData: IEmployeeRequest): Promise<IEmployeeResponse> => {
+  const updateEmployee = async (id: number, updatedData: TEmployeeResponseMap): Promise<IEmployeeResponse> => {
     const updated = await employeeService.update(id, updatedData);
     setEmployeeData((prev) => prev.map((c) => (c.id === id ? updated : c)));
     return updated;

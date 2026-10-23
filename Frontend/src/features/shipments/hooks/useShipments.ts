@@ -19,6 +19,7 @@ export function useShipments() {
 
       const isArray = Array.isArray(response);
 
+
       const newShipments: Shipment[] = isArray ? response : response.data;
       const canFetchMore = isArray
         ? newShipments.length === PAGE_SIZE
