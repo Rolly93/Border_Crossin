@@ -1,23 +1,26 @@
 import os
-import sys
 import time
+from typing import Any
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 from database import engine
 from model.db_model import Base
-from utility.schema_upgrade import upgrade_unit_schema
 from routes.client_route import router as client_router
 from routes.employee_route import router as employee_router
 from routes.notification_router import router as notifications_router
-from routes.shipment import router as shipment_router
 from routes.sftp_route import router as sftp_router
-from routes.system_route import router as system_router, health_router
+from routes.shipment import router as shipment_router
+from routes.system_route import health_router
+from routes.system_route import router as system_router
 from routes.unit_route import router as unit_router
 from routes.user import router as user_router
-from service.logging_config import setup_logging, get_logger
+from service.logging_config import get_logger, setup_logging
+from utility.schema_upgrade import upgrade_unit_schema
 
 # Configure structured logging early
 log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -38,12 +41,13 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Log startup
 logger.info("application_starting", environment=os.getenv("ENVIRONMENT", "development"))
 
+
 # Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     start_time = time.time()
     client_ip = request.client.host if request.client else "unknown"
-    
+
     logger.info(
         "request_started",
         method=request.method,
@@ -51,11 +55,11 @@ async def log_requests(request: Request, call_next):
         client_ip=client_ip,
         user_agent=request.headers.get("user-agent", ""),
     )
-    
+
     try:
         response = await call_next(request)
         process_time = time.time() - start_time
-        
+
         logger.info(
             "request_completed",
             method=request.method,
@@ -76,6 +80,7 @@ async def log_requests(request: Request, call_next):
             client_ip=client_ip,
         )
         raise
+
 
 # CORS configuration - configurable via env for production
 cors_origins = os.getenv("CORS_ORIGINS", "*")

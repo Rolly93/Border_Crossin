@@ -18,3 +18,5 @@ pymysql
 python-stdnum
 fastapi-restful
 boto3
+slowapi
+structlog

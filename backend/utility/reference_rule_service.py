@@ -36,7 +36,7 @@ class ReferenceRuleService:
             .all()
         )
 
-    def clients_for_operation(self, operation: str) -> list[dict]:
+    def clients_for_operation(self, operation: str) -> list[dict[str, str]]:
         op = normalize_operation(operation)
 
         has_rule_for_op = exists().where(

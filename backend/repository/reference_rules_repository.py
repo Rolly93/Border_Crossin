@@ -1,3 +1,5 @@
+import select
+
 from fastapi import HTTPException, status
 from sqlalchemy import exists
 from sqlalchemy.orm import Session
@@ -20,9 +22,10 @@ class ClientRuleRepository(BaseRepository[ClientReferenceRule]):
             .all()
         )
 
-    def client_for_operation(self, operation: str) -> list[ClientReferenceRule]:
+    def client_for_operation(self, operation: str) -> list[ClientReferenceRule] | None:
         has_rule_for_op = exists().where(
             ClientReferenceRule.id == Client.id,
             ClientReferenceRule.operation_type == operation,
         )
         has_any_rule = exists().where(ClientReferenceRule.client_id == Client.id)
+        return None

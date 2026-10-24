@@ -1,22 +1,24 @@
 """Structured logging configuration using structlog."""
-import sys
+
 import logging
+import sys
+
 import structlog
-from typing import Any
+from structlog.typing import Processor
 
 
 def setup_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
     """Configure structlog for structured JSON logging."""
-    
+
     # Configure standard library logging
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
         level=getattr(logging, log_level.upper()),
     )
-    
+
     # Configure structlog
-    processors = [
+    processors: list[Processor] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.filter_by_level,
         structlog.stdlib.add_logger_name,
@@ -27,12 +29,12 @@ def setup_logging(log_level: str = "INFO", json_logs: bool = True) -> None:
         structlog.processors.format_exc_info,
         structlog.processors.UnicodeDecoder(),
     ]
-    
+
     if json_logs:
         processors.append(structlog.processors.JSONRenderer())
     else:
         processors.append(structlog.dev.ConsoleRenderer())
-    
+
     structlog.configure(
         processors=processors,
         context_class=dict,
