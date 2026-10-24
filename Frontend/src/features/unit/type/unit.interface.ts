@@ -1,3 +1,4 @@
+
 export type UnitState = "ACTIVA" | "MANTENIMIENTO" | "BAJA";
 
 export const UNIT_STATE_OPTIONS: { value: UnitState; label: string }[] = [
@@ -5,6 +6,8 @@ export const UNIT_STATE_OPTIONS: { value: UnitState; label: string }[] = [
   { value: "MANTENIMIENTO", label: "Mantenimiento" },
   { value: "BAJA", label: "Baja" },
 ];
+export type TUnitType = 'trailer' | 'unit truck'
+
 
 export const UNIT_STATE_COLOR: Record<UnitState, string> = {
   ACTIVA: "green",
@@ -17,6 +20,8 @@ export interface IUnit {
   id: number;
   plates: string;
   unitNumber: string | null;
+  typeUnit:TUnitType
+
   status: UnitState;
   tag: string | null;
   driverId: number | null;
@@ -29,6 +34,7 @@ export interface IUnitInput {
   plates: string;
   unitNumber: string;
   state: UnitState;
+  typeUnit:TUnitType
   tag?: string;
 }
 

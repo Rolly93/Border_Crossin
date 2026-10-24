@@ -30,7 +30,7 @@ export function useLoginForm() {
       return data
     } catch (err: any) {
       const errorMessage =
-        err.response?.data?.message ||
+
         err.message ||
         'Invalid email or password';
 

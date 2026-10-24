@@ -1,14 +1,14 @@
 import { ICliente, ISftpConfiguration } from '@/features/clients/types/Cliente';
-import { IEmployeeDriverResponse, IEmployeeResponse, IEmployeeUserResponse, TEmployeeResponseMap } from '@/features/employee/type/employee.interface';
+import { IEmployeeDriverResponse, IEmployeeResponse, IEmployeeUserResponse, IOperatorOption, TEmployeeResponseMap } from '@/features/employee/type/employee.interface';
 import { ISftpFileStatus } from '@/features/sftp/types/ISftpSend';
 import { EventCategory } from '@/features/shipments/types/Shipment';
-import { UnitState } from '@/features/unit/type/unit.interface';
+import { TUnitType, UnitState } from '@/features/unit/type/unit.interface';
 import { http, HttpResponse, delay, PathParams } from 'msw';
 import { log } from 'node:console';
 import { promiseHooks } from 'node:v8';
 
 // Base URL of your backend (matches your Axios client configuration)
-const BASE_URL = 'http://127.0.0.1:8000';//http://127.0.0.1:8000
+const BASE_URL = 'http://localhost:8000';//http://127.0.0.1:8000
 
 // Type helpers for MSW
 type JsonBody = Record<string, unknown>;
@@ -44,7 +44,9 @@ interface MockUnit {
   status: UnitState;
   tag: string;
   is_active: boolean;
-  id_Operador: number | null
+  driver_id: number | null
+  typeUnit:TUnitType
+
 }
 
 type MockEmployee = IEmployeeUserResponse | IEmployeeDriverResponse;
@@ -94,14 +96,18 @@ const mockSftpSends: MockSftpSend[] = [
 ];
 
 const mockUnits: MockUnit[] = [
-  { id: 1, id_Operador: 3, unitNumber: 'TRUCK-001', plates: 'ABC-123', tag: 'ANAM2022L0001T0000000001', is_active: true, status: 'ACTIVA' },
-  { id: 2, id_Operador: 4, unitNumber: 'TRUCK-002', plates: 'DEF-456', tag: 'ANAM2022L0001T0000000001', is_active: true, status: 'MANTENIMIENTO' },
+  { id: 1, driver_id: 3, unitNumber: 'TRUCK-001', plates: 'ABC-123', tag: 'ANAM2022L0001T0000000001', is_active: true, status: 'ACTIVA' ,typeUnit:"trailer"},
+
+  { id: 2, driver_id: 4, unitNumber: 'TRUCK-002', plates: 'DEF-456', tag: 'ANAM2022L0001T0000000001', is_active: true, status: 'MANTENIMIENTO',typeUnit:'unit truck' },
 ];
 
 const mockEmployees: MockEmployee[] = [
   { id: 1, firstName: 'John', lastName: "Doe", email: 'john@test.com', username: 'nld-rolando', password: 'hunterX0369*', isAdmin: true, role: 'admin', rfc: "rfc32165181", dateOfBirth: "10/15/1993", hireDate: "10/15/2010", employeeType: "csr" },
+
   { id: 2, firstName: 'Jane', lastName: "Smith", email: 'jane@test.com', username: 'janesmith', password: 'password123', isAdmin: false, role: 'csr', rfc: "rfc3165161", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'csr' },
-  { id: 3, firstName: 'Bob', lastName: "Martinez", role: 'operador', rfc: "rfc3165161", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'operador', licenseNumber: "LIC-12345", licenseExpiration: "2030-01-01", gafetId: "ANAMGETR2025062500000001" },
+
+  { id: 3, firstName: 'Bob', lastName: "Martinez", role: 'operador', rfc: "rfc3165161", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'operador', licenseNumber: "LIC-12345", licenseExpiration: "2030-01-01", gafetId: "ANAMGETR2025062500000001"  },
+
   { id: 4, firstName: 'Pepe', lastName: "Sanchez", role: 'operador', rfc: "rfc9876541", hireDate: "10/15/2005", dateOfBirth: "11/20/1998", employeeType: 'operador', licenseNumber: "LIC-12345", licenseExpiration: "2030-01-01", gafetId: "ANAMGETR2025062500000001" },
 ];
 
@@ -462,9 +468,18 @@ export const handlers = [
     });
   }),
 
-  http.get(`${BASE_URL}/employees/operators`, async () => {
+  http.get(`${BASE_URL}/employees/operators`, async ()  => {
     await delay(300);
-    return HttpResponse.json(mockEmployees.filter(e => e.employeeType === 'operador').map(e => ({ id: e.id, firstName: e.firstName })));
+    const operdadorWithUnit = mockEmployees.filter(e => e.employeeType ==='operador').map(e =>{
+      const assginedUnit = mockUnits.find(u => u.driver_id === e.id);
+
+      return{
+        id:e.id,
+        firstName : e.firstName,
+        unit : assginedUnit ? assginedUnit.unitNumber : undefined,
+        typeUnit:assginedUnit?.typeUnit       }
+    })
+    return HttpResponse.json(operdadorWithUnit);
   }),
 
   http.get(`${BASE_URL}/employees/:id`, async ({ params, request: _request }) => {

@@ -1,4 +1,5 @@
 import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
+import { TUnitType } from "@/features/unit/type/unit.interface";
 
 export interface IEmployeeRequest {
   firstName: string;
@@ -58,17 +59,18 @@ export interface IEmployeeUserResponse extends IEmployeeBaseResponse {
   password: string;
   isAdmin: boolean;
 }
-
 export interface IEmployeeDriverResponse extends IEmployeeBaseResponse {
   licenseNumber: string;
   licenseExpiration: string;
   gafetId: string;
+
 }
 
 export interface IOperatorOption {
   id: number;
   firstName: string;
   unit?: string
+  typeUnit:TUnitType
 }
 
 export interface IEmployeeFormRequest extends INewEmployeeRequest {

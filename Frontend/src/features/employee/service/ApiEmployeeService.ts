@@ -62,8 +62,6 @@ export class ApiEmployeeService
   async getOperators(): Promise<IOperatorOption[]> {
     const response = await this.api.get<IOperatorOption[]>(`${this.resourcePath}/operators`);
 
-    console.error(response.status);
-    console.error(response.data);
 
     return response.data;
   }

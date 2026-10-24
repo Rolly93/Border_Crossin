@@ -1,34 +1,53 @@
+/** @format */
 
-import { useForm } from '@mantine/form';
-import { TextInput, Button, Group, Stack, Select, Title, Paper } from '@mantine/core';
-import { ShipmentFormProps } from '@/features/shipments/types/ShipmentFormProps';
-import { setupShipmentWatchers } from '../validation/ShipmentFormRules';
-import { ShipmentValidator } from '../validation/ShipmentValidator';
-import { useTranslation } from 'react-i18next';
-import { useClientsByOperation } from '@/features/clients/hooks/useClientsByOperation';
-import { useClientReferenceRules } from '@/features/clients/hooks/useClientReferenceRules';
-import { notifications } from '@mantine/notifications';
-import { ValidateClientReference } from '@/components/utils/businessRules';
-import { useOperators } from '@/features/employee/hook/useOperators';
+import { useForm } from "@mantine/form";
+import {
+  TextInput,
+  Button,
+  Group,
+  Stack,
+  Select,
+  Title,
+  Paper,
+} from "@mantine/core";
+import { ShipmentFormProps } from "@/features/shipments/types/ShipmentFormProps";
+import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
+import { ShipmentValidator } from "../validation/ShipmentValidator";
+import { useTranslation } from "react-i18next";
+import { useClientsByOperation } from "@/features/clients/hooks/useClientsByOperation";
+import { useClientReferenceRules } from "@/features/clients/hooks/useClientReferenceRules";
+import { notifications } from "@mantine/notifications";
+import { ValidateClientReference } from "@/components/utils/businessRules";
+import { useOperators } from "@/features/employee/hook/useOperators";
+import { useState } from "react";
+import { TUnitType } from "@/features/unit/type/unit.interface";
 
-export function ShipmentForm({ initialData, onSubmit, onCancel, opened }: ShipmentFormProps) {
+export function ShipmentForm({
+  initialData,
+  onSubmit,
+  onCancel,
+  opened,
+}: ShipmentFormProps) {
   const { operators, loading, error } = useOperators(opened);
+  const [typeUnit, setTypeUnit] = useState<TUnitType>();
 
-  const { t } = useTranslation()
+  const toggleUnit = operators.filter((u) => u.typeUnit === typeUnit);
+  console.log(toggleUnit);
+
+  const { t } = useTranslation();
   const form = useForm({
-    mode: 'controlled',
+    mode: "controlled",
     validateInputOnChange: true,
     initialValues: {
-      tracking_number: initialData?.tracking_number || '',
-      customer_tracking: initialData?.customer_tracking || '',
-      type_operation: initialData?.type_operation || 'Exportacion',
-      cliente: initialData?.cliente || '',
-      truck: initialData?.truck || '',
-      vehicle_type: initialData?.vehicle_type || '',
-      trailer: initialData?.trailer || '',
-      origen: initialData?.origen || '',
-      destino: initialData?.destino || '',
-
+      tracking_number: initialData?.tracking_number || "",
+      customer_tracking: initialData?.customer_tracking || "",
+      type_operation: initialData?.type_operation || "Exportacion",
+      cliente: initialData?.cliente || "",
+      truck: initialData?.truck || "",
+      vehicle_type: initialData?.vehicle_type || "",
+      trailer: initialData?.trailer || "",
+      origen: initialData?.origen || "",
+      destino: initialData?.destino || "",
     },
 
     validate: (values) => {
@@ -41,37 +60,31 @@ export function ShipmentForm({ initialData, onSubmit, onCancel, opened }: Shipme
         destino: validator.validateDestination(),
         trailer: validator.validateTrailer(),
         type_operation: validator.validateTypeOperation(),
-      }
-    }
-
+      };
+    },
   });
 
-  setupShipmentWatchers(form)
+  setupShipmentWatchers(form);
 
   // La lista de clientes depende del tipo de operación seleccionado.
-  const operation = form.values.type_operation
-  const { clients: clientOptions } = useClientsByOperation(operation)
-  const { getRules } = useClientReferenceRules()
-
-
-
-
-
+  const operation = form.values.type_operation;
+  const { clients: clientOptions } = useClientsByOperation(operation);
+  const { getRules } = useClientReferenceRules();
 
   const handleValidationError = (_errors: typeof form.errors) => {
     notifications.show({
-      title: 'Error de Datos',
-      message: 'Por favor revisa los campos marcados en rojo antes de continuar.',
-      color: 'red',
+      title: "Error de Datos",
+      message:
+        "Por favor revisa los campos marcados en rojo antes de continuar.",
+      color: "red",
     });
   };
-
 
   const handleSubmit = async (values: typeof form.values) => {
     try {
       const clientId = Number(values.cliente);
       const selectedClient = clientOptions.find((c) => c.id === clientId);
-      const clientName = selectedClient?.name || '';
+      const clientName = selectedClient?.name || "";
       const rules = clientId ? await getRules(clientId) : [];
 
       const { isValid, field, error } = ValidateClientReference({
@@ -87,42 +100,44 @@ export function ShipmentForm({ initialData, onSubmit, onCancel, opened }: Shipme
       }
 
       await onSubmit(values);
-
     } catch (err: any) {
-      if (typeof err === 'object' && !err.message) {
+      if (typeof err === "object" && !err.message) {
         form.setErrors(err);
       } else if (err.message) {
-        form.setFieldError('customer_tracking', err.message);
+        form.setFieldError("customer_tracking", err.message);
       }
     }
   };
 
   return (
     <Paper p="md" withBorder>
-      <form onSubmit={form.onSubmit((values) => handleSubmit(values as any), handleValidationError)}>
+      <form
+        onSubmit={form.onSubmit(
+          (values) => handleSubmit(values as any),
+          handleValidationError,
+        )}>
         <Stack gap="md">
           <Title order={3}>Shipment Information</Title>
 
           <Group grow>
             <TextInput
-              label={t('shipment.labels.trackingNumber')}
-              placeholder={t('shipment.placeholders.trackingNumber')}
+              label={t("shipment.labels.trackingNumber")}
+              placeholder={t("shipment.placeholders.trackingNumber")}
               required
-              {...form.getInputProps('tracking_number')}
+              {...form.getInputProps("tracking_number")}
             />
             <TextInput
-              label={t('shipment.labels.customer_tracking')}
+              label={t("shipment.labels.customer_tracking")}
               required
-              placeholder={t('shipment.placeholders.customer_tracking')}
-              {...form.getInputProps('customer_tracking')}
+              placeholder={t("shipment.placeholders.customer_tracking")}
+              {...form.getInputProps("customer_tracking")}
             />
-
           </Group>
 
           <Group grow>
             <Select
-              label={t('shipment.labels.cliente')}
-              placeholder={t('shipment.placeholders.cliente')}
+              label={t("shipment.labels.cliente")}
+              placeholder={t("shipment.placeholders.cliente")}
               data={clientOptions.map((client) => ({
                 value: client.id,
                 label: client.name,
@@ -130,64 +145,71 @@ export function ShipmentForm({ initialData, onSubmit, onCancel, opened }: Shipme
               autoSelectOnBlur
               searchable
               required
-              {...form.getInputProps('cliente')}
+              {...form.getInputProps("cliente")}
             />
             <Select
-              label={t('shipment.labels.operation_type')}
-              placeholder={t('shipment.placeholders.operation_type')}
-              data={['Exportacion', 'Importacion']}
+              label={t("shipment.labels.operation_type")}
+              placeholder={t("shipment.placeholders.operation_type")}
+              data={["Exportacion", "Importacion"]}
               autoSelectOnBlur
               searchable
               required
-              {...form.getInputProps('type_operation')}
+              {...form.getInputProps("type_operation")}
               onChange={(value) => {
-                form.setFieldValue('type_operation', value ?? '');
-                form.setFieldValue('cliente', '');
+                form.setFieldValue("type_operation", value ?? "");
+                form.setFieldValue("cliente", "");
               }}
             />
           </Group>
 
           <Group grow>
             <Select
-              label={t('shipment.labels.truck')}
+              label={t("shipment.labels.truck")}
               required
-              data={operators.map((o) => ({ value: String(o.id), label: o.firstName }))}
-              placeholder={t('shipment.placeholders.truck')}
-              {...form.getInputProps('truck')}
+              data={toggleUnit.map((o) => ({
+                value: String(o.id),
+                label: o.unit,
+              }))}
+              placeholder={t("shipment.placeholders.truck")}
+              {...form.getInputProps("truck")}
             />
             <Select
-              label={t('shipment.labels.vehicle_type')}
+              label={t("shipment.labels.vehicle_type")}
               required
-              placeholder={t('shipment.placeholders.vehicle_type')}
-              data={['Drya va', 'Truck']}
-
-              {...form.getInputProps('vehicle_type')}
+              placeholder={t("shipment.placeholders.vehicle_type")}
+              data={["trailer", "unit truck"]}
+              {...form.getInputProps("vehicle_type")}
+              onChange={(value, option) => {
+                form.setFieldValue("vehicle_type", value);
+                if (value) {
+                  setTypeUnit(value);
+                } else {
+                  setTypeUnit(undefined);
+                }
+              }}
             />
             <TextInput
-              label={t('shipment.labels.trailer')}
+              label={t("shipment.labels.trailer")}
               required
-              placeholder={t('shipment.placeholders.trailer')}
-              {...form.getInputProps('trailer')}
+              placeholder={t("shipment.placeholders.trailer")}
+              {...form.getInputProps("trailer")}
             />
-
           </Group>
-
 
           <Group grow>
             <TextInput
-              label={t('shipment.labels.origen')}
+              label={t("shipment.labels.origen")}
               required
-              placeholder={t('shipment.placeholders.origen')}
-              {...form.getInputProps('origen')}
+              placeholder={t("shipment.placeholders.origen")}
+              {...form.getInputProps("origen")}
             />
             <TextInput
-              label={t('shipment.labels.destination')}
+              label={t("shipment.labels.destination")}
               required
-              placeholder={t('shipment.placeholders.origen')}
-              {...form.getInputProps('destino')}
+              placeholder={t("shipment.placeholders.origen")}
+              {...form.getInputProps("destino")}
             />
           </Group>
-
 
           <Group justify="end" mt="xl">
             <Button variant="default" onClick={onCancel}>
