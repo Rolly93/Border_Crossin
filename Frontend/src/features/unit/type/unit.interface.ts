@@ -1,3 +1,4 @@
+/** @format */
 
 export type UnitState = "ACTIVA" | "MANTENIMIENTO" | "BAJA";
 
@@ -6,8 +7,7 @@ export const UNIT_STATE_OPTIONS: { value: UnitState; label: string }[] = [
   { value: "MANTENIMIENTO", label: "Mantenimiento" },
   { value: "BAJA", label: "Baja" },
 ];
-export type TUnitType = 'trailer' | 'unit truck'
-
+export type TUnitType = "trailer" | "unit truck";
 
 export const UNIT_STATE_COLOR: Record<UnitState, string> = {
   ACTIVA: "green",
@@ -16,17 +16,29 @@ export const UNIT_STATE_COLOR: Record<UnitState, string> = {
 };
 
 /** Renglón de GET /unit/ (incluye el operador vigente, si lo hay). */
+
+export interface IUnitResponse {
+  id: number;
+  plates: string;
+  unitNumber: string | null;
+  typeUnit: TUnitType;
+  status: UnitState;
+  tag: string | null;
+  driverId: number | null;
+  assignedAt: string | null;
+  driverName: string;
+}
 export interface IUnit {
   id: number;
   plates: string;
   unitNumber: string | null;
-  typeUnit:TUnitType
+  typeUnit: TUnitType;
 
   status: UnitState;
   tag: string | null;
   driverId: number | null;
-  driverName: string | null;
   assignedAt: string | null;
+  driverName: string | null;
 }
 
 /** Payload para crear o actualizar una unidad. */
@@ -34,7 +46,7 @@ export interface IUnitInput {
   plates: string;
   unitNumber: string;
   state: UnitState;
-  typeUnit:TUnitType
+  typeUnit: TUnitType;
   tag?: string;
 }
 

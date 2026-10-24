@@ -1,3 +1,5 @@
+/** @format */
+
 import { Group, Table, Title } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { useRef, useCallback, useState } from "react";
@@ -9,7 +11,15 @@ import { useEmployee } from "../hook/useEmployee";
 import { useEmployeeForm } from "../hook/useEmployeeForm";
 import { EmployeeTableRow } from "./EmployeeTableRow";
 import { EmployeeModal } from "./EmployeeModal";
-import { EmployeeType, IEmployeeResponse, IEmployeeUserResponse, IEmployeeDriverResponse, IEmployeeRequest, TEmployeeResponseMap, IEmployeeFormRequest } from "../type/employee.interface";
+import {
+  EmployeeType,
+  IEmployeeResponse,
+  IEmployeeUserResponse,
+  IEmployeeDriverResponse,
+  IEmployeeRequest,
+  TEmployeeResponseMap,
+  IEmployeeFormRequest,
+} from "../type/employee.interface";
 
 const DEFAULT_FORM_VALUES = {
   employeeType: "csr" as EmployeeType,
@@ -27,20 +37,34 @@ const DEFAULT_FORM_VALUES = {
   gafetId: "",
 };
 
-function isUserResponse(employee: IEmployeeResponse): employee is IEmployeeUserResponse {
+function isUserResponse(
+  employee: IEmployeeResponse,
+): employee is IEmployeeUserResponse {
   return "username" in employee;
 }
 
-function isDriverResponse(employee: IEmployeeResponse): employee is IEmployeeDriverResponse {
+function isDriverResponse(
+  employee: IEmployeeResponse,
+): employee is IEmployeeDriverResponse {
   return "licenseNumber" in employee;
 }
 
 export function EmployeeTable() {
   const { isAdmin } = useAuth();
-  const { employeeData, loading, hasMore, fetchNextPage, createEmployeeAccount, updateEmployee, getEmployeeData } = useEmployee();
+  const {
+    employeeData,
+    loading,
+    hasMore,
+    fetchNextPage,
+    createEmployeeAccount,
+    updateEmployee,
+    getEmployeeData,
+  } = useEmployee();
 
-  const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<TEmployeeResponseMap | null>(null);
+  const [modalOpened, { open: openModal, close: closeModal }] =
+    useDisclosure(false);
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<TEmployeeResponseMap | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
 
   const employeeForm = useEmployeeForm({
@@ -67,30 +91,44 @@ export function EmployeeTable() {
   };
 
   const handleOpenEdit = async (employee: IEmployeeResponse) => {
-
-    const employeeToEdit = await getEmployeeData(employee.id!, employee.role as  EmployeeType);
+    const employeeToEdit = await getEmployeeData(
+      employee.id!,
+      employee.role as EmployeeType,
+    );
     if (!employeeToEdit) {
       return;
     }
 
     const formValues = {
-      employeeType: (employeeToEdit.role === "operador" ? "operador" : "csr") as EmployeeType,
+      employeeType: (employeeToEdit.role === "operador"
+        ? "operador"
+        : "csr") as EmployeeType,
       firstName: employeeToEdit.firstName || "",
       lastName: employeeToEdit.lastName || "",
-      dateOfBirth: employeeToEdit.dateOfBirth ? new Date(employeeToEdit.dateOfBirth) : null,
+      dateOfBirth: employeeToEdit.dateOfBirth
+        ? new Date(employeeToEdit.dateOfBirth)
+        : null,
       rfc: employeeToEdit.rfc || "",
-      username: isUserResponse(employeeToEdit) ? employeeToEdit.username || "sd65f1" : "",
-      email: isUserResponse(employeeToEdit) && employeeToEdit.email || "" ,
+      username: isUserResponse(employeeToEdit)
+        ? employeeToEdit.username || "sd65f1"
+        : "",
+      email: (isUserResponse(employeeToEdit) && employeeToEdit.email) || "",
       password: "",
       confirmPassword: "",
-      isAdmin: isUserResponse(employeeToEdit) ? employeeToEdit.isAdmin || false : false,
-      licenseNumber: isDriverResponse(employeeToEdit) ? employeeToEdit.licenseNumber || "" : "",
-      licenseExpiration: isDriverResponse(employeeToEdit) && employeeToEdit.licenseExpiration
-        ? new Date(employeeToEdit.licenseExpiration)
-        : null,
-      gafetId: isDriverResponse(employeeToEdit) ? employeeToEdit.gafetId || "" : "",
+      isAdmin: isUserResponse(employeeToEdit)
+        ? employeeToEdit.isAdmin || false
+        : false,
+      licenseNumber: isDriverResponse(employeeToEdit)
+        ? employeeToEdit.licenseNumber || ""
+        : "",
+      licenseExpiration:
+        isDriverResponse(employeeToEdit) && employeeToEdit.licenseExpiration
+          ? new Date(employeeToEdit.licenseExpiration)
+          : null,
+      gafetId: isDriverResponse(employeeToEdit)
+        ? employeeToEdit.gafetId || ""
+        : "",
     };
-    console.log(formValues);
 
     employeeForm.form.setInitialValues(formValues);
     employeeForm.form.setValues(formValues);
@@ -99,36 +137,46 @@ export function EmployeeTable() {
     openModal();
   };
 
-  const lastElementRef = useCallback((node: HTMLTableRowElement | null) => {
-    if (loading) {
-      return;
-    }
-    if (observer.current) {
-      observer.current.disconnect();
-    }
-
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) {
-        fetchNextPage();
+  const lastElementRef = useCallback(
+    (node: HTMLTableRowElement | null) => {
+      if (loading) {
+        return;
       }
-    });
-    if (node) {
-      return observer.current.observe(node);
-    }
-  }, [loading, hasMore, fetchNextPage]);
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchNextPage();
+        }
+      });
+      if (node) {
+        return observer.current.observe(node);
+      }
+    },
+    [loading, hasMore, fetchNextPage],
+  );
 
   return (
     <>
       <Group justify="space-between" mt="md">
         <Title order={3}>Empleados</Title>
         {isAdmin && (
-          <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleOpenCreate}>
+          <AtomButton
+            leftSection={<IconPlus size={16} />}
+            color="blue"
+            onClick={handleOpenCreate}>
             Nuevo empleado
           </AtomButton>
         )}
       </Group>
 
-      <EmployeeModal opened={modalOpened} onClose={closeModal} employeeForm={employeeForm} />
+      <EmployeeModal
+        opened={modalOpened}
+        onClose={closeModal}
+        employeeForm={employeeForm}
+      />
 
       <Table.ScrollContainer minWidth={760} h={500}>
         <Table
@@ -138,8 +186,7 @@ export function EmployeeTable() {
           miw={700}
           layout="fixed"
           stickyHeader
-          mt={25}
-        >
+          mt={25}>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Nombre</Table.Th>

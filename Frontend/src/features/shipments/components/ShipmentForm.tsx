@@ -47,7 +47,7 @@ export function ShipmentForm({
       vehicle_type: initialData?.vehicle_type || "",
       trailer: initialData?.trailer || "",
       origen: initialData?.origen || "",
-      destino: initialData?.destino || "",
+      destination: initialData?.destination || "",
     },
 
     validate: (values) => {
@@ -57,7 +57,7 @@ export function ShipmentForm({
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
-        destino: validator.validateDestination(),
+        des: validator.validateDestination(),
         trailer: validator.validateTrailer(),
         type_operation: validator.validateTypeOperation(),
       };

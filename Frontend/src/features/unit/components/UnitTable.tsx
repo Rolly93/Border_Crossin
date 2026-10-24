@@ -1,10 +1,17 @@
+/** @format */
+
 import { Badge, Table, Text } from "@mantine/core";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import { IUnit, UNIT_STATE_COLOR, UnitState } from "../type/unit.interface";
+import {
+  IUnit,
+  IUnitResponse,
+  UNIT_STATE_COLOR,
+  UnitState,
+} from "../type/unit.interface";
 
 interface UnitTableProps {
-  units: IUnit[];
+  units: IUnitResponse[];
   loading: boolean;
   isAdmin: boolean;
   onEdit: (unit: IUnit) => void;
@@ -12,10 +19,21 @@ interface UnitTableProps {
   onHistory: (unit: IUnit) => void;
 }
 
-export function UnitTable({ units, loading, isAdmin, onEdit, onAssign, onHistory }: UnitTableProps) {
+export function UnitTable({
+  units,
+  loading,
+  isAdmin,
+  onEdit,
+  onAssign,
+  onHistory,
+}: UnitTableProps) {
   return (
     <Table.ScrollContainer minWidth={800}>
-      <Table highlightOnHover verticalSpacing="xs" horizontalSpacing="md" miw={760}>
+      <Table
+        highlightOnHover
+        verticalSpacing="xs"
+        horizontalSpacing="md"
+        miw={760}>
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Número</Table.Th>
@@ -31,7 +49,11 @@ export function UnitTable({ units, loading, isAdmin, onEdit, onAssign, onHistory
             <TableSkeletonRows rows={4} columns={6} />
           ) : units.length === 0 ? (
             <Table.Tr>
-              <Table.Td colSpan={6}><Text c="dimmed" size="sm">No hay unidades registradas</Text></Table.Td>
+              <Table.Td colSpan={6}>
+                <Text c="dimmed" size="sm">
+                  No hay unidades registradas
+                </Text>
+              </Table.Td>
             </Table.Tr>
           ) : (
             units.map((unit) => (
@@ -39,20 +61,44 @@ export function UnitTable({ units, loading, isAdmin, onEdit, onAssign, onHistory
                 <Table.Td>{unit.unitNumber ?? "—"}</Table.Td>
                 <Table.Td>{unit.plates}</Table.Td>
                 <Table.Td>
-                  <Badge color={UNIT_STATE_COLOR[unit.status as UnitState] ?? "gray"} variant="light">
+                  <Badge
+                    color={UNIT_STATE_COLOR[unit.status as UnitState] ?? "gray"}
+                    variant="light">
                     {unit.status}
                   </Badge>
                 </Table.Td>
                 <Table.Td>{unit.tag ?? "—"}</Table.Td>
-                <Table.Td>{unit.driverName ?? <Text c="dimmed" span size="sm">Sin asignar</Text>}</Table.Td>
                 <Table.Td>
-                  <AtomButton size="xs" variant="light" onClick={() => onHistory(unit)}>Historial</AtomButton>
+                  {unit.driverName ?? (
+                    <Text c="dimmed" span size="sm">
+                      Sin asignar
+                    </Text>
+                  )}
+                </Table.Td>
+                <Table.Td>
+                  <AtomButton
+                    size="xs"
+                    variant="light"
+                    onClick={() => onHistory(unit)}>
+                    Historial
+                  </AtomButton>
                   {isAdmin && (
                     <>
                       {" "}
-                      <AtomButton size="xs" variant="light" color="blue" onClick={() => onEdit(unit)}>Editar</AtomButton>
-                      {" "}
-                      <AtomButton size="xs" variant="light" color="teal" onClick={() => onAssign(unit)}>Operador</AtomButton>
+                      <AtomButton
+                        size="xs"
+                        variant="light"
+                        color="blue"
+                        onClick={() => onEdit(unit)}>
+                        Editar
+                      </AtomButton>{" "}
+                      <AtomButton
+                        size="xs"
+                        variant="light"
+                        color="teal"
+                        onClick={() => onAssign(unit)}>
+                        Operador
+                      </AtomButton>
                     </>
                   )}
                 </Table.Td>

@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { Table } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { Shipment, ShipmentUpdate } from '@/features/shipments/types/Shipment';
-import { ShipmentRow } from './ShipmentRow';
-import { shipmentService } from '@/features/shipments/service/shipmentService';
-import { useTranslation } from 'react-i18next';
-import { EmbarqueModal } from './EmbarqueModalProps';
-import { TableSkeletonRows } from '@/components/ui/TableSkeletonRows';
+/** @format */
+
+import { useState } from "react";
+import { Table } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { Shipment, ShipmentUpdate } from "@/features/shipments/types/Shipment";
+import { ShipmentRow } from "./ShipmentRow";
+import { shipmentService } from "@/features/shipments/service/shipmentService";
+import { useTranslation } from "react-i18next";
+import { EmbarqueModal } from "./EmbarqueModalProps";
+import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 
 interface ShipmentTableProps {
   shipments: Shipment[];
@@ -25,14 +27,20 @@ function shipmentToUpdate(shipment: Shipment): ShipmentUpdate {
     vehicle_type: shipment.vehicle_type,
     trailer: shipment.trailer,
     origen: shipment.origen,
-    destination: shipment.destino,
+    destination: shipment.destination,
     type_operation: shipment.type_operation,
     events: shipment.events,
   };
 }
 
-export default function ShipmentTable({ shipments, loading, error: _error, onUpdateShipment, onLastElement }: ShipmentTableProps) {
-  const { t } = useTranslation()
+export default function ShipmentTable({
+  shipments,
+  loading,
+  error: _error,
+  onUpdateShipment,
+  onLastElement,
+}: ShipmentTableProps) {
+  const { t } = useTranslation();
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedElement, setSelectedElement] = useState<Shipment | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -42,7 +50,6 @@ export default function ShipmentTable({ shipments, loading, error: _error, onUpd
 
     open();
   };
-
 
   const handleUpdateSubmit = async (updatedValues: Shipment) => {
     try {
@@ -59,29 +66,28 @@ export default function ShipmentTable({ shipments, loading, error: _error, onUpd
     }
   };
 
-
-
-
   return (
     <>
-      <Table.ScrollContainer minWidth={1400} maxHeight={500} h={500}  >
+      <Table.ScrollContainer minWidth={1400} maxHeight={500} h={500}>
         <Table
           highlightOnHover
           horizontalSpacing="md"
           verticalSpacing="sm"
-          layout='fixed' >
+          layout="fixed">
           <Table.Thead>
             <Table.Tr>
-              <Table.Th w={100}>{t('shipment.table.trackingNumber')}</Table.Th>
-              <Table.Th w={130} >{t('shipment.table.customer_tracking')}</Table.Th>
-              <Table.Th w={120} >{t('shipment.table.trailer')}</Table.Th>
-              <Table.Th w={100} >Tractosr</Table.Th>
-              <Table.Th w={180} >Cliente</Table.Th>
-              <Table.Th w={180} >asignacion</Table.Th>
+              <Table.Th w={100}>{t("shipment.table.trackingNumber")}</Table.Th>
+              <Table.Th w={130}>
+                {t("shipment.table.customer_tracking")}
+              </Table.Th>
+              <Table.Th w={120}>{t("shipment.table.trailer")}</Table.Th>
+              <Table.Th w={100}>Tractor</Table.Th>
+              <Table.Th w={180}>Cliente</Table.Th>
+              <Table.Th w={180}>asignacion</Table.Th>
 
-              <Table.Th w={140} >Tipo Operacion</Table.Th>
-              <Table.Th w={160} >Origen</Table.Th>
-              <Table.Th w={160} >Destino</Table.Th>
+              <Table.Th w={140}>Tipo Operacion</Table.Th>
+              <Table.Th w={160}>Origen</Table.Th>
+              <Table.Th w={160}>Destino</Table.Th>
 
               <Table.Th w={140}>Recoleccion</Table.Th>
               <Table.Th w={140}>Salida de Patio</Table.Th>
@@ -114,10 +120,11 @@ export default function ShipmentTable({ shipments, loading, error: _error, onUpd
                 );
               })
             )}
-            {loading && shipments.length > 0 && <TableSkeletonRows rows={3} columns={15} />}
+            {loading && shipments.length > 0 && (
+              <TableSkeletonRows rows={3} columns={15} />
+            )}
           </Table.Tbody>
         </Table>
-
       </Table.ScrollContainer>
 
       <EmbarqueModal

@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useState } from 'react';
-import { getErrorMessage } from '@/components/utils/errorMessage';
-import { unitService } from '../service/ApiUnitService';
-import { IUnit, IUnitInput } from '../type/unit.interface';
-import { AxiosError } from 'axios';
+/** @format */
+
+import { useCallback, useEffect, useState } from "react";
+import { getErrorMessage } from "@/components/utils/errorMessage";
+import { unitService } from "../service/ApiUnitService";
+import { IUnit, IUnitInput, IUnitResponse } from "../type/unit.interface";
+import { AxiosError } from "axios";
 
 /**
  * Estado de la lista de unidades y sus acciones.
  * Cada acción recarga la lista al terminar y devuelve true/false para que la UI cierre o no el modal.
  */
 export function useUnits() {
-  const [units, setUnits] = useState<IUnit[]>([]);
+  const [units, setUnits] = useState<IUnitResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +27,7 @@ export function useUnits() {
         setUnits([]);
         setError(null);
       } else {
-        setError(getErrorMessage(err, 'No se pudieron cargar las unidades'));
+        setError(getErrorMessage(err, "No se pudieron cargar las unidades"));
       }
     } finally {
       setLoading(false);
@@ -48,20 +50,23 @@ export function useUnits() {
         return false;
       }
     },
-    [refresh]
+    [refresh],
   );
 
   const createUnit = (input: IUnitInput) =>
-    run(() => unitService.create(input), 'No se pudo crear la unidad');
+    run(() => unitService.create(input), "No se pudo crear la unidad");
 
   const updateUnit = (id: number, input: IUnitInput) =>
-    run(() => unitService.update(id, input), 'No se pudo actualizar la unidad');
+    run(() => unitService.update(id, input), "No se pudo actualizar la unidad");
 
   const assignDriver = (unitId: number, driverId: number) =>
-    run(() => unitService.assign(unitId, driverId), 'No se pudo asignar el operador');
+    run(
+      () => unitService.assign(unitId, driverId),
+      "No se pudo asignar el operador",
+    );
 
   const releaseDriver = (unitId: number) =>
-    run(() => unitService.release(unitId), 'No se pudo liberar la unidad');
+    run(() => unitService.release(unitId), "No se pudo liberar la unidad");
 
   return {
     units,

@@ -1,30 +1,45 @@
+/** @format */
+
 import { BaseApiService } from "@/components/service/BaseApiService";
-import { IUnit, IUnitAssignment, IUnitInput } from "../type/unit.interface";
+import {
+  IUnit,
+  IUnitAssignment,
+  IUnitInput,
+  IUnitResponse,
+} from "../type/unit.interface";
 
 export class ApiUnitService extends BaseApiService {
   constructor() {
     super("/unit");
   }
 
-  async list(): Promise<IUnit[]> {
-    const { data } = await this.api.get<IUnit[]>(`${this.resourcePath}/`);
+  async list(): Promise<IUnitResponse[]> {
+    const { data } = await this.api.get<IUnitResponse[]>(
+      `${this.resourcePath}/`,
+    );
     return data;
   }
 
   async create(input: IUnitInput): Promise<IUnit> {
-    const { data } = await this.api.post<IUnit>(`${this.resourcePath}/create`, input);
+    const { data } = await this.api.post<IUnit>(
+      `${this.resourcePath}/create`,
+      input,
+    );
     return data;
   }
 
   async update(id: number, input: IUnitInput): Promise<IUnit> {
-    const { data } = await this.api.put<IUnit>(`${this.resourcePath}/update/${id}`, input);
+    const { data } = await this.api.put<IUnit>(
+      `${this.resourcePath}/update/${id}`,
+      input,
+    );
     return data;
   }
 
   async assign(unitId: number, driverId: number): Promise<IUnitAssignment> {
     const { data } = await this.api.post<IUnitAssignment>(
       `${this.resourcePath}/${unitId}/assign`,
-      { driverId }
+      { driverId },
     );
     return data;
   }
@@ -34,7 +49,9 @@ export class ApiUnitService extends BaseApiService {
   }
 
   async history(unitId: number): Promise<IUnitAssignment[]> {
-    const { data } = await this.api.get<IUnitAssignment[]>(`${this.resourcePath}/${unitId}/history`);
+    const { data } = await this.api.get<IUnitAssignment[]>(
+      `${this.resourcePath}/${unitId}/history`,
+    );
     return data;
   }
 }
