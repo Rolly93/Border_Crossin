@@ -11,21 +11,21 @@ import { TUnitType, UnitState } from "@/features/unit/type/unit.interface";
 import { http, HttpResponse, delay, PathParams } from "msw";
 
 // Base URL of your backend (matches your Axios client configuration)
-const BASE_URL = "http://localhost:8000"; //http://127.0.0.1:8000
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; //http://127.0.0.1:8000
 
 // Type helpers for MSW
 type JsonBody = Record<string, unknown>;
 
 // Mock data
-interface MockClient extends ICliente {}
+interface MockClient extends ICliente { }
 
-interface MockShipment extends Shipment {}
+interface MockShipment extends Shipment { }
 
 interface MockSftpConfig extends ISftpConfiguration {
   is_active: boolean;
 }
 
-interface MockSftpSend extends ISftpFileStatus {}
+interface MockSftpSend extends ISftpFileStatus { }
 
 interface MockUnit {
   id: number;
@@ -260,6 +260,8 @@ export const handlers = [
 
     const foundUser = mockEmployees.find((user) => {
       if ("username" in user && "password" in user) {
+        console.log(user);
+
         return user.username === username && user.password === password;
       }
       return false;
@@ -608,10 +610,15 @@ export const handlers = [
   http.put(`${BASE_URL}/unit/update/:id`, async ({ params, request }) => {
     await delay(500);
     const body = await getJsonBody(request);
+
     const id = parseInt(getPathId(params), 10);
+
     const idx = mockUnits.findIndex((u) => u.id === id);
+
+
     if (idx >= 0) {
       mockUnits[idx] = { ...mockUnits[idx], ...body } as MockUnit;
+      console.log(mockUnits[idx]);
       return HttpResponse.json(mockUnits[idx]);
     }
     return HttpResponse.json({ detail: "Not found" }, { status: 404 });
@@ -637,16 +644,18 @@ export const handlers = [
     const unitId = parseInt(getPathId(params), 10);
     return HttpResponse.json([
       {
-        unit_id: unitId,
-        driver_id: 1,
-        assigned_at: "2026-01-01T10:00:00Z",
-        released_at: "2026-01-15T10:00:00Z",
+        id: unitId,
+        driverId: 1,
+        driverName: mockEmployees[0].firstName,
+        assignedAt: "2026-01-01T10:00:00Z",
+        releasedAt: "2026-01-15T10:00:00Z",
       },
       {
-        unit_id: unitId,
+        id: unitId,
         driver_id: 2,
-        assigned_at: "2026-01-16T10:00:00Z",
-        released_at: null,
+        driverName: mockEmployees[1].firstName,
+        assignedAt: "2026-01-16T10:00:00Z",
+        releasedAt: null,
       },
     ]);
   }),

@@ -31,7 +31,7 @@ export function UnitHistoryModal({ unitId, unitLabel, onClose }: UnitHistoryModa
             {loading ? (
               <TableSkeletonRows rows={3} columns={4} />
             ) : history.length === 0 ? (
-              <Table.Tr><Table.Td colSpan={4}><Text c="dimmed" size="sm">Sin asignaciones</Text></Table.Td></Table.Tr>
+              <Table.Tr ><Table.Td colSpan={4}><Text c="dimmed" size="sm">Sin asignaciones</Text></Table.Td></Table.Tr>
             ) : (
               history.map((h) => (
                 <Table.Tr key={h.id}>

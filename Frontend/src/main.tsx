@@ -11,7 +11,10 @@ import { queryClient } from "./service/queryClient";
 import "./styles/fonts.css";
 
 async function enableMocking() {
-  if (import.meta.env.VITE_USE_MOCK !== "true") {
+  const mock_vite = import.meta.env.VITE_USE_MOCK
+  console.log(mock_vite);
+
+  if (mock_vite !== "true") {
     return;
   }
   const { worker } = await import("./mocks/browser");

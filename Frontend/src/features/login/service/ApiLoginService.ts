@@ -9,6 +9,7 @@ export class AuthService extends BaseApiService implements ILoginService {
   }
 
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
+
     const response = await this.api.post<LoginResponse>(
       `${this.resourcePath}/login`,
       credentials

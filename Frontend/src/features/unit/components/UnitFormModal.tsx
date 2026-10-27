@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Select, Stack, TextInput, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import { IUnit, IUnitInput, UNIT_STATE_OPTIONS, UnitState } from "../type/unit.interface";
+import { IUnit, IUnitInput, TUnitType, UNIT_STATE_OPTIONS, UNIT_TYPE, UnitState } from "../type/unit.interface";
 
 interface UnitFormModalProps {
   opened: boolean;
@@ -15,17 +15,19 @@ interface UnitFormValues {
   plates: string;
   unitNumber: string;
   state: UnitState;
+  typeUnit: TUnitType
   tag: string;
 }
 
 export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const form = useForm<UnitFormValues>({
-    initialValues: { plates: "", unitNumber: "", state: "ACTIVA", tag: "" },
+    initialValues: { plates: "", unitNumber: "", state: "ACTIVA", tag: "", typeUnit: 'trailer' },
     validate: {
       plates: (v) => (v.trim() ? null : "Requerido"),
       unitNumber: (v) => (v.trim() ? null : "Requerido"),
       tag: (v) => (v.trim().length > 24 ? "Máximo 24 caracteres" : null),
+
     },
   });
 
@@ -38,6 +40,7 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
       plates: unit?.plates ?? "",
       unitNumber: unit?.unitNumber ?? "",
       state: unit?.status ?? "ACTIVA",
+      typeUnit: unit?.typeUnit,
       tag: unit?.tag ?? "",
     });
     form.resetDirty();
@@ -50,6 +53,7 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
       plates: values.plates.trim(),
       unitNumber: values.unitNumber.trim(),
       state: values.state,
+      typeUnit: values.typeUnit,
       tag: values.tag.trim() || undefined,
     });
     setSubmitting(false);
@@ -63,9 +67,13 @@ export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModal
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="sm">
           <Group grow>
+
             <TextInput label="Número de unidad" required {...form.getInputProps("unitNumber")} />
             <TextInput label="Placas" required {...form.getInputProps("plates")} />
           </Group>
+          <Select label="Tipo de Unidad"
+            placeholder="Seleccione tipo de unidad" data={UNIT_TYPE} allowDeselect={false}
+            {...form.getInputProps('typeUnit')} />
           <Group grow>
             <Select label="Estado" data={UNIT_STATE_OPTIONS} allowDeselect={false}
               {...form.getInputProps("state")} />
