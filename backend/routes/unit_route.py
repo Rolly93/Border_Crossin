@@ -28,6 +28,7 @@ async def create_unit(
     service: UnitSvc,
     current_user: CurrentUser,
 ):
+    print(data)
     unit = service.create(data)
     return service.get_out(unit_id=unit.id)
 
@@ -44,6 +45,7 @@ async def update_unit(
     service: UnitSvc,
     current_user: CurrentUser,
 ) -> UnitOut:
+    print(data.typeUnit)
     service.update(unit_id, data)
     return service.get_out(unit_id)
 

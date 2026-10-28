@@ -21,6 +21,8 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from schema.employee_schema import TypeUnit
+
 hire_date: date = date.today()
 
 
@@ -62,7 +64,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     hashed_password: Mapped[str] = mapped_column(String(250), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    employee_id: Mapped[Optional[int]] = mapped_column(
+    employee_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("employee.id"), nullable=True
     )
 
@@ -113,7 +115,7 @@ class Client(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     still_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    phonenumber: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    phonenumber: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # Relaciones
     sftp_services: Mapped[list["SftpService"]] = relationship(
@@ -194,10 +196,13 @@ class UnitTruck(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
-    unit_number: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    unit_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     state: Mapped[str] = mapped_column(String(50), nullable=False, default="ACTIVA")
-    tag_id: Mapped[Optional[str]] = mapped_column(
+    tag_id: Mapped[str | None] = mapped_column(
         String(24), nullable=True, unique=True, default="N/A"
+    )
+    type_unit: Mapped[str] = mapped_column(
+        String, nullable=False, default=TypeUnit.TRAILER
     )
     assigned_day: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
@@ -235,7 +240,7 @@ class UnitAssignment(Base):
     assigned_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.current_timestamp()
     )
-    released_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    released_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relaciones
     unit: Mapped["UnitTruck"] = relationship("UnitTruck", back_populates="assignments")

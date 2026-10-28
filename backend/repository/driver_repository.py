@@ -3,9 +3,10 @@ from typing import override
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from model.db_model import DriverDetails, Employee
+from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from repository import EmployeeRepository
 from repository.base_repository import BaseRepository
+from schema.employee_schema import OperatorOption
 
 
 class DriverRepository(BaseRepository[DriverDetails]):
@@ -28,20 +29,25 @@ class DriverRepository(BaseRepository[DriverDetails]):
             )
         return driver
 
-    def get_drivers_list(self) -> list[dict[str, str | int]]:
-
+    def get_drivers_list(self) -> list[OperatorOption] | OperatorOption:
         drivers = (
-            self._db.query(DriverDetails)
-            .join(Employee, Employee.id == DriverDetails.employee_id)
-            .filter(Employee.still_employee.is_(True))
+            self._db.query(UnitTruck, UnitAssignment, Employee)
+            .join(DriverDetails, DriverDetails.employee_id == Employee.id)
+            .outerjoin(
+                UnitAssignment, UnitAssignment.driver_id == DriverDetails.employee_id
+            )
+            .outerjoin(UnitTruck, UnitTruck.id == UnitAssignment.unit_id)
+            .filter(Employee.role == "operador", Employee.still_employee.is_(True))
             .order_by(Employee.name)
             .all()
         )
 
         return [
-            {
-                "id": driver.employee_id,
-                "name": f"{driver.employee.name} {driver.employee.last_name}",
-            }
-            for driver in drivers
+            OperatorOption(
+                id=employee.id,
+                firstName=f"{employee.name} {employee.last_name}",
+                unit=unit_truck.unit_number if unit_truck else None,
+                typeUnit=unit_assignment.type_Unit,
+            )
+            for unit_truck, unit_assignment, employee in drivers
         ]

@@ -3,14 +3,17 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+from schema.employee_schema import TypeUnit
+
 UnitState = Literal["ACTIVA", "MANTENIMIENTO", "BAJA"]
 
 
 class UnitIn(BaseModel):
     plates: str = Field(min_length=1, max_length=50)
     unitNumber: str = Field(min_length=1, max_length=20)
-    state: UnitState = "ACTIVA"
-    tag: Optional[str] = Field(default=None, max_length=24)
+    status: UnitState = "ACTIVA"
+    tag: str | None = Field(default=None, max_length=24)
+    typeUnit: Literal[TypeUnit.TRAILER, TypeUnit.UNIT_TRUCK]
 
     @field_validator("plates", "unitNumber", mode="before")
     @classmethod
@@ -29,12 +32,13 @@ class UnitIn(BaseModel):
 class UnitOut(BaseModel):
     id: int
     plates: str
-    unitNumber: Optional[str] = None
-    state: str
-    tag: Optional[str] = None
-    driverId: Optional[int] = None
-    driverName: Optional[str] = None
-    assignedAt: Optional[datetime] = None
+    unitNumber: str | None
+    status: str
+    typeUnit: TypeUnit
+    tag: str | None
+    driverId: int | None
+    driverName: str | None
+    assignedAt: datetime | None
 
 
 class AssignIn(BaseModel):

@@ -12,6 +12,7 @@ from schema.employee_schema import (
     EmployeeCreateUnion,
     EmployeeListItem,
     EmployeeRequestDash,
+    OperatorOption,
     PaginatedEmployeeResponse,
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
@@ -144,8 +145,17 @@ class EmployeeService:
             )
         self._db.commit()
 
-    def list_operators(self) -> list[dict[str, str | int]]:
-        drivers = self._driver_repo.get_drivers_list()
+    def list_operators(self) -> list[OperatorOption] | OperatorOption:
+        drivers: list[OperatorOption] | OperatorOption = (
+            self._driver_repo.get_drivers_list()
+        )
+        if not drivers:
+            raise (
+                HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Not Units Assgined yet!",
+                )
+            )
 
         return drivers
 

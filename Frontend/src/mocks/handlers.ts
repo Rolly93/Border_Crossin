@@ -10,22 +10,21 @@ import { Shipment } from "@/features/shipments/types/Shipment";
 import { TUnitType, UnitState } from "@/features/unit/type/unit.interface";
 import { http, HttpResponse, delay, PathParams } from "msw";
 
-// Base URL of your backend (matches your Axios client configuration)
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; //http://127.0.0.1:8000
 
 // Type helpers for MSW
 type JsonBody = Record<string, unknown>;
 
 // Mock data
-interface MockClient extends ICliente { }
+interface MockClient extends ICliente {}
 
-interface MockShipment extends Shipment { }
+interface MockShipment extends Shipment {}
 
 interface MockSftpConfig extends ISftpConfiguration {
   is_active: boolean;
 }
 
-interface MockSftpSend extends ISftpFileStatus { }
+interface MockSftpSend extends ISftpFileStatus {}
 
 interface MockUnit {
   id: number;
@@ -615,7 +614,6 @@ export const handlers = [
 
     const idx = mockUnits.findIndex((u) => u.id === id);
 
-
     if (idx >= 0) {
       mockUnits[idx] = { ...mockUnits[idx], ...body } as MockUnit;
       console.log(mockUnits[idx]);
@@ -644,14 +642,14 @@ export const handlers = [
     const unitId = parseInt(getPathId(params), 10);
     return HttpResponse.json([
       {
-        id: unitId,
-        driverId: 1,
+        id: 1,
+        driver_id: 1,
         driverName: mockEmployees[0].firstName,
         assignedAt: "2026-01-01T10:00:00Z",
         releasedAt: "2026-01-15T10:00:00Z",
       },
       {
-        id: unitId,
+        id: 2,
         driver_id: 2,
         driverName: mockEmployees[1].firstName,
         assignedAt: "2026-01-16T10:00:00Z",

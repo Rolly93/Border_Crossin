@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException, status
+from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import Session
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
@@ -75,26 +76,35 @@ class UnitService:
         )
 
     def list_units(self) -> list[UnitOut]:
-        units = self._db.query(UnitTruck).order_by(UnitTruck.unit_number).all()
-        open_rows = (
-            self._db.query(UnitAssignment)
-            .filter(UnitAssignment.released_at.is_(None))
+        results: list[Row[tuple[UnitTruck, UnitAssignment, Employee]]] = (
+            self._db.query(UnitTruck, UnitAssignment, Employee)
+            .outerjoin(
+                UnitAssignment,
+                (UnitAssignment.unit_id == UnitTruck.id)
+                & (UnitAssignment.released_at.is_(None)),
+            )
+            .outerjoin(
+                DriverDetails, DriverDetails.employee_id == UnitAssignment.unit_id
+            )
+            .outerjoin(Employee, Employee.id == DriverDetails.employee_id)
+            .order_by(UnitTruck.unit_number)
             .all()
         )
-        open_by_unit = {a.unit_id: a for a in open_rows}
-        result = []
-        for unit in units:
-            open_a = open_by_unit.get(unit.id)
+        result: list[UnitOut] = []
+        for unit, assignment, employee in results:
             result.append(
                 UnitOut(
                     id=unit.id,
                     plates=unit.plates,
                     unitNumber=unit.unit_number,
-                    state=unit.state,
+                    status=unit.state,
+                    typeUnit=unit.type_unit,
                     tag=unit.tag_id,
-                    driverId=open_a.driver_id if open_a else None,
-                    driverName=self._driver_name(open_a.driver_id) if open_a else None,
-                    assignedAt=open_a.assigned_at if open_a else None,
+                    driverId=assignment.driver_id if assignment else None,
+                    driverName=(
+                        f"{employee.name} {employee.last_name}" if employee else None
+                    ),
+                    assignedAt=assignment.assignet_at if assignment else None,
                 )
             )
         return result
@@ -125,7 +135,8 @@ class UnitService:
         unit = UnitTruck(
             plates=data.plates,
             unit_number=data.unitNumber,
-            state=data.state,
+            type_unit=data.typeUnit,
+            state=data.status,
             tag_id=data.tag,
         )
         self._db.add(unit)
@@ -139,11 +150,12 @@ class UnitService:
 
         unit.plates = data.plates
         unit.unit_number = data.unitNumber
-        unit.state = data.state
+        unit.state = data.status
         unit.tag_id = data.tag
+        unit.type_unit = data.typeUnit
 
         # Una unidad que no está activa no puede seguir ligada a un operador.
-        if data.state != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
+        if data.status != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
             open_a.released_at = datetime.now()
 
         self._db.commit()

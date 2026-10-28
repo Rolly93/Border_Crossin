@@ -14,18 +14,29 @@ export class ApiUnitService extends BaseApiService {
   }
 
   async list(): Promise<IUnitResponse[]> {
-    const { data } = await this.api.get<IUnitResponse[]>(
-      `${this.resourcePath}/`,
-    );
-    return data;
+    try {
+      const { data } = await this.api.get<IUnitResponse[]>(
+        `${this.resourcePath}/`,
+      );
+
+      return data;
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async create(input: IUnitInput): Promise<IUnit> {
-    const { data } = await this.api.post<IUnit>(
-      `${this.resourcePath}/create`,
-      input,
-    );
-    return data;
+    try {
+      const { data } = await this.api.post<IUnit>(
+        `${this.resourcePath}/create`,
+        input,
+      );
+      console.log(data);
+
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async update(id: number, input: IUnitInput): Promise<IUnit> {

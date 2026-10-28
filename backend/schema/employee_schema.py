@@ -1,4 +1,5 @@
 from datetime import date
+from enum import StrEnum
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field
@@ -64,9 +65,16 @@ class EmployeeRequest(EmployeeBase):
     gafetId: str | None
 
 
+class TypeUnit(StrEnum):
+    UNIT_TRUCK = "unit truck"
+    TRAILER = "trailer"
+
+
 class OperatorOption(BaseModel):
     id: int
-    name: str
+    firstName: str
+    unit: str | None
+    typeUnit: TypeUnit
 
 
 class EmployeeListItem(BaseModel):

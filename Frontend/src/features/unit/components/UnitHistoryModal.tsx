@@ -1,3 +1,5 @@
+/** @format */
+
 import { Modal, Table, Text, Badge } from "@mantine/core";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { useUnitHistory } from "../hook/useUnitHistory";
@@ -11,12 +13,25 @@ interface UnitHistoryModalProps {
 const formatDate = (value: string | null) =>
   value ? new Date(value).toLocaleString() : "—";
 
-export function UnitHistoryModal({ unitId, unitLabel, onClose }: UnitHistoryModalProps) {
+export function UnitHistoryModal({
+  unitId,
+  unitLabel,
+  onClose,
+}: UnitHistoryModalProps) {
   const { history, loading, error } = useUnitHistory(unitId);
 
   return (
-    <Modal opened={unitId !== null} onClose={onClose} title={`Historial · ${unitLabel}`} centered size="lg">
-      {error && <Text c="red" size="sm">{error}</Text>}
+    <Modal
+      opened={unitId !== null}
+      onClose={onClose}
+      title={`Historial · ${unitLabel}`}
+      centered
+      size="lg">
+      {error && (
+        <Text c="red" size="sm">
+          {error}
+        </Text>
+      )}
       <Table.ScrollContainer minWidth={500}>
         <Table verticalSpacing="xs" horizontalSpacing="sm">
           <Table.Thead>
@@ -31,7 +46,13 @@ export function UnitHistoryModal({ unitId, unitLabel, onClose }: UnitHistoryModa
             {loading ? (
               <TableSkeletonRows rows={3} columns={4} />
             ) : history.length === 0 ? (
-              <Table.Tr ><Table.Td colSpan={4}><Text c="dimmed" size="sm">Sin asignaciones</Text></Table.Td></Table.Tr>
+              <Table.Tr>
+                <Table.Td colSpan={4}>
+                  <Text c="dimmed" size="sm">
+                    Sin asignaciones
+                  </Text>
+                </Table.Td>
+              </Table.Tr>
             ) : (
               history.map((h) => (
                 <Table.Tr key={h.id}>
@@ -39,7 +60,9 @@ export function UnitHistoryModal({ unitId, unitLabel, onClose }: UnitHistoryModa
                   <Table.Td>{formatDate(h.assignedAt)}</Table.Td>
                   <Table.Td>{formatDate(h.releasedAt)}</Table.Td>
                   <Table.Td>
-                    <Badge color={h.releasedAt ? "gray" : "green"} variant="light">
+                    <Badge
+                      color={h.releasedAt ? "gray" : "green"}
+                      variant="light">
                       {h.releasedAt ? "Cerrada" : "Vigente"}
                     </Badge>
                   </Table.Td>

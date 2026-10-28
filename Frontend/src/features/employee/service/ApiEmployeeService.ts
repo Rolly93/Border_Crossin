@@ -1,3 +1,5 @@
+/** @format */
+
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import {
   IEmployeeRequest,
@@ -9,18 +11,24 @@ import {
   EmployeeType,
 } from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
+import { log } from "node:console";
 
 export class ApiEmployeeService
   extends BaseCrudApiService<IEmployeeResponse, IEmployeeRequest>
-  implements IEmployeeService {
+  implements IEmployeeService
+{
   constructor() {
     super("employees");
   }
 
-  async getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap> {
-    const response = await this.api.get<{ data: TEmployeeResponseMap }>(`${this.resourcePath}/${id}`, {
-      params: { cargoType },
-    });
+  async getEmployee<T extends EmployeeType>(
+    id: number,
+    cargoType: T,
+  ): Promise<TEmployeeResponseMap> {
+    const response = await this.api.get<{ data: TEmployeeResponseMap }>(
+      `${this.resourcePath}/${id}`,
+      { params: { cargoType } },
+    );
 
     if (response.status === 200) {
       return response.data.data;
@@ -39,14 +47,20 @@ export class ApiEmployeeService
   }
 
   async createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse> {
-    const response = await this.api.post<IEmployeeResponse>(`${this.resourcePath}/create`, data);
+    const response = await this.api.post<IEmployeeResponse>(
+      `${this.resourcePath}/create`,
+      data,
+    );
     return response.data;
   }
 
-  async getPaginated(page: number, limit: number): Promise<PaginatedResponse<TEmployeeResponseMap>> {
-    const response = await this.api.get<PaginatedResponse<TEmployeeResponseMap>>(`${this.resourcePath}/`, {
-      params: { page, limit },
-    });
+  async getPaginated(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResponse<TEmployeeResponseMap>> {
+    const response = await this.api.get<
+      PaginatedResponse<TEmployeeResponseMap>
+    >(`${this.resourcePath}/`, { params: { page, limit } });
     if (response.status === 200) {
       return response.data;
     }
@@ -60,8 +74,12 @@ export class ApiEmployeeService
   }
 
   async getOperators(): Promise<IOperatorOption[]> {
-    const response = await this.api.get<IOperatorOption[]>(`${this.resourcePath}/operators`);
+    console.log("test");
 
+    const response = await this.api.get<IOperatorOption[]>(
+      `${this.resourcePath}/operators`,
+    );
+    console.log(response);
 
     return response.data;
   }
