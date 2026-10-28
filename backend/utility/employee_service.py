@@ -149,6 +149,7 @@ class EmployeeService:
         drivers: list[OperatorOption] | OperatorOption = (
             self._driver_repo.get_drivers_list()
         )
+
         if not drivers:
             raise (
                 HTTPException(

@@ -7,15 +7,27 @@ export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseAp
   protected updateIdParamName = 'id';
 
   async getAll(): Promise<T[]> {
-    const response = await this.api.get<T[]>(`/${this.resourcePath}`);
-    return response.data;
+    try {
+      const response = await this.api.get<T[]>(`/${this.resourcePath}`);
+      return response.data;
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
   }
 
   async update(id: number, data: UpdateT): Promise<T> {
-    const response = await this.api.put<T>(`${this.resourcePath}/update`, data, {
-      params: { [this.updateIdParamName]: id },
-    });
-    return response.data;
+    try {
+      const response = await this.api.put<T>(`${this.resourcePath}/update`, data, {
+        params: { [this.updateIdParamName]: id },
+      });
+      return response.data;
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
+
   }
 
   async insert(data: T): Promise<T> {
@@ -53,9 +65,15 @@ export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseAp
     }
   }
   async delete(id: number): Promise<T> {
-    const response = await this.api.delete<T>(`${this.resourcePath}/delete/${id}`);
-    return response.data;
+    try {
+      const response = await this.api.delete<T>(`${this.resourcePath}/delete/${id}`);
+      return response.data;
+
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
+
   }
-
-
 }

@@ -16,6 +16,7 @@ export const EmployeeTableRow = forwardRef<HTMLTableRowElement, EmployeeTableRow
       <Table.Td>{employee.role}</Table.Td>
       <Table.Td>{employee.hireDate}</Table.Td>
       <Table.Td>{employee.rfc}</Table.Td>
+
     </Table.Tr>
   )
 })

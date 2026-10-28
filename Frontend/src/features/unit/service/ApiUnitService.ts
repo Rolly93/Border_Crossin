@@ -20,8 +20,9 @@ export class ApiUnitService extends BaseApiService {
       );
 
       return data;
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
+      throw e.message
     }
   }
 
@@ -34,36 +35,60 @@ export class ApiUnitService extends BaseApiService {
       console.log(data);
 
       return data;
-    } catch (error) {
-      console.log(error);
+    } catch (e: any) {
+      console.log(e.message);
+      throw e.message
     }
   }
 
   async update(id: number, input: IUnitInput): Promise<IUnit> {
-    const { data } = await this.api.put<IUnit>(
-      `${this.resourcePath}/update/${id}`,
-      input,
-    );
-    return data;
+    try {
+      const { data } = await this.api.put<IUnit>(
+        `${this.resourcePath}/update/${id}`,
+        input,
+      );
+      return data;
+    } catch (error: any) {
+      console.log(error.message);
+      throw error
+
+    }
   }
 
   async assign(unitId: number, driverId: number): Promise<IUnitAssignment> {
-    const { data } = await this.api.post<IUnitAssignment>(
-      `${this.resourcePath}/${unitId}/assign`,
-      { driverId },
-    );
-    return data;
+    try {
+      const { data } = await this.api.post<IUnitAssignment>(
+        `${this.resourcePath}/${unitId}/assign`,
+        { driverId },
+      );
+      return data;
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+
+    }
   }
 
   async release(unitId: number): Promise<void> {
-    await this.api.post(`${this.resourcePath}/${unitId}/release`);
+    try {
+      await this.api.post(`${this.resourcePath}/${unitId}/release`);
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
   }
 
   async history(unitId: number): Promise<IUnitAssignment[]> {
-    const { data } = await this.api.get<IUnitAssignment[]>(
-      `${this.resourcePath}/${unitId}/history`,
-    );
-    return data;
+    try {
+      const { data } = await this.api.get<IUnitAssignment[]>(
+        `${this.resourcePath}/${unitId}/history`,
+      );
+      return data;
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
   }
 }
 

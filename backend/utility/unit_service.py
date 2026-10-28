@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy.engine.row import Row
 from sqlalchemy.orm import Session
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
+from schema.employee_schema import TypeUnit
 from schema.unit_schema import AssignmentOut, UnitIn, UnitOut
 
 ACTIVE_STATE = "ACTIVA"
@@ -76,7 +76,7 @@ class UnitService:
         )
 
     def list_units(self) -> list[UnitOut]:
-        results: list[Row[tuple[UnitTruck, UnitAssignment, Employee]]] = (
+        results = (
             self._db.query(UnitTruck, UnitAssignment, Employee)
             .outerjoin(
                 UnitAssignment,
@@ -91,20 +91,23 @@ class UnitService:
             .all()
         )
         result: list[UnitOut] = []
-        for unit, assignment, employee in results:
+        for row in results:
+            unit: UnitTruck = row[0]
+            assignment: UnitAssignment = row[1]
+            employee: Employee = row[2]
             result.append(
                 UnitOut(
                     id=unit.id,
                     plates=unit.plates,
                     unitNumber=unit.unit_number,
                     status=unit.state,
-                    typeUnit=unit.type_unit,
+                    typeUnit=TypeUnit(unit.type_unit),
                     tag=unit.tag_id,
                     driverId=assignment.driver_id if assignment else None,
                     driverName=(
                         f"{employee.name} {employee.last_name}" if employee else None
                     ),
-                    assignedAt=assignment.assignet_at if assignment else None,
+                    assignedAt=assignment.assigned_at if assignment else None,
                 )
             )
         return result

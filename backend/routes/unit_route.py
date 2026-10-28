@@ -45,7 +45,6 @@ async def update_unit(
     service: UnitSvc,
     current_user: CurrentUser,
 ) -> UnitOut:
-    print(data.typeUnit)
     service.update(unit_id, data)
     return service.get_out(unit_id)
 
@@ -61,7 +60,7 @@ async def assign_driver(
     data: AssignIn,
     service: UnitSvc,
     current_user: CurrentUser,
-):
+) -> AssignmentOut:
     assignment = service.assign(
         unit_id, data.driverId, assigned_by=get_user_id(current_user)
     )
@@ -91,5 +90,5 @@ async def unit_history(
     unit_id: int,
     service: UnitSvc,
     current_user: CurrentUser,
-):
+) -> list[AssignmentOut] | AssignmentOut:
     return service.history(unit_id)

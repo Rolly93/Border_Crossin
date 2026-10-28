@@ -23,24 +23,42 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
   }
 
   override async getAll(): Promise<ICliente[]> {
-    const response = await this.api.get<ICliente[]>(`/${this.resourcePath}/all`);
+    try {
+      const response = await this.api.get<ICliente[]>(`/${this.resourcePath}/all`);
 
-    return response.data
+      return response.data
+
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
 
   }
 
   async getByOperation(operation: string): Promise<IClientNameOption[]> {
-    const response = await this.api.get<IClientNameOption[]>(`/${this.resourcePath}/by-operation`, {
-      params: { operation_type: operation },
-    });
-    return response.data;
+    try {
+      const response = await this.api.get<IClientNameOption[]>(`/${this.resourcePath}/by-operation`, {
+        params: { operation_type: operation },
+      });
+      return response.data;
+
+
+    } catch (error: any) {
+      throw error.message
+    }
   }
 
   async getReferenceRules(clientId: number): Promise<IClientReferenceRule[]> {
-    const response = await this.api.get<IClientReferenceRule[]>(
-      `/${this.resourcePath}/${clientId}/reference-rules`
-    );
-    return response.data;
+    try {
+      const response = await this.api.get<IClientReferenceRule[]>(
+        `/${this.resourcePath}/${clientId}/reference-rules`
+      );
+      return response.data;
+
+    } catch (error: any) {
+      throw error.message
+    }
   }
 
   async getOptions(): Promise<IClientOption[]> {
@@ -50,9 +68,14 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
   async active(id: number): Promise<ICliente> {
 
-    const response = await this.api.put<ICliente>(`/${this.resourcePath}/reactive/${id}`);
+    try {
+      const response = await this.api.put<ICliente>(`/${this.resourcePath}/reactive/${id}`);
 
-    return response.data
+      return response.data
+
+    } catch (error: any) {
+      throw error.message
+    }
 
 
   }
@@ -63,6 +86,8 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
       return response.data;
     } catch (error: any) {
+      console.log(error);
+
       const errorMessage =
         error.response?.data?.detail ||
         error.response?.data?.message ||
@@ -76,20 +101,25 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
 
   async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<ICliente>> {
-    const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
-      params: { page: page, limit: limit },
-    });
+    try {
+      const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
+        params: { page: page, limit: limit },
+      });
 
-    if (response.status === 200) {
+      if (response.status === 200) {
 
-      return response.data;
-    }
-    return {
-      page: response.data.page,
-      hasNextPage: response.data.hasNextPage,
-      totalRecords: response.data.totalRecords,
-      limit: response.data.limit,
-      data: response.data.data
+        return response.data;
+      }
+      return {
+        page: response.data.page,
+        hasNextPage: response.data.hasNextPage,
+        totalRecords: response.data.totalRecords,
+        limit: response.data.limit,
+        data: response.data.data
+      }
+
+    } catch (error: any) {
+      throw error.message
     }
 
   }

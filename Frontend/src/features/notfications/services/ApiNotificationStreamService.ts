@@ -3,13 +3,21 @@ import { INotificationStreamService, NotificationEvent } from "./INotificationSt
 
 export class ApiNotificationStreamService implements INotificationStreamService {
     subscribe(onMessage: (data: NotificationEvent) => void): () => void {
-        const eventSource = createEventSource(`/events/stream`);
+        try {
+            const eventSource = createEventSource(`/events/stream`);
 
-        eventSource.onmessage = (event) => {
-            const data: NotificationEvent = JSON.parse(event.data);
-            onMessage(data);
+            eventSource.onmessage = (event) => {
+                const data: NotificationEvent = JSON.parse(event.data);
+                onMessage(data);
+            }
+
+            return () => eventSource.close();
+
+
+
+        } catch (error: any) {
+            console.log(error);
+            throw error.message
         }
-
-        return () => eventSource.close();
     }
 }

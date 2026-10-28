@@ -144,7 +144,7 @@ export function useEmployeeForm({
       lastName: values.lastName.trim(),
       dateOfBirth: values.dateOfBirth ? toIsoDate(values.dateOfBirth) : undefined,
       rfc: values.rfc.trim().toUpperCase(),
-      role: values.employeeType === "operador" ? "operator" : "cargo",
+      role: values.employeeType === "operador" ? "operador" : "cargo",
       employeeType: values.employeeType,
     };
     if (values.employeeType === "csr") {

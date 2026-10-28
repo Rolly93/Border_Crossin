@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from datetime import date, datetime, timezone
-from typing import Optional
 
 from sqlalchemy import (
     Boolean,
@@ -39,19 +40,17 @@ class Employee(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     last_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    role: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="costumer representative"
-    )
+    role: Mapped[str] = mapped_column(String(50), nullable=False, default="csr")
     date_birth: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     hire_date: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     rfc: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)
     still_employee: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relaciones
-    user: Mapped[Optional["User"]] = relationship(
+    user: Mapped[User | None] = relationship(
         "User", back_populates="employee", uselist=False
     )
-    driver_details: Mapped[Optional["DriverDetails"]] = relationship(
+    driver_details: Mapped[DriverDetails | None] = relationship(
         "DriverDetails", back_populates="employee", uselist=False
     )
 
@@ -69,13 +68,11 @@ class User(Base):
     )
 
     # Relaciones
-    employee: Mapped[Optional["Employee"]] = relationship(
-        "Employee", back_populates="user"
-    )
-    shipment_assigns: Mapped[list["ShipmentAssign"]] = relationship(
+    employee: Mapped[Employee | None] = relationship("Employee", back_populates="user")
+    shipment_assigns: Mapped[list[ShipmentAssign]] = relationship(
         "ShipmentAssign", back_populates="assigned_by_user"
     )
-    trip_events: Mapped[list["ShipmentEventModel"]] = relationship(
+    trip_events: Mapped[list[ShipmentEventModel]] = relationship(
         "ShipmentEventModel", back_populates="capturer"
     )
 
@@ -94,10 +91,10 @@ class DriverDetails(Base):
     )
 
     # Relaciones
-    employee: Mapped["Employee"] = relationship(
+    employee: Mapped[Employee] = relationship(
         "Employee", back_populates="driver_details"
     )
-    shipment_assigns: Mapped[list["ShipmentAssign"]] = relationship(
+    shipment_assigns: Mapped[list[ShipmentAssign]] = relationship(
         "ShipmentAssign", back_populates="driver"
     )
 
@@ -118,13 +115,13 @@ class Client(Base):
     phonenumber: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
     # Relaciones
-    sftp_services: Mapped[list["SftpService"]] = relationship(
+    sftp_services: Mapped[list[SftpService]] = relationship(
         "SftpService", back_populates="client"
     )
-    shipment_assigns: Mapped[list["ShipmentAssign"]] = relationship(
+    shipment_assigns: Mapped[list[ShipmentAssign]] = relationship(
         "ShipmentAssign", back_populates="client"
     )
-    email_recipients: Mapped[list["ClientEmailRecipient"]] = relationship(
+    email_recipients: Mapped[list[ClientEmailRecipient]] = relationship(
         "ClientEmailRecipient", back_populates="client"
     )
 
@@ -145,7 +142,7 @@ class ClientReferenceRule(Base):
     )
     operation_type: Mapped[str] = mapped_column(String(20), nullable=False)
     prefix: Mapped[str] = mapped_column(String(10), nullable=False)
-    reference_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    reference_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class ClientEmailRecipient(Base):
@@ -160,7 +157,7 @@ class ClientEmailRecipient(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relaciones
-    client: Mapped["Client"] = relationship("Client", back_populates="email_recipients")
+    client: Mapped[Client] = relationship("Client", back_populates="email_recipients")
 
 
 class SftpService(Base):
@@ -183,8 +180,8 @@ class SftpService(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relaciones
-    client: Mapped["Client"] = relationship("Client", back_populates="sftp_services")
-    sends: Mapped[list["SftpSend"]] = relationship("SftpSend", back_populates="service")
+    client: Mapped[Client] = relationship("Client", back_populates="sftp_services")
+    sends: Mapped[list[SftpSend]] = relationship("SftpSend", back_populates="service")
 
 
 # ==============================================================================
@@ -209,10 +206,10 @@ class UnitTruck(Base):
     )
 
     # Relaciones
-    shipment_assigns: Mapped[list["ShipmentAssign"]] = relationship(
+    shipment_assigns: Mapped[list[ShipmentAssign]] = relationship(
         "ShipmentAssign", back_populates="truck"
     )
-    assignments: Mapped[list["UnitAssignment"]] = relationship(
+    assignments: Mapped[list[UnitAssignment]] = relationship(
         "UnitAssignment",
         back_populates="unit",
         order_by="UnitAssignment.assigned_at.desc()",
@@ -243,8 +240,8 @@ class UnitAssignment(Base):
     released_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relaciones
-    unit: Mapped["UnitTruck"] = relationship("UnitTruck", back_populates="assignments")
-    driver: Mapped["DriverDetails"] = relationship("DriverDetails")
+    unit: Mapped[UnitTruck] = relationship(UnitTruck, back_populates="assignments")
+    driver: Mapped[DriverDetails] = relationship(DriverDetails)
 
 
 class Trailer(Base):
@@ -260,7 +257,7 @@ class Trailer(Base):
     )
 
     # Relaciones
-    shipment_assigns: Mapped[list["ShipmentAssign"]] = relationship(
+    shipment_assigns: Mapped[list[ShipmentAssign]] = relationship(
         "ShipmentAssign", back_populates="trailer"
     )
 
@@ -292,7 +289,7 @@ class ShipmentAssign(Base):
     trailer_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("trailer.id"), nullable=False
     )
-    unit_truck_id: Mapped[Optional[int]] = mapped_column(
+    unit_truck_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("unit_truck.id"), nullable=True
     )
 
@@ -304,24 +301,24 @@ class ShipmentAssign(Base):
     destination: Mapped[str] = mapped_column(String(200), nullable=False)
 
     # Relaciones
-    driver: Mapped["DriverDetails"] = relationship(
-        "DriverDetails", back_populates="shipment_assigns"
+    driver: Mapped[DriverDetails] = relationship(
+        DriverDetails, back_populates="shipment_assigns"
     )
-    client: Mapped["Client"] = relationship("Client", back_populates="shipment_assigns")
-    assigned_by_user: Mapped["User"] = relationship(
+    client: Mapped[Client] = relationship("Client", back_populates="shipment_assigns")
+    assigned_by_user: Mapped[User] = relationship(
         "User", back_populates="shipment_assigns"
     )
-    trailer: Mapped["Trailer"] = relationship(
+    trailer: Mapped[Trailer] = relationship(
         "Trailer", back_populates="shipment_assigns"
     )
-    truck: Mapped[Optional["UnitTruck"]] = relationship(
+    truck: Mapped[UnitTruck | None] = relationship(
         "UnitTruck", back_populates="shipment_assigns"
     )
 
-    events: Mapped[list["ShipmentEventModel"]] = relationship(
+    events: Mapped[list[ShipmentEventModel]] = relationship(
         "ShipmentEventModel", back_populates="trip", cascade="all, delete-orphan"
     )
-    email_services: Mapped[list["EmailService"]] = relationship(
+    email_services: Mapped[list[EmailService]] = relationship(
         "EmailService", back_populates="trip"
     )
 
@@ -335,13 +332,13 @@ class ShipmentEventModel(Base):
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, index=True, autoincrement=True
     )
-    category: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    event_type: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    event_time: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    category: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    event_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    event_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     captured_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=text("CURRENT_TIMESTAMP")
     )
-    notes: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(200), nullable=True)
 
     trip_assigned_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("trip_assigned.id", ondelete="CASCADE"), nullable=False
@@ -356,11 +353,11 @@ class ShipmentEventModel(Base):
     new_seal: Mapped[str] = mapped_column(String(50), default="N/A")
 
     # Relaciones
-    trip: Mapped["ShipmentAssign"] = relationship(
+    trip: Mapped[ShipmentAssign] = relationship(
         "ShipmentAssign", back_populates="events"
     )
-    capturer: Mapped["User"] = relationship("User", back_populates="trip_events")
-    sftp_sends: Mapped[list["SftpSend"]] = relationship(
+    capturer: Mapped[User] = relationship("User", back_populates="trip_events")
+    sftp_sends: Mapped[list[SftpSend]] = relationship(
         "SftpSend", back_populates="shipment_event"
     )
 
@@ -377,10 +374,10 @@ class EmailService(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=text("CURRENT_TIMESTAMP")
     )
-    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relaciones
-    trip: Mapped["ShipmentAssign"] = relationship(
+    trip: Mapped[ShipmentAssign] = relationship(
         "ShipmentAssign", back_populates="email_services"
     )
 
@@ -398,12 +395,12 @@ class SftpSend(Base):
     sent_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("sftp_service.id"), nullable=False
     )
-    sftp_log: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    sftp_log: Mapped[str | None] = mapped_column(Text, nullable=True)
     retries: Mapped[int] = mapped_column(Integer, default=0)
 
     # Relaciones
-    service: Mapped["SftpService"] = relationship("SftpService", back_populates="sends")
-    shipment_event: Mapped["ShipmentEventModel"] = relationship(
+    service: Mapped[SftpService] = relationship("SftpService", back_populates="sends")
+    shipment_event: Mapped[ShipmentEventModel] = relationship(
         "ShipmentEventModel", back_populates="sftp_sends"
     )
 

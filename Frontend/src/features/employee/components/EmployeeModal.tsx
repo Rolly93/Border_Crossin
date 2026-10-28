@@ -3,6 +3,7 @@ import { DateInput } from '@mantine/dates';
 import { AtomButton } from '@/components/atoms/AtomButton';
 import { EmployeeType } from '../type/employee.interface';
 import { useEmployeeForm } from '../hook/useEmployeeForm';
+import '@mantine/dates/styles.css';
 
 interface EmployeeModalProps {
   opened: boolean;

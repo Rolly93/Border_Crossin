@@ -11,12 +11,10 @@ import {
   EmployeeType,
 } from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
-import { log } from "node:console";
 
 export class ApiEmployeeService
   extends BaseCrudApiService<IEmployeeResponse, IEmployeeRequest>
-  implements IEmployeeService
-{
+  implements IEmployeeService {
   constructor() {
     super("employees");
   }
@@ -25,62 +23,84 @@ export class ApiEmployeeService
     id: number,
     cargoType: T,
   ): Promise<TEmployeeResponseMap> {
-    const response = await this.api.get<{ data: TEmployeeResponseMap }>(
-      `${this.resourcePath}/${id}`,
-      { params: { cargoType } },
-    );
+    try {
+      const response = await this.api.get<{ data: TEmployeeResponseMap }>(
+        `${this.resourcePath}/${id}`,
+        { params: { cargoType } },
+      );
 
-    if (response.status === 200) {
       return response.data.data;
+
+
+
+    } catch (error: any) {
+      throw error.message
     }
-    throw new Error("No se pudo obtener el empleado");
   }
 
   override async insert(data: IEmployeeRequest): Promise<IEmployeeResponse> {
-    const responseData = await super.insert(data);
+    try {
+      const responseData = await super.insert(data);
 
-    if ("token" in responseData && responseData.token) {
-      localStorage.setItem("jwt_token", responseData.token);
+      if ("token" in responseData && responseData.token) {
+        localStorage.setItem("jwt_token", responseData.token);
+      }
+
+      return responseData;
+
+
+    } catch (error: any) {
+      throw error.message
     }
-
-    return responseData;
   }
 
   async createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse> {
-    const response = await this.api.post<IEmployeeResponse>(
-      `${this.resourcePath}/create`,
-      data,
-    );
-    return response.data;
+    try {
+      const response = await this.api.post<IEmployeeResponse>(
+        `${this.resourcePath}/create`,
+        data,
+      );
+      return response.data;
+
+    } catch (error: any) {
+      throw error.message
+    }
   }
 
   async getPaginated(
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<TEmployeeResponseMap>> {
-    const response = await this.api.get<
-      PaginatedResponse<TEmployeeResponseMap>
-    >(`${this.resourcePath}/`, { params: { page, limit } });
-    if (response.status === 200) {
-      return response.data;
+
+    try {
+      const response = await this.api.get<PaginatedResponse<TEmployeeResponseMap>>(`${this.resourcePath}/`, { params: { page, limit } });
+      //if (response.status === 200) {
+      //  return response.data;
+      //}
+      return {
+        page: response.data.page,
+        hasNextPage: response.data.hasNextPage,
+        totalRecords: response.data.totalRecords,
+        limit: response.data.limit,
+        data: response.data.data,
+      };
+
+    } catch (error: any) {
+      throw error.message
     }
-    return {
-      page: response.data.page,
-      hasNextPage: response.data.hasNextPage,
-      totalRecords: response.data.totalRecords,
-      limit: response.data.limit,
-      data: response.data.data,
-    };
   }
 
   async getOperators(): Promise<IOperatorOption[]> {
-    console.log("test");
 
-    const response = await this.api.get<IOperatorOption[]>(
-      `${this.resourcePath}/operators`,
-    );
-    console.log(response);
+    try {
+      const response = await this.api.get<IOperatorOption[]>(
+        `${this.resourcePath}/operators`,
+      );
 
-    return response.data;
+      return response.data;
+
+    } catch (error: any) {
+      throw error.message
+    }
   }
 }

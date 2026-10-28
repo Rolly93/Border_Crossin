@@ -78,36 +78,58 @@ export class ApiShipmentService extends BaseCrudApiService<
     page: number = 1,
     limit: number = 10,
   ): Promise<PaginatedResponse<Shipment>> {
-    const response = await this.api.get<PaginatedResponse<Shipment>>(
-      `/${this.resourcePath}/`,
-      { params: { page, limit } },
-    );
-    if (response.status === 200) {
-      return response.data;
+    try {
+      const response = await this.api.get<PaginatedResponse<Shipment>>(
+        `/${this.resourcePath}/`,
+        { params: { page, limit } },
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+      return {
+        page: response.data.page,
+        hasNextPage: response.data.hasNextPage,
+        totalRecords: response.data.totalRecords,
+        limit: response.data.limit,
+        data: response.data.data,
+      };
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
     }
-    return {
-      page: response.data.page,
-      hasNextPage: response.data.hasNextPage,
-      totalRecords: response.data.totalRecords,
-      limit: response.data.limit,
-      data: response.data.data,
-    };
   }
 
   // Backend: PUT /shipment/{id}/update
   async update(id: number, data: ShipmentUpdate): Promise<Shipment> {
-    const response = await this.api.put<Shipment>(
-      `/${this.resourcePath}/${id}/update`,
-      data,
-    );
-    return response.data;
+    try {
+      const response = await this.api.put<Shipment>(
+        `/${this.resourcePath}/${id}/update`,
+        data,
+      );
+      return response.data;
+
+
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
   }
 
   // Backend: PATCH /shipment/{id}/delete
   async delete(id: number): Promise<Shipment> {
-    const response = await this.api.patch<Shipment>(
-      `/${this.resourcePath}/${id}/delete`,
-    );
-    return response.data;
+    try {
+      const response = await this.api.patch<Shipment>(
+        `/${this.resourcePath}/${id}/delete`,
+      );
+      return response.data;
+
+
+
+    } catch (error: any) {
+      console.log(error);
+      throw error.message
+    }
   }
 }

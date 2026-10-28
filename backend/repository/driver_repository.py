@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from repository import EmployeeRepository
 from repository.base_repository import BaseRepository
-from schema.employee_schema import OperatorOption
+from schema.employee_schema import OperatorOption, TypeUnit
 
 
 class DriverRepository(BaseRepository[DriverDetails]):
@@ -29,10 +29,12 @@ class DriverRepository(BaseRepository[DriverDetails]):
             )
         return driver
 
-    def get_drivers_list(self) -> list[OperatorOption] | OperatorOption:
+    def get_drivers_list(self) -> list[OperatorOption]:
         drivers = (
-            self._db.query(UnitTruck, UnitAssignment, Employee)
-            .join(DriverDetails, DriverDetails.employee_id == Employee.id)
+            self._db.query(Employee, DriverDetails, UnitAssignment, UnitTruck)
+            .outerjoin(
+                DriverDetails, DriverDetails.employee_id == Employee.id
+            )  # <-- Cambiado a outerjoin
             .outerjoin(
                 UnitAssignment, UnitAssignment.driver_id == DriverDetails.employee_id
             )
@@ -41,13 +43,19 @@ class DriverRepository(BaseRepository[DriverDetails]):
             .order_by(Employee.name)
             .all()
         )
-
-        return [
-            OperatorOption(
-                id=employee.id,
-                firstName=f"{employee.name} {employee.last_name}",
-                unit=unit_truck.unit_number if unit_truck else None,
-                typeUnit=unit_assignment.type_Unit,
+        result: list[OperatorOption] = []
+        for row in drivers:
+            unit_truck: UnitTruck = row[0]
+            unit_assignment: UnitAssignment = row[1]
+            employee: Employee = row[2]
+            print(employee)
+            result.append(
+                OperatorOption(
+                    id=employee.id,
+                    firstName=f"{employee.name} {employee.last_name}",
+                    unit=unit_truck.unit_number if unit_truck else None,
+                    typeUnit=TypeUnit(unit_truck.type_unit),
+                )
             )
-            for unit_truck, unit_assignment, employee in drivers
-        ]
+
+        return result

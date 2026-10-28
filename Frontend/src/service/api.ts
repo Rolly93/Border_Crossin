@@ -7,7 +7,6 @@ import axios, {
 } from "axios";
 
 export const getBaseUrl = () => import.meta.env.VITE_API_URL || "";
-console.log(getBaseUrl());
 
 // Create a single axios instance with interceptors
 const apiClient = axios.create({

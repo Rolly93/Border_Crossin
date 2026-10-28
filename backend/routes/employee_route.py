@@ -67,6 +67,7 @@ async def list_operators(
     service: EmployeeSvc,
     current_user: CurrentUser,
 ) -> list[OperatorOption] | OperatorOption:
+
     return service.list_operators()
 
 

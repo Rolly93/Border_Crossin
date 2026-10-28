@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -22,7 +22,7 @@ class UnitIn(BaseModel):
 
     @field_validator("tag", mode="before")
     @classmethod
-    def _clean_tag(cls, value: Optional[str]) -> Optional[str]:
+    def _clean_tag(cls, value: str | None) -> str | None:
         if value is None:
             return None
         cleaned = str(value).strip()
@@ -51,4 +51,4 @@ class AssignmentOut(BaseModel):
     driverName: str
     assignedBy: int
     assignedAt: datetime
-    releasedAt: Optional[datetime] = None
+    releasedAt: datetime | None
