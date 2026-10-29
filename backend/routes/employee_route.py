@@ -12,6 +12,7 @@ from schema.employee_schema import (
     EmployeeCreateUnion,
     EmployeeRequest,
     OperatorOption,
+    OperatorOptionResponse,
     PaginatedEmployeeResponse,
 )
 
@@ -61,12 +62,12 @@ async def register_employee(
     "/operators",
     summary="List Operators",
     status_code=status.HTTP_200_OK,
-    response_model=list[OperatorOption],
+    response_model=list[OperatorOption] | list[OperatorOptionResponse],
 )
 async def list_operators(
     service: EmployeeSvc,
     current_user: CurrentUser,
-) -> list[OperatorOption] | OperatorOption:
+) -> list[OperatorOption] | list[OperatorOptionResponse]:
 
     return service.list_operators()
 

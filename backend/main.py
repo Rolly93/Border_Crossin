@@ -23,7 +23,7 @@ from service.logging_config import setup_logging, get_logger
 log_level = os.getenv("LOG_LEVEL", "INFO")
 json_logs = os.getenv("JSON_LOGS", "true").lower() == "true"
 setup_logging(log_level=log_level, json_logs=json_logs)
-logger = get_logger(__name__)
+# logger = get_logger(__name__)
 
 Base.metadata.create_all(bind=engine)
 upgrade_unit_schema(engine)
@@ -36,7 +36,8 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Log startup
-logger.info("application_starting", environment=os.getenv("ENVIRONMENT", "development"))
+# logger.info("application_starting", environment=os.getenv("ENVIRONMENT", "development"))
+
 
 # Request logging middleware
 @app.middleware("http")
@@ -44,38 +45,39 @@ async def log_requests(request: Request, call_next):
     start_time = time.time()
     client_ip = request.client.host if request.client else "unknown"
 
-    logger.info(
-        "request_started",
-        method=request.method,
-        path=request.url.path,
-        client_ip=client_ip,
-        user_agent=request.headers.get("user-agent", ""),
-    )
+    # logger.info(
+    #     "request_started",
+    #     method=request.method,
+    #     path=request.url.path,
+    #     client_ip=client_ip,
+    #     user_agent=request.headers.get("user-agent", ""),
+    # )
 
     try:
         response = await call_next(request)
         process_time = time.time() - start_time
 
-        logger.info(
-            "request_completed",
-            method=request.method,
-            path=request.url.path,
-            status_code=response.status_code,
-            process_time_ms=round(process_time * 1000, 2),
-            client_ip=client_ip,
-        )
+        #  logger.info(
+        #      "request_completed",
+        #      method=request.method,
+        #      path=request.url.path,
+        #      status_code=response.status_code,
+        #      process_time_ms=round(process_time * 1000, 2),
+        #      client_ip=client_ip,
+        #  )
         return response
     except Exception as e:
         process_time = time.time() - start_time
-        logger.error(
-            "request_failed",
-            method=request.method,
-            path=request.url.path,
-            error=str(e),
-            process_time_ms=round(process_time * 1000, 2),
-            client_ip=client_ip,
-        )
+        #   logger.error(
+        #       "request_failed",
+        #       method=request.method,
+        #       path=request.url.path,
+        #       error=str(e),
+        #       process_time_ms=round(process_time * 1000, 2),
+        #       client_ip=client_ip,
+        #   )
         raise
+
 
 # CORS configuration - configurable via env for production
 cors_origins = os.getenv("CORS_ORIGINS", "*")

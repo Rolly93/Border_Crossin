@@ -13,6 +13,7 @@ from schema.employee_schema import (
     EmployeeListItem,
     EmployeeRequestDash,
     OperatorOption,
+    OperatorOptionResponse,
     PaginatedEmployeeResponse,
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
@@ -145,8 +146,8 @@ class EmployeeService:
             )
         self._db.commit()
 
-    def list_operators(self) -> list[OperatorOption] | OperatorOption:
-        drivers: list[OperatorOption] | OperatorOption = (
+    def list_operators(self) -> list[OperatorOption] | list[OperatorOptionResponse]:
+        drivers: list[OperatorOption] | list[OperatorOptionResponse] = (
             self._driver_repo.get_drivers_list()
         )
 

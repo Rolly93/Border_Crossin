@@ -77,6 +77,13 @@ class OperatorOption(BaseModel):
     typeUnit: TypeUnit
 
 
+class OperatorOptionResponse(BaseModel):
+    id: int
+    firstName: str
+    unit: str | None
+    typeUnit: TypeUnit | None
+
+
 class EmployeeListItem(BaseModel):
     id: int
     firstName: str
