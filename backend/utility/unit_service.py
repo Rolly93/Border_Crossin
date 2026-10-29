@@ -76,38 +76,31 @@ class UnitService:
         )
 
     def list_units(self) -> list[UnitOut]:
-        results = (
-            self._db.query(UnitTruck, UnitAssignment, Employee)
-            .outerjoin(
-                UnitAssignment,
-                (UnitAssignment.unit_id == UnitTruck.id)
-                & (UnitAssignment.released_at.is_(None)),
-            )
-            .outerjoin(
-                DriverDetails, DriverDetails.employee_id == UnitAssignment.unit_id
-            )
-            .outerjoin(Employee, Employee.id == DriverDetails.employee_id)
-            .order_by(UnitTruck.unit_number)
-            .all()
-        )
+        units = self._db.query(UnitTruck).order_by(UnitTruck.unit_number).all()
+
         result: list[UnitOut] = []
-        for row in results:
-            unit: UnitTruck = row[0]
-            assignment: UnitAssignment = row[1]
-            employee: Employee = row[2]
+        for unit in units:
+            latest_assignment = unit.assignments[0] if unit.assignments else None
+
+            employee = None
+            if latest_assignment and latest_assignment.driver:
+                employee = latest_assignment.driver.employee
+
             result.append(
                 UnitOut(
                     id=unit.id,
                     plates=unit.plates,
                     unitNumber=unit.unit_number,
-                    status=unit.state,
                     typeUnit=TypeUnit(unit.type_unit),
+                    status=unit.state,
                     tag=unit.tag_id,
-                    driverId=assignment.driver_id if assignment else None,
+                    driverId=latest_assignment.driver_id if latest_assignment else None,
                     driverName=(
                         f"{employee.name} {employee.last_name}" if employee else None
                     ),
-                    assignedAt=assignment.assigned_at if assignment else None,
+                    assignedAt=(
+                        latest_assignment.assigned_at if latest_assignment else None
+                    ),
                 )
             )
         return result
@@ -156,8 +149,6 @@ class UnitService:
         unit.state = data.status
         unit.tag_id = data.tag
         unit.type_unit = data.typeUnit
-
-        # Una unidad que no está activa no puede seguir ligada a un operador.
         if data.status != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
             open_a.released_at = datetime.now()
 

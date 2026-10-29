@@ -1,17 +1,22 @@
 from datetime import datetime
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 from schema.employee_schema import TypeUnit
 
-UnitState = Literal["ACTIVA", "MANTENIMIENTO", "BAJA"]
+
+class UnitState(StrEnum):
+    ACTIVA = "ACTIVA"
+    MANTENIMIENTO = "MANTENIMIENTO"
+    BAJA = "BAJA"
 
 
 class UnitIn(BaseModel):
     plates: str = Field(min_length=1, max_length=50)
     unitNumber: str = Field(min_length=1, max_length=20)
-    status: UnitState = "ACTIVA"
+    status: UnitState = UnitState.ACTIVA
     tag: str | None = Field(default=None, max_length=24)
     typeUnit: Literal[TypeUnit.TRAILER, TypeUnit.UNIT_TRUCK]
 

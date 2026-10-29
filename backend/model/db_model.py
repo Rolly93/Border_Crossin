@@ -23,6 +23,7 @@ from sqlalchemy.orm import (
 )
 
 from schema.employee_schema import TypeUnit
+from schema.unit_schema import UnitState
 
 hire_date: date = date.today()
 
@@ -194,7 +195,9 @@ class UnitTruck(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
     unit_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    state: Mapped[str] = mapped_column(String(50), nullable=False, default="ACTIVA")
+    state: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=UnitState.ACTIVA
+    )
     tag_id: Mapped[str | None] = mapped_column(
         String(24), nullable=True, unique=True, default="N/A"
     )
