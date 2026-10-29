@@ -42,6 +42,9 @@ export class ApiUnitService extends BaseApiService {
   }
 
   async update(id: number, input: IUnitInput): Promise<IUnit> {
+
+    console.log(id, input);
+
     try {
       const { data } = await this.api.put<IUnit>(
         `${this.resourcePath}/update/${id}`,

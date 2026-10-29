@@ -70,7 +70,7 @@ export interface IOperatorOption {
   id: number;
   firstName: string;
   unit?: string
-  typeUnit:TUnitType
+  typeUnit?: TUnitType
 }
 
 export interface IEmployeeFormRequest extends INewEmployeeRequest {
