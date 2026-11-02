@@ -1,6 +1,3 @@
-import re
-from typing import List, Optional
-
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from .sftp_schema import SftpConfigurationRequest
@@ -23,24 +20,24 @@ class ClientOptionResponse(BaseModel):
 
 class ClientModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    id: Optional[int] = None
-    phonenumber: Optional[str]
+    id: int | None = None
+    phonenumber: str | None
     sftService: bool
     emailService: bool
-    email: Optional[list[EmailStr]] = None
+    email: list[EmailStr] | None = None
     name: str = Field(..., min_length=2, max_length=100)
 
 
 class ClientRequest(BaseModel):
-    phonenumber: Optional[str] = "N/A"
-    sftService: Optional[bool] = False
-    emailService: Optional[bool] = False
-    email: Optional[list[EmailStr]] = None
+    phonenumber: str | None = "N/A"
+    sftService: bool | None = False
+    emailService: bool | None = False
+    email: list[EmailStr] | None = None
     name: str = Field(min_length=2, max_length=100)
 
 
 class EmailConfigurationRequest(BaseModel):
-    email: List[EmailStr]
+    email: list[EmailStr]
 
 
 class ClienteServiceResponse(BaseModel):
@@ -70,15 +67,15 @@ class ClientResponse(ClientModel):
 class ClientPaginateData(BaseModel):
     id: int
     name: str
-    telefono: Optional[str]
-    still_active: Optional[bool] = False
-    sftService: Optional[bool] = False
-    emailService: Optional[bool] = False
-    email: Optional[List[EmailStr]] | None
+    telefono: str | None
+    still_active: bool | None = False
+    sftService: bool | None = False
+    emailService: bool | None = False
+    email: list[EmailStr] | None
 
 
 class PaginatedClientResponse(BaseModel):
-    data: List[ClientPaginateData]
+    data: list[ClientPaginateData]
     totalRecords: int
     hasNextPage: bool
     page: int
@@ -94,6 +91,6 @@ class ReferenceRuleOut(BaseModel):
     id: int
     operation_type: str
     prefix: str
-    reference_length: Optional[int] = None
+    reference_length: int | None = None
 
     model_config = ConfigDict(from_attributes=True)

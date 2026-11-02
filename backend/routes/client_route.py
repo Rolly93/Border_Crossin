@@ -87,19 +87,20 @@ async def new_client(
 
 
 @router.put(
-    "/update",
+    "/update/{id}",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(require_admin)],
 )
 async def update_client(
     data: ClientRequest,
-    client_id: int,
+    id: int,
     service: ClientSvc,
     current_user: CurrentUser,
 ):
-    if not client_id:
+    print(id)
+    if not id:
         return
-    return service.update_client_info(client_id=client_id, data=data)
+    return service.update_client_info(client_id=id, data=data)
 
 
 @router.delete(

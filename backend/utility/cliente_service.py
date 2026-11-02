@@ -1,3 +1,4 @@
+from select import select
 from typing import Literal
 
 from fastapi import HTTPException, status
@@ -61,6 +62,8 @@ class ClienteService:
         client.phonenumber = data.phonenumber
         if data.email:
             self._db.add_emails_to_client(client_id, data.email)
+        # need to check the toogle function to activate and anactivate the email service
+        self._db.toggle_client_status(client_id, status=bool(data.emailService))
 
         return self._db.save(client)
 

@@ -28,6 +28,7 @@ export class ApiEmployeeService
         `${this.resourcePath}/${id}`,
         { params: { cargoType } },
       );
+      console.log(response.data);
 
       return response.data;
     } catch (error: any) {

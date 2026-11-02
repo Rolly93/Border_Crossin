@@ -52,7 +52,9 @@ class ClienteRepository(BaseRepository[Client]):
         """
         Creates a client and handles initial email recipient setup cleanly.
         """
-        client_dict = client_data.model_dump(exclude={"email"})
+        client_dict = client_data.model_dump(
+            exclude={"email", "sftService", "emailService"}
+        )
         new_client = Client(**client_dict)
 
         saved_client = self.save(new_client)
