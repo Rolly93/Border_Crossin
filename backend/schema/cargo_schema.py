@@ -1,19 +1,25 @@
 from datetime import date
+from enum import StrEnum
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
 
+class CargoTypeEnum(StrEnum):
+    CSR = "csr"
+    OPERADOR = "operador"
+
+
 class EmployeeBase(BaseModel):
     firstName: str
     lastName: str
-    role: str
+    role: CargoTypeEnum
     rfc: str
     dateOfBirth: date
 
 
 class CargoCreate(EmployeeBase):
-    employeeType: Literal["cargo"] = "cargo"
+    employeeType: Literal[CargoTypeEnum.CSR] = CargoTypeEnum.CSR
     username: str
     email: EmailStr
     password: str = Field(..., min_length=8)
@@ -21,7 +27,7 @@ class CargoCreate(EmployeeBase):
 
 
 class OperadorCreate(EmployeeBase):
-    employeeType: Literal["operador"] = "operador"
+    employeeType: Literal[CargoTypeEnum.OPERADOR] = CargoTypeEnum.OPERADOR
     gafetId: str = Field(..., min_length=24, max_length=24)
     licenseNumber: str
     licenseExpiration: date

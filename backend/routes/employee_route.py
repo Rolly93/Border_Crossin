@@ -1,5 +1,3 @@
-from enum import Enum
-
 from fastapi import APIRouter, Query, Request, status
 
 from deps.auth import (
@@ -8,6 +6,7 @@ from deps.auth import (
 )
 from deps.service import EmployeeSvc, UserSvc
 from schema import EmployeeResponseUnion
+from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
     EmployeeCreateUnion,
     EmployeeRequest,
@@ -17,11 +16,6 @@ from schema.employee_schema import (
 )
 
 router = APIRouter(prefix="/employees", tags=["employee"])
-
-
-class CargoTypeEnum(str, Enum):
-    CSR = "csr"
-    OPERADOR = "operador"
 
 
 @router.get(

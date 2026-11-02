@@ -132,7 +132,7 @@ class UnitService:
             plates=data.plates,
             unit_number=data.unitNumber,
             type_unit=data.typeUnit,
-            state=data.status,
+            state=data.state,
             tag_id=data.tag,
         )
         self._db.add(unit)
@@ -146,10 +146,10 @@ class UnitService:
 
         unit.plates = data.plates
         unit.unit_number = data.unitNumber
-        unit.state = data.status
+        unit.state = data.state
         unit.tag_id = data.tag
         unit.type_unit = data.typeUnit
-        if data.status != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
+        if data.state != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
             open_a.released_at = datetime.now()
 
         self._db.commit()

@@ -22,6 +22,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import TypeUnit
 from schema.unit_schema import UnitState
 
@@ -41,7 +42,9 @@ class Employee(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     last_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    role: Mapped[str] = mapped_column(String(50), nullable=False, default="csr")
+    role: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=CargoTypeEnum.CSR
+    )
     date_birth: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     hire_date: Mapped[date] = mapped_column(Date, nullable=False, default=date.today)
     rfc: Mapped[str] = mapped_column(String(200), nullable=False, unique=True)

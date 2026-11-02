@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from stdnum.mx import rfc as rfc_validator
 
 from config.config import Env
-from model.db_model import User
+from model.db_model import DriverDetails, User
 from repository import EmployeeRepository, UserRepository
 from schema.employee_schema import (
     EmployeeDriverResponse,
@@ -72,7 +72,6 @@ class UserService:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
-        print(user)
 
         if not user:
             self.verify_password("dummy_password", DUMMY_HASH)
@@ -165,14 +164,14 @@ class UserService:
     def get_employee_info(
         self, id: int, cargoType: Literal["csr", "operador"]
     ) -> EmployeeResponseUnion:
+        data, e = self._user_repo.get_data_by_id(id)
 
-        if cargoType == "csr":
-            u, e = self._user_repo.get_user_by_id(id)
+        if cargoType == "csr" and isinstance(data, User):
             return EmployeeUserResponse(
                 id=e.id,
-                username=u.username,
-                email=u.email,
-                isAdmin=u.is_admin,
+                username=data.username,
+                email=data.email,
+                isAdmin=data.is_admin,
                 password="*******",
                 firstName=e.name,
                 lastName=e.last_name,
@@ -181,8 +180,8 @@ class UserService:
                 dateOfBirth=e.date_birth,
             )
 
-        if cargoType == "operador":
-            d, e = self._employee_service.get_driver_by_id(id)
+        if cargoType == "operador" and isinstance(data, DriverDetails):
+
             return EmployeeDriverResponse(
                 id=e.id,
                 firstName=e.name,
@@ -190,7 +189,11 @@ class UserService:
                 role=e.role,
                 rfc=e.rfc,
                 dateOfBirth=e.date_birth,
-                licenseNumber=d.license_number,
-                licenseExpiration=d.expiration_date,
-                gafetId=d.gafet_id,
+                licenseNumber=data.license_number,
+                licenseExpiration=data.expiration_date,
+                gafetId=data.gafet_id,
             )
+
+        raise ValueError(
+            f"Invalid request: cargoType '{cargoType}' does not match record type {type(data)}"
+        )

@@ -1,7 +1,8 @@
-from typing import Annotated, Literal, Self
-from enum import Enum
-from pydantic import AliasChoices, BaseModel, ConfigDict, BeforeValidator, Field
 from datetime import datetime
+from enum import Enum
+from typing import Annotated, Literal, Self
+
+from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field
 
 toUppercase = Annotated[
     str, BeforeValidator(lambda v: v.upper().strip() if isinstance(v, str) else v)

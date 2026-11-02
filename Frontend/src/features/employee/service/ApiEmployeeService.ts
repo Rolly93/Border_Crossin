@@ -24,20 +24,17 @@ export class ApiEmployeeService
     cargoType: T,
   ): Promise<TEmployeeResponseMap> {
     try {
-      const response = await this.api.get<{ data: TEmployeeResponseMap }>(
+      const response = await this.api.get<TEmployeeResponseMap>(
         `${this.resourcePath}/${id}`,
         { params: { cargoType } },
       );
 
-      return response.data.data;
-
-
-
+      return response.data;
     } catch (error: any) {
-      throw error.message
+      console.log(error);
+      throw error;
     }
   }
-
   override async insert(data: IEmployeeRequest): Promise<IEmployeeResponse> {
     try {
       const responseData = await super.insert(data);

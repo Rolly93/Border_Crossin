@@ -1,5 +1,6 @@
 import secrets
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import jwt
 
@@ -25,7 +26,7 @@ class JWTService:
         self,
         ip: str,
         sub: int | str,
-        extra_data: dict | None,
+        extra_data: dict[str, Any] | None,
         expires_delta: timedelta | None,
     ) -> str:
         now = datetime.now(UTC)

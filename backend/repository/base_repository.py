@@ -32,8 +32,7 @@ class BaseRepository(Generic[T]):
         self._db.delete(instance)
         self._db.commit()
 
-    def get_by_id(self, id_val: int) -> T | None:
-
+    def get_by_id(self, id_val: int) -> T | None | tuple[T, T]:
         return self._db.get(entity=self._model, ident=id_val)
 
     def update(self, id_val: int, obj_in: BaseModel | dict[str, Any]) -> T | None:

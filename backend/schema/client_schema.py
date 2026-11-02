@@ -1,8 +1,9 @@
-from pydantic import BaseModel, field_validator, Field, ConfigDict
-from typing import Optional, List
-from .sftp_schema import SftpConfigurationRequest
-from pydantic import EmailStr
 import re
+from typing import List, Optional
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+
+from .sftp_schema import SftpConfigurationRequest
 
 
 class MetricsClientResponse(BaseModel):

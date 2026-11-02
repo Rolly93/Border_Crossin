@@ -1,12 +1,14 @@
+from select import select
 from typing import override
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
-from repository import EmployeeRepository
 from repository.base_repository import BaseRepository
-from schema.employee_schema import OperatorOption, OperatorOptionResponse, TypeUnit
+from repository.employee_repository import EmployeeRepository
+from schema.employee_schema import OperatorOptionResponse, TypeUnit
 
 
 class DriverRepository(BaseRepository[DriverDetails]):
@@ -28,6 +30,16 @@ class DriverRepository(BaseRepository[DriverDetails]):
                 detail="Operador no esta en la Base de datos",
             )
         return driver
+
+    def get_full_data(self, employee: Employee) -> DriverDetails:
+        stmt = select(DriverDetails).where(DriverDetails.employee_id == employee.id)
+        drv_details = self._db.execute(stmt).scalar_one_or_none()
+        if not drv_details:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Operdor no encontrado"
+            )
+
+        return drv_details
 
     def get_drivers_list(self) -> list[OperatorOptionResponse]:
 

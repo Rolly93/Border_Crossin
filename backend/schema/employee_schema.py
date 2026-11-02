@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
+from schema.cargo_schema import CargoTypeEnum
+
 
 class EmployeeBase(BaseModel):
     id: int | None = None
@@ -12,7 +14,7 @@ class EmployeeBase(BaseModel):
 class EmployeeBaseRequest(BaseModel):
     firstName: str
     lastName: str
-    role: str
+    role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
     rfc: str
     dateOfBirth: date
 
@@ -33,7 +35,7 @@ class EmployeeRequestDash(EmployeeBaseRequest):
 
 
 class EmployeeUserRequest(EmployeeBaseRequest):
-    employeeType: Literal["csr"] = "csr"
+    employeeType: Literal[CargoTypeEnum.CSR] = CargoTypeEnum.CSR
     username: str
     email: str
     password: str
@@ -41,7 +43,7 @@ class EmployeeUserRequest(EmployeeBaseRequest):
 
 
 class EmployeeDriverRequest(EmployeeBaseRequest):
-    employeeType: Literal["operador"] = "operador"
+    employeeType: Literal[CargoTypeEnum.OPERADOR] = CargoTypeEnum.OPERADOR
     licenseNumber: str
     licenseExpiration: date
     gafetId: str
@@ -53,7 +55,7 @@ class EmployeeRequest(EmployeeBase):
     role: str
     rfc: str
     dateOfBirth: date
-    employeeType: Literal["csr", "operador"] = "csr"
+    employeeType: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR] = CargoTypeEnum.CSR
     # Cargo: cuenta de usuario
     username: str | None
     email: EmailStr | None
@@ -88,7 +90,7 @@ class EmployeeListItem(BaseModel):
     id: int
     firstName: str
     lastName: str
-    role: str
+    role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
     rfc: str
     hireDate: date | None = None
     stillEmployee: bool

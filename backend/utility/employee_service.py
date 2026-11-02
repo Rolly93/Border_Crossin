@@ -7,6 +7,7 @@ from stdnum.mx import rfc as rfc_validator
 
 from model.db_model import DriverDetails, Employee, User
 from repository import DriverRepository, EmployeeRepository, UserRepository
+from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
     BoosttrapAdmin,
     EmployeeCreateUnion,
@@ -63,7 +64,7 @@ class EmployeeService:
                     id=e.id,
                     firstName=e.name,
                     lastName=e.last_name,
-                    role=e.role,
+                    role=CargoTypeEnum(e.role),
                     rfc=e.rfc,
                     hireDate=e.hire_date,
                     stillEmployee=e.still_employee,
@@ -78,7 +79,6 @@ class EmployeeService:
 
     def _validate_account(self, data: EmployeeCreateUnion) -> None:
         """Valida todo antes de crear el empleado, para no dejar registros a medias."""
-        print(data)
         if data.employeeType == "csr":
             # Database validations (repo checks)
             if self._user_repo.get_username(data.username.strip()):
@@ -122,7 +122,7 @@ class EmployeeService:
         data: EmployeeCreateUnion,
         current_user: TokenPayload | InitialTokenPayload,
     ) -> None:
-        if data.employeeType == "csr":
+        if data.employeeType == CargoTypeEnum.CSR:
             from utility.user_service import UserService
 
             self._db.add(
@@ -222,7 +222,7 @@ class EmployeeService:
             id=new_employee.id,
             firstName=new_employee.name,
             lastName=new_employee.last_name,
-            role=new_employee.role,
+            role=CargoTypeEnum(new_employee.role),
             hireDate=new_employee.hire_date,
             stillEmployee=new_employee.still_employee,
             rfc=new_employee.rfc,

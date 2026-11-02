@@ -52,8 +52,8 @@ export class ApiUnitService extends BaseApiService {
       );
       return data;
     } catch (error: any) {
-      console.log(error.message);
-      throw error
+      console.log(error);
+      throw error.message
 
     }
   }

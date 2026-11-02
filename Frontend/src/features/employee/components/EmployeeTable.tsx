@@ -16,9 +16,7 @@ import {
   IEmployeeResponse,
   IEmployeeUserResponse,
   IEmployeeDriverResponse,
-  IEmployeeRequest,
   TEmployeeResponseMap,
-  IEmployeeFormRequest,
 } from "../type/employee.interface";
 
 const DEFAULT_FORM_VALUES = {
