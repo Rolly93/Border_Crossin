@@ -18,7 +18,6 @@ export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseAp
 
   async update(id: number, data: UpdateT): Promise<T> {
     try {
-      console.log(id, data);
 
       const response = await this.api.put<T>(`${this.resourcePath}/update/${id}`, data, {
         params: { [this.updateIdParamName]: id },
