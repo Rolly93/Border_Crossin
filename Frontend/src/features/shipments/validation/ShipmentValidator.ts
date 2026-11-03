@@ -1,6 +1,6 @@
-import { EventCategory, Shipment } from "@/features/shipments/types/Shipment";
+import { TEventCategory, TShipmentBase } from "../hooks/useShipments";
 
-const EVENT_SEQUENCE_ORDER: EventCategory[] = [
+const EVENT_SEQUENCE_ORDER: TEventCategory[] = [
   "pick_up",
   "departure",
   "delay",
@@ -12,7 +12,7 @@ const EVENT_SEQUENCE_ORDER: EventCategory[] = [
   "deliver"
 ]
 
-const REQUIERE_EVENTS = new Set<EventCategory>([
+const REQUIERE_EVENTS = new Set<TEventCategory>([
   "pick_up",
   "departure",
   "clear_mex",
@@ -21,8 +21,8 @@ const REQUIERE_EVENTS = new Set<EventCategory>([
 ])
 export class ShipmentValidator {
 
-  private data: Partial<Shipment>;
-  constructor(formData: Partial<Shipment>) {
+  private data: Partial<TShipmentBase>;
+  constructor(formData: Partial<TShipmentBase>) {
     this.data = formData;
   }
 
@@ -43,7 +43,7 @@ export class ShipmentValidator {
   }
 
   public validateDestination(): string | null {
-    return (this.data.destino?.trim().length || 0) < 3 ? 'Destino Invalido' : null;
+    return (this.data.destination?.trim().length || 0) < 3 ? 'Destino Invalido' : null;
   }
 
   public validateTrailer(): string | null {
@@ -75,8 +75,8 @@ export class ShipmentValidator {
         !!event.dateTime && !!event.category
       )
       .sort((a, b) => {
-        const indexA = EVENT_SEQUENCE_ORDER.indexOf(a.category as EventCategory);
-        const indexB = EVENT_SEQUENCE_ORDER.indexOf(b.category as EventCategory);
+        const indexA = EVENT_SEQUENCE_ORDER.indexOf(a.category as TEventCategory);
+        const indexB = EVENT_SEQUENCE_ORDER.indexOf(b.category as TEventCategory);
         return indexA - indexB;
       });
 

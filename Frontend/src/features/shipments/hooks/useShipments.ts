@@ -1,11 +1,22 @@
 import { useState, useEffect, useCallback } from "react";
-import { Shipment, ShipmentUpdate } from "@/features/shipments/types/Shipment";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
+import { components, paths } from "@/types/api";
 
+export type TShipmentBase = components['schemas']['ShipmentResponse']
+export type TShipmentPaginate = components['schemas']['PaginatedShipmentResponse']
+export type TShipmentUpdate = components['schemas']['ShipmentUpdate'];
+export type TShipmentCreate = components['schemas']['ShipmentCreateRequest']
+export type TEventCategory = components['schemas']['EventCategory']
+export type TShipmentEvent = components['schemas']['ShipmentEvent']
+export type TShipmentCreateRequest = components["schemas"]["ShipmentCreateRequest"];
+
+export interface IShipmentFormValues extends Omit<TShipmentCreateRequest, "cliente"> {
+  cliente: string | number;
+}
 const PAGE_SIZE = 10;
 
 export function useShipments() {
-  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [shipments, setShipments] = useState<TShipmentBase[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -20,7 +31,7 @@ export function useShipments() {
       const isArray = Array.isArray(response);
 
 
-      const newShipments: Shipment[] = isArray ? response : response.data;
+      const newShipments: TShipmentBase[] = isArray ? response : response.data;
       const canFetchMore = isArray
         ? newShipments.length === PAGE_SIZE
         : Boolean(response.hasNextPage);
@@ -48,10 +59,11 @@ export function useShipments() {
     }
   }, [loading, hasMore, page, fetchShipments]);
 
-  const updateShipment = async (id: number, shipmentData: ShipmentUpdate) => {
+  const updateShipment = async (id: number, shipmentData: TShipmentUpdate) => {
+
     const updated = await shipmentService.update(id, shipmentData);
     setShipments((prev) =>
-      prev.map((item) => (item.id === id ? updated : item))
+      prev.map((item) => (item.id === updated.id ? updated : item))
     );
     return updated;
   };
@@ -63,8 +75,20 @@ export function useShipments() {
     return result;
   };
 
-  const addShipment = async (newShipment: Shipment): Promise<Shipment> => {
-    const createdShipment = await shipmentService.insert(newShipment);
+  const addShipment = async (newShipment: IShipmentFormValues): Promise<TShipmentBase> => {
+
+
+    const payload: TShipmentCreateRequest = {
+      tracking_number: newShipment.tracking_number,
+      customer_tracking: newShipment.customer_tracking,
+      type_operation: newShipment.type_operation,
+      cliente: Number(newShipment.cliente),
+      origen: newShipment.origen,
+      destination: newShipment.destination,
+      truck: newShipment.truck,
+      trailer: newShipment.trailer,
+    };
+    const createdShipment = await shipmentService.insert(payload);
     setShipments((prev) => [createdShipment, ...prev]);
     return createdShipment;
   };

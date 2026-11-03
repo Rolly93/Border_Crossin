@@ -1,19 +1,19 @@
 import { Modal, LoadingOverlay, Box } from '@mantine/core';
 import ShipmentUpdateForm from './ShipmentUpdateForm';
-import { Shipment } from '@/features/shipments/types/Shipment';
 import { useTranslation } from 'react-i18next';
+import { TShipmentBase } from '../hooks/useShipments';
 
 interface EmbarqueModalProps {
   opened: boolean;
   onClose: () => void;
-  selectedElement: Shipment | null;
-  onSubmit: (formData: Shipment) => Promise<void>
+  selectedElement: TShipmentBase | null;
+  onSubmit: (formData: TShipmentBase) => Promise<void>
   loading: boolean;
 }
 
 export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, loading }: EmbarqueModalProps) {
   const { t } = useTranslation()
-  const SubmitShipment = async (formData: Shipment) => {
+  const SubmitShipment = async (formData: TShipmentBase) => {
     await onSubmit(formData)
   }
   return (

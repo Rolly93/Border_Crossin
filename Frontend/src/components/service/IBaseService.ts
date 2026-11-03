@@ -9,10 +9,10 @@ export interface PaginatedResponse<T> {
 }
 
 
-export interface IBaseService<T, UpdateT = Partial<T>> {
+export interface IBaseService<T, UpdateT = Partial<T>, CreateT = T> {
   getAll(): Promise<T[]>;
   update(id: number, data: UpdateT): Promise<T>;
-  insert(data: T): Promise<T>;
+  insert(data: CreateT): Promise<T>;
   delete(id: number): Promise<T>;
 }
 

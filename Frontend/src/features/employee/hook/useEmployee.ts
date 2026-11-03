@@ -3,6 +3,13 @@ import { EmployeeType, IEmployeeFormRequest, IEmployeeRequest, IEmployeeResponse
 import { employeeService } from "../service/EmployeeService";
 import { usePaginatedList } from "@/components/hook/usePaginaterList";
 
+import { components } from "@/types/api";
+export type TEmployeeCreateUnion = components['schemas']['EmployeeUserRequest'] | components['schemas']['EmployeeDriverRequest']
+export type TEmployeeCreateUnionResponse = components['schemas']['EmployeeUserResponse'] | components['schemas']['EmployeeDriverResponse']
+export type TEmployeeUserRequest = components['schemas']['EmployeeUserRequest']
+export type TEmployeeBase = components['schemas']['EmployeeRequest']
+export type TEmployeeBaseRequest = Omit<TEmployeeBase, "id">
+
 export function useEmployee() {
   const fetchFn = useCallback((page: number, size: number) => employeeService.getPaginated(page, size), []);
 
@@ -34,20 +41,7 @@ export function useEmployee() {
     return data;
   };
 
-  const createNewEmployee = async (employeeData: IEmployeeRequest): Promise<IEmployeeResponse> => {
-    try {
-      setLoading(true);
-      setError(null);
-      const newEmployee = await employeeService.insert(employeeData);
-      setEmployeeData((prev) => [newEmployee, ...prev]);
-      return newEmployee;
-    } catch (e: any) {
-      setError(e.message);
-      throw e;
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const createEmployeeAccount = async (payload: INewEmployeeRequest): Promise<IEmployeeResponse> => {
     setLoading(true);
@@ -69,7 +63,6 @@ export function useEmployee() {
     loading,
     error,
     hasMore,
-    createNewEmployee,
     createEmployeeAccount,
     fetchNextPage,
     setError,

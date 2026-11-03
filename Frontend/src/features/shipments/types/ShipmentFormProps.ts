@@ -1,8 +1,9 @@
 import { Shipment } from '@/features/shipments/types/Shipment';
+import { TShipmentBase } from '../hooks/useShipments';
 
 export interface ShipmentFormProps {
-  initialData?: Partial<Shipment>;
+  initialData?: Partial<TShipmentBase>;
   opened: boolean;
-  onSubmit: (values: Omit<Shipment, 'id' | 'events'>) => void;
+  onSubmit: (values: Omit<TShipmentBase, 'id' | 'events' | 'status'>) => void;
   onCancel: () => void;
 }

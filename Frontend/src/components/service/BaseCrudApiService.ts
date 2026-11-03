@@ -1,82 +1,35 @@
-import { BaseApiService } from "./BaseApiService";
+import { AxiosInstance } from "axios";
 import { IBaseService } from "./IBaseService";
+import { apiClient } from "@/service/api";
 
-export abstract class BaseCrudApiService<T, UpdateT = Partial<T>> extends BaseApiService
-  implements IBaseService<T, UpdateT> {
+export class BaseCrudApiService<T, UpdateT = Partial<T>, CreateT = T>
+  implements IBaseService<T, UpdateT, CreateT> {
+  protected resourcePath: string;
+  protected api: AxiosInstance;
 
-  protected updateIdParamName = 'id';
+  constructor(resourcePath: string) {
+    this.resourcePath = resourcePath;
+    this.api = apiClient;
+  }
 
   async getAll(): Promise<T[]> {
-    try {
-      const response = await this.api.get<T[]>(`/${this.resourcePath}`);
-      return response.data;
-    } catch (error: any) {
-      console.log(error);
-      throw error.message
-    }
+    const response = await this.api.get<T[]>(`/${this.resourcePath}`);
+    return response.data;
   }
 
   async update(id: number, data: UpdateT): Promise<T> {
-    try {
-
-      const response = await this.api.put<T>(`${this.resourcePath}/update/${id}`, data, {
-        params: { [this.updateIdParamName]: id },
-      });
-      console.log(response);
-
-      return response.data;
-
-    } catch (error: any) {
-      console.log(error);
-      throw error.message
-    }
-
+    const response = await this.api.put<T>(`/${this.resourcePath}/${id}`, data);
+    return response.data;
   }
 
-  async insert(data: T): Promise<T> {
-    try {
-
-      const response = await this.api.post<T>(`${this.resourcePath}/create`, data);
-      return response.data;
-    } catch (error: any) {
-      const responseData = error.response?.data;
-
-      let errorMessage: string;
-
-      if (Array.isArray(responseData?.errors)) {
-        errorMessage = responseData.errors.join(', ');
-      }
-      else if (Array.isArray(responseData?.detail)) {
-        errorMessage = responseData.detail
-          .map((err: any) => {
-            if (typeof err === 'string') {
-              return err;
-            }
-            const field = err.loc ? err.loc.slice(1).join('.') : '';
-            return field ? `${field}: ${err.msg}` : err.msg;
-          })
-          .join(', ');
-      }
-      else if (typeof responseData?.detail === 'string') {
-        errorMessage = responseData.detail;
-      }
-      else {
-        errorMessage = responseData?.message || error.message || 'Failed to create record';
-      }
-
-      throw new Error(errorMessage);
-    }
+  // Update insert to use CreateT instead of T
+  async insert(data: CreateT): Promise<T> {
+    const response = await this.api.post<T>(`/${this.resourcePath}/create`, data);
+    return response.data;
   }
+
   async delete(id: number): Promise<T> {
-    try {
-      const response = await this.api.delete<T>(`${this.resourcePath}/delete/${id}`);
-      return response.data;
-
-
-    } catch (error: any) {
-      console.log(error);
-      throw error.message
-    }
-
+    const response = await this.api.delete<T>(`/${this.resourcePath}/${id}`);
+    return response.data;
   }
 }

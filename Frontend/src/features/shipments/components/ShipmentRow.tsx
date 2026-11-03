@@ -1,13 +1,13 @@
 /** @format */
 
 import { Table } from "@mantine/core";
-import { Shipment } from "@/features/shipments/types/Shipment";
 import { ShipmentModel } from "../domain/shipmentModel";
 import { forwardRef } from "react";
+import { TShipmentBase } from "../hooks/useShipments";
 
 interface ShipmentRowProps {
-  shipment: Shipment;
-  onRowDoubleClick: (element: Shipment) => void;
+  shipment: TShipmentBase;
+  onRowDoubleClick: (element: TShipmentBase) => void;
 }
 
 function getDate(date: Date): string {
@@ -31,7 +31,7 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
   ({ shipment: rawShipment, onRowDoubleClick }, ref) => {
     const shipment = new ShipmentModel(rawShipment);
 
-    const create = getDate(shipment.data.create!);
+    //const create = getDate(shipment.data.create!);
 
     return (
       <Table.Tr
@@ -43,7 +43,7 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
         <Table.Td>{shipment.data.trailer}</Table.Td>
         <Table.Td>{shipment.data.truck}</Table.Td>
         <Table.Td>{shipment.data.cliente}</Table.Td>
-        <Table.Td>{create}</Table.Td>
+        {/**<Table.Td>{create}</Table.Td> **/}
         <Table.Td>{shipment.data.type_operation}</Table.Td>
         <Table.Td>{shipment.data.origen}</Table.Td>
         <Table.Td>{shipment.data.destination}</Table.Td>

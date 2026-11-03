@@ -65,10 +65,6 @@ class ShipmentCreateRequest(BaseModel):
     type_operation: str = Field(min_length=1, max_length=50)
     cliente: int = Field(gt=0, description="ID del cliente")
     origen: str = Field(min_length=1, max_length=200)
-    placas: toUppercase = Field(
-        min_length=1, max_length=50, description="Numero de placas"
-    )
-    # El formulario manda `destino`; se acepta también `destination`.
     destination: str = Field(
         min_length=1,
         max_length=200,
@@ -90,25 +86,26 @@ class ShipmentResponse(ShipmentCreate):
         model_config = ConfigDict(from_attributes=True)
 
 
-class ShipmentUpdate(BaseModel):
-    tracking_number: str | None = None
-    customer_tracking: str | None
-    cliente: int
-    truck: str | None
-    vehicle_type: str | None
-    trailer: str | None
-    origen: str | None
-    destination: str | None
-    type_operation: str | None
-    events: list[ShipmentEvent] | ShipmentEvent
-
-
 class PaginatedShipmentResponse(BaseModel):
     data: list[ShipmentResponse]
     totalRecords: int
     hasNextPage: bool
     page: int
     limit: int
+
+
+class ShipmentUpdate(BaseModel):
+    id: int
+    tracking_number: str
+    customer_tracking: str
+    cliente: int
+    truck: str
+    vehicle_type: str
+    trailer: str
+    origen: str
+    destination: str
+    type_operation: str
+    events: list[ShipmentEvent] | ShipmentEvent
 
 
 class EventPayload(BaseModel):

@@ -12,7 +12,6 @@ import {
 } from "@mantine/core";
 import "@mantine/notifications/styles.css";
 import { DateTimePicker } from "@mantine/dates";
-import { Shipment, EventCategory } from "@/features/shipments/types/Shipment";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
@@ -26,8 +25,9 @@ import { useTranslation } from "react-i18next";
 
 import { notify } from "../../../components/utils/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
+import { TEventCategory, TShipmentBase } from "../hooks/useShipments";
 interface EventFieldConfig {
-  key: EventCategory;
+  key: TEventCategory;
   showNotes?: boolean;
   maxNotesLength?: number;
   notesLable?: string;
@@ -49,15 +49,16 @@ export default function ShipmentUpdateForm({
   onSubmit,
   initialShipment,
 }: {
-  onSubmit: (values: Shipment) => void;
-  initialShipment?: Shipment;
+  onSubmit: (values: TShipmentBase) => void;
+  initialShipment?: TShipmentBase;
 }) {
   const { t } = useTranslation();
-  const form = useForm<Shipment>({
+  const form = useForm<TShipmentBase>({
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       id: initialShipment?.id || 0,
+
       tracking_number: initialShipment?.tracking_number || "",
       customer_tracking: initialShipment?.customer_tracking || "",
       cliente: initialShipment?.cliente || "",
@@ -66,6 +67,7 @@ export default function ShipmentUpdateForm({
       trailer: initialShipment?.trailer || "",
       origen: initialShipment?.origen || "",
       destination: initialShipment?.destination || "",
+      status: initialShipment?.status || "",
       type_operation: initialShipment?.type_operation || "",
       events: ShipmentModel.prepareInitialEvents(
         initialShipment?.events,
@@ -95,7 +97,7 @@ export default function ShipmentUpdateForm({
     title: "Error de Validacion en Evento",
   });
 
-  const handeSubmit = (values: Shipment) => {
+  const handeSubmit = (values: TShipmentBase) => {
     if (!form.isDirty()) {
       notify.warning(
         "No has realizado ninguna modificación en los datos o fechas.",

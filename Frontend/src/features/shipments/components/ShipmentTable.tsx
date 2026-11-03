@@ -3,35 +3,22 @@
 import { useState } from "react";
 import { Table } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { Shipment, ShipmentUpdate } from "@/features/shipments/types/Shipment";
 import { ShipmentRow } from "./ShipmentRow";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
 import { useTranslation } from "react-i18next";
 import { EmbarqueModal } from "./EmbarqueModalProps";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
+import { TShipmentBase, TShipmentUpdate } from "../hooks/useShipments";
 
 interface ShipmentTableProps {
-  shipments: Shipment[];
+  shipments: TShipmentBase[];
   loading: boolean;
   error: string | null;
-  onUpdateShipment: (id: number, data: ShipmentUpdate) => void;
+  onUpdateShipment: (id: number, data: TShipmentUpdate) => void;
   onLastElement?: (node: HTMLTableRowElement | null) => void;
 }
 
-function shipmentToUpdate(shipment: Shipment): ShipmentUpdate {
-  return {
-    tracking_number: shipment.tracking_number,
-    customer_tracking: shipment.customer_tracking,
-    cliente: parseInt(shipment.cliente, 10) || 0,
-    truck: shipment.truck,
-    vehicle_type: shipment.vehicle_type,
-    trailer: shipment.trailer,
-    origen: shipment.origen,
-    destination: shipment.destination,
-    type_operation: shipment.type_operation,
-    events: shipment.events,
-  };
-}
+
 
 export default function ShipmentTable({
   shipments,
@@ -42,22 +29,39 @@ export default function ShipmentTable({
 }: ShipmentTableProps) {
   const { t } = useTranslation();
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedElement, setSelectedElement] = useState<Shipment | null>(null);
+  const [selectedElement, setSelectedElement] = useState<TShipmentBase | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleRowDoubleClick = (element: Shipment): void => {
+  const handleRowDoubleClick = (element: TShipmentBase): void => {
     setSelectedElement(element);
 
     open();
   };
 
-  const handleUpdateSubmit = async (updatedValues: Shipment) => {
+  const handleUpdateSubmit = async (updatedValues: TShipmentBase) => {
+
+
+
+
     try {
       setIsSaving(true);
-      const updateData = shipmentToUpdate(updatedValues);
-      await shipmentService.update(updatedValues.id, updateData);
+      const payload: TShipmentUpdate = {
+        id: updatedValues.id,
+        tracking_number: updatedValues.tracking_number,
+        customer_tracking: updatedValues.customer_tracking,
+        type_operation: updatedValues.type_operation,
+        cliente: Number(updatedValues.cliente),
+        origen: updatedValues.origen,
+        destination: updatedValues.destination,
+        truck: updatedValues.truck!,
+        trailer: updatedValues.trailer!,
+        vehicle_type: updatedValues.vehicle_type!,
+        events: updatedValues.events
+      }
 
-      onUpdateShipment(updatedValues.id, updateData);
+      await shipmentService.update(payload.id, payload);
+
+      onUpdateShipment(updatedValues.id, payload);
 
       close();
     } catch (err) {

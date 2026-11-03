@@ -1,41 +1,13 @@
 /** @format */
 
-import { Shipment } from "@/features/shipments/types/Shipment";
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
-import { ShipmentUpdate } from "../types/Shipment";
 import { getErrorMessage } from "@/components/utils/errorMessage";
-
-/** Lo que espera POST /shipment/create (ver ShipmentCreateRequest en el backend). */
-interface ShipmentCreatePayload {
-  tracking_number: string;
-  customer_tracking: string;
-  type_operation: string;
-  cliente: number;
-  origen: string;
-  destination: string;
-  truck: string;
-  trailer: string;
-}
-
-/** Respuesta del alta: el backend usa `destination` y `cliente` numérico. */
-interface ShipmentCreateResponse {
-  id: number;
-  tracking_number: string;
-  customer_tracking: string;
-  type_operation: string;
-  origen: string;
-  destination: string;
-  cliente: number;
-  truck: string | null;
-  trailer: string | null;
-  status?: string;
-  events: Shipment["events"];
-}
+import { TShipmentBase, TShipmentCreateRequest, TShipmentUpdate } from "../hooks/useShipments";
 
 export class ApiShipmentService extends BaseCrudApiService<
-  Shipment,
-  ShipmentUpdate
+  TShipmentBase,
+  TShipmentUpdate, TShipmentCreateRequest
 > {
   constructor() {
     super("shipment");
@@ -45,30 +17,15 @@ export class ApiShipmentService extends BaseCrudApiService<
    * Traduce el formulario (cliente en texto, destino en español) al contrato del backend.
    * Es el único lugar donde se hace esta traducción.
    */
-  override async insert(data: Shipment): Promise<Shipment> {
-    const payload: ShipmentCreatePayload = {
-      tracking_number: data.tracking_number,
-      customer_tracking: data.customer_tracking,
-      type_operation: data.type_operation,
-      cliente: Number(data.cliente),
-      origen: data.origen,
-      destination: data.destination,
-      truck: data.truck,
-      trailer: data.trailer,
-    };
+  override async insert(data: TShipmentCreateRequest): Promise<TShipmentBase> {
 
     try {
-      const response = await this.api.post<ShipmentCreateResponse>(
+      const response = await this.api.post<TShipmentBase>(
         `/${this.resourcePath}/create`,
-        payload,
+        data,
       );
-      const created = response.data;
-      return {
-        ...created,
-        cliente: String(created.cliente),
-        destino: created.destination,
-        events: created.events ?? [],
-      } as unknown as Shipment;
+
+      return response.data
     } catch (err) {
       throw new Error(getErrorMessage(err, "No se pudo registrar el embarque"));
     }
@@ -77,9 +34,9 @@ export class ApiShipmentService extends BaseCrudApiService<
   async getPaginated(
     page: number = 1,
     limit: number = 10,
-  ): Promise<PaginatedResponse<Shipment>> {
+  ): Promise<PaginatedResponse<TShipmentBase>> {
     try {
-      const response = await this.api.get<PaginatedResponse<Shipment>>(
+      const response = await this.api.get<PaginatedResponse<TShipmentBase>>(
         `/${this.resourcePath}/`,
         { params: { page, limit } },
       );
@@ -101,10 +58,10 @@ export class ApiShipmentService extends BaseCrudApiService<
   }
 
   // Backend: PUT /shipment/{id}/update
-  async update(id: number, data: ShipmentUpdate): Promise<Shipment> {
+  override async update(id: number, data: TShipmentUpdate): Promise<TShipmentBase> {
     try {
-      const response = await this.api.put<Shipment>(
-        `/${this.resourcePath}/${id}/update`,
+      const response = await this.api.put<TShipmentBase>(
+        `/${this.resourcePath}/${data.id}/update`,
         data,
       );
       return response.data;
@@ -118,9 +75,9 @@ export class ApiShipmentService extends BaseCrudApiService<
   }
 
   // Backend: PATCH /shipment/{id}/delete
-  async delete(id: number): Promise<Shipment> {
+  async delete(id: number): Promise<TShipmentBase> {
     try {
-      const response = await this.api.patch<Shipment>(
+      const response = await this.api.patch<TShipmentBase>(
         `/${this.resourcePath}/${id}/delete`,
       );
       return response.data;

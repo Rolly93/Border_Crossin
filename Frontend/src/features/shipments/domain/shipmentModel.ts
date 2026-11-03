@@ -1,14 +1,14 @@
-import { Shipment, EventCategory, ShipmentEvent } from "@/features/shipments/types/Shipment";
+import { TEventCategory, TShipmentBase, TShipmentEvent } from "../hooks/useShipments";
 
 export class ShipmentModel {
-  constructor(public readonly data: Shipment) { }
+  constructor(public readonly data: TShipmentBase) { }
 
-  private getEvent(categoryKey: EventCategory) {
+  private getEvent(categoryKey: TEventCategory) {
 
     return this.data.events?.find(e => e.category === categoryKey);
   }
 
-  public getEventDate(categoryKey: EventCategory): string {
+  public getEventDate(categoryKey: TEventCategory): string {
     const event = this.getEvent(categoryKey);
     if (!event || !event.dateTime) {
       return '--';
@@ -26,17 +26,17 @@ export class ShipmentModel {
       .replace(',', '');
   }
 
-  public getNotes(categoryKey: EventCategory): string {
+  public getNotes(categoryKey: TEventCategory): string {
 
 
     const event = this.getEvent(categoryKey);
     return event?.notes || '--';
   }
 
-  static prepareInitialEvents(existingEvents: ShipmentEvent[] = [], expectedCategories: string[]): ShipmentEvent[] {
+  static prepareInitialEvents(existingEvents: TShipmentEvent[] = [], expectedCategories: string[]): TShipmentEvent[] {
     return expectedCategories.map(category => {
       const found = existingEvents.find(e => e.category === category);
-      return found || { category: category as any, dateTime: null, notes: '' };
+      return found || { category: category as any, dateTime: "", notes: '' };
     });
 
   }

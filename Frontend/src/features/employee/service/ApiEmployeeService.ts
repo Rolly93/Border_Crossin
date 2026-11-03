@@ -36,21 +36,6 @@ export class ApiEmployeeService
       throw error;
     }
   }
-  override async insert(data: IEmployeeRequest): Promise<IEmployeeResponse> {
-    try {
-      const responseData = await super.insert(data);
-
-      if ("token" in responseData && responseData.token) {
-        localStorage.setItem("jwt_token", responseData.token);
-      }
-
-      return responseData;
-
-
-    } catch (error: any) {
-      throw error.message
-    }
-  }
 
   async createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse> {
     try {

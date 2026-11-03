@@ -46,6 +46,7 @@ export function ShipmentForm({
       vehicle_type: initialData?.vehicle_type || "",
       trailer: initialData?.trailer || "",
       origen: initialData?.origen || "",
+
       destination: initialData?.destination || "",
     },
 
