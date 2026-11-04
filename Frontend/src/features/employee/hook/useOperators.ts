@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "@/components/utils/errorMessage";
 import { employeeService } from "../service/EmployeeService";
-import { IOperatorOption } from "../type/employee.interface";
+import { TOperatorOption } from "./useEmployee";
 
 /** Operadores activos, para elegir a quién se liga una unidad. */
 export function useOperators(enabled: boolean) {
-  const [operators, setOperators] = useState<IOperatorOption[]>([]);
+  const [operators, setOperators] = useState<TOperatorOption[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

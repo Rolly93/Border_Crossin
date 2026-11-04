@@ -17,6 +17,12 @@ class EmployeeBaseRequest(BaseModel):
     role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
     rfc: str
     dateOfBirth: date
+    hireDate: date
+    stillEmployee: bool
+
+
+class EmployeeBaseResponse(EmployeeBaseRequest):
+    id: int
 
 
 class BoosttrapAdmin(BaseModel):
@@ -86,18 +92,8 @@ class OperatorOptionResponse(BaseModel):
     typeUnit: TypeUnit | None
 
 
-class EmployeeListItem(BaseModel):
-    id: int
-    firstName: str
-    lastName: str
-    role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
-    rfc: str
-    hireDate: date | None = None
-    stillEmployee: bool
-
-
 class PaginatedEmployeeResponse(BaseModel):
-    data: list[EmployeeListItem]
+    data: list[EmployeeBaseResponse]
     totalRecords: int
     hasNextPage: bool
     page: int

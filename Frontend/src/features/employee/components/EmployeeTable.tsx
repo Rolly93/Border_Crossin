@@ -7,20 +7,18 @@ import { useDisclosure } from "@mantine/hooks";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { useAuth } from "@/features/login/context/AuthContext";
-import { useEmployee } from "../hook/useEmployee";
+import {
+  TEmployeeBaseResponse,
+  TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeDriverRequest,
+  TEmployeeType, TEmployeeUserRequest, useEmployee
+} from "../hook/useEmployee";
 import { useEmployeeForm } from "../hook/useEmployeeForm";
 import { EmployeeTableRow } from "./EmployeeTableRow";
 import { EmployeeModal } from "./EmployeeModal";
-import {
-  EmployeeType,
-  IEmployeeResponse,
-  IEmployeeUserResponse,
-  IEmployeeDriverResponse,
-  TEmployeeResponseMap,
-} from "../type/employee.interface";
+
 
 const DEFAULT_FORM_VALUES = {
-  employeeType: "csr" as EmployeeType,
+  employeeType: "csr" as TEmployeeType,
   firstName: "",
   lastName: "",
   dateOfBirth: null,
@@ -36,14 +34,14 @@ const DEFAULT_FORM_VALUES = {
 };
 
 function isUserResponse(
-  employee: IEmployeeResponse,
-): employee is IEmployeeUserResponse {
+  employee: TEmployeeCreateUnion,
+): employee is TEmployeeUserRequest {
   return "username" in employee;
 }
 
 function isDriverResponse(
-  employee: IEmployeeResponse,
-): employee is IEmployeeDriverResponse {
+  employee: TEmployeeCreateUnion,
+): employee is TEmployeeDriverRequest {
   return "licenseNumber" in employee;
 }
 
@@ -62,14 +60,14 @@ export function EmployeeTable() {
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
   const [selectedEmployee, setSelectedEmployee] =
-    useState<TEmployeeResponseMap | null>(null);
+    useState<TEmployeeCreateUnionResponse | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
 
   const employeeForm = useEmployeeForm({
     initialEmployee: selectedEmployee,
-    onSubmitAction: async (payload, id) => {
+    onSubmitAction: async (payload: TEmployeeCreateUnion | TEmployeeCreateUnionResponse, id) => {
       if (id) {
-        return await updateEmployee(id, payload as TEmployeeResponseMap);
+        return await updateEmployee(id, payload as TEmployeeCreateUnionResponse);
       }
       return await createEmployeeAccount(payload);
     },
@@ -88,19 +86,20 @@ export function EmployeeTable() {
     openModal();
   };
 
-  const handleOpenEdit = async (employee: IEmployeeResponse) => {
+  const handleOpenEdit = async (employee: TEmployeeBaseResponse) => {
     const employeeToEdit = await getEmployeeData(
       employee.id!,
-      employee.role as EmployeeType,
+      employee.role as TEmployeeType,
     );
     if (!employeeToEdit) {
       return;
     }
 
     const formValues = {
-      employeeType: (employeeToEdit.role === "operador"
+      employeeType: (employeeToEdit.role === 'csr'
         ? "operador"
-        : "csr") as EmployeeType,
+        : "csr") as TEmployeeType,
+
       firstName: employeeToEdit.firstName || "",
       lastName: employeeToEdit.lastName || "",
       dateOfBirth: employeeToEdit.dateOfBirth
@@ -108,7 +107,7 @@ export function EmployeeTable() {
         : null,
       rfc: employeeToEdit.rfc || "",
       username: isUserResponse(employeeToEdit)
-        ? employeeToEdit.username || "sd65f1"
+        ? employeeToEdit.username || ""
         : "",
       email: (isUserResponse(employeeToEdit) && employeeToEdit.email) || "",
       password: "",

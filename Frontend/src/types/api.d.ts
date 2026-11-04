@@ -754,6 +754,41 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
+        };
+        /** EmployeeBaseResponse */
+        EmployeeBaseResponse: {
+            /** Firstname */
+            firstName: string;
+            /** Lastname */
+            lastName: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "operador" | "csr";
+            /** Rfc */
+            rfc: string;
+            /**
+             * Dateofbirth
+             * Format: date
+             */
+            dateOfBirth: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
+            /** Id */
+            id: number;
         };
         /** EmployeeDriverRequest */
         EmployeeDriverRequest: {
@@ -773,6 +808,13 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -807,6 +849,13 @@ export interface components {
              */
             dateOfBirth: string;
             /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
+            /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
@@ -822,26 +871,6 @@ export interface components {
             gafetId: string;
             /** Id */
             id: number;
-        };
-        /** EmployeeListItem */
-        EmployeeListItem: {
-            /** Id */
-            id: number;
-            /** Firstname */
-            firstName: string;
-            /** Lastname */
-            lastName: string;
-            /**
-             * Role
-             * @enum {string}
-             */
-            role: "operador" | "csr";
-            /** Rfc */
-            rfc: string;
-            /** Hiredate */
-            hireDate?: string | null;
-            /** Stillemployee */
-            stillEmployee: boolean;
         };
         /** EmployeeRequest */
         EmployeeRequest: {
@@ -903,6 +932,13 @@ export interface components {
              */
             dateOfBirth: string;
             /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
+            /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
@@ -934,6 +970,13 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1061,7 +1104,7 @@ export interface components {
         /** PaginatedEmployeeResponse */
         PaginatedEmployeeResponse: {
             /** Data */
-            data: components["schemas"]["EmployeeListItem"][];
+            data: components["schemas"]["EmployeeBaseResponse"][];
             /** Totalrecords */
             totalRecords: number;
             /** Hasnextpage */

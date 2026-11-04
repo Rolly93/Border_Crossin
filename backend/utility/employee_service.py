@@ -10,8 +10,9 @@ from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
     BoosttrapAdmin,
+    EmployeeBaseRequest,
+    EmployeeBaseResponse,
     EmployeeCreateUnion,
-    EmployeeListItem,
     EmployeeRequestDash,
     OperatorOption,
     OperatorOptionResponse,
@@ -60,7 +61,7 @@ class EmployeeService:
         offset = (page - 1) * limit
         return PaginatedEmployeeResponse(
             data=[
-                EmployeeListItem(
+                EmployeeBaseResponse(
                     id=e.id,
                     firstName=e.name,
                     lastName=e.last_name,
@@ -68,6 +69,7 @@ class EmployeeService:
                     rfc=e.rfc,
                     hireDate=e.hire_date,
                     stillEmployee=e.still_employee,
+                    dateOfBirth=e.date_birth,
                 )
                 for e in employees
             ],

@@ -5,7 +5,7 @@ import {
   PaginatedResponse,
 } from "@/components/service/IBaseService";
 import { TUnitType } from "@/features/unit/type/unit.interface";
-import { TEmployeeResponse } from "../hook/useEmployee";
+import { TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeType, TOperatorOption, TPaginatedEmployeeResponse } from "../hook/useEmployee";
 
 export interface IEmployeeRequest {
   firstName: string;
@@ -21,7 +21,7 @@ export interface IEmployeeResponse extends IEmployeeRequest {
   id?: number;
 }
 
-export interface IEmployeeFormsValues extends IEmployeeRequest {}
+export interface IEmployeeFormsValues extends IEmployeeRequest { }
 
 export interface EmployeeFormProps {
   onSuccess?: () => void;
@@ -87,16 +87,18 @@ export type TEmployeeResponseMap =
   | IEmployeeDriverResponse;
 
 export interface IEmployeeService extends IBaseService<
-  TEmployeeResponse,
-  TEmployeeResponse
+  TEmployeeCreateUnionResponse,
+  TEmployeeCreateUnion, TPaginatedEmployeeResponse
 > {
+
   getPaginated(
     page: number,
     limit: number,
-  ): Promise<PaginatedResponse<TEmployeeResponseMap>>;
-  getOperators(): Promise<IOperatorOption[]>;
-  createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>;
-  getEmployee<T extends EmployeeType>(
+  ): Promise<TPaginatedEmployeeResponse>;
+
+  getOperators(): Promise<TOperatorOption[]>;
+  createEmployee(data: TEmployeeCreateUnion): Promise<TEmployeeCreateUnionResponse>;
+  getEmployee<T extends TEmployeeType>(
     id: number,
     cargoType: T,
   ): Promise<TEmployeeResponseMap>;

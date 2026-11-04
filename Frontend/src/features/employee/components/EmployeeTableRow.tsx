@@ -1,10 +1,10 @@
 import { Table } from "@mantine/core";
 import { forwardRef } from "react";
-import { IEmployeeResponse } from "../type/employee.interface";
+import { TEmployeeBaseRequest, TEmployeeCreateUnionResponse } from "../hook/useEmployee";
 
 interface EmployeeTableRowProps {
-  employee: IEmployeeResponse;
-  onClick: (employee: IEmployeeResponse) => void;
+  employee: TEmployeeBaseRequest;
+  onClick: (employee: TEmployeeBaseRequest) => void;
 
 }
 

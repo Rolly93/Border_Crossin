@@ -1,9 +1,9 @@
 import { Alert, Checkbox, Group, Modal, PasswordInput, SegmentedControl, Stack, TextInput } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { AtomButton } from '@/components/atoms/AtomButton';
-import { EmployeeType } from '../type/employee.interface';
 import { useEmployeeForm } from '../hook/useEmployeeForm';
 import '@mantine/dates/styles.css';
+import { TEmployeeType } from '../hook/useEmployee';
 
 interface EmployeeModalProps {
   opened: boolean;
@@ -11,7 +11,7 @@ interface EmployeeModalProps {
   employeeForm: ReturnType<typeof useEmployeeForm>;
 }
 
-const TYPE_OPTIONS: { value: EmployeeType; label: string }[] = [
+const TYPE_OPTIONS: { value: TEmployeeType; label: string }[] = [
   { value: "csr", label: "C.S.R (Representante de Cuenta)" },
   { value: "operador", label: "Operador (con licencia y unidad)" },
 ];

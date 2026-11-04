@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { getErrorMessage } from "@/components/utils/errorMessage";
 import { EmployeeType, IEmployeeResponse, INewEmployeeRequest } from "../type/employee.interface";
+import { TEmployeeAllRequest, TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeType } from "./useEmployee";
 
 export interface EmployeeFormValues {
-  employeeType: EmployeeType;
+  employeeType: TEmployeeType;
   firstName: string;
   lastName: string;
   dateOfBirth: Date | null;
@@ -30,17 +31,15 @@ export function toIsoDate(value: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-export type ExtendedEmployee = Omit<IEmployeeResponse, "dateOfBirth"> & Partial<INewEmployeeRequest> & {
-  dateOfBirth?: Date | string | null;
-};
+
 
 interface UseEmployeeFormOptions {
   initialEmployee?: any | null;
-  onSubmitAction: (payload: any, employeeId?: number) => Promise<IEmployeeResponse | undefined>;
-  onSuccess?: (employee: IEmployeeResponse) => void;
+  onSubmitAction: (payload: any, employeeId?: number) => Promise<TEmployeeCreateUnionResponse | undefined>;
+  onSuccess?: (employee: TEmployeeCreateUnionResponse) => void;
 }
 
-const getInitialValues = (initialEmployee?: any | null): EmployeeFormValues => {
+const getInitialValues = (initialEmployee: TEmployeeAllRequest | null): EmployeeFormValues => {
   if (!initialEmployee) {
     return {
       employeeType: "csr",
@@ -167,7 +166,7 @@ export function useEmployeeForm({
     };
   };
 
-  const submit = async (): Promise<IEmployeeResponse | undefined> => {
+  const submit = async (): Promise<TEmployeeCreateUnionResponse | undefined> => {
     if (form.validate().hasErrors) {
       return undefined;
     }

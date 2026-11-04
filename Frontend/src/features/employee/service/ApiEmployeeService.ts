@@ -1,32 +1,23 @@
 /** @format */
 
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
-import {
-  IEmployeeRequest,
-  IEmployeeService,
-  IEmployeeResponse,
-  IOperatorOption,
-  INewEmployeeRequest,
-  TEmployeeResponseMap,
-  EmployeeType,
-} from "../type/employee.interface";
+import { IEmployeeService } from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
-import { TEmployeeResponse } from "../hook/useEmployee";
+import { TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeType, TOperatorOption, TPaginatedEmployeeResponse } from "../hook/useEmployee";
 
 export class ApiEmployeeService
-  extends BaseCrudApiService<TEmployeeResponse, Partial<TEmployeeResponse>>
-  implements IEmployeeService
-{
+  extends BaseCrudApiService<TEmployeeCreateUnionResponse, Partial<TEmployeeCreateUnion>, Partial<TPaginatedEmployeeResponse>>
+  implements IEmployeeService {
   constructor() {
     super("employees");
   }
 
-  async getEmployee<T extends EmployeeType>(
+  async getEmployee<T extends TEmployeeType>(
     id: number,
     cargoType: T,
-  ): Promise<TEmployeeResponseMap> {
+  ): Promise<TEmployeeCreateUnionResponse> {
     try {
-      const response = await this.api.get<TEmployeeResponseMap>(
+      const response = await this.api.get<TEmployeeCreateUnionResponse>(
         `${this.resourcePath}/${id}`,
         { params: { cargoType } },
       );
@@ -39,9 +30,9 @@ export class ApiEmployeeService
     }
   }
 
-  async createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse> {
+  async createEmployee(data: TEmployeeCreateUnion): Promise<TEmployeeCreateUnionResponse> {
     try {
-      const response = await this.api.post<IEmployeeResponse>(
+      const response = await this.api.post<TEmployeeCreateUnionResponse>(
         `${this.resourcePath}/create`,
         data,
       );
@@ -54,29 +45,20 @@ export class ApiEmployeeService
   async getPaginated(
     page: number,
     limit: number,
-  ): Promise<PaginatedResponse<TEmployeeResponseMap>> {
+  ): Promise<TPaginatedEmployeeResponse> {
     try {
-      const response = await this.api.get<
-        PaginatedResponse<TEmployeeResponseMap>
-      >(`${this.resourcePath}/`, { params: { page, limit } });
-      //if (response.status === 200) {
-      //  return response.data;
-      //}
-      return {
-        page: response.data.page,
-        hasNextPage: response.data.hasNextPage,
-        totalRecords: response.data.totalRecords,
-        limit: response.data.limit,
-        data: response.data.data,
-      };
+      const response = await this.api.get<TPaginatedEmployeeResponse>(`${this.resourcePath}/`, { params: { page, limit } });
+
+      const data = response.data
+      return response.data;
     } catch (error: any) {
       throw error.message;
     }
   }
 
-  async getOperators(): Promise<IOperatorOption[]> {
+  async getOperators(): Promise<TOperatorOption[]> {
     try {
-      const response = await this.api.get<IOperatorOption[]>(
+      const response = await this.api.get<TOperatorOption[]>(
         `${this.resourcePath}/operators`,
       );
 
