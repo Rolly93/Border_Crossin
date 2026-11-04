@@ -11,10 +11,12 @@ import {
   EmployeeType,
 } from "../type/employee.interface";
 import { PaginatedResponse } from "@/components/service/IBaseService";
+import { TEmployeeResponse } from "../hook/useEmployee";
 
 export class ApiEmployeeService
-  extends BaseCrudApiService<IEmployeeResponse, IEmployeeRequest>
-  implements IEmployeeService {
+  extends BaseCrudApiService<TEmployeeResponse, Partial<TEmployeeResponse>>
+  implements IEmployeeService
+{
   constructor() {
     super("employees");
   }
@@ -44,9 +46,8 @@ export class ApiEmployeeService
         data,
       );
       return response.data;
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 
@@ -54,9 +55,10 @@ export class ApiEmployeeService
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<TEmployeeResponseMap>> {
-
     try {
-      const response = await this.api.get<PaginatedResponse<TEmployeeResponseMap>>(`${this.resourcePath}/`, { params: { page, limit } });
+      const response = await this.api.get<
+        PaginatedResponse<TEmployeeResponseMap>
+      >(`${this.resourcePath}/`, { params: { page, limit } });
       //if (response.status === 200) {
       //  return response.data;
       //}
@@ -67,23 +69,20 @@ export class ApiEmployeeService
         limit: response.data.limit,
         data: response.data.data,
       };
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 
   async getOperators(): Promise<IOperatorOption[]> {
-
     try {
       const response = await this.api.get<IOperatorOption[]>(
         `${this.resourcePath}/operators`,
       );
 
       return response.data;
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 }

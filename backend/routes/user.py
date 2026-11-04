@@ -4,6 +4,7 @@ from slowapi.util import get_remote_address
 
 from deps.auth import CurrentUser, get_client_ip
 from deps.service import UserSvc
+from schema.employee_schema import EmployeeBaseRequest
 from schema.user_schema import (
     LoginRequest,
     LoginResponse,
@@ -42,3 +43,15 @@ async def logout(
 ):
 
     return {"status": "success", "detail": "Logged out successfully"}
+
+
+@router.post(
+    "delete/{id}",
+    summary="Erease Employee by ID",
+    status_code=status.HTTP_200_OK,
+    response_model=EmployeeBaseRequest,
+)
+async def delete_employee_by_id(
+    rq: Request, id: int, current_user: CurrentUser, service: UserSvc
+):
+    pass

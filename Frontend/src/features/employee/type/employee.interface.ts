@@ -1,5 +1,11 @@
-import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
+/** @format */
+
+import {
+  IBaseService,
+  PaginatedResponse,
+} from "@/components/service/IBaseService";
 import { TUnitType } from "@/features/unit/type/unit.interface";
+import { TEmployeeResponse } from "../hook/useEmployee";
 
 export interface IEmployeeRequest {
   firstName: string;
@@ -15,7 +21,7 @@ export interface IEmployeeResponse extends IEmployeeRequest {
   id?: number;
 }
 
-export interface IEmployeeFormsValues extends IEmployeeRequest { }
+export interface IEmployeeFormsValues extends IEmployeeRequest {}
 
 export interface EmployeeFormProps {
   onSuccess?: () => void;
@@ -63,25 +69,35 @@ export interface IEmployeeDriverResponse extends IEmployeeBaseResponse {
   licenseNumber: string;
   licenseExpiration: string;
   gafetId: string;
-
 }
 
 export interface IOperatorOption {
   id: number;
   firstName: string;
-  unit?: string
-  typeUnit?: TUnitType
+  unit?: string;
+  typeUnit?: TUnitType;
 }
 
 export interface IEmployeeFormRequest extends INewEmployeeRequest {
   id?: number;
 }
 
-export type TEmployeeResponseMap = IEmployeeUserResponse | IEmployeeDriverResponse;
+export type TEmployeeResponseMap =
+  | IEmployeeUserResponse
+  | IEmployeeDriverResponse;
 
-export interface IEmployeeService extends IBaseService<IEmployeeResponse, IEmployeeRequest> {
-  getPaginated(page: number, limit: number): Promise<PaginatedResponse<TEmployeeResponseMap>>;
+export interface IEmployeeService extends IBaseService<
+  TEmployeeResponse,
+  TEmployeeResponse
+> {
+  getPaginated(
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResponse<TEmployeeResponseMap>>;
   getOperators(): Promise<IOperatorOption[]>;
   createEmployee(data: INewEmployeeRequest): Promise<IEmployeeResponse>;
-  getEmployee<T extends EmployeeType>(id: number, cargoType: T): Promise<TEmployeeResponseMap>;
+  getEmployee<T extends EmployeeType>(
+    id: number,
+    cargoType: T,
+  ): Promise<TEmployeeResponseMap>;
 }

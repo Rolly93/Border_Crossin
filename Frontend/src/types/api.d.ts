@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/userdelete/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Erease Employee by ID */
+        post: operations["delete_employee_by_id_userdelete__id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -719,6 +736,25 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** EmployeeBaseRequest */
+        EmployeeBaseRequest: {
+            /** Firstname */
+            firstName: string;
+            /** Lastname */
+            lastName: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "operador" | "csr";
+            /** Rfc */
+            rfc: string;
+            /**
+             * Dateofbirth
+             * Format: date
+             */
+            dateOfBirth: string;
+        };
         /** EmployeeDriverRequest */
         EmployeeDriverRequest: {
             /** Firstname */
@@ -1345,6 +1381,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_employee_by_id_userdelete__id__post: {
+        parameters: {
+            query?: {
+                token?: string | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeBaseRequest"];
                 };
             };
             /** @description Validation Error */

@@ -14,6 +14,8 @@
         }
     ],
     "settings": {
+        "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+        "js/ts.validate.enabled": true,
         "files.exclude": {
             "backend": true,
             "Frontend": true,
@@ -28,6 +30,8 @@
         "console-ninja.toolsToEnableSupportAutomaticallyFor": {
             "live-server-extension": true,
             "live-preview-extension": true
-        }
+        },
+        "js/ts.tsdk.path": "Frontend\\node_modules\\typescript\\lib",
+        "reactSnippets.settings.prettierEnabled": false
     }
 }

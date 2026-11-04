@@ -1,6 +1,8 @@
-import { Table, Title, Text, Group, Modal } from '@mantine/core';
+/** @format */
+
+import { Table, Title, Text, Group, Modal } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { IconPlus, IconRefresh } from '@tabler/icons-react';
+import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import ClientModalProps from "./ClientModalProps";
 import { useState, useRef, useCallback } from "react";
 import { ICliente } from "@/features/clients/types/Cliente";
@@ -12,45 +14,59 @@ import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { useAuth } from "@/features/login/context/AuthContext";
 
-
 export function ClientTable() {
   const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
-  const [createdClient, setCreatedClient] = useState<{ id: number; name: string } | null>(null);
+  const [createdClient, setCreatedClient] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const navigate = useNavigate();
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure();
   const { isAdmin } = useAuth();
-  const { clients,
+  const {
+    clients,
     loading,
     hasMore,
     error,
-    fetchNextPage, fetchPage,
+    fetchNextPage,
+    fetchPage,
     addClient,
-    updateClient, setError,
-    deleteCliente, reActiveCliente, metrics } = useClients()
+    updateClient,
+    setError,
+    deleteCliente,
+    reActiveCliente,
+    metrics,
+  } = useClients();
 
-  const observer = useRef<IntersectionObserver | null>(null)
-  const lastElementRef = useCallback((node: HTMLTableRowElement | null) => {
-    if (loading) { return; }
-    if (observer.current) { observer.current.disconnect() }
-    observer.current = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && hasMore) {
-        fetchNextPage();
-
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback(
+    (node: HTMLTableRowElement | null) => {
+      if (loading) {
+        return;
       }
-    })
-    if (node) { return observer.current.observe(node) }
-  }, [loading, hasMore, fetchNextPage])
-
-
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          fetchNextPage();
+        }
+      });
+      if (node) {
+        return observer.current.observe(node);
+      }
+    },
+    [loading, hasMore, fetchNextPage],
+  );
 
   function handleSelectClient(onSelectClient: ICliente) {
-    setselectedClient(onSelectClient)
-    openModal()
+    setselectedClient(onSelectClient);
+    openModal();
   }
   function handleCreateClient() {
     setselectedClient(null);
     openModal();
-  };
+  }
 
   async function handleSaveClient(formData: any) {
     const clienData: ICliente = {
@@ -75,45 +91,44 @@ export function ClientTable() {
     if (!id) {
       return;
     }
-    deleteCliente(id)
+    deleteCliente(id);
   }
   function handelReactive(id: number) {
     if (!id) {
       return;
     }
-    reActiveCliente(id)
-
+    reActiveCliente(id);
   }
-
-
 
   return (
     <>
-
       <Group justify="space-between" mb="lg">
         <div>
-          <Title order={2} >Cartelera de Clientes</Title>
-          <Text size="sm" c="dimmed">Directorio y gestión de clientes activos</Text>
+          <Title order={2}>Cartelera de Clientes</Title>
+          <Text size="sm" c="dimmed">
+            Directorio y gestión de clientes activos
+          </Text>
         </div>
         <Group>
-
-
           {isAdmin && (
-            <AtomButton leftSection={<IconPlus size={16} />} color="blue" onClick={handleCreateClient}>
+            <AtomButton
+              leftSection={<IconPlus size={16} />}
+              color="blue"
+              onClick={handleCreateClient}>
               Agregar Cliente
             </AtomButton>
           )}
           <AtomButton
             variant="default"
             leftSection={<IconRefresh size={16} />}
-            onClick={() => fetchPage(1)}
-          >            Actualizar
+            onClick={() => fetchPage(1)}>
+            {" "}
+            Actualizar
           </AtomButton>
         </Group>
       </Group>
       <ClientMetrics onMetrics={metrics} />
       <Table.ScrollContainer minWidth={760} h={500}>
-
         <Table
           highlightOnHover
           horizontalSpacing="md"
@@ -121,9 +136,8 @@ export function ClientTable() {
           miw={700}
           layout="fixed"
           stickyHeader
-          mt={25}
-        >
-          <Table.Thead >
+          mt={25}>
+          <Table.Thead>
             <Table.Tr>
               <Table.Th>Cliente</Table.Th>
               <Table.Th>Telefono</Table.Th>
@@ -136,37 +150,51 @@ export function ClientTable() {
           </Table.Thead>
 
           <Table.Tbody>
-
             {loading && clients.length === 0 ? (
               <TableSkeletonRows rows={4} columns={6} />
-            ) : (clients.map((cliente, index) => {
-              const isLastElement = clients.length === index + 1;
-              return (<ClientTableRow
-                ref={isLastElement ? lastElementRef : null}
-                key={cliente.id}
-                cliente={cliente}
-                onClick={handleSelectClient}
-                onDelete={handelDeleteClient}
-                onActivate={handelReactive}
-                canManage={isAdmin}
-              />)
-            }))}
+            ) : (
+              clients.map((cliente, index) => {
+                const isLastElement = clients.length === index + 1;
+                return (
+                  <ClientTableRow
+                    ref={isLastElement ? lastElementRef : null}
+                    key={cliente.id}
+                    cliente={cliente}
+                    onClick={handleSelectClient}
+                    onDelete={handelDeleteClient}
+                    onActivate={handelReactive}
+                    canManage={isAdmin}
+                  />
+                );
+              })
+            )}
             {loading && <TableSkeletonRows rows={4} columns={6} />}
           </Table.Tbody>
         </Table>
       </Table.ScrollContainer>
 
-      <Modal opened={createdClient !== null} onClose={() => setCreatedClient(null)} title="Cliente creado" centered>
+      <Modal
+        opened={createdClient !== null}
+        onClose={() => setCreatedClient(null)}
+        title="Cliente creado"
+        centered>
         <Text size="sm" mb="md">
-          {createdClient?.name} se registró correctamente. ¿Quieres configurar su conexión SFTP ahora?
+          {createdClient?.name} se registró correctamente. ¿Quieres configurar
+          su conexión SFTP ahora?
         </Text>
         <Group justify="flex-end">
-          <AtomButton variant="default" onClick={() => setCreatedClient(null)}>Más tarde</AtomButton>
-          <AtomButton color="teal" onClick={() => {
-            const id = createdClient?.id;
-            setCreatedClient(null);
-            navigate(`/sftp_connection?client=${id}`);
-          }}>Configurar SFTP</AtomButton>
+          <AtomButton variant="default" onClick={() => setCreatedClient(null)}>
+            Más tarde
+          </AtomButton>
+          <AtomButton
+            color="teal"
+            onClick={() => {
+              const id = createdClient?.id;
+              setCreatedClient(null);
+              navigate(`/sftp_connection?client=${id}`);
+            }}>
+            Configurar SFTP
+          </AtomButton>
         </Group>
       </Modal>
       <ClientModalProps
@@ -175,9 +203,8 @@ export function ClientTable() {
         onClose={closeModal}
         onSave={handleSaveClient}
         onError={error}
-        onSetError={setError} />
-
+        onSetError={setError}
+      />
     </>
-
-  )
+  );
 }
