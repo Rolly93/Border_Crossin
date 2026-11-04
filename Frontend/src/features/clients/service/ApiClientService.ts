@@ -1,30 +1,17 @@
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
-import { ICliente } from "../types/Cliente";
-import {
-  IClientNameOption,
-  IClientOption,
-  IClientReferenceRule,
-  IClientService,
-  ClientRequest,
-} from "../types/IClientService";
+import { IClientService } from "../types/IClientService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
+import { TClientMetricsResponse, TClientOption, TClientReferenceRule, TClientRequest, TClientResponse, TPaginatedClientResponse } from "../hooks/useClients";
 
-interface MetricsResponse {
-  totalClients: number;
-  activeClient: number;
-  emailService: number;
-  sftpService: number;
 
-}
-export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest> implements IClientService {
+export class ApiClientService extends BaseCrudApiService<TClientResponse, Partial<TClientRequest>, Partial<TPaginatedClientResponse>> implements IClientService {
   constructor() {
     super('client');
-    this.updateIdParamName = 'client_id';
   }
 
-  override async getAll(): Promise<ICliente[]> {
+  override async getAll(): Promise<TClientResponse[]> {
     try {
-      const response = await this.api.get<ICliente[]>(`/${this.resourcePath}/all`);
+      const response = await this.api.get<TClientResponse[]>(`/${this.resourcePath}/all`);
 
       return response.data
 
@@ -36,9 +23,9 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
   }
 
-  async getByOperation(operation: string): Promise<IClientNameOption[]> {
+  async getByOperation(operation: string): Promise<TClientOption[]> {
     try {
-      const response = await this.api.get<IClientNameOption[]>(`/${this.resourcePath}/by-operation`, {
+      const response = await this.api.get<TClientOption[]>(`/${this.resourcePath}/by-operation`, {
         params: { operation_type: operation },
       });
       return response.data;
@@ -49,9 +36,9 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
     }
   }
 
-  async getReferenceRules(clientId: number): Promise<IClientReferenceRule[]> {
+  async getReferenceRules(clientId: number): Promise<TClientReferenceRule[]> {
     try {
-      const response = await this.api.get<IClientReferenceRule[]>(
+      const response = await this.api.get<TClientReferenceRule[]>(
         `/${this.resourcePath}/${clientId}/reference-rules`
       );
       return response.data;
@@ -61,15 +48,15 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
     }
   }
 
-  async getOptions(): Promise<IClientOption[]> {
-    const response = await this.api.get<IClientOption[]>(`/${this.resourcePath}/all`);
+  async getOptions(): Promise<TClientOption[]> {
+    const response = await this.api.get<TClientOption[]>(`/${this.resourcePath}/all`);
     return response.data;
   }
 
-  async active(id: number): Promise<ICliente> {
+  async active(id: number): Promise<TClientResponse> {
 
     try {
-      const response = await this.api.put<ICliente>(`/${this.resourcePath}/reactive/${id}`);
+      const response = await this.api.put<TClientResponse>(`/${this.resourcePath}/reactive/${id}`);
 
       return response.data
 
@@ -79,9 +66,9 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
 
   }
-  async getMetrics(): Promise<MetricsResponse> {
+  async getMetrics(): Promise<TClientMetricsResponse> {
     try {
-      const response = await this.api.get<MetricsResponse>(`${this.resourcePath}/metrics`);
+      const response = await this.api.get<TClientMetricsResponse>(`${this.resourcePath}/metrics`);
 
 
       return response.data;
@@ -100,9 +87,9 @@ export class ApiClientService extends BaseCrudApiService<ICliente, ClientRequest
 
 
 
-  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<ICliente>> {
+  async getPaginated(page: number = 1, limit: number = 10): Promise<PaginatedResponse<TClientResponse>> {
     try {
-      const response = await this.api.get<PaginatedResponse<ICliente>>(`${this.resourcePath}`, {
+      const response = await this.api.get<PaginatedResponse<TClientResponse>>(`${this.resourcePath}`, {
         params: { page: page, limit: limit },
       });
 

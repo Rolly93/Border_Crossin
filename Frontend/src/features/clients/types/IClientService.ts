@@ -1,5 +1,5 @@
 import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
-import { ICliente } from "./Cliente";
+import { TClientMetricsResponse, TClientOption, TClientReferenceRule, TClientRequest, TClientResponse, TPaginatedClientResponse } from "../hooks/useClients";
 
 export interface ClientMetricsResponse {
   totalClients: number;
@@ -33,11 +33,11 @@ export interface ClientRequest {
   name: string;
 }
 
-export interface IClientService extends IBaseService<ICliente, ClientRequest> {
-  active(id: number): Promise<ICliente>
-  getOptions(): Promise<IClientOption[]>
-  getByOperation(operation: string): Promise<IClientNameOption[]>
-  getReferenceRules(clientId: number): Promise<IClientReferenceRule[]>
-  getMetrics(): Promise<ClientMetricsResponse>;
-  getPaginated(page: number, limit: number): Promise<PaginatedResponse<ICliente>>
+export interface IClientService extends IBaseService<TClientResponse, Partial<TClientRequest>, Partial<TPaginatedClientResponse>> {
+  active(id: number): Promise<TClientResponse>
+  getOptions(): Promise<TClientOption[]>
+  getByOperation(operation: string): Promise<TClientOption[]>
+  getReferenceRules(clientId: number): Promise<TClientReferenceRule[]>
+  getMetrics(): Promise<TClientMetricsResponse>;
+  getPaginated(page: number, limit: number): Promise<PaginatedResponse<TClientResponse>>
 }

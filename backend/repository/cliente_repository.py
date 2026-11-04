@@ -93,7 +93,7 @@ class ClienteRepository(BaseRepository[Client]):
         clients_orm = self._db.scalars(stmt).all()
 
         has_next_page = (offset + limit) < total_records
-        formatted_clients = []
+        formatted_clients: list[ClientPaginateData] = []
 
         for client in clients_orm:
             active_emails = [
@@ -107,7 +107,7 @@ class ClienteRepository(BaseRepository[Client]):
                     id=client.id,
                     still_active=client.still_active,
                     name=client.name,
-                    telefono=str(client.phonenumber) if client.phonenumber else None,
+                    phonenumber=str(client.phonenumber) if client.phonenumber else None,
                     email=active_emails,
                     emailService=bool(active_emails),
                     sftService=any(s.is_active for s in client.sftp_services),

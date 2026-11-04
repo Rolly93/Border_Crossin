@@ -2,7 +2,6 @@
 
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { IEmployeeService } from "../type/employee.interface";
-import { PaginatedResponse } from "@/components/service/IBaseService";
 import { TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeType, TOperatorOption, TPaginatedEmployeeResponse } from "../hook/useEmployee";
 
 export class ApiEmployeeService
@@ -49,7 +48,7 @@ export class ApiEmployeeService
     try {
       const response = await this.api.get<TPaginatedEmployeeResponse>(`${this.resourcePath}/`, { params: { page, limit } });
 
-      const data = response.data
+
       return response.data;
     } catch (error: any) {
       throw error.message;

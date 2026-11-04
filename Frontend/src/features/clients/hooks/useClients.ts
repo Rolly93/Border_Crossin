@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { ICliente } from "../types/Cliente";
 import { clientService } from "../service/clientService";
 import { ClientMetricsResponse } from "../types/IClientService";
 import { usePaginatedList } from "@/components/hook/usePaginaterList";
+import { components } from "@/types/api";
 
-interface ClientOption {
-  id: number;
-  name: string;
-}
+export type TClientOption = components['schemas']['ClientNameResponse']
+export type TClientResponse = components['schemas']['ClientPaginateData']
+export type TClientRequest = components['schemas']['ClientRequest']
+export type TClientReferenceRule = components['schemas']['ReferenceRuleOut']
+export type TPaginatedClientResponse = components['schemas']['PaginatedClientResponse']
+export type TClientMetricsResponse = components['schemas']['MetricsClientResponse']
 export function useClients() {
 
   const fetchFn = useCallback((page: number, size: number) => clientService.getPaginated(page, size), [])
@@ -20,10 +22,10 @@ export function useClients() {
     setError, fetchPage,
     fetchNextPage
 
-  } = usePaginatedList<ICliente>(fetchFn);
+  } = usePaginatedList<TClientResponse>(fetchFn);
 
 
-  const [clientsName, setClientsName] = useState<ClientOption[]>([]);
+  const [clientsName, setClientsName] = useState<TClientOption[]>([]);
   const [metrics, setMetrics] = useState<ClientMetricsResponse>(
     {
       totalClients: 0,
@@ -34,7 +36,7 @@ export function useClients() {
 
 
 
-  const getClientList = async (): Promise<ClientOption[] | null> => {
+  const getClientList = async (): Promise<TClientOption[] | null> => {
     const data = await clientService.getAll();
 
     const safeData = Array.isArray(data) ? data : (data as any)?.clients || [];
@@ -75,7 +77,7 @@ export function useClients() {
 
 
 
-  const addClient = async (newClientData: ICliente): Promise<ICliente> => {
+  const addClient = async (newClientData: TClientRequest): Promise<TClientResponse> => {
     try {
 
       const createClient = await clientService.insert(newClientData)
@@ -91,7 +93,7 @@ export function useClients() {
 
 
 
-  const updateClient = async (id: number, updatedData: ICliente) => {
+  const updateClient = async (id: number, updatedData: TClientRequest) => {
     try {
       const updated = await clientService.update(id, updatedData);
       await fetchPage(1);
@@ -103,6 +105,7 @@ export function useClients() {
       throw error;
     }
   };
+
   const deleteCliente = async (id: number) => {
     try {
       const clientDelete = await clientService.delete(id)

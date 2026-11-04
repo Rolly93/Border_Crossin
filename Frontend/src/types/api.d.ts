@@ -691,28 +691,22 @@ export interface components {
         /** ClientPaginateData */
         ClientPaginateData: {
             /** Id */
-            id: number;
+            id?: number | null;
+            /** Phonenumber */
+            phonenumber: string | null;
             /** Name */
             name: string;
-            /** Telefono */
-            telefono: string | null;
+            /** Sftservice */
+            sftService: boolean;
+            /** Emailservice */
+            emailService: boolean;
+            /** Email */
+            email?: string[] | null;
             /**
              * Still Active
-             * @default false
+             * @default true
              */
-            still_active: boolean | null;
-            /**
-             * Sftservice
-             * @default false
-             */
-            sftService: boolean | null;
-            /**
-             * Emailservice
-             * @default false
-             */
-            emailService: boolean | null;
-            /** Email */
-            email: string[] | null;
+            still_active: boolean;
         };
         /** ClientRequest */
         ClientRequest: {
@@ -725,12 +719,12 @@ export interface components {
              * Sftservice
              * @default false
              */
-            sftService: boolean | null;
+            sftService: boolean;
             /**
              * Emailservice
              * @default false
              */
-            emailService: boolean | null;
+            emailService: boolean;
             /** Email */
             email?: string[] | null;
             /** Name */

@@ -22,16 +22,17 @@ class ClientModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int | None = None
     phonenumber: str | None
+    name: str = Field(..., min_length=2, max_length=100)
     sftService: bool
     emailService: bool
     email: list[EmailStr] | None = None
-    name: str = Field(..., min_length=2, max_length=100)
+    still_active: bool = True
 
 
 class ClientRequest(BaseModel):
     phonenumber: str | None = "N/A"
-    sftService: bool | None = False
-    emailService: bool | None = False
+    sftService: bool = False
+    emailService: bool = False
     email: list[EmailStr] | None = None
     name: str = Field(min_length=2, max_length=100)
 
@@ -64,14 +65,7 @@ class ClientResponse(ClientModel):
             return v
 
 
-class ClientPaginateData(BaseModel):
-    id: int
-    name: str
-    telefono: str | None
-    still_active: bool | None = False
-    sftService: bool | None = False
-    emailService: bool | None = False
-    email: list[EmailStr] | None
+class ClientPaginateData(ClientModel): ...
 
 
 class PaginatedClientResponse(BaseModel):
