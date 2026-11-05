@@ -19,14 +19,14 @@ class ClientOptionResponse(BaseModel):
 
 
 class ClientModel(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int | None = None
-    phonenumber: str | None
+    id: int
     name: str = Field(..., min_length=2, max_length=100)
+    phonenumber: str | None
     sftService: bool
     emailService: bool
     email: list[EmailStr] | None = None
     still_active: bool = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ClientRequest(BaseModel):

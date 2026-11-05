@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useForm } from "@mantine/form";
 import { getErrorMessage } from "@/components/utils/errorMessage";
-import { EmployeeType, IEmployeeResponse, INewEmployeeRequest } from "../type/employee.interface";
-import { TEmployeeAllRequest, TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeType } from "./useEmployee";
+import { TEmployeeAllRequest, TEmployeeCreateUnionResponse, TEmployeeType } from "./useEmployee";
 
 export interface EmployeeFormValues {
   employeeType: TEmployeeType;

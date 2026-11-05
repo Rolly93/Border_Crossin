@@ -5,10 +5,10 @@ import { IconMail, IconPlus, IconX } from "@tabler/icons-react";
 import ActionCard from "../../../components/ui/ActionCard";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { AtmoAction } from "@/components/atoms/AtomActionIcon";
-import { ICliente } from "@/features/clients/types/Cliente";
+import { TClientResponse } from "../hooks/useClients";
 
 interface ClienteModalProps {
-    onSelectClient: ICliente | null;
+    onSelectClient: TClientResponse | null;
     opened: boolean;
     onClose: () => void;
     onSave: (data: any) => void
@@ -42,7 +42,7 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
         if (onSelectClient) {
             form.setValues({
                 companyName: onSelectClient.name || '',
-                phoneNumber: onSelectClient.telefono || ''
+                phoneNumber: onSelectClient.phonenumber || ''
             });
             const rawEmail = onSelectClient.email
             const loadedEmails = Array.isArray(rawEmail)
@@ -91,29 +91,22 @@ export default function ClientModalProps({ onSelectClient, opened, onClose, onSa
     const handleRemoveRecipient = (emailToRemove: string) => {
         setRecipients(recipients.filter(email => email !== emailToRemove));
     };
-
     const handleSubmit = async (values: typeof form.values) => {
 
         if (!values.companyName) {
             return;
         }
-
-
         const finalData = {
             ...values,
             email: recipients,
             emailService: service.email
         };
         try {
-
-
             await onSave(finalData)
-
             onClose();
         } catch (err: any) {
         }
     };
-
 
     const toggleService = (key: keyof typeof service) => {
         setService((prev) => ({

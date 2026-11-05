@@ -691,11 +691,11 @@ export interface components {
         /** ClientPaginateData */
         ClientPaginateData: {
             /** Id */
-            id?: number | null;
-            /** Phonenumber */
-            phonenumber: string | null;
+            id: number;
             /** Name */
             name: string;
+            /** Phonenumber */
+            phonenumber: string | null;
             /** Sftservice */
             sftService: boolean;
             /** Emailservice */

@@ -1,14 +1,5 @@
 import { SftpSendStatus, ISftpSend, SftpSendFilters } from '@/features/sftp/types/ISftpSend';
 
-export interface ICliente {
-    id: number;
-    name: string;
-    telefono: string;
-    still_active: boolean;
-    sftService: boolean;
-    emailService: boolean;
-    email?: string[] | null;
-}
 
 export interface IClientCard {
     total: number;
@@ -27,7 +18,6 @@ export interface ISftpConfiguration {
     remote_folder?: string;
 }
 
-// Re-export SFTP types from canonical location
 export type { ISftpSend, SftpSendFilters, SftpSendStatus };
 
 export interface ResendRequest {

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { clientService } from "../service/clientService";
-import { IClientOption } from "../types/IClientService";
+import { TClientOption } from "./useClients";
 
 export function useClientOptions() {
-  const [options, setOptions] = useState<IClientOption[]>([]);
+  const [options, setOptions] = useState<TClientOption[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

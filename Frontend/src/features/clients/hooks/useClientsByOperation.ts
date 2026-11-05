@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { clientService } from "../service/clientService";
-import { IClientNameOption } from "../types/IClientService";
+import { TClientOption } from "./useClients";
 
 /** Clientes que operan un tipo de operación (Importacion / Exportacion). */
 export function useClientsByOperation(operation: string) {
-  const [clients, setClients] = useState<IClientNameOption[]>([]);
+  const [clients, setClients] = useState<TClientOption[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {

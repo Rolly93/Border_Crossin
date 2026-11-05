@@ -2,7 +2,7 @@ import { AxiosInstance } from "axios";
 import { IBaseService } from "./IBaseService";
 import { apiClient } from "@/service/api";
 
-export class BaseCrudApiService<T, UpdateT = Partial<T>, CreateT = T>
+export class BaseCrudApiService<T, UpdateT = Partial<T>, CreateT = Partial<T>>
   implements IBaseService<T, UpdateT, CreateT> {
   protected resourcePath: string;
   protected api: AxiosInstance;

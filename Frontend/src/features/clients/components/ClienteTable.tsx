@@ -5,17 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import ClientModalProps from "./ClientModalProps";
 import { useState, useRef, useCallback } from "react";
-import { ICliente } from "@/features/clients/types/Cliente";
 import { useDisclosure } from "@mantine/hooks";
 import { ClientMetrics } from "./ClientMetrics";
 import { ClientTableRow } from "./ClientTableRow";
-import { useClients } from "../hooks/useClients";
+import { TClientResponse, useClients } from "../hooks/useClients";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { useAuth } from "@/features/login/context/AuthContext";
 
 export function ClientTable() {
-  const [selectedClient, setselectedClient] = useState<ICliente | null>(null);
+  const [selectedClient, setselectedClient] = useState<TClientResponse | null>(null);
   const [createdClient, setCreatedClient] = useState<{
     id: number;
     name: string;
@@ -59,7 +58,7 @@ export function ClientTable() {
     [loading, hasMore, fetchNextPage],
   );
 
-  function handleSelectClient(onSelectClient: ICliente) {
+  function handleSelectClient(onSelectClient: TClientResponse) {
     setselectedClient(onSelectClient);
     openModal();
   }
@@ -69,10 +68,10 @@ export function ClientTable() {
   }
 
   async function handleSaveClient(formData: any) {
-    const clienData: ICliente = {
+    const clienData: TClientResponse = {
       id: formData.id || null,
       name: formData.companyName,
-      telefono: formData.phoneNumber,
+      phonenumber: formData.phoneNumber,
       email: formData.email,
       still_active: true,
       sftService: formData.sftService,

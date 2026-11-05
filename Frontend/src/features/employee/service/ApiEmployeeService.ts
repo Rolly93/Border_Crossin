@@ -13,11 +13,10 @@ import {
 export class ApiEmployeeService
   extends BaseCrudApiService<
     TEmployeeCreateUnionResponse,
-    Partial<TEmployeeCreateUnion>,
-    Partial<TPaginatedEmployeeResponse>
+    TEmployeeCreateUnion,
+    TEmployeeCreateUnion
   >
-  implements IEmployeeService
-{
+  implements IEmployeeService {
   constructor() {
     super("employees");
   }

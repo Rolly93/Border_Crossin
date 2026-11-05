@@ -14,11 +14,10 @@ import {
 export class ApiClientService
   extends BaseCrudApiService<
     TClientResponse,
-    Partial<TClientRequest>,
-    Partial<TPaginatedClientResponse>
+    TClientRequest,
+    TClientRequest
   >
-  implements IClientService
-{
+  implements IClientService {
   constructor() {
     super("client");
   }

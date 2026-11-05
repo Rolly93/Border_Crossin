@@ -1,10 +1,10 @@
 import { SimpleGrid } from "@mantine/core";
 import { IconBuilding, IconMail, IconFileText } from "@tabler/icons-react";
 import ActionCard from "../../../components/ui/ActionCard";
-import { ClientMetricsResponse } from "../types/IClientService";
+import { TClientMetricsResponse } from "../hooks/useClients";
 
 interface ClientMetricsProps {
-  onMetrics: ClientMetricsResponse;
+  onMetrics: TClientMetricsResponse;
 }
 
 

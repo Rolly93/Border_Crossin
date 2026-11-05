@@ -2,18 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { clientService } from "../service/clientService";
-import { ClientMetricsResponse } from "../types/IClientService";
 import { usePaginatedList } from "@/components/hook/usePaginaterList";
 import { components } from "@/types/api";
 
-export type TClientOption = components["schemas"]["ClientNameResponse"];
+export type TClientOption = components["schemas"]["ClientOptionResponse"];
 export type TClientResponse = components["schemas"]["ClientPaginateData"];
 export type TClientRequest = components["schemas"]["ClientRequest"];
 export type TClientReferenceRule = components["schemas"]["ReferenceRuleOut"];
 export type TPaginatedClientResponse =
   components["schemas"]["PaginatedClientResponse"];
+
 export type TClientMetricsResponse =
   components["schemas"]["MetricsClientResponse"];
+
 export function useClients() {
   const fetchFn = useCallback(
     (page: number, size: number) => clientService.getPaginated(page, size),
@@ -30,8 +31,23 @@ export function useClients() {
     fetchNextPage,
   } = usePaginatedList<TClientResponse>(fetchFn);
 
+  const updateClient = async (
+    id: number,
+    updatedData: TClientResponse):
+    Promise<TClientResponse> => {
+
+    const updated = await clientService.update(id, updatedData);
+    await fetchPage(1);
+
+    await fetchClientsMetrics();
+    return updated;
+  };
+
+
+
+
   const [clientsName, setClientsName] = useState<TClientOption[]>([]);
-  const [metrics, setMetrics] = useState<ClientMetricsResponse>({
+  const [metrics, setMetrics] = useState<TClientMetricsResponse>({
     totalClients: 0,
     emailService: 0,
     sftpService: 0,
@@ -64,7 +80,6 @@ export function useClients() {
 
   useEffect(() => {
     fetchClientsMetrics();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchClientsMetrics]);
 
   const addClient = async (
@@ -81,18 +96,10 @@ export function useClients() {
     }
   };
 
-  const updateClient = async (id: number, updatedData: TClientRequest) => {
-    try {
-      const updated = await clientService.update(id, updatedData);
-      await fetchPage(1);
 
-      await fetchClientsMetrics();
-      return updated;
-    } catch (error: any) {
-      setError(error.message);
-      throw error;
-    }
-  };
+
+
+
 
   const deleteCliente = async (id: number) => {
     try {

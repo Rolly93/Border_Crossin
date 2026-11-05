@@ -1,10 +1,10 @@
-import type { IClientReferenceRule } from '@/features/clients/types/IClientService';
+import { TClientReferenceRule } from '@/features/clients/hooks/useClients';
 
 export interface IValidateClientProps {
   onClientName?: string;
   onReferenceClient?: string;
   onTypeOperation?: string;
-  rules?: IClientReferenceRule[];
+  rules?: TClientReferenceRule[];
 }
 export interface ValidationResult {
   isValid: boolean;

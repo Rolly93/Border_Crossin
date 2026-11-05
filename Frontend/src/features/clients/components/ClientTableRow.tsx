@@ -1,12 +1,12 @@
 import { Table } from "@mantine/core";
-import { ICliente } from "@/features/clients/types/Cliente";
 import { AtmoAction } from "@/components/atoms/AtomActionIcon";
 import { IconTrash, IconRefresh } from "@tabler/icons-react";
 import { forwardRef } from "react";
+import { TClientResponse } from "../hooks/useClients";
 
 interface ClientTableRowProps {
-  cliente: ICliente;
-  onClick: (client: ICliente) => void
+  cliente: TClientResponse;
+  onClick: (client: TClientResponse) => void
   onDelete: (id: number) => void
   canManage: boolean
   onActivate: (id: number) => void
@@ -19,7 +19,7 @@ export const ClientTableRow = forwardRef<HTMLTableRowElement, ClientTableRowProp
   return (
     <Table.Tr ref={ref} onClick={() => onClick(cliente)} style={{ cursor: 'pointer' }}>
       <Table.Td>{cliente.name}</Table.Td>
-      <Table.Td>{cliente.telefono}</Table.Td>
+      <Table.Td>{cliente.phonenumber}</Table.Td>
       <Table.Td>{cliente.still_active ? "Activo" : "Inactivo"}</Table.Td>
       <Table.Td>{cliente.sftService ? "Si" : "No"}</Table.Td>
       <Table.Td>{cliente.emailService ? "Si" : "No"}</Table.Td>
