@@ -13,10 +13,7 @@ export class ApiShipmentService extends BaseCrudApiService<
     super("shipment");
   }
 
-  /**
-   * Traduce el formulario (cliente en texto, destino en español) al contrato del backend.
-   * Es el único lugar donde se hace esta traducción.
-   */
+
   override async insert(data: TShipmentCreateRequest): Promise<TShipmentBase> {
 
     try {

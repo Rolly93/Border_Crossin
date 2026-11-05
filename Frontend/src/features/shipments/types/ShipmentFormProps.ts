@@ -1,4 +1,3 @@
-import { Shipment } from '@/features/shipments/types/Shipment';
 import { TShipmentBase } from '../hooks/useShipments';
 
 export interface ShipmentFormProps {

@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { getErrorMessage } from "@/components/utils/errorMessage";
 import { unitService } from "../service/ApiUnitService";
 import { IUnitAssignment } from "../type/unit.interface";
+import { components } from "@/types/api";
 
 /** Carga el historial de asignaciones cuando hay una unidad seleccionada. */
+
 export function useUnitHistory(unitId: number | null) {
   const [history, setHistory] = useState<IUnitAssignment[]>([]);
   const [loading, setLoading] = useState(false);

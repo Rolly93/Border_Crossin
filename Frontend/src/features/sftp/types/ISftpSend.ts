@@ -1,3 +1,5 @@
+import { components } from "@/types/api";
+
 export type SftpSendStatus = "pending" | "sent" | "failed";
 
 export interface ISftpSend {
@@ -11,15 +13,15 @@ export interface ISftpSend {
   reference: string;
   shipment_event_id: number;
 }
-export interface ISftpFileStatus{
+export interface ISftpFileStatus {
   filename: string;
-  reference:string
+  reference: string
   retries: number;
   status: SftpSendStatus;
   id: number;
   sftp_log: string | null;
   client_id: number;
-  created_at:string
+  created_at: string
 
 
 

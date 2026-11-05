@@ -7,15 +7,16 @@ import {
   IUnitInput,
   IUnitResponse,
 } from "../type/unit.interface";
+import { TUnitRequest, TUnitRespose } from "../hook/useUnits";
 
 export class ApiUnitService extends BaseApiService {
   constructor() {
     super("/unit");
   }
 
-  async list(): Promise<IUnitResponse[]> {
+  async list(): Promise<TUnitRespose[]> {
     try {
-      const { data } = await this.api.get<IUnitResponse[]>(
+      const { data } = await this.api.get<TUnitRespose[]>(
         `${this.resourcePath}/`,
       );
 
@@ -26,13 +27,12 @@ export class ApiUnitService extends BaseApiService {
     }
   }
 
-  async create(input: IUnitInput): Promise<IUnit> {
+  async create(input: TUnitRequest): Promise<TUnitRequest> {
     try {
-      const { data } = await this.api.post<IUnit>(
+      const { data } = await this.api.post<TUnitRequest>(
         `${this.resourcePath}/create`,
         input,
       );
-      console.log(data);
 
       return data;
     } catch (e: any) {

@@ -32,6 +32,7 @@ export function ShipmentForm({
   const [typeUnit, setTypeUnit] = useState<TUnitType>();
 
   const toggleUnit = operators.filter((u) => u.typeUnit === typeUnit);
+  console.log(operators);
 
   const { t } = useTranslation();
   const form = useForm({

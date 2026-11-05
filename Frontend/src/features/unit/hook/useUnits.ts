@@ -5,13 +5,17 @@ import { getErrorMessage } from "@/components/utils/errorMessage";
 import { unitService } from "../service/ApiUnitService";
 import { IUnit, IUnitInput, IUnitResponse } from "../type/unit.interface";
 import { AxiosError } from "axios";
+import { components } from "@/types/api";
 
 /**
  * Estado de la lista de unidades y sus acciones.
  * Cada acción recarga la lista al terminar y devuelve true/false para que la UI cierre o no el modal.
  */
+
+export type TUnitRespose = components['schemas']['UnitOut']
+export type TUnitRequest = components['schemas']['UnitIn']
 export function useUnits() {
-  const [units, setUnits] = useState<IUnitResponse[]>([]);
+  const [units, setUnits] = useState<TUnitRespose[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,13 +57,13 @@ export function useUnits() {
     [refresh],
   );
 
-  const createUnit = (input: IUnitInput) =>
+  const createUnit = (input: TUnitRequest) =>
     run(() => unitService.create(input), "No se pudo crear la unidad");
 
-  const updateUnit = (id: number, input: IUnitInput) =>
+  const updateUnit = (id: number, input: TUnitRequest) =>
     run(() => unitService.update(id, input), "No se pudo actualizar la unidad");
 
-  const assignDriver = (unitId: number, driverId: number) =>
+  const assignDriver = (unitId: TUnitRequest, driverId: number) =>
     run(
       () => unitService.assign(unitId, driverId),
       "No se pudo asignar el operador",

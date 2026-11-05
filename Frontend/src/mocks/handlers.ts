@@ -1,12 +1,11 @@
 /** @format */
 
-import { ICliente, ISftpConfiguration } from "@/features/clients/types/Cliente";
-import {
-  IEmployeeDriverResponse,
-  IEmployeeUserResponse,
-} from "@/features/employee/type/employee.interface";
+import { TClientResponse } from "@/features/clients/hooks/useClients";
+import { ISftpConfiguration } from "@/features/clients/types/Cliente";
+import { TEmployeeCreateUnionResponse } from "@/features/employee/hook/useEmployee";
+
 import { ISftpFileStatus } from "@/features/sftp/types/ISftpSend";
-import { Shipment } from "@/features/shipments/types/Shipment";
+import { TShipmentBase } from "@/features/shipments/hooks/useShipments";
 import { TUnitType, UnitState } from "@/features/unit/type/unit.interface";
 import { http, HttpResponse, delay, PathParams } from "msw";
 
@@ -16,15 +15,15 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; //http
 type JsonBody = Record<string, unknown>;
 
 // Mock data
-interface MockClient extends ICliente {}
+interface MockClient extends TClientResponse { }
 
-interface MockShipment extends Shipment {}
+interface MockShipment extends TShipmentBase { }
 
 interface MockSftpConfig extends ISftpConfiguration {
   is_active: boolean;
 }
 
-interface MockSftpSend extends ISftpFileStatus {}
+interface MockSftpSend extends ISftpFileStatus { }
 
 interface MockUnit {
   id: number;
@@ -37,16 +36,16 @@ interface MockUnit {
   typeUnit: TUnitType;
 }
 
-type MockEmployee = IEmployeeUserResponse | IEmployeeDriverResponse;
+type MockEmployee = TEmployeeCreateUnionResponse;
 
-const mockClients: MockClient[] = [
+const mockClients: TClientResponse[] = [
   {
     id: 1,
     name: "Expeditors",
     still_active: true,
     emailService: true,
     sftService: false,
-    telefono: "867123456789",
+    phonenumber: "867123456789",
     email: ["test@expeditros.com"],
   },
   {
@@ -55,7 +54,7 @@ const mockClients: MockClient[] = [
     still_active: true,
     emailService: true,
     sftService: true,
-    telefono: "867987654321",
+    phonenumber: "867987654321",
     email: [],
   },
   {
@@ -64,7 +63,7 @@ const mockClients: MockClient[] = [
     still_active: false,
     emailService: false,
     sftService: false,
-    telefono: "867741852963",
+    phonenumber: "867741852963",
     email: ["test@fedex.com", "test2@fedex.com"],
   },
 ];
@@ -81,8 +80,8 @@ const mockShipments: MockShipment[] = [
     destination: "Los Angeles",
     truck: "TRUCK-001",
     trailer: "TRL-001",
-    create: new Date("2026-01-15T10:00:00Z"),
     events: [],
+    status: 'in-transit'
   },
   {
     id: 2,
@@ -95,8 +94,8 @@ const mockShipments: MockShipment[] = [
     destination: "Shanghai",
     truck: "TRUCK-002",
     trailer: "TRL-002",
-    create: new Date("2026-01-16T10:00:00Z"),
     events: [],
+    status: 'in-transit'
   },
 ];
 
@@ -170,11 +169,12 @@ const mockEmployees: MockEmployee[] = [
     username: "nld-rolando",
     password: "hunterX0369*",
     isAdmin: true,
-    role: "admin",
+    role: "csr",
     rfc: "rfc32165181",
     dateOfBirth: "10/15/1993",
     hireDate: "10/15/2010",
     employeeType: "csr",
+    stillEmployee: true
   },
 
   {
@@ -190,6 +190,7 @@ const mockEmployees: MockEmployee[] = [
     hireDate: "10/15/2005",
     dateOfBirth: "11/20/1998",
     employeeType: "csr",
+    stillEmployee: true
   },
 
   {
@@ -204,6 +205,7 @@ const mockEmployees: MockEmployee[] = [
     licenseNumber: "LIC-12345",
     licenseExpiration: "2030-01-01",
     gafetId: "ANAMGETR2025062500000001",
+    stillEmployee: true
   },
 
   {
@@ -218,6 +220,7 @@ const mockEmployees: MockEmployee[] = [
     licenseNumber: "LIC-12345",
     licenseExpiration: "2030-01-01",
     gafetId: "ANAMGETR2025062500000001",
+    stillEmployee: true
   },
 ];
 
@@ -379,7 +382,7 @@ export const handlers = [
       still_active: true,
       emailService: false,
       sftService: false,
-      telefono: "867-123456789",
+      phonenumber: "867-123456789",
     };
     mockClients.push(newClient);
     return HttpResponse.json({ id: newClient.id, name: newClient.name });
@@ -441,7 +444,6 @@ export const handlers = [
         destination: s.destination,
         type_operation: s.type_operation,
         events: s.events,
-        create: new Date(s.create!),
         status: s.status,
       };
     });
@@ -474,8 +476,8 @@ export const handlers = [
       destination: (body.destination ?? "") as string,
       truck: (body.truck ?? "") as string,
       trailer: (body.trailer ?? "") as string,
-      create: new Date(),
       events: [],
+      status: "in-transit"
     };
     mockShipments.push(newShipment);
     return HttpResponse.json(newShipment);

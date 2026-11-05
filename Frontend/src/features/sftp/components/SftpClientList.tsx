@@ -54,13 +54,13 @@ export function SftpClientList() {
               <Table.Tr key={client.id}>
                 <Table.Td>{client.name}</Table.Td>
                 <Table.Td>
-                  <Badge color={client.sftService ? "green" : "gray"} variant="light">
-                    {client.sftService ? "Configurado" : "Sin configurar"}
+                  <Badge color={client.has_sftp ? "green" : "gray"} variant="light">
+                    {client.has_sftp ? "Configurado" : "Sin configurar"}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
                   <Button size="xs" variant="light" onClick={() => openConfig(client.id)}>
-                    {client.sftService ? "Editar" : "Configurar"}
+                    {client.has_sftp ? "Editar" : "Configurar"}
                   </Button>
                 </Table.Td>
               </Table.Tr>

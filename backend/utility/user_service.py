@@ -9,6 +9,7 @@ from stdnum.mx import rfc as rfc_validator
 from config.config import Env
 from model.db_model import DriverDetails, User
 from repository import EmployeeRepository, UserRepository
+from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
     EmployeeDriverResponse,
     EmployeeResponseUnion,
@@ -175,9 +176,11 @@ class UserService:
                 password="*******",
                 firstName=e.name,
                 lastName=e.last_name,
-                role=e.role,
+                role=CargoTypeEnum(e.role),
                 rfc=e.rfc,
                 dateOfBirth=e.date_birth,
+                hireDate=e.hire_date,
+                stillEmployee=e.still_employee,
             )
 
         if cargoType == "operador" and isinstance(data, DriverDetails):
@@ -186,9 +189,11 @@ class UserService:
                 id=e.id,
                 firstName=e.name,
                 lastName=e.last_name,
-                role=e.role,
+                role=CargoTypeEnum(e.role),
                 rfc=e.rfc,
                 dateOfBirth=e.date_birth,
+                hireDate=e.hire_date,
+                stillEmployee=e.still_employee,
                 licenseNumber=data.license_number,
                 licenseExpiration=data.expiration_date,
                 gafetId=data.gafet_id,

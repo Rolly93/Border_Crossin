@@ -3,10 +3,9 @@
 import Headers from "@/components/Header/Header";
 import { Container, Stack, Title, Text } from "@mantine/core";
 
-import { useShipments } from "@/features/shipments/hooks/useShipments";
+import { IShipmentFormValues, TShipmentBase, useShipments } from "@/features/shipments/hooks/useShipments";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ShipmentTable from "@/features/shipments/components/ShipmentTable";
-import { Shipment } from "@/features/shipments/types/Shipment";
 
 function DashBoard() {
   const {
@@ -61,7 +60,7 @@ function DashBoard() {
     [loading, hasMore, fetchNextPage, search],
   );
 
-  const handleCreateSubmit = async (newValues: Shipment) => {
+  const handleCreateSubmit = async (newValues: IShipmentFormValues) => {
     addShipment(newValues);
   };
 
