@@ -4,7 +4,11 @@ import {
   IBaseService,
   PaginatedResponse,
 } from "@/components/service/IBaseService";
-import { TShipmentBase, TShipmentCreateRequest, TShipmentUpdate } from "../hooks/useShipments";
+import {
+  TShipmentBase,
+  TShipmentCreateRequest,
+  TShipmentUpdate,
+} from "../hooks/useShipments";
 
 export interface Shipment extends ShipmentCreate {
   id: number;
@@ -57,7 +61,8 @@ export interface ShipmentUpdate {
 
 export interface IShipmentService extends IBaseService<
   TShipmentBase,
-  TShipmentUpdate, TShipmentCreateRequest
+  TShipmentUpdate,
+  TShipmentCreateRequest
 > {
   insert(data: TShipmentCreateRequest): Promise<TShipmentBase>;
   getPaginated(

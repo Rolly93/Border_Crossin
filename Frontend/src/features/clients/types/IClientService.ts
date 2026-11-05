@@ -1,5 +1,14 @@
-import { IBaseService, PaginatedResponse } from "@/components/service/IBaseService";
-import { TClientMetricsResponse, TClientOption, TClientReferenceRule, TClientRequest, TClientResponse, TPaginatedClientResponse } from "../hooks/useClients";
+/** @format */
+
+import { IBaseService } from "@/components/service/IBaseService";
+import {
+  TClientMetricsResponse,
+  TClientOption,
+  TClientReferenceRule,
+  TClientRequest,
+  TClientResponse,
+  TPaginatedClientResponse,
+} from "../hooks/useClients";
 
 export interface ClientMetricsResponse {
   totalClients: number;
@@ -33,11 +42,15 @@ export interface ClientRequest {
   name: string;
 }
 
-export interface IClientService extends IBaseService<TClientResponse, Partial<TClientRequest>, Partial<TPaginatedClientResponse>> {
-  active(id: number): Promise<TClientResponse>
-  getOptions(): Promise<TClientOption[]>
-  getByOperation(operation: string): Promise<TClientOption[]>
-  getReferenceRules(clientId: number): Promise<TClientReferenceRule[]>
+export interface IClientService extends IBaseService<
+  TClientResponse,
+  TClientRequest,
+  TPaginatedClientResponse
+> {
+  active(id: number): Promise<TClientResponse>;
+  getOptions(): Promise<TClientOption[]>;
+  getByOperation(operation: string): Promise<TClientOption[]>;
+  getReferenceRules(clientId: number): Promise<TClientReferenceRule[]>;
   getMetrics(): Promise<TClientMetricsResponse>;
-  getPaginated(page: number, limit: number): Promise<PaginatedResponse<TClientResponse>>
+  getPaginated(page: number, limit: number): Promise<TPaginatedClientResponse>;
 }

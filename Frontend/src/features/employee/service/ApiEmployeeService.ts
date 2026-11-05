@@ -2,11 +2,22 @@
 
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { IEmployeeService } from "../type/employee.interface";
-import { TEmployeeCreateUnion, TEmployeeCreateUnionResponse, TEmployeeType, TOperatorOption, TPaginatedEmployeeResponse } from "../hook/useEmployee";
+import {
+  TEmployeeCreateUnion,
+  TEmployeeCreateUnionResponse,
+  TEmployeeType,
+  TOperatorOption,
+  TPaginatedEmployeeResponse,
+} from "../hook/useEmployee";
 
 export class ApiEmployeeService
-  extends BaseCrudApiService<TEmployeeCreateUnionResponse, Partial<TEmployeeCreateUnion>, Partial<TPaginatedEmployeeResponse>>
-  implements IEmployeeService {
+  extends BaseCrudApiService<
+    TEmployeeCreateUnionResponse,
+    Partial<TEmployeeCreateUnion>,
+    Partial<TPaginatedEmployeeResponse>
+  >
+  implements IEmployeeService
+{
   constructor() {
     super("employees");
   }
@@ -29,7 +40,9 @@ export class ApiEmployeeService
     }
   }
 
-  async createEmployee(data: TEmployeeCreateUnion): Promise<TEmployeeCreateUnionResponse> {
+  async createEmployee(
+    data: TEmployeeCreateUnion,
+  ): Promise<TEmployeeCreateUnionResponse> {
     try {
       const response = await this.api.post<TEmployeeCreateUnionResponse>(
         `${this.resourcePath}/create`,
@@ -46,8 +59,10 @@ export class ApiEmployeeService
     limit: number,
   ): Promise<TPaginatedEmployeeResponse> {
     try {
-      const response = await this.api.get<TPaginatedEmployeeResponse>(`${this.resourcePath}/`, { params: { page, limit } });
-
+      const response = await this.api.get<TPaginatedEmployeeResponse>(
+        `${this.resourcePath}/`,
+        { params: { page, limit } },
+      );
 
       return response.data;
     } catch (error: any) {
