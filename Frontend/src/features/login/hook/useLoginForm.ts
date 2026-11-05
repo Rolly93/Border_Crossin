@@ -2,15 +2,22 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AuthenticationService } from '../service/LoginService';
-import { ISignIn, ISignInPayload, LoginCredentials } from '../type/ILoginService';
+import { TSignInPayload, TSingIn } from '../type/ILoginService';
+import { components } from '@/types/api';
+
+
+export type TLoginRequest = components['schemas']['LoginRequest']
+export type TLoginResponse = components['schemas']['LoginResponse']
+export type TNewUserRequest = components['schemas']['NewUser']
+export type TNewUserResponse = components['schemas']['NewUserResponse']
 
 export function useLoginForm() {
-  const [userData, setUserData] = useState<ISignIn>({
+  const [userData, setUserData] = useState<TSingIn>({
     email: '',
-    isAdmin: false,
-    role: '',
     username: '',
     password: '',
+    role: '',
+    isAdmin: false,
   })
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +25,7 @@ export function useLoginForm() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const Login = async (credencials: LoginCredentials) => {
+  const Login = async (credencials: TLoginRequest) => {
     setError('');
     setLoading(true);
     try {
@@ -40,7 +47,7 @@ export function useLoginForm() {
     }
   };
 
-  const signIn = async (employeeData: ISignInPayload) => {
+  const signIn = async (employeeData: TSignInPayload) => {
     setError('');
     setLoading(true);
 

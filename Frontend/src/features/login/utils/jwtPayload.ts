@@ -1,9 +1,9 @@
+
 export interface JwtClaims {
   sub?: string;
   is_admin?: boolean;
   [key: string]: unknown;
 }
-
 /**
  * Lee los claims del JWT sin verificar la firma.
  * Sirve solo para decidir qué mostrar en la interfaz: el backend siempre valida.

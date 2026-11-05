@@ -1,39 +1,23 @@
-
-export interface LoginCredentials {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  access_token: string;
-  token_type: string;
-  status: string;
-  detail: string;
-  isAdmin: boolean;
-}
+import { components } from "@/types/api";
+import { TLoginRequest, TLoginResponse } from "../hook/useLoginForm";
 
 
-
-export interface ISignIn extends LoginCredentials {
-  email: string
-  isAdmin: boolean
-  role: string
-
-}
-export interface SignInWithRfc extends ISignIn {
-  hasRfc: true;
-  rfc: string;
-}
-
-export interface SignInWithoutRfc extends ISignIn {
+export type TSignInWithoutRfc = Omit<components['schemas']['NewUser'], 'rfc'> & {
   hasRfc: false;
-  rfc?: never;
+  rfc?: never
 }
 
-export type ISignInPayload = SignInWithRfc | SignInWithoutRfc;
+export type TSignInWithRfc = Omit<components['schemas']['NewUser'], 'rfc'> & {
+  hasRfc: true;
+  rfc: string
+}
+
+export type TSingIn = Omit<components['schemas']['NewUser'], 'rfc'>
+
+export type TSignInPayload = TSignInWithRfc | TSignInWithoutRfc;
 
 export interface ILoginService {
-  login(credentials: LoginCredentials): Promise<LoginResponse>;
+  login(credentials: TLoginRequest): Promise<TLoginResponse>;
   logout(): Promise<void>;
-  signIn(credentials: ISignInPayload): Promise<void>
+  signIn(credentials: TSignInPayload): Promise<void>
 }

@@ -1,5 +1,6 @@
 import { BaseApiService } from "@/components/service/BaseApiService";
-import { ILoginService, ISignInPayload, LoginCredentials, LoginResponse } from "../type/ILoginService";
+import { ILoginService, TSignInPayload } from "../type/ILoginService";
+import { TLoginRequest, TLoginResponse } from "../hook/useLoginForm";
 
 
 
@@ -8,10 +9,10 @@ export class AuthService extends BaseApiService implements ILoginService {
     super('user')
   }
 
-  async login(credentials: LoginCredentials): Promise<LoginResponse> {
+  async login(credentials: TLoginRequest): Promise<TLoginResponse> {
     try {
 
-      const response = await this.api.post<LoginResponse>(
+      const response = await this.api.post<TLoginResponse>(
         `${this.resourcePath}/login`,
         credentials
       );
@@ -35,7 +36,7 @@ export class AuthService extends BaseApiService implements ILoginService {
     }
 
   }
-  async signIn(credentials: ISignInPayload): Promise<void> {
+  async signIn(credentials: TSignInPayload): Promise<void> {
     try {
       await this.api.post(`${this.resourcePath}/create`, credentials);
 
