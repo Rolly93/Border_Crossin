@@ -1,3 +1,5 @@
+/** @format */
+
 import { TEventCategory, TShipmentBase } from "../hooks/useShipments";
 
 const EVENT_SEQUENCE_ORDER: TEventCategory[] = [
@@ -9,61 +11,75 @@ const EVENT_SEQUENCE_ORDER: TEventCategory[] = [
   "usa_inspeccion",
   "clear_usa",
   "safety_yard",
-  "deliver"
-]
+  "deliver",
+];
 
 const REQUIERE_EVENTS = new Set<TEventCategory>([
   "pick_up",
   "departure",
   "clear_mex",
   "clear_usa",
-  "deliver"
-])
+  "deliver",
+]);
 export class ShipmentValidator {
-
   private data: Partial<TShipmentBase>;
   constructor(formData: Partial<TShipmentBase>) {
     this.data = formData;
+    console.log(this.data);
   }
 
   public validateTrackingNumber(): string | null {
-    return (this.data.tracking_number?.trim().length || 0) < 5 ? 'No. Embarque Invalido' : null;
+    return (this.data.tracking_number?.trim().length || 0) < 5
+      ? "No. Embarque Invalido"
+      : null;
   }
 
   public validateCustomerTracking(): string | null {
-    return (this.data.customer_tracking?.trim().length || 0) < 5 ? 'No. Cliente Invalido' : null;
+    return (this.data.customer_tracking?.trim().length || 0) < 5
+      ? "No. Cliente Invalido"
+      : null;
   }
 
   public validateTruck(): string | null {
-    return (this.data.truck?.trim().length || 0) < 2 ? 'Undiad Invalida' : null;
+    return (this.data.truck?.trim().length || 0) == 0
+      ? "Undiad Invalida"
+      : null;
   }
 
   public validateOrigin(): string | null {
-    return (this.data.origen?.trim().length || 0) < 5 ? 'Origen Invalido' : null;
+    return (this.data.origen?.trim().length || 0) < 5
+      ? "Origen Invalido"
+      : null;
   }
 
   public validateDestination(): string | null {
-    return (this.data.destination?.trim().length || 0) < 3 ? 'Destino Invalido' : null;
+    return (this.data.destination?.trim().length || 0) < 3
+      ? "Destino Invalido"
+      : null;
   }
 
   public validateTrailer(): string | null {
-    return (this.data.trailer?.trim().length || 0) < 3 ? 'Trailer Invalido' : null;
+    return (this.data.trailer?.trim().length || 0) < 3
+      ? "Trailer Invalido"
+      : null;
   }
 
   public validateTypeOperation(): string | null {
-    return (this.data.type_operation?.trim().length || 0) < 3 ? 'Pick Southbound or Northbound' : null;
+    return (this.data.type_operation?.trim().length || 0) < 3
+      ? "Pick Southbound or Northbound"
+      : null;
   }
   public validateEventChronology(): Record<string, string> {
-
     const currentEvents = this.data?.events || [];
 
     return {
       ...this.ValidateMissingRequiereEvents(currentEvents),
-      ...this.validateChronologicalOrder(currentEvents)
-
-    }
+      ...this.validateChronologicalOrder(currentEvents),
+    };
   }
-  private validateChronologicalOrder(currentEvents: any[]): Record<string, string> {
+  private validateChronologicalOrder(
+    currentEvents: any[],
+  ): Record<string, string> {
     const errors: Record<string, string> = {};
 
     if (!currentEvents || !Array.isArray(currentEvents)) {
@@ -71,12 +87,17 @@ export class ShipmentValidator {
     }
 
     const activeEvents = currentEvents
-      .filter((event): event is typeof event & { dateTime: string | Date } =>
-        !!event.dateTime && !!event.category
+      .filter(
+        (event): event is typeof event & { dateTime: string | Date } =>
+          !!event.dateTime && !!event.category,
       )
       .sort((a, b) => {
-        const indexA = EVENT_SEQUENCE_ORDER.indexOf(a.category as TEventCategory);
-        const indexB = EVENT_SEQUENCE_ORDER.indexOf(b.category as TEventCategory);
+        const indexA = EVENT_SEQUENCE_ORDER.indexOf(
+          a.category as TEventCategory,
+        );
+        const indexB = EVENT_SEQUENCE_ORDER.indexOf(
+          b.category as TEventCategory,
+        );
         return indexA - indexB;
       });
 
@@ -92,9 +113,12 @@ export class ShipmentValidator {
       }
 
       if (nextDate < currentDate) {
-        const realIndex = currentEvents.findIndex(e => e.category === nextEvent.category);
+        const realIndex = currentEvents.findIndex(
+          (e) => e.category === nextEvent.category,
+        );
         if (realIndex !== -1) {
-          errors[`events.${realIndex}.dateTime`] = `Evento "${this.FieldsName(nextEvent.category)}" no puede ser antes "${this.FieldsName(currentEvent.category)}"`;
+          errors[`events.${realIndex}.dateTime`] =
+            `Evento "${this.FieldsName(nextEvent.category)}" no puede ser antes "${this.FieldsName(currentEvent.category)}"`;
         }
       }
     }
@@ -102,7 +126,9 @@ export class ShipmentValidator {
     return errors;
   }
 
-  private ValidateMissingRequiereEvents(currentEvents: any[]): Record<string, string> {
+  private ValidateMissingRequiereEvents(
+    currentEvents: any[],
+  ): Record<string, string> {
     const errors: Record<string, string> = {};
 
     if (!currentEvents || !Array.isArray(currentEvents)) {
@@ -132,10 +158,13 @@ export class ShipmentValidator {
 
         if (isRequire && !hasDate) {
           const latestCategoryFilled = EVENT_SEQUENCE_ORDER[latestFillIndex];
-          const realIndex = currentEvents.findIndex(e => e.category === latestCategoryFilled);
+          const realIndex = currentEvents.findIndex(
+            (e) => e.category === latestCategoryFilled,
+          );
 
           if (realIndex !== -1) {
-            errors[`events.${realIndex}.dateTime`] = `No puedes registrar "${this.FieldsName(latestCategoryFilled)}" si hace falta llenar el campo obligatorio anterior "${this.FieldsName(category)}"`;
+            errors[`events.${realIndex}.dateTime`] =
+              `No puedes registrar "${this.FieldsName(latestCategoryFilled)}" si hace falta llenar el campo obligatorio anterior "${this.FieldsName(category)}"`;
           }
         }
       }

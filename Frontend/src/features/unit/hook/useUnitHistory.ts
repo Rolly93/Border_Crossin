@@ -1,13 +1,14 @@
+/** @format */
+
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "@/components/utils/errorMessage";
 import { unitService } from "../service/ApiUnitService";
-import { IUnitAssignment } from "../type/unit.interface";
-import { components } from "@/types/api";
+import { TAssignResponse } from "./useUnits";
 
 /** Carga el historial de asignaciones cuando hay una unidad seleccionada. */
 
 export function useUnitHistory(unitId: number | null) {
-  const [history, setHistory] = useState<IUnitAssignment[]>([]);
+  const [history, setHistory] = useState<TAssignResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -16,7 +16,8 @@ export class ApiEmployeeService
     TEmployeeCreateUnion,
     TEmployeeCreateUnion
   >
-  implements IEmployeeService {
+  implements IEmployeeService
+{
   constructor() {
     super("employees");
   }
@@ -62,7 +63,6 @@ export class ApiEmployeeService
         `${this.resourcePath}/`,
         { params: { page, limit } },
       );
-
       return response.data;
     } catch (error: any) {
       throw error.message;

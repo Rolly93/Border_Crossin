@@ -12,7 +12,6 @@ import "./styles/fonts.css";
 
 async function enableMocking() {
   const mock_vite = import.meta.env.VITE_USE_MOCK;
-  console.log(mock_vite);
 
   if (mock_vite !== "true") {
     return;

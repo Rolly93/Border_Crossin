@@ -38,7 +38,7 @@ class UnitOut(BaseModel):
     id: int
     plates: str
     unitNumber: str | None
-    status: str
+    status: UnitState
     typeUnit: TypeUnit
     tag: str | None
     driverId: int | None

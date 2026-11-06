@@ -1294,8 +1294,7 @@ export interface components {
             plates: string;
             /** Unitnumber */
             unitNumber: string | null;
-            /** Status */
-            status: string;
+            status: components["schemas"]["UnitState"];
             typeUnit: components["schemas"]["TypeUnit"];
             /** Tag */
             tag: string | null;
@@ -1306,6 +1305,11 @@ export interface components {
             /** Assignedat */
             assignedAt: string | null;
         };
+        /**
+         * UnitState
+         * @enum {string}
+         */
+        UnitState: "ACTIVA" | "MANTENIMIENTO" | "BAJA";
         /** ValidationError */
         ValidationError: {
             /** Location */

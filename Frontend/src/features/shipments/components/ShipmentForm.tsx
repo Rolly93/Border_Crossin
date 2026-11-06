@@ -32,7 +32,6 @@ export function ShipmentForm({
   const [typeUnit, setTypeUnit] = useState<TUnitType>();
 
   const toggleUnit = operators.filter((u) => u.typeUnit === typeUnit);
-  console.log(operators);
 
   const { t } = useTranslation();
   const form = useForm({
@@ -47,7 +46,6 @@ export function ShipmentForm({
       vehicle_type: initialData?.vehicle_type || "",
       trailer: initialData?.trailer || "",
       origen: initialData?.origen || "",
-
       destination: initialData?.destination || "",
     },
 
@@ -58,7 +56,7 @@ export function ShipmentForm({
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
-        des: validator.validateDestination(),
+        destination: validator.validateDestination(),
         trailer: validator.validateTrailer(),
         type_operation: validator.validateTypeOperation(),
       };
@@ -105,6 +103,8 @@ export function ShipmentForm({
       if (typeof err === "object" && !err.message) {
         form.setErrors(err);
       } else if (err.message) {
+        console.log(err);
+
         form.setFieldError("customer_tracking", err.message);
       }
     }
@@ -208,7 +208,7 @@ export function ShipmentForm({
               label={t("shipment.labels.destination")}
               required
               placeholder={t("shipment.placeholders.origen")}
-              {...form.getInputProps("destino")}
+              {...form.getInputProps("destination")}
             />
           </Group>
 

@@ -1,13 +1,8 @@
 /** @format */
 
 import { BaseApiService } from "@/components/service/BaseApiService";
-import {
-  IUnit,
-  IUnitAssignment,
-  IUnitInput,
-  IUnitResponse,
-} from "../type/unit.interface";
-import { TUnitRequest, TUnitRespose } from "../hook/useUnits";
+
+import { TAssignResponse, TUnitRequest, TUnitRespose } from "../hook/useUnits";
 
 export class ApiUnitService extends BaseApiService {
   constructor() {
@@ -23,7 +18,7 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (e: any) {
       console.log(e);
-      throw e.message
+      throw e.message;
     }
   }
 
@@ -37,59 +32,54 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (e: any) {
       console.log(e.message);
-      throw e.message
+      throw e.message;
     }
   }
 
-  async update(id: number, input: IUnitInput): Promise<IUnit> {
-
-
+  async update(id: number, input: TUnitRespose): Promise<TUnitRespose> {
     try {
-      const { data } = await this.api.put<IUnit>(
+      const { data } = await this.api.put<TUnitRespose>(
         `${this.resourcePath}/update/${id}`,
         input,
       );
       return data;
     } catch (error: any) {
       console.log(error);
-      throw error.message
-
+      throw error.message;
     }
   }
 
-  async assign(unitId: number, driverId: number): Promise<IUnitAssignment> {
+  async assign(unitId: number, driverId: number): Promise<TAssignResponse> {
     try {
-      const { data } = await this.api.post<IUnitAssignment>(
+      const { data } = await this.api.post<TAssignResponse>(
         `${this.resourcePath}/${unitId}/assign`,
         { driverId },
       );
       return data;
     } catch (error: any) {
       console.log(error);
-      throw error.message
-
+      throw error.message;
     }
   }
 
   async release(unitId: number): Promise<void> {
     try {
       await this.api.post(`${this.resourcePath}/${unitId}/release`);
-
     } catch (error: any) {
       console.log(error);
-      throw error.message
+      throw error.message;
     }
   }
 
-  async history(unitId: number): Promise<IUnitAssignment[]> {
+  async history(unitId: number): Promise<TAssignResponse[]> {
     try {
-      const { data } = await this.api.get<IUnitAssignment[]>(
+      const { data } = await this.api.get<TAssignResponse[]>(
         `${this.resourcePath}/${unitId}/history`,
       );
       return data;
     } catch (error: any) {
       console.log(error);
-      throw error.message
+      throw error.message;
     }
   }
 }

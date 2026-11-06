@@ -3,20 +3,16 @@
 import { Badge, Table, Text } from "@mantine/core";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import {
-  IUnit,
-  IUnitResponse,
-  UNIT_STATE_COLOR,
-  UnitState,
-} from "../type/unit.interface";
+import { UNIT_STATE_COLOR, UnitState } from "../type/unit.interface";
+import { TUnitRespose } from "../hook/useUnits";
 
 interface UnitTableProps {
-  units: IUnitResponse[];
+  units: TUnitRespose[];
   loading: boolean;
   isAdmin: boolean;
-  onEdit: (unit: IUnit) => void;
-  onAssign: (unit: IUnit) => void;
-  onHistory: (unit: IUnit) => void;
+  onEdit: (unit: TUnitRespose) => void;
+  onAssign: (unit: TUnitRespose) => void;
+  onHistory: (unit: TUnitRespose) => void;
 }
 
 export function UnitTable({

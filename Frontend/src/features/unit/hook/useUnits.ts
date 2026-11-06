@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getErrorMessage } from "@/components/utils/errorMessage";
 import { unitService } from "../service/ApiUnitService";
-import { IUnit, IUnitInput, IUnitResponse } from "../type/unit.interface";
 import { AxiosError } from "axios";
 import { components } from "@/types/api";
 
@@ -12,8 +11,11 @@ import { components } from "@/types/api";
  * Cada acción recarga la lista al terminar y devuelve true/false para que la UI cierre o no el modal.
  */
 
-export type TUnitRespose = components['schemas']['UnitOut']
-export type TUnitRequest = components['schemas']['UnitIn']
+export type TUnitRespose = components["schemas"]["UnitOut"];
+export type TUnitRequest = components["schemas"]["UnitIn"];
+export type TAssignRequest = components["schemas"]["AssignIn"];
+export type TAssignResponse = components["schemas"]["AssignmentOut"];
+
 export function useUnits() {
   const [units, setUnits] = useState<TUnitRespose[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,10 +62,10 @@ export function useUnits() {
   const createUnit = (input: TUnitRequest) =>
     run(() => unitService.create(input), "No se pudo crear la unidad");
 
-  const updateUnit = (id: number, input: TUnitRequest) =>
+  const updateUnit = (id: number, input: TUnitRespose) =>
     run(() => unitService.update(id, input), "No se pudo actualizar la unidad");
 
-  const assignDriver = (unitId: TUnitRequest, driverId: number) =>
+  const assignDriver = (unitId: number, driverId: number) =>
     run(
       () => unitService.assign(unitId, driverId),
       "No se pudo asignar el operador",

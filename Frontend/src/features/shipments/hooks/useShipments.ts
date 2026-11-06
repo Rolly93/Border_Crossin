@@ -1,16 +1,24 @@
+/** @format */
+
 import { useState, useEffect, useCallback } from "react";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
 import { components, paths } from "@/types/api";
+import { log } from "node:console";
 
-export type TShipmentBase = components['schemas']['ShipmentResponse']
-export type TShipmentPaginate = components['schemas']['PaginatedShipmentResponse']
-export type TShipmentUpdate = components['schemas']['ShipmentUpdate'];
-export type TShipmentCreate = components['schemas']['ShipmentCreateRequest']
-export type TEventCategory = components['schemas']['EventCategory']
-export type TShipmentEvent = components['schemas']['ShipmentEvent']
-export type TShipmentCreateRequest = components["schemas"]["ShipmentCreateRequest"];
+export type TShipmentBase = components["schemas"]["ShipmentResponse"];
+export type TShipmentPaginate =
+  components["schemas"]["PaginatedShipmentResponse"];
+export type TShipmentUpdate = components["schemas"]["ShipmentUpdate"];
+export type TShipmentCreate = components["schemas"]["ShipmentCreateRequest"];
+export type TEventCategory = components["schemas"]["EventCategory"];
+export type TShipmentEvent = components["schemas"]["ShipmentEvent"];
+export type TShipmentCreateRequest =
+  components["schemas"]["ShipmentCreateRequest"];
 
-export interface IShipmentFormValues extends Omit<TShipmentCreateRequest, "cliente"> {
+export interface IShipmentFormValues extends Omit<
+  TShipmentCreateRequest,
+  "cliente"
+> {
   cliente: string | number;
 }
 const PAGE_SIZE = 10;
@@ -26,10 +34,12 @@ export function useShipments() {
     try {
       setLoading(true);
       setError(null);
-      const response = await shipmentService.getPaginated(currentPage, PAGE_SIZE);
+      const response = await shipmentService.getPaginated(
+        currentPage,
+        PAGE_SIZE,
+      );
 
       const isArray = Array.isArray(response);
-
 
       const newShipments: TShipmentBase[] = isArray ? response : response.data;
       const canFetchMore = isArray
@@ -38,7 +48,7 @@ export function useShipments() {
 
       setHasMore(canFetchMore);
       setShipments((prev) =>
-        currentPage === 1 ? newShipments : [...prev, ...newShipments]
+        currentPage === 1 ? newShipments : [...prev, ...newShipments],
       );
     } catch (err) {
       setError("Failed to load shipments");
@@ -60,10 +70,9 @@ export function useShipments() {
   }, [loading, hasMore, page, fetchShipments]);
 
   const updateShipment = async (id: number, shipmentData: TShipmentUpdate) => {
-
     const updated = await shipmentService.update(id, shipmentData);
     setShipments((prev) =>
-      prev.map((item) => (item.id === updated.id ? updated : item))
+      prev.map((item) => (item.id === updated.id ? updated : item)),
     );
     return updated;
   };
@@ -75,9 +84,9 @@ export function useShipments() {
     return result;
   };
 
-  const addShipment = async (newShipment: IShipmentFormValues): Promise<TShipmentBase> => {
-
-
+  const addShipment = async (
+    newShipment: IShipmentFormValues,
+  ): Promise<TShipmentBase> => {
     const payload: TShipmentCreateRequest = {
       tracking_number: newShipment.tracking_number,
       customer_tracking: newShipment.customer_tracking,
@@ -88,6 +97,8 @@ export function useShipments() {
       truck: newShipment.truck,
       trailer: newShipment.trailer,
     };
+    console.log(payload.truck);
+
     const createdShipment = await shipmentService.insert(payload);
     setShipments((prev) => [createdShipment, ...prev]);
     return createdShipment;

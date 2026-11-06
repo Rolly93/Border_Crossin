@@ -1,18 +1,26 @@
+/** @format */
+
 import { useState } from "react";
 import { Alert, Modal, Select, Stack, Text, Group } from "@mantine/core";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { useOperators } from "@/features/employee/hook/useOperators";
-import { IUnit } from "../type/unit.interface";
+import { TUnitRespose } from "../hook/useUnits";
 
 interface IUnitAssignModalProps {
   opened: boolean;
-  unit: IUnit | null;
+  unit: TUnitRespose | null;
   onClose: () => void;
   onAssign: (unitId: number, driverId: number) => Promise<boolean>;
   onRelease: (unitId: number) => Promise<boolean>;
 }
 
-export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: IUnitAssignModalProps) {
+export function UnitAssignModal({
+  opened,
+  unit,
+  onClose,
+  onAssign,
+  onRelease,
+}: IUnitAssignModalProps) {
   const { operators, loading, error } = useOperators(opened);
   const [driverId, setDriverId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -46,7 +54,11 @@ export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: 
   const canAssign = unit.status === "ACTIVA";
 
   return (
-    <Modal opened={opened} onClose={onClose} title={`Operador de la unidad ${unit.unitNumber ?? ""}`} centered>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title={`Operador de la unidad ${unit.unitNumber ?? ""}`}
+      centered>
       <Stack gap="sm">
         <Text size="sm">
           Operador actual: <b>{unit.driverName ?? "Sin operador"}</b>
@@ -56,14 +68,18 @@ export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: 
 
         {!canAssign && (
           <Alert color="yellow">
-            Solo se asignan operadores a unidades activas. Cambia el estado a Activa para asignar.
+            Solo se asignan operadores a unidades activas. Cambia el estado a
+            Activa para asignar.
           </Alert>
         )}
 
         <Select
-          label="Nuevo operador"
+          label={`${unit.driverName ? "Nuevo operador" : "Asignar Operador"}`}
           placeholder={loading ? "Cargando..." : "Selecciona un operador"}
-          data={operators.map((o) => ({ value: String(o.id), label: o.firstName }))}
+          data={operators.map((o) => ({
+            value: String(o.id),
+            label: o.firstName,
+          }))}
           value={driverId}
           onChange={setDriverId}
           searchable
@@ -73,12 +89,21 @@ export function UnitAssignModal({ opened, unit, onClose, onAssign, onRelease }: 
 
         <Group justify="flex-end" mt="md">
           {unit.driverId !== null && (
-            <AtomButton color="red" variant="light" onClick={handleRelease} loading={submitting}>
+            <AtomButton
+              color="red"
+              variant="light"
+              onClick={handleRelease}
+              loading={submitting}>
               Liberar unidad
             </AtomButton>
           )}
-          <AtomButton variant="default" onClick={onClose}>Cancelar</AtomButton>
-          <AtomButton onClick={handleAssign} loading={submitting} disabled={!driverId || !canAssign}>
+          <AtomButton variant="default" onClick={onClose}>
+            Cancelar
+          </AtomButton>
+          <AtomButton
+            onClick={handleAssign}
+            loading={submitting}
+            disabled={!driverId || !canAssign}>
             Asignar
           </AtomButton>
         </Group>

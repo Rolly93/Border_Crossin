@@ -32,6 +32,13 @@
             "live-preview-extension": true
         },
         "js/ts.tsdk.path": "Frontend\\node_modules\\typescript\\lib",
-        "reactSnippets.settings.prettierEnabled": false
+        "reactSnippets.settings.prettierEnabled": false,
+        "terminal.integrated.suggest.insertTrailingSpace": true,
+        "terminal.integrated.suggest.runOnEnter": "exactMatch",
+        "terminal.integrated.suggest.selectionMode": "always",
+        "terminal.integrated.suggest.quickSuggestions": {
+            "arguments": "on",
+            "commands": "on"
+        }
     }
 }
