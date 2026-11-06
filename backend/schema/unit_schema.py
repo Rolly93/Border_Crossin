@@ -17,7 +17,7 @@ class UnitIn(BaseModel):
     plates: str = Field(min_length=1, max_length=50)
     unitNumber: str = Field(min_length=1, max_length=20)
     state: Literal[UnitState.ACTIVA, UnitState.BAJA, UnitState.MANTENIMIENTO]
-    tag: str | None = Field(default=None, max_length=24)
+    tag: str = Field(default="ANAM2025LOTE0T0000000001", max_length=24)
     typeUnit: Literal[TypeUnit.TRAILER, TypeUnit.UNIT_TRUCK]
 
     @field_validator("plates", "unitNumber", mode="before")

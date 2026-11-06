@@ -91,10 +91,9 @@ class ShipmentService:
         )
 
         # La unidad debe estar activa y tener un operador vigente: el operador es quien maneja.
-        if not (unit := (self._unit_repo.get_unit_by_number(data.truck))):
-            raise HTTPException(
-                status.HTTP_404_NOT_FOUND, f"Unidad {data.truck} no encontrada"
-            )
+        if not (data_unit := (self._unit_repo.get_unit_by_number(data.truck))):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Unidad no encontrada")
+        unit = data_unit
         if unit.state != "ACTIVA":
             raise HTTPException(
                 status.HTTP_409_CONFLICT,
@@ -107,7 +106,7 @@ class ShipmentService:
             )
 
         if not (
-            trailer := self._trailer_repo.find_by_trailer(data.placas, data.trailer)
+            trailer := self._trailer_repo.find_by_trailer(unit.plates, data.trailer)
         ):
 
             trailer = Trailer(plates=data.trailer, state="ACTIVA")
@@ -118,7 +117,7 @@ class ShipmentService:
             tracking_number=data.tracking_number,
             customer_tracking=data.customer_tracking,
             type_operation=data.type_operation,
-            driver_id=assignment.driver_id,
+            truck=assignment.driver_id,
             client_id=client.id,
             assigned_by=user_id,
             trailer_id=trailer.id,

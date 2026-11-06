@@ -1187,7 +1187,7 @@ export interface components {
             destination: string;
             /**
              * Truck
-             * @description Número de unidad
+             * @description Operador ID
              */
             truck: string;
             /**
@@ -1235,7 +1235,7 @@ export interface components {
              */
             status: string | null;
             /** Events */
-            events: components["schemas"]["ShipmentEvent"][];
+            events: components["schemas"]["ShipmentEvent"][] | null;
         };
         /** ShipmentUpdate */
         ShipmentUpdate: {
@@ -1278,8 +1278,11 @@ export interface components {
              * @enum {string}
              */
             state: "ACTIVA" | "BAJA" | "MANTENIMIENTO";
-            /** Tag */
-            tag?: string | null;
+            /**
+             * Tag
+             * @default ANAM2025LOTE0T0000000001
+             */
+            tag: string;
             /**
              * Typeunit
              * @enum {string}

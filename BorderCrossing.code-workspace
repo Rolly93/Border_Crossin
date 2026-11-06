@@ -16,17 +16,22 @@
     "settings": {
         "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
         "js/ts.validate.enabled": true,
+
         "files.exclude": {
-            "backend": true,
             "Frontend": true,
             ".agents": true,
             ".fastapicloud": true,
             ".opencode": true,
             ".firebase": true
         },
+
+        "python.defaultInterpreterPath": "${workspaceFolder:Backend (Python)}/.venv/Scripts/python.exe",
+
         "python.analysis.extraPaths": [
             "${workspaceFolder:Backend (Python)}"
         ],
+        "python.analysis.autoSearchPaths": true,
+
         "console-ninja.toolsToEnableSupportAutomaticallyFor": {
             "live-server-extension": true,
             "live-preview-extension": true

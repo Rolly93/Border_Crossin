@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
-import { components, paths } from "@/types/api";
-import { log } from "node:console";
+import { components } from "@/types/api";
 
 export type TShipmentBase = components["schemas"]["ShipmentResponse"];
 export type TShipmentPaginate =
   components["schemas"]["PaginatedShipmentResponse"];
 export type TShipmentUpdate = components["schemas"]["ShipmentUpdate"];
-export type TShipmentCreate = components["schemas"]["ShipmentCreateRequest"];
 export type TEventCategory = components["schemas"]["EventCategory"];
 export type TShipmentEvent = components["schemas"]["ShipmentEvent"];
 export type TShipmentCreateRequest =
@@ -94,10 +92,9 @@ export function useShipments() {
       cliente: Number(newShipment.cliente),
       origen: newShipment.origen,
       destination: newShipment.destination,
-      truck: newShipment.truck,
+      driver_id: newShipment.driver_id,
       trailer: newShipment.trailer,
     };
-    console.log(payload.truck);
 
     const createdShipment = await shipmentService.insert(payload);
     setShipments((prev) => [createdShipment, ...prev]);

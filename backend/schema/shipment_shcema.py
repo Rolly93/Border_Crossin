@@ -70,7 +70,7 @@ class ShipmentCreateRequest(BaseModel):
         max_length=200,
         validation_alias=AliasChoices("destination", "destino"),
     )
-    truck: str = Field(min_length=1, max_length=20, description="Número de unidad")
+    truck: str = Field(min_length=1, max_length=20, description="Operador ID")
     trailer: toUppercase = Field(
         min_length=1, max_length=50, description="number de caja"
     )
@@ -79,7 +79,7 @@ class ShipmentCreateRequest(BaseModel):
 class ShipmentResponse(ShipmentCreate):
     id: int
     status: str | None = "success"
-    events: list[ShipmentEvent]
+    events: list[ShipmentEvent] | None
 
     class Config:
         from_attributes: Literal[True]

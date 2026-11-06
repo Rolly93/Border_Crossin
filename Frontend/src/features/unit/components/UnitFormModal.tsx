@@ -1,51 +1,34 @@
-/** @format */
-
 import { useEffect, useState } from "react";
 import { Modal, Select, Stack, TextInput, Group } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import {
-  TUnitType,
-  UNIT_STATE_OPTIONS,
-  UNIT_TYPE,
-  UnitState,
-} from "../type/unit.interface";
-import { TUnitRequest, TUnitRespose } from "../hook/useUnits";
+import { UNIT_STATE_OPTIONS, UNIT_TYPE } from "../type/unit.interface";
+import { TUnitRequest, TUnitRespose, TUnitStateOptions, TUnitType } from "../hook/useUnits";
 
 interface UnitFormModalProps {
   opened: boolean;
   unit: TUnitRespose | null; // null = alta
   onClose: () => void;
-  onSubmit: (input: TUnitRespose) => Promise<boolean>;
+  onSubmit: (input: TUnitRequest) => Promise<boolean>;
 }
 
 interface UnitFormValues {
   plates: string;
   unitNumber: string;
-  status: UnitState;
-  typeUnit: TUnitType;
+  state: TUnitStateOptions;
+  typeUnit: TUnitType
   tag: string;
 }
 
-export function UnitFormModal({
-  opened,
-  unit,
-  onClose,
-  onSubmit,
-}: UnitFormModalProps) {
+export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModalProps) {
   const [submitting, setSubmitting] = useState(false);
-  const form = useForm<TUnitRequest>({
-    initialValues: {
-      plates: "",
-      unitNumber: "",
-      state: "ACTIVA",
-      tag: "",
-      typeUnit: "trailer",
-    },
+  const form = useForm<UnitFormValues>({
+    initialValues: { plates: "", unitNumber: "", state: "ACTIVA", tag: "", typeUnit: 'trailer' },
     validate: {
       plates: (v) => (v.trim() ? null : "Requerido"),
       unitNumber: (v) => (v.trim() ? null : "Requerido"),
       tag: (v) => (v.trim().length > 24 ? "Máximo 24 caracteres" : null),
+
     },
   });
 
@@ -70,9 +53,9 @@ export function UnitFormModal({
     const ok = await onSubmit({
       plates: values.plates.trim(),
       unitNumber: values.unitNumber.trim(),
-      status: values.status,
+      state: values.state,
       typeUnit: values.typeUnit,
-      tag: values?.tag.trim() || null,
+      tag: values.tag.trim() || "",
     });
     setSubmitting(false);
     if (ok) {
@@ -81,52 +64,25 @@ export function UnitFormModal({
   };
 
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={unit ? "Editar unidad" : "Nueva unidad"}
-      centered>
+    <Modal opened={opened} onClose={onClose} title={unit ? "Editar unidad" : "Nueva unidad"} centered>
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="sm">
           <Group grow>
-            <TextInput
-              label="Número de unidad"
-              required
-              {...form.getInputProps("unitNumber")}
-            />
-            <TextInput
-              label="Placas"
-              required
-              {...form.getInputProps("plates")}
-            />
+
+            <TextInput label="Número de unidad" required {...form.getInputProps("unitNumber")} />
+            <TextInput label="Placas" required {...form.getInputProps("plates")} />
           </Group>
-          <Select
-            label="Tipo de Unidad"
-            placeholder="Seleccione tipo de unidad"
-            data={UNIT_TYPE}
-            allowDeselect={false}
-            {...form.getInputProps("typeUnit")}
-          />
+          <Select label="Tipo de Unidad"
+            placeholder="Seleccione tipo de unidad" data={UNIT_TYPE} allowDeselect={false}
+            {...form.getInputProps('typeUnit')} />
           <Group grow>
-            <Select
-              label="Estado"
-              data={UNIT_STATE_OPTIONS}
-              allowDeselect={false}
-              {...form.getInputProps("state")}
-            />
+            <Select label="Estado" data={UNIT_STATE_OPTIONS} allowDeselect={false}
+              {...form.getInputProps("state")} />
             <TextInput label="Tag" {...form.getInputProps("tag")} />
           </Group>
           <Group justify="flex-end" mt="md">
-            <AtomButton
-              variant="default"
-              onClick={() => {
-                onClose();
-              }}>
-              Cancelar
-            </AtomButton>
-            <AtomButton type="submit" loading={submitting}>
-              Guardar
-            </AtomButton>
+            <AtomButton variant="default" onClick={() => { onClose(); }}>Cancelar</AtomButton>
+            <AtomButton type="submit" loading={submitting}>Guardar</AtomButton>
           </Group>
         </Stack>
       </form>

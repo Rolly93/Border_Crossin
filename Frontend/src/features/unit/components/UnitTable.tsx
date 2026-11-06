@@ -3,8 +3,8 @@
 import { Badge, Table, Text } from "@mantine/core";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import { UNIT_STATE_COLOR, UnitState } from "../type/unit.interface";
-import { TUnitRespose } from "../hook/useUnits";
+import { UNIT_STATE_COLOR } from "../type/unit.interface";
+import { TUnitRespose, TUnitStateOptions } from "../hook/useUnits";
 
 interface UnitTableProps {
   units: TUnitRespose[];
@@ -58,7 +58,7 @@ export function UnitTable({
                 <Table.Td>{unit.plates}</Table.Td>
                 <Table.Td>
                   <Badge
-                    color={UNIT_STATE_COLOR[unit.status as UnitState] ?? "gray"}
+                    color={UNIT_STATE_COLOR[unit.status as TUnitStateOptions] ?? "gray"}
                     variant="light">
                     {unit.status}
                   </Badge>

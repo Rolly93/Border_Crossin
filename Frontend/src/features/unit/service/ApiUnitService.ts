@@ -1,7 +1,10 @@
 /** @format */
 
 import { BaseApiService } from "@/components/service/BaseApiService";
+import {
 
+  IUnitAssignment,
+} from "../type/unit.interface";
 import { TAssignResponse, TUnitRequest, TUnitRespose } from "../hook/useUnits";
 
 export class ApiUnitService extends BaseApiService {
@@ -18,7 +21,7 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (e: any) {
       console.log(e);
-      throw e.message;
+      throw e.message
     }
   }
 
@@ -32,11 +35,13 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (e: any) {
       console.log(e.message);
-      throw e.message;
+      throw e.message
     }
   }
 
-  async update(id: number, input: TUnitRespose): Promise<TUnitRespose> {
+  async update(id: number, input: TUnitRequest): Promise<TUnitRespose> {
+
+
     try {
       const { data } = await this.api.put<TUnitRespose>(
         `${this.resourcePath}/update/${id}`,
@@ -45,7 +50,8 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (error: any) {
       console.log(error);
-      throw error.message;
+      throw error.message
+
     }
   }
 
@@ -58,16 +64,18 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (error: any) {
       console.log(error);
-      throw error.message;
+      throw error.message
+
     }
   }
 
   async release(unitId: number): Promise<void> {
     try {
       await this.api.post(`${this.resourcePath}/${unitId}/release`);
+
     } catch (error: any) {
       console.log(error);
-      throw error.message;
+      throw error.message
     }
   }
 
@@ -79,7 +87,7 @@ export class ApiUnitService extends BaseApiService {
       return data;
     } catch (error: any) {
       console.log(error);
-      throw error.message;
+      throw error.message
     }
   }
 }

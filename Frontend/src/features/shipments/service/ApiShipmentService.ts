@@ -15,6 +15,8 @@ export class ApiShipmentService extends BaseCrudApiService<
 
 
   override async insert(data: TShipmentCreateRequest): Promise<TShipmentBase> {
+    console.log(data);
+
 
     try {
       const response = await this.api.post<TShipmentBase>(

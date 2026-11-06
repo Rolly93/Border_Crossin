@@ -25,7 +25,6 @@ export class ShipmentValidator {
   private data: Partial<TShipmentBase>;
   constructor(formData: Partial<TShipmentBase>) {
     this.data = formData;
-    console.log(this.data);
   }
 
   public validateTrackingNumber(): string | null {

@@ -82,8 +82,7 @@ async def new_client(
     service: ClientSvc,
     current_user: CurrentUser,
 ):
-    client = service.create_client(data=data)
-    return {"id": client.id, "name": client.name}
+    service.create_client(data=data)
 
 
 @router.put(
@@ -97,9 +96,6 @@ async def update_client(
     service: ClientSvc,
     current_user: CurrentUser,
 ):
-    print(id)
-    if not id:
-        return
     return service.update_client_info(client_id=id, data=data)
 
 

@@ -3,7 +3,6 @@
 import {
   IBaseService,
 } from "@/components/service/IBaseService";
-import { TUnitType } from "@/features/unit/type/unit.interface";
 import {
   TEmployeeCreateUnion,
   TEmployeeCreateUnionResponse,
@@ -11,6 +10,7 @@ import {
   TOperatorOption,
   TPaginatedEmployeeResponse,
 } from "../hook/useEmployee";
+import { TUnitType } from "@/features/unit/hook/useUnits";
 
 
 

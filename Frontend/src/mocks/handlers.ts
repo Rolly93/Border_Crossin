@@ -6,7 +6,7 @@ import { TEmployeeCreateUnionResponse } from "@/features/employee/hook/useEmploy
 
 import { ISftpFileStatus } from "@/features/sftp/types/ISftpSend";
 import { TShipmentBase } from "@/features/shipments/hooks/useShipments";
-import { TUnitType, UnitState } from "@/features/unit/type/unit.interface";
+import { TUnitStateOptions, TUnitType } from "@/features/unit/hook/useUnits";
 import { http, HttpResponse, delay, PathParams } from "msw";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; //http://127.0.0.1:8000
@@ -29,7 +29,7 @@ interface MockUnit {
   id: number;
   unitNumber: string;
   plates: string;
-  status: UnitState;
+  status: TUnitStateOptions;
   tag: string;
   is_active: boolean;
   driver_id: number | null;

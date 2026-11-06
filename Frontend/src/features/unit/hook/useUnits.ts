@@ -15,6 +15,8 @@ export type TUnitRespose = components["schemas"]["UnitOut"];
 export type TUnitRequest = components["schemas"]["UnitIn"];
 export type TAssignRequest = components["schemas"]["AssignIn"];
 export type TAssignResponse = components["schemas"]["AssignmentOut"];
+export type TUnitType = components['schemas']['TypeUnit']
+export type TUnitStateOptions = components['schemas']['UnitState']
 
 export function useUnits() {
   const [units, setUnits] = useState<TUnitRespose[]>([]);
@@ -62,7 +64,7 @@ export function useUnits() {
   const createUnit = (input: TUnitRequest) =>
     run(() => unitService.create(input), "No se pudo crear la unidad");
 
-  const updateUnit = (id: number, input: TUnitRespose) =>
+  const updateUnit = (id: number, input: TUnitRequest) =>
     run(() => unitService.update(id, input), "No se pudo actualizar la unidad");
 
   const assignDriver = (unitId: number, driverId: number) =>

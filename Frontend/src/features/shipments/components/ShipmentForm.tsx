@@ -20,7 +20,7 @@ import { notifications } from "@mantine/notifications";
 import { ValidateClientReference } from "@/components/utils/businessRules";
 import { useOperators } from "@/features/employee/hook/useOperators";
 import { useState } from "react";
-import { TUnitType } from "@/features/unit/type/unit.interface";
+import { TUnitType } from "@/features/unit/hook/useUnits";
 
 export function ShipmentForm({
   initialData,

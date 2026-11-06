@@ -1,5 +1,8 @@
 from datetime import datetime
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from repository.base_repository import BaseRepository
 from schema.unit_schema import UnitIn
@@ -31,8 +34,18 @@ class UnitRepository(BaseRepository[UnitTruck]):
             .all()
         )
 
-    def get_unit_by_number(self, truck: str) -> UnitTruck | None:
-        return self._db.query(UnitTruck).filter(UnitTruck.unit_number == truck).first()
+    def get_unit_by_number(
+        self, driver_id: str
+    ) -> tuple[UnitTruck, DriverDetails] | None:
+        # self._db.query(UnitTruck).filter(UnitTruck.unit_number == truck).first()
+        stmt = (
+            select(UnitTruck, DriverDetails)
+            .join(UnitTruck.assignments)
+            .join(UnitAssignment.driver)
+            .where(DriverDetails.employee_id == driver_id)
+            .order_by(UnitAssignment.assigned_at.desc())
+        )
+        return self._db.execute(stmt).first()
 
     def get_assignment_by_id(self, assignment_id: int) -> UnitAssignment | None:
         return self._db.get(UnitAssignment, assignment_id)

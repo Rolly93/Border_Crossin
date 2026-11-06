@@ -10,7 +10,6 @@ from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
     BoosttrapAdmin,
-    EmployeeBaseRequest,
     EmployeeBaseResponse,
     EmployeeCreateUnion,
     EmployeeRequestDash,

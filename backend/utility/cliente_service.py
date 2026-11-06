@@ -1,4 +1,3 @@
-from select import select
 from typing import Literal
 
 from fastapi import HTTPException, status
@@ -55,14 +54,13 @@ class ClienteService:
         if not client:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Client with id {client_id} not found",
+                detail="Client not found",
             )
 
         client.name = data.name
         client.phonenumber = data.phonenumber
         if data.email:
             self._db.add_emails_to_client(client_id, data.email)
-        # need to check the toogle function to activate and anactivate the email service
         self._db.toggle_client_status(client_id, status=bool(data.emailService))
 
         return self._db.save(client)
@@ -112,7 +110,7 @@ class ClienteService:
         if client_to_inactive is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Client with id {client_id} not found",
+                detail="Client not found",
             )
 
         self._db.toggle_client_status(client_to_inactive.id, False)
