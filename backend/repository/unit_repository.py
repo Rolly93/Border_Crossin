@@ -34,9 +34,7 @@ class UnitRepository(BaseRepository[UnitTruck]):
             .all()
         )
 
-    def get_unit_by_number(
-        self, driver_id: str
-    ) -> tuple[UnitTruck, DriverDetails] | None:
+    def get_unit_by_number(self, driver_id: str) -> UnitTruck | None:
         # self._db.query(UnitTruck).filter(UnitTruck.unit_number == truck).first()
         stmt = (
             select(UnitTruck, DriverDetails)
@@ -45,7 +43,9 @@ class UnitRepository(BaseRepository[UnitTruck]):
             .where(DriverDetails.employee_id == driver_id)
             .order_by(UnitAssignment.assigned_at.desc())
         )
-        return self._db.execute(stmt).first()
+        u, d = self._db.execute(stmt).first()
+
+        return u
 
     def get_assignment_by_id(self, assignment_id: int) -> UnitAssignment | None:
         return self._db.get(UnitAssignment, assignment_id)

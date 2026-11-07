@@ -92,7 +92,7 @@ export function useShipments() {
       cliente: Number(newShipment.cliente),
       origen: newShipment.origen,
       destination: newShipment.destination,
-      driver_id: newShipment.driver_id,
+      truck: newShipment.truck,
       trailer: newShipment.trailer,
     };
 

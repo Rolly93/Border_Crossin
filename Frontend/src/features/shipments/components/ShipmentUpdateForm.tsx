@@ -162,7 +162,8 @@ export default function ShipmentUpdateForm({
 
           <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg" maw={900}>
             {EVENT_FIELDS.map((field) => {
-              const eventIndex = form.values.events.findIndex(
+              const events = form.values.events ?? []
+              const eventIndex = events.findIndex(
                 (e) => e.category === field.key,
               );
               if (eventIndex === -1) {

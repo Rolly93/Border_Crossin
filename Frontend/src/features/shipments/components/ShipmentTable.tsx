@@ -56,7 +56,7 @@ export default function ShipmentTable({
         truck: updatedValues.truck!,
         trailer: updatedValues.trailer!,
         vehicle_type: updatedValues.vehicle_type!,
-        events: updatedValues.events
+        events: updatedValues.events ?? []
       }
 
       await shipmentService.update(payload.id, payload);

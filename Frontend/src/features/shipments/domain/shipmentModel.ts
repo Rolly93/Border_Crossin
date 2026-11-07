@@ -33,9 +33,11 @@ export class ShipmentModel {
     return event?.notes || '--';
   }
 
-  static prepareInitialEvents(existingEvents: TShipmentEvent[] = [], expectedCategories: string[]): TShipmentEvent[] {
+  static prepareInitialEvents(existingEvents: TShipmentEvent[] | null = [], expectedCategories: string[]): TShipmentEvent[] {
+    const safeEvents = existingEvents ?? [];
+
     return expectedCategories.map(category => {
-      const found = existingEvents.find(e => e.category === category);
+      const found = safeEvents.find(e => e.category === category);
       return found || { category: category as any, dateTime: "", notes: '' };
     });
 
