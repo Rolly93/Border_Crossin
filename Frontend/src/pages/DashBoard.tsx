@@ -3,7 +3,7 @@
 import Headers from "@/components/Header/Header";
 import { Container, Stack, Title, Text } from "@mantine/core";
 
-import { IShipmentFormValues, TShipmentBase, useShipments } from "@/features/shipments/hooks/useShipments";
+import { IShipmentFormValues, useShipments } from "@/features/shipments/hooks/useShipments";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ShipmentTable from "@/features/shipments/components/ShipmentTable";
 

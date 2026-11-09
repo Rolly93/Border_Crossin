@@ -9,7 +9,12 @@ import {
   Select,
   Title,
   Paper,
+  ActionIcon,
+  NumberInput,
+  Text,
+  Divider,
 } from "@mantine/core";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { ShipmentFormProps } from "@/features/shipments/types/ShipmentFormProps";
 import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
 import { ShipmentValidator } from "../validation/ShipmentValidator";
@@ -22,14 +27,27 @@ import { useOperators } from "@/features/employee/hook/useOperators";
 import { useState } from "react";
 import { TUnitType } from "@/features/unit/hook/useUnits";
 
+
+export enum TypeOperation {
+  NORTHBOUND = "exportacion",
+  SOUTHBOUND = "importacion",
+}
+
+export enum ServiceType {
+  TRAILER = "trailer_53ft",
+  CONSOLIDATED = "consolidated",
+}
+
 export function ShipmentForm({
   initialData,
   onSubmit,
   onCancel,
   opened,
 }: ShipmentFormProps) {
-  const { operators, loading, error } = useOperators(opened);
-  const [typeUnit, setTypeUnit] = useState<TUnitType>();
+  const { operators } = useOperators(opened);
+  const [typeUnit, setTypeUnit] = useState<TUnitType | undefined>(
+    (initialData as any)?.vehicle_type as TUnitType
+  );
 
   const toggleUnit = operators.filter((u) => u.typeUnit === typeUnit);
 
@@ -41,32 +59,39 @@ export function ShipmentForm({
       tracking_number: initialData?.tracking_number || "",
       customer_tracking: initialData?.customer_tracking || "",
       type_operation: initialData?.type_operation || "Exportacion",
+      service_type: (initialData as any)?.service_type || ServiceType.TRAILER,
       cliente: initialData?.cliente || "",
       truck: initialData?.truck || "",
       vehicle_type: initialData?.vehicle_type || "",
       trailer: initialData?.trailer || "",
       origen: initialData?.origen || "",
       destination: initialData?.destination || "",
+      consolidate_guide: (initialData as any)?.consolidate_guide || [
+        { guide_number: "", pieces: 1, weight: 0 },
+      ],
     },
 
     validate: (values) => {
       const validator = new ShipmentValidator(values);
+
+      // Si es trailer_53ft exige el tráiler; si es consolidado no es obligatorio
+      const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
 
       return {
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
         destination: validator.validateDestination(),
-        trailer: validator.validateTrailer(),
         type_operation: validator.validateTypeOperation(),
+        trailer: isConsolidated ? null : validator.validateTrailer(),
       };
     },
   });
 
   setupShipmentWatchers(form);
 
-  // La lista de clientes depende del tipo de operación seleccionado.
   const operation = form.values.type_operation;
+  const isConsolidated = form.values.service_type === ServiceType.CONSOLIDATED;
   const { clients: clientOptions } = useClientsByOperation(operation);
   const { getRules } = useClientReferenceRules();
 
@@ -98,13 +123,19 @@ export function ShipmentForm({
         return;
       }
 
-      await onSubmit(values);
+      // Ajustamos los valores finales según la lógica de la BD
+      const finalPayload = {
+        ...values,
+        trailer: isConsolidated ? "" : values.trailer,
+        consolidate_guide: isConsolidated ? values.consolidate_guide : [],
+      };
+
+      await onSubmit(finalPayload as any);
     } catch (err: any) {
       if (typeof err === "object" && !err.message) {
         form.setErrors(err);
       } else if (err.message) {
         console.log(err);
-
         form.setFieldError("customer_tracking", err.message);
       }
     }
@@ -115,10 +146,28 @@ export function ShipmentForm({
       <form
         onSubmit={form.onSubmit(
           (values) => handleSubmit(values as any),
-          handleValidationError,
-        )}>
+          handleValidationError
+        )}
+      >
         <Stack gap="md">
           <Title order={3}>Shipment Information</Title>
+
+          {/* Selector de Tipo de Servicio */}
+          <Select
+            label="Tipo de Servicio"
+            required
+            data={[
+              { value: ServiceType.TRAILER, label: "Tráiler 53 ft (FTL)" },
+              { value: ServiceType.CONSOLIDATED, label: "Consolidado (3.5t / Rabón)" },
+            ]}
+            {...form.getInputProps("service_type")}
+            onChange={(value) => {
+              form.setFieldValue("service_type", value ?? ServiceType.TRAILER);
+              if (value === ServiceType.CONSOLIDATED) {
+                form.setFieldValue("trailer", "");
+              }
+            }}
+          />
 
           <Group grow>
             <TextInput
@@ -140,7 +189,7 @@ export function ShipmentForm({
               label={t("shipment.labels.cliente")}
               placeholder={t("shipment.placeholders.cliente")}
               data={clientOptions.map((client) => ({
-                value: client.id,
+                value: String(client.id),
                 label: client.name,
               }))}
               autoSelectOnBlur
@@ -163,7 +212,18 @@ export function ShipmentForm({
             />
           </Group>
 
-          <Group grow>
+          <Group grow align="flex-start">
+            <Select
+              label={t("shipment.labels.vehicle_type")}
+              required
+              placeholder={t("shipment.placeholders.vehicle_type")}
+              data={["trailer", "unit truck"]}
+              {...form.getInputProps("vehicle_type")}
+              onChange={(value) => {
+                form.setFieldValue("vehicle_type", value ?? "");
+                setTypeUnit(value ? (value as TUnitType) : undefined);
+              }}
+            />
             <Select
               label={t("shipment.labels.truck")}
               required
@@ -174,28 +234,87 @@ export function ShipmentForm({
               placeholder={t("shipment.placeholders.truck")}
               {...form.getInputProps("truck")}
             />
-            <Select
-              label={t("shipment.labels.vehicle_type")}
-              required
-              placeholder={t("shipment.placeholders.vehicle_type")}
-              data={["trailer", "unit truck"]}
-              {...form.getInputProps("vehicle_type")}
-              onChange={(value, option) => {
-                form.setFieldValue("vehicle_type", value);
-                if (value) {
-                  setTypeUnit(value);
-                } else {
-                  setTypeUnit(undefined);
-                }
-              }}
-            />
-            <TextInput
-              label={t("shipment.labels.trailer")}
-              required
-              placeholder={t("shipment.placeholders.trailer")}
-              {...form.getInputProps("trailer")}
-            />
+
+            {/* Solo se muestra y requiere la caja de tráiler si NO es servicio consolidado */}
+            {!isConsolidated && (
+              <TextInput
+                label={t("shipment.labels.trailer")}
+                required
+                placeholder={t("shipment.placeholders.trailer")}
+                {...form.getInputProps("trailer")}
+              />
+            )}
           </Group>
+
+          {/* Si es servicio CONSOLIDADO, desplegamos las guías hijas dinámicas */}
+          {isConsolidated && (
+            <Stack gap="xs">
+              <Divider label="Guías del Consolidado" labelPosition="center" my="xs" />
+              <Group justify="space-between">
+                <Text size="sm" fw={500}>
+                  Números de Guía / Paquetes
+                </Text>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="xs"
+                  onClick={() =>
+                    form.insertListItem("consolidate_guide", {
+                      guide_number: "",
+                      pieces: 1,
+                      weight: 0,
+                    })
+                  }
+                  leftSection={<IconPlus size={14} />}
+                >
+                  Agregar Guía
+                </Button>
+              </Group>
+              <Stack gap="xs">
+                {/* Encabezado fijo de columnas */}
+                <Group grow align="center" pr={36}>
+                  <Text size="xs" fw={500} c="dimmed">
+                    Número de Guía
+                  </Text>
+                  <Text size="xs" fw={500} c="dimmed">
+                    Piezas
+                  </Text>
+                  <Text size="xs" fw={500} c="dimmed">
+                    Peso (kg)
+                  </Text>
+                </Group>
+
+                {/* Renglones dinámicos sin labels */}
+                {form.values.consolidate_guide.map((_: any, index: number) => (
+                  <Group key={index} align="center" grow>
+                    <TextInput
+                      placeholder="Número de Guía"
+                      required
+                      {...form.getInputProps(`consolidate_guide.${index}.guide_number`)}
+                    />
+                    <NumberInput
+                      placeholder="Piezas"
+                      min={1}
+                      {...form.getInputProps(`consolidate_guide.${index}.pieces`)}
+                    />
+                    <NumberInput
+                      placeholder="Peso (kg)"
+                      decimalScale={2}
+                      {...form.getInputProps(`consolidate_guide.${index}.weight`)}
+                    />
+                    <ActionIcon
+                      color="red"
+                      variant="subtle"
+                      onClick={() => form.removeListItem("consolidate_guide", index)}
+                      disabled={form.values.consolidate_guide.length === 1}
+                    >
+                      <IconTrash size={18} />
+                    </ActionIcon>
+                  </Group>
+                ))}
+              </Stack>
+            </Stack>
+          )}
 
           <Group grow>
             <TextInput
