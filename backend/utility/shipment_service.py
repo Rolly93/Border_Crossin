@@ -9,6 +9,7 @@ from model.db_model import (
     Trailer,
 )
 from repository import ShipmentRepository
+from repository.cliente_repository import ClientServiceType
 from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
@@ -161,7 +162,7 @@ class ShipmentService:
             return []
 
         client_data = self._client_service.get_client_service(
-            shipment.client_id, "sftp_service"
+            shipment.client_id, ClientServiceType.SFTP
         )
         if not client_data or not client_data.sftService:
             return []

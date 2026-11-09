@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Annotated, Literal, Self
 
 from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field
@@ -10,6 +10,16 @@ toUppercase = Annotated[
 toCapitalCase = Annotated[
     str, BeforeValidator(lambda v: v.strip().capitalize() if isinstance(v, str) else v)
 ]
+
+
+class TypeOperation(StrEnum):
+    SOUTHBOUND = "southbound"
+    NORTHBOUND = "northbound"
+
+
+class ServiceType(StrEnum):
+    TRAILER = "trailer"
+    UNIT_TRUCK = "unit_truck"
 
 
 class ShipmentStats(BaseModel):

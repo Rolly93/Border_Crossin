@@ -1,10 +1,8 @@
-from typing import Literal
-
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from model.db_model import Client
-from repository.cliente_repository import ClienteRepository
+from repository.cliente_repository import ClienteRepository, ClientServiceType
 from repository.email_repository import EmailRepository
 from repository.sftp_repository import SftpRepository
 from schema import (
@@ -16,8 +14,6 @@ from schema import (
 from schema.client_schema import MetricsClientResponse
 from schema.sftp_schema import SftpConfiRequst
 from schema.shipment_shcema import ShipmentCreateRequest
-
-ServiceType = Literal["sftp_service", "email_service", "sms_service"]
 
 
 class ClienteService:
@@ -66,7 +62,7 @@ class ClienteService:
         return self._db.save(client)
 
     def get_client_service(
-        self, client_id: int, service_type: ServiceType
+        self, client_id: int, service_type: ClientServiceType
     ) -> ClienteServiceResponse:
 
         client = self._db.get_client_by_id(client_id)
@@ -79,14 +75,14 @@ class ClienteService:
         sftp_service: SftpConfigurationRequest | None = None
         email_service: EmailConfigurationRequest | None = None
 
-        if service_type == "sftp_service":
+        if service_type == ClientServiceType("sftp_service"):
             sftp_data = self._sftp_service.get_sftp_data(client.id)
             if sftp_data:
                 sftp_service = SftpConfigurationRequest.model_validate(
                     sftp_data.model_dump()
                 )
 
-        if service_type == "email_service":
+        if service_type == ClientServiceType("email_service"):
             active_emails = [
                 rec.email for rec in client.email_recipients if rec.is_active
             ]

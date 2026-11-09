@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from sqlalchemy import (
     Boolean,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -24,6 +25,7 @@ from sqlalchemy.orm import (
 
 from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import TypeUnit
+from schema.shipment_shcema import ServiceType, TypeOperation
 from schema.unit_schema import UnitState
 
 hire_date: date = date.today()
@@ -259,12 +261,33 @@ class Trailer(Base):
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     seal: Mapped[str] = mapped_column(String(50), nullable=False, default="N/A")
     assigned_day: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+        DateTime, nullable=False, default=lambda: datetime.now(UTC)
     )
 
     # Relaciones
     shipment_assigns: Mapped[list[ShipmentAssign]] = relationship(
         "ShipmentAssign", back_populates="trailer"
+    )
+
+
+# ==================================================
+# #.- Consolidate Shipment
+# ==================================================
+
+
+class Consolidate(Base):
+    __tablename__ = "consolidate"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    client_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    guide_number: Mapped[str] = mapped_column(String(100), nullable=False)
+    pieces: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    weight: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    client_assigns: Mapped[list[Client]] = relationship(
+        Client, back_populates="shipment"
+    )
+    trip_assigned: Mapped[ShipmentAssign] = relationship(
+        "ShipmentAssign", back_populates="consolidate_guide"
     )
 
 
@@ -279,8 +302,12 @@ class ShipmentAssign(Base):
         String(100), unique=True, nullable=False
     )
     customer_tracking: Mapped[str] = mapped_column(String(100), nullable=False)
+
     type_operation: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="exportacion"
+        String(50), nullable=False, default=TypeOperation.NORTHBOUND
+    )
+    service_type: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=ServiceType.TRAILER
     )
 
     driver_id: Mapped[int] = mapped_column(
@@ -292,11 +319,16 @@ class ShipmentAssign(Base):
     assigned_by: Mapped[int] = mapped_column(
         Integer, ForeignKey("user.id"), nullable=False
     )
+
     trailer_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("trailer.id"), nullable=False
+        Integer, ForeignKey("trailer.id"), nullable=True
     )
     unit_truck_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("unit_truck.id"), nullable=True
+    )
+
+    consolidate_guide: Mapped[list[Consolidate]] = relationship(
+        Consolidate, back_populates="trip_assigned", cascade="all, delete-orphan"
     )
 
     assigned_day: Mapped[datetime] = mapped_column(

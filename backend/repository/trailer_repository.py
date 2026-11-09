@@ -1,9 +1,11 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
+
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 from model.db_model import Trailer
 from repository.base_repository import BaseRepository
-from pydantic import BaseModel
 
 
 class TrailerRepository(BaseRepository[Trailer]):
@@ -35,7 +37,7 @@ class TrailerRepository(BaseRepository[Trailer]):
             state=state,
             trailer_number=trailer_number,
             seal=seal,
-            assigned_day=datetime.now(timezone.utc),
+            assigned_day=datetime.now(UTC),
         )
         return self.save(trailer)  # Inherited from BaseRepository
 

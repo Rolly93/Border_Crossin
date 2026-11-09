@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -11,7 +11,7 @@ from schema import ClientRequest
 from schema.client_schema import ClientPaginateData, PaginatedClientResponse
 
 
-class ClientServiceType(str, Enum):
+class ClientServiceType(StrEnum):
     SFTP = "sftService"
     EMAIL = "emailService"
 
