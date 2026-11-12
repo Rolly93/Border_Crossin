@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from model.db_model import (
+    Consolidate,
     ShipmentAssign,
     ShipmentEventModel,
     Trailer,
@@ -14,17 +15,15 @@ from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
 from schema.shipment_shcema import (
-    ConsolidateRequest,
+    ConsolidateResponse,
     EventCategory,
     PaginatedShipmentResponse,
     ServiceType,
-    ShipmentCreateRequest,
+    ServiceTypeUnionRequest,
+    ServiceTypeUnionResponse,
     ShipmentEvent,
-    ShipmentResponse,
     ShipmentUpdate,
-    TRailerResponse,
-    TrailerRequest,
-    TypeOperation,
+    TrailerResponse,
 )
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
@@ -56,7 +55,7 @@ class ShipmentService:
         )
 
     @staticmethod
-    def _to_response(s: ShipmentAssign) -> ShipmentResponse:
+    def _to_response(s: ShipmentAssign) -> ServiceTypeUnionResponse:
         # truck y trailer son relaciones ORM; el esquema espera su texto (número / placas).
         valid_categories = {c.value for c in EventCategory}
         events = [
@@ -66,40 +65,50 @@ class ShipmentService:
             for e in s.events
             if e.event_time and e.category in valid_categories
         ]
-        service_shipment_data = None
-        if s.service_type == ServiceType.UNIT_TRUCK and s.consolidate_guide:
+        service_shipment_data: ServiceTypeUnionResponse | None = None
+
+        if s.service_type == ServiceType.CONSOLIDATED:
             g = s.consolidate_guide[0]
-            service_shipment_data = ConsolidateRequest(
-                service_type=ServiceType.UNIT_TRUCK,
-                client_id=s.client_id,
+            service_shipment_data = ConsolidateResponse(
+                id=s.id,
+                tracking_number=s.tracking_number,
+                customer_tracking=s.customer_tracking,
+                service_type=ServiceType.CONSOLIDATED,
                 guide_number=g.guide_number,
+                client_id=s.client_id,
                 pices=g.pieces or 0,
                 weight=g.weight or 0,
+                cliente=s.client_id,
+                origen=s.origen,
+                destination=s.destination,
+                truck=str(s.truck),
+                events=events,
             )
         if s.service_type == ServiceType.TRAILER and s.trailer:
-            service_shipment_data = TrailerRequest(
+            service_shipment_data = TrailerResponse(
+                id=s.id,
                 service_type=ServiceType.TRAILER,
                 trailer_number=s.trailer.trailer_number,
                 plates=s.trailer.plates,
                 state=s.trailer.state,
                 seal=s.trailer.seal,
+                tracking_number=s.tracking_number,
+                customer_tracking=s.customer_tracking,
+                cliente=s.client_id,
+                origen=s.origen,
+                destination=s.destination,
+                truck=str(s.truck),
+                events=events,
+            )
+        if not service_shipment_data:
+            raise ValueError(
+                "El embarque no cuenta con un servicio válido asociado (Consolidado o Tráiler)."
             )
 
-        return ShipmentResponse(
-            id=s.id,
-            tracking_number=s.tracking_number,
-            customer_tracking=s.customer_tracking,
-            type_operation=TypeOperation(s.type_operation),
-            origen=s.origen,
-            destination=s.destination,
-            cliente=int(s.client_id),
-            truck=s.truck.unit_number if s.truck else "Pending",
-            events=events,
-            service_shipment=service_shipment_data,
-        )
+        return service_shipment_data
 
     def create_shipment(
-        self, data: ShipmentCreateRequest, user_id: int
+        self, data: ServiceTypeUnionRequest, user_id: int
     ) -> ShipmentAssign:
         client = self._client_service.get_client(data)
 
@@ -128,14 +137,35 @@ class ShipmentService:
                 status.HTTP_409_CONFLICT,
                 f"La unidad {data.truck} no tiene operador asignado",
             )
+        if not data.service_type:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, detail="Falta Caputar el Tipo de Servicio"
+            )
 
-        if not (
-            trailer := self._trailer_repo.find_by_trailer(unit.plates, data.trailer)
-        ):
-
-            trailer = Trailer(plates=data.trailer, state="ACTIVA")
-            self.db.add(trailer)
+        trailer_objt = None
+        consolidate_objt = None
+        if data.service_type == ServiceType.CONSOLIDATED:
+            consolidate_objt = Consolidate(
+                client_id=data.cliente,
+                guide_number=data.guide_number,
+                pieces=int(data.pices),
+                weight=data.weight,
+            )
+            self.db.add(consolidate_objt)
             self.db.flush()
+
+        elif data.service_type == ServiceType.TRAILER:
+            trailer_objt = Trailer(
+                plates=data.plates,
+                trailer_number=data.trailer_number,
+                state=data.state,
+                seal=data.seal,
+            )
+            self.db.add(trailer_objt)
+            self.db.flush()
+
+        else:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Tipo de Servicio Invalido")
 
         shipment = ShipmentAssign(
             tracking_number=data.tracking_number,
@@ -144,12 +174,16 @@ class ShipmentService:
             truck=assignment.driver_id,
             client_id=client.id,
             assigned_by=user_id,
-            trailer_id=trailer.id,
             unit_truck_id=unit.id,
             origen=data.origen,
             destination=data.destination,
             is_active=True,
+            trailer_id=trailer_objt.id if trailer_objt else None,
+            service_type=data.service_type,
         )
+
+        if consolidate_objt:
+            shipment.consolidate_guide.append(consolidate_objt)
 
         self.db.add(shipment)
         self.db.commit()

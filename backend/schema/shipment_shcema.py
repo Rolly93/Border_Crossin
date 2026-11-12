@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum, StrEnum
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field
 
@@ -19,7 +19,7 @@ class TypeOperation(StrEnum):
 
 class ServiceType(StrEnum):
     TRAILER = "trailer"
-    UNIT_TRUCK = "unit_truck"
+    CONSOLIDATED = "consolidated"
 
 
 class ShipmentStats(BaseModel):
@@ -48,39 +48,6 @@ class ShipmentEvent(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ConsolidateRequest(BaseModel):
-    service_type: ServiceType = Field(
-        min_length=2, max_length=50, default=ServiceType.UNIT_TRUCK
-    )
-    client_id: int = Field(gt=0)
-    guide_number: str = Field(min_length=3, max_length=100)
-    pices: int = Field(gt=0)
-    weight: float = Field(gt=0)
-
-
-class ConsolidateResponse(ConsolidateRequest):
-    id: int
-
-
-class TrailerRequest(BaseModel):
-    service_type: ServiceType = Field(
-        min_length=2, max_length=50, default=ServiceType.TRAILER
-    )
-    trailer_number: str = Field(min_length=2, max_length=50)
-    plates: str = Field(min_length=2, max_length=30)
-    state: str = Field(min_length=1, max_length=10, default="N/A")
-    seal: str = Field(min_length=2, max_length=50)
-
-
-class TRailerResponse(TrailerRequest):
-    id: int
-
-
-ServiceTypeUnionRequest = Annotated[
-    ConsolidateRequest | TrailerRequest | None, Field(discriminator="service_type")
-]
-
-
 class ShipmentCreateRequest(BaseModel):
     """Cuerpo de POST /shipment/create. Lo que manda el formulario de embarque."""
 
@@ -95,23 +62,43 @@ class ShipmentCreateRequest(BaseModel):
         validation_alias=AliasChoices("destination", "destino"),
     )
     truck: str = Field(min_length=1, max_length=20, description="Operador ID")
-    service_shipment: ServiceTypeUnionRequest
+
+
+class ConsolidateRequest(ShipmentCreateRequest):
+    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
+    client_id: int = Field(gt=0)
+    guide_number: str = Field(min_length=3, max_length=100)
+    pices: int = Field(gt=0)
+    weight: float = Field(gt=0)
+
+
+class TrailerRequest(ShipmentCreateRequest):
+    service_type: Literal[ServiceType.TRAILER] = ServiceType.TRAILER
+    trailer_number: str = Field(min_length=2, max_length=50)
+    plates: str = Field(min_length=2, max_length=30)
+    state: str = Field(min_length=1, max_length=10, default="N/A")
+    seal: str = Field(min_length=2, max_length=50)
 
 
 class ShipmentResponse(ShipmentCreateRequest):
+    ...
     id: int
     events: list[ShipmentEvent] | None
 
 
-class PaginatedShipmentResponse(BaseModel):
-    data: list[ShipmentResponse]
-    totalRecords: int
-    hasNextPage: bool
-    page: int
-    limit: int
-
-
 class ShipmentUpdate(ShipmentResponse): ...
+
+
+class ConsolidateResponse(ConsolidateRequest):
+    ...
+    id: int
+    events: list[ShipmentEvent] | None
+
+
+class TrailerResponse(TrailerRequest):
+    ...
+    id: int
+    events: list[ShipmentEvent] | None
 
 
 class EventPayload(BaseModel):
@@ -149,3 +136,19 @@ class EventPayload(BaseModel):
             for e in events_list
             if e is not None
         ]
+
+
+ServiceTypeUnionRequest = Annotated[
+    ConsolidateRequest | TrailerRequest, Field(discriminator="service_type")
+]
+ServiceTypeUnionResponse = Annotated[
+    ConsolidateResponse | TrailerResponse, Field(discriminator="service_type")
+]
+
+
+class PaginatedShipmentResponse(BaseModel):
+    data: list[ServiceTypeUnionResponse]
+    totalRecords: int
+    hasNextPage: bool
+    page: int
+    limit: int
