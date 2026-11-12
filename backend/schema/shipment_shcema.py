@@ -1,8 +1,15 @@
 from datetime import datetime
 from enum import Enum, StrEnum
-from typing import Annotated, Literal, Self
+from typing import Annotated, Any, Literal, Self
 
-from pydantic import AliasChoices, BaseModel, BeforeValidator, ConfigDict, Field
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    field_validator,
+)
 
 toUppercase = Annotated[
     str, BeforeValidator(lambda v: v.upper().strip() if isinstance(v, str) else v)
@@ -81,7 +88,6 @@ class TrailerRequest(ShipmentCreateRequest):
 
 
 class ShipmentResponse(ShipmentCreateRequest):
-    ...
     id: int
     events: list[ShipmentEvent] | None
 
@@ -90,15 +96,22 @@ class ShipmentUpdate(ShipmentResponse): ...
 
 
 class ConsolidateResponse(ConsolidateRequest):
-    ...
     id: int
-    events: list[ShipmentEvent] | None
+    events: list[ShipmentEvent | None] | None = None
+
+    @field_validator("events", mode="before")
+    @classmethod
+    def clean_events(cls, v: Any) -> Optional[list[Any]]:
+        if isinstance(v, list):
+            return [item for item in v if item is not None]
+        return v
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TrailerResponse(TrailerRequest):
-    ...
     id: int
-    events: list[ShipmentEvent] | None
+    events: list[ShipmentEvent]
 
 
 class EventPayload(BaseModel):
@@ -138,10 +151,26 @@ class EventPayload(BaseModel):
         ]
 
 
+class UpdateShipment(BaseModel):
+    id: int
+    tracking_number: str
+    events_total: int | None
+
+
+class ShipmentUpdateResponse(BaseModel):
+    status: str
+    data: UpdateShipment
+
+
 ServiceTypeUnionRequest = Annotated[
     ConsolidateRequest | TrailerRequest, Field(discriminator="service_type")
 ]
 ServiceTypeUnionResponse = Annotated[
+    ConsolidateResponse | TrailerResponse, Field(discriminator="service_type")
+]
+
+
+ServiceTypeUnionResquestUpdate = Annotated[
     ConsolidateResponse | TrailerResponse, Field(discriminator="service_type")
 ]
 

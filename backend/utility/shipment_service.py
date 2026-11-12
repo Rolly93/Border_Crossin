@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from model.db_model import (
     Consolidate,
+    SftpSend,
     ShipmentAssign,
     ShipmentEventModel,
     Trailer,
@@ -21,6 +22,7 @@ from schema.shipment_shcema import (
     ServiceType,
     ServiceTypeUnionRequest,
     ServiceTypeUnionResponse,
+    ServiceTypeUnionResquestUpdate,
     ShipmentEvent,
     ShipmentUpdate,
     TrailerResponse,
@@ -197,7 +199,10 @@ class ShipmentService:
         return shipment_delete
 
     def update_shipment(
-        self, shipment_id: int, shipment_data: ShipmentUpdate, user_id: int
+        self,
+        shipment_id: int,
+        shipment_data: ServiceTypeUnionResquestUpdate,
+        user_id: int,
     ) -> ShipmentAssign:
         current = self._shipment_db.get_shipment(shipment_id)
         self._reference_rule.validate(
@@ -214,7 +219,7 @@ class ShipmentService:
 
     def sftp_service(
         self, shipment: ShipmentAssign, events: list[ShipmentEventModel]
-    ) -> list:
+    ) -> list[SftpSend]:
         if not events:
             return []
 

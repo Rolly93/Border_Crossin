@@ -44,6 +44,7 @@
         "terminal.integrated.suggest.quickSuggestions": {
             "arguments": "on",
             "commands": "on"
-        }
+        },
+        "python.analysis.inlayHints.callArgumentNames": "partial"
     }
 }

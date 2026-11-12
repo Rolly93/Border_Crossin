@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from model.db_model import ShipmentAssign, ShipmentEventModel
 from repository.base_repository import BaseRepository
-from schema.shipment_shcema import ShipmentUpdate
+from schema.shipment_shcema import ServiceTypeUnionResquestUpdate
 
 
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
@@ -50,27 +50,34 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             )
         return shipment_id
 
-    def update_shipment(self, id: int, shipment_data: ShipmentUpdate, user_id: int):
+    def update_shipment(
+        self, id: int, shipment_data: ServiceTypeUnionResquestUpdate, user_id: int
+    ):
+
         shipment = self.get_shipment(id)
 
         column_map = {"cliente": "client_id"}
-        for field, value in shipment_data.model_dump(
+
+        shipment_events = shipment_data.model_dump(
             exclude={"events"}, exclude_unset=True
-        ).items():
+        )
+        for field, value in shipment_events.items():
             column = column_map.get(field, field)
             if value is not None and hasattr(shipment, column):
                 setattr(shipment, column, value)
 
         # Los eventos se AGREGAN al historial (no se reemplazan): sftp_send
         # referencia eventos existentes y el cascade borraría su historial.
+
         events = (
             shipment_data.events
             if isinstance(shipment_data.events, list)
             else [shipment_data.events]
         )
+
         new_events: list[ShipmentEventModel] = []
         for e in events:
-            if e.dateTime is None:
+            if e is None:
                 continue
             new_event = ShipmentEventModel(
                 category=e.category.value,

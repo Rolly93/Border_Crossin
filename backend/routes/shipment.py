@@ -4,8 +4,10 @@ from deps.auth import CurrentUser, get_user_id
 from deps.service import ShipmentSvc
 from schema.shipment_shcema import (
     PaginatedShipmentResponse,
-    ShipmentCreateRequest,
-    ShipmentUpdate,
+    ServiceTypeUnionRequest,
+    ServiceTypeUnionResquestUpdate,
+    ShipmentUpdateResponse,
+    UpdateShipment,
 )
 
 router = APIRouter(
@@ -29,32 +31,30 @@ async def shipment_dashboard(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_shipment(
-    shipment: ShipmentCreateRequest,
+    shipment: ServiceTypeUnionRequest,
     current_user: CurrentUser,
     service: ShipmentSvc,
 ):
     service.create_shipment(shipment, get_user_id(current_user))
-    # created
-    # return _shipment_to_dict(created)
 
 
 @router.put("/{id}/update")
 async def update_trip(
     id: int,
-    shipment_data: ShipmentUpdate,
+    shipment_data: ServiceTypeUnionResquestUpdate,
     current_user: CurrentUser,
     service: ShipmentSvc,
-):
+) -> ShipmentUpdateResponse:
     updated = service.update_shipment(id, shipment_data, int(current_user.sub))
 
-    return {
-        "status": "success",
-        "data": {
-            "id": updated.id,
-            "tracking_number": updated.tracking_number,
-            "events_total": len(list(updated.events)),
-        },
-    }
+    return ShipmentUpdateResponse(
+        status="success",
+        data=UpdateShipment(
+            id=updated.id,
+            tracking_number=updated.tracking_number,
+            events_total=len(list(updated.events)),
+        ),
+    )
 
 
 @router.patch("/{id}/delete")
