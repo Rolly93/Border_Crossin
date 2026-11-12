@@ -101,7 +101,7 @@ class ConsolidateResponse(ConsolidateRequest):
 
     @field_validator("events", mode="before")
     @classmethod
-    def clean_events(cls, v: Any) -> Optional[list[Any]]:
+    def clean_events(cls, v: Any) -> list[Any | None]:
         if isinstance(v, list):
             return [item for item in v if item is not None]
         return v
