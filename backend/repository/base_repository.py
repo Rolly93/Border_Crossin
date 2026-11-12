@@ -1,6 +1,5 @@
 from typing import Any, Generic, Protocol, TypeVar
 
-from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session

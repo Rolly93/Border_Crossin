@@ -74,8 +74,8 @@ class EmployeeRequest(EmployeeBase):
 
 
 class TypeUnit(StrEnum):
-    UNIT_TRUCK = "unit truck"
-    TRAILER = "trailer"
+    UNIT_TRUCK = "trailer_53ft"
+    TRAILER = "consolidated"
 
 
 class OperatorOption(BaseModel):

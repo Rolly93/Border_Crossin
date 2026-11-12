@@ -258,7 +258,7 @@ class Trailer(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     trailer_number: Mapped[str] = mapped_column(String(length=50), nullable=False)
     plates: Mapped[str] = mapped_column(String(50), nullable=False)
-    state: Mapped[str] = mapped_column(String(50), nullable=False)
+    state: Mapped[str] = mapped_column(String(50), nullable=False, default="N/A")
     seal: Mapped[str] = mapped_column(String(50), nullable=False, default="N/A")
     assigned_day: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=lambda: datetime.now(UTC)
@@ -282,6 +282,9 @@ class Consolidate(Base):
     guide_number: Mapped[str] = mapped_column(String(100), nullable=False)
     pieces: Mapped[int | None] = mapped_column(Integer, nullable=True)
     weight: Mapped[float | None] = mapped_column(Float, nullable=True)
+    request_day: Mapped[DateTime] = mapped_column(
+        DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
+    )
 
     client_assigns: Mapped[list[Client]] = relationship(
         Client, back_populates="shipment"
@@ -298,14 +301,17 @@ class ShipmentAssign(Base):
     __tablename__ = "trip_assigned"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
     tracking_number: Mapped[str] = mapped_column(
         String(100), unique=True, nullable=False
     )
+
     customer_tracking: Mapped[str] = mapped_column(String(100), nullable=False)
 
     type_operation: Mapped[str] = mapped_column(
         String(50), nullable=False, default=TypeOperation.NORTHBOUND
     )
+
     service_type: Mapped[str] = mapped_column(
         String(50), nullable=False, default=ServiceType.TRAILER
     )
@@ -313,9 +319,11 @@ class ShipmentAssign(Base):
     driver_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("driver_details.employee_id"), nullable=False
     )
+
     client_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("client.id"), nullable=False
     )
+
     assigned_by: Mapped[int] = mapped_column(
         Integer, ForeignKey("user.id"), nullable=False
     )
@@ -323,6 +331,7 @@ class ShipmentAssign(Base):
     trailer_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("trailer.id"), nullable=True
     )
+
     unit_truck_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey("unit_truck.id"), nullable=True
     )

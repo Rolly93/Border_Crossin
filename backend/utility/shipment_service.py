@@ -14,12 +14,17 @@ from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
 from schema.shipment_shcema import (
+    ConsolidateRequest,
     EventCategory,
     PaginatedShipmentResponse,
+    ServiceType,
     ShipmentCreateRequest,
     ShipmentEvent,
     ShipmentResponse,
     ShipmentUpdate,
+    TRailerResponse,
+    TrailerRequest,
+    TypeOperation,
 )
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
@@ -61,18 +66,36 @@ class ShipmentService:
             for e in s.events
             if e.event_time and e.category in valid_categories
         ]
+        service_shipment_data = None
+        if s.service_type == ServiceType.UNIT_TRUCK and s.consolidate_guide:
+            g = s.consolidate_guide[0]
+            service_shipment_data = ConsolidateRequest(
+                service_type=ServiceType.UNIT_TRUCK,
+                client_id=s.client_id,
+                guide_number=g.guide_number,
+                pices=g.pieces or 0,
+                weight=g.weight or 0,
+            )
+        if s.service_type == ServiceType.TRAILER and s.trailer:
+            service_shipment_data = TrailerRequest(
+                service_type=ServiceType.TRAILER,
+                trailer_number=s.trailer.trailer_number,
+                plates=s.trailer.plates,
+                state=s.trailer.state,
+                seal=s.trailer.seal,
+            )
+
         return ShipmentResponse(
             id=s.id,
             tracking_number=s.tracking_number,
             customer_tracking=s.customer_tracking,
-            type_operation=s.type_operation,
+            type_operation=TypeOperation(s.type_operation),
             origen=s.origen,
             destination=s.destination,
-            cliente=str(s.client_id),
-            truck=s.truck.unit_number if s.truck else None,
-            trailer=s.trailer.plates if s.trailer else None,
-            vehicle_type=None,
+            cliente=int(s.client_id),
+            truck=s.truck.unit_number if s.truck else "Pending",
             events=events,
+            service_shipment=service_shipment_data,
         )
 
     def create_shipment(

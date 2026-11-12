@@ -102,7 +102,7 @@ class ExpeditorsXMLService(BaseXMLTransformer):
         eventcode = self._event_code(data.event)
         return f"{scac.upper()}_{reference}_{eventcode}_{now_str}.xml"
 
-    def transform_event(self, data: EventPayload) -> Dict[str, Any]:
+    def transform_event(self, data: EventPayload) -> dict[str, Any]:
         valid_ref = self.validate_reference(data.customer_tracking)
         return {
             "AvisoEventos": {

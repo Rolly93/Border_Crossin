@@ -27,7 +27,6 @@ import { useOperators } from "@/features/employee/hook/useOperators";
 import { useState } from "react";
 import { TUnitType } from "@/features/unit/hook/useUnits";
 
-
 export enum TypeOperation {
   NORTHBOUND = "exportacion",
   SOUTHBOUND = "importacion",
@@ -46,7 +45,7 @@ export function ShipmentForm({
 }: ShipmentFormProps) {
   const { operators } = useOperators(opened);
   const [typeUnit, setTypeUnit] = useState<TUnitType | undefined>(
-    (initialData as any)?.vehicle_type as TUnitType
+    (initialData as any)?.vehicle_type as TUnitType,
   );
 
   const toggleUnit = operators.filter((u) => u.typeUnit === typeUnit);
@@ -59,10 +58,9 @@ export function ShipmentForm({
       tracking_number: initialData?.tracking_number || "",
       customer_tracking: initialData?.customer_tracking || "",
       type_operation: initialData?.type_operation || "Exportacion",
-      service_type: (initialData as any)?.service_type || ServiceType.TRAILER,
+      vehicle_type: (initialData as any)?.vehicle_type || ServiceType.TRAILER,
       cliente: initialData?.cliente || "",
       truck: initialData?.truck || "",
-      vehicle_type: initialData?.vehicle_type || "",
       trailer: initialData?.trailer || "",
       origen: initialData?.origen || "",
       destination: initialData?.destination || "",
@@ -75,7 +73,7 @@ export function ShipmentForm({
       const validator = new ShipmentValidator(values);
 
       // Si es trailer_53ft exige el tráiler; si es consolidado no es obligatorio
-      const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
+      const isConsolidated = values.vehicle_type === ServiceType.CONSOLIDATED;
 
       return {
         tracking_number: validator.validateTrackingNumber(),
@@ -91,7 +89,7 @@ export function ShipmentForm({
   setupShipmentWatchers(form);
 
   const operation = form.values.type_operation;
-  const isConsolidated = form.values.service_type === ServiceType.CONSOLIDATED;
+  const isConsolidated = form.values.vehicle_type === ServiceType.CONSOLIDATED;
   const { clients: clientOptions } = useClientsByOperation(operation);
   const { getRules } = useClientReferenceRules();
 
@@ -146,9 +144,8 @@ export function ShipmentForm({
       <form
         onSubmit={form.onSubmit(
           (values) => handleSubmit(values as any),
-          handleValidationError
-        )}
-      >
+          handleValidationError,
+        )}>
         <Stack gap="md">
           <Title order={3}>Shipment Information</Title>
 
@@ -158,11 +155,14 @@ export function ShipmentForm({
             required
             data={[
               { value: ServiceType.TRAILER, label: "Tráiler 53 ft (FTL)" },
-              { value: ServiceType.CONSOLIDATED, label: "Consolidado (3.5t / Rabón)" },
+              {
+                value: ServiceType.CONSOLIDATED,
+                label: "Consolidado (3.5t / Rabón)",
+              },
             ]}
-            {...form.getInputProps("service_type")}
+            {...form.getInputProps("vehicle_type")}
             onChange={(value) => {
-              form.setFieldValue("service_type", value ?? ServiceType.TRAILER);
+              form.setFieldValue("vehicle_type", value ?? ServiceType.TRAILER);
               if (value === ServiceType.CONSOLIDATED) {
                 form.setFieldValue("trailer", "");
               }
@@ -214,17 +214,6 @@ export function ShipmentForm({
 
           <Group grow align="flex-start">
             <Select
-              label={t("shipment.labels.vehicle_type")}
-              required
-              placeholder={t("shipment.placeholders.vehicle_type")}
-              data={["trailer", "unit truck"]}
-              {...form.getInputProps("vehicle_type")}
-              onChange={(value) => {
-                form.setFieldValue("vehicle_type", value ?? "");
-                setTypeUnit(value ? (value as TUnitType) : undefined);
-              }}
-            />
-            <Select
               label={t("shipment.labels.truck")}
               required
               data={toggleUnit.map((o) => ({
@@ -236,20 +225,39 @@ export function ShipmentForm({
             />
 
             {/* Solo se muestra y requiere la caja de tráiler si NO es servicio consolidado */}
-            {!isConsolidated && (
-              <TextInput
-                label={t("shipment.labels.trailer")}
-                required
-                placeholder={t("shipment.placeholders.trailer")}
-                {...form.getInputProps("trailer")}
-              />
-            )}
           </Group>
-
+          {!isConsolidated && (
+            <Stack gap={"xs"}>
+              <Divider label="Servicio 53Ft" labelPosition="center" my="xs" />
+              <Group justify={"space-between"}>
+                <TextInput
+                  label={t("shipment.labels.trailer")}
+                  required
+                  placeholder={t("shipment.placeholders.trailer")}
+                  {...form.getInputProps("trailer")}
+                />
+                <TextInput label="Sello" required placeholder="Sello" />
+                <TextInput
+                  label="placas"
+                  required
+                  placeholder="Placa de Caja"
+                />
+                <TextInput
+                  label="Estado"
+                  required
+                  placeholder="Eje. Mex , USA,.."
+                />
+              </Group>
+            </Stack>
+          )}
           {/* Si es servicio CONSOLIDADO, desplegamos las guías hijas dinámicas */}
           {isConsolidated && (
             <Stack gap="xs">
-              <Divider label="Guías del Consolidado" labelPosition="center" my="xs" />
+              <Divider
+                label="Guías del Consolidado"
+                labelPosition="center"
+                my="xs"
+              />
               <Group justify="space-between">
                 <Text size="sm" fw={500}>
                   Números de Guía / Paquetes
@@ -265,8 +273,7 @@ export function ShipmentForm({
                       weight: 0,
                     })
                   }
-                  leftSection={<IconPlus size={14} />}
-                >
+                  leftSection={<IconPlus size={14} />}>
                   Agregar Guía
                 </Button>
               </Group>
@@ -290,24 +297,31 @@ export function ShipmentForm({
                     <TextInput
                       placeholder="Número de Guía"
                       required
-                      {...form.getInputProps(`consolidate_guide.${index}.guide_number`)}
+                      {...form.getInputProps(
+                        `consolidate_guide.${index}.guide_number`,
+                      )}
                     />
                     <NumberInput
                       placeholder="Piezas"
                       min={1}
-                      {...form.getInputProps(`consolidate_guide.${index}.pieces`)}
+                      {...form.getInputProps(
+                        `consolidate_guide.${index}.pieces`,
+                      )}
                     />
                     <NumberInput
                       placeholder="Peso (kg)"
                       decimalScale={2}
-                      {...form.getInputProps(`consolidate_guide.${index}.weight`)}
+                      {...form.getInputProps(
+                        `consolidate_guide.${index}.weight`,
+                      )}
                     />
                     <ActionIcon
                       color="red"
                       variant="subtle"
-                      onClick={() => form.removeListItem("consolidate_guide", index)}
-                      disabled={form.values.consolidate_guide.length === 1}
-                    >
+                      onClick={() =>
+                        form.removeListItem("consolidate_guide", index)
+                      }
+                      disabled={form.values.consolidate_guide.length === 1}>
                       <IconTrash size={18} />
                     </ActionIcon>
                   </Group>
