@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 
 import { notify } from "../../../components/utils/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import { TConsolidateRequest, TEventCategory, TShipmentResponse } from "../hooks/useShipments";
+import { TConsolidateRequest, TEventCategory, TShipmentResponse, TTrailerRequest } from "../hooks/useShipments";
 interface EventFieldConfig {
   key: TEventCategory;
   showNotes?: boolean;
@@ -56,7 +56,7 @@ export default function ShipmentUpdateForm({
 
 
   if (initialShipment.service_type === 'consolidated') {
-    const consolidated: TConsolidateRequest = {
+    const InitialShipmentForm: TConsolidateRequest = {
       id: initialShipment.id || 0,
       tracking_number: initialShipment?.tracking_number || '',
       customer_tracking: initialShipment?.customer_tracking || '',
@@ -74,7 +74,9 @@ export default function ShipmentUpdateForm({
 
     }
   }
-  if (initialShipment.service_type === 'trailer') { }
+  if (initialShipment.service_type === 'trailer') {
+    const InitialShipmentForm: TTrailerRequest = {}
+  }
 
   const form = useForm<TShipmentResponse>({
 

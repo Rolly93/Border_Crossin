@@ -40,6 +40,8 @@ export default function ShipmentTable({
   const handleUpdateSubmit = async (updatedValues: TShipmentUpdate) => {
     try {
       setIsSaving(true);
+
+
       const payload: TShipmentUpdate = {
         id: updatedValues.id,
         tracking_number: updatedValues.tracking_number,

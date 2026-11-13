@@ -33,6 +33,8 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
 
     //const create = getDate(shipment.data.create!);
 
+
+
     return (
       <Table.Tr
         ref={ref}
