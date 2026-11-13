@@ -3,11 +3,11 @@
 import { Table } from "@mantine/core";
 import { ShipmentModel } from "../domain/shipmentModel";
 import { forwardRef } from "react";
-import { TShipmentBase } from "../hooks/useShipments";
+import { TShipmentResponse } from "../hooks/useShipments";
 
 interface ShipmentRowProps {
-  shipment: TShipmentBase;
-  onRowDoubleClick: (element: TShipmentBase) => void;
+  shipment: TShipmentResponse;
+  onRowDoubleClick: (element: TShipmentResponse) => void;
 }
 
 function getDate(date: Date): string {

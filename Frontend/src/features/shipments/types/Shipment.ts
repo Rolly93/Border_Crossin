@@ -5,21 +5,21 @@ import {
   PaginatedResponse,
 } from "@/components/service/IBaseService";
 import {
-  TShipmentBase,
-  TShipmentCreateRequest,
+  TShipmentResponse,
   TShipmentUpdate,
+  TShipmentRequest,
 } from "../hooks/useShipments";
 
 export interface IShipmentService extends IBaseService<
-  TShipmentBase,
+  TShipmentResponse,
   TShipmentUpdate,
-  TShipmentCreateRequest
+  TShipmentRequest
 > {
-  insert(data: TShipmentCreateRequest): Promise<TShipmentBase>;
+  insert(data: TShipmentRequest): Promise<TShipmentResponse>;
   getPaginated(
     page: number,
     limit: number,
-  ): Promise<PaginatedResponse<TShipmentBase>>;
-  update(id: number, data: TShipmentUpdate): Promise<TShipmentBase>;
-  delete(id: number): Promise<TShipmentBase>;
+  ): Promise<PaginatedResponse<TShipmentResponse>>;
+  update(id: number, data: TShipmentUpdate): Promise<TShipmentResponse>;
+  delete(id: number): Promise<TShipmentResponse>;
 }

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from model.db_model import ShipmentAssign, ShipmentEventModel
 from repository.base_repository import BaseRepository
-from schema.shipment_shcema import ServiceTypeUnionResquestUpdate
+from schema.shipment_shcema import ServiceTypeUnionRequestUpdate
 
 
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
@@ -51,7 +51,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         return shipment_id
 
     def update_shipment(
-        self, id: int, shipment_data: ServiceTypeUnionResquestUpdate, user_id: int
+        self, id: int, shipment_data: ServiceTypeUnionRequestUpdate, user_id: int
     ):
 
         shipment = self.get_shipment(id)

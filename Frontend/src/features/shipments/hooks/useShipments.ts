@@ -4,25 +4,31 @@ import { useState, useEffect, useCallback } from "react";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
 import { components } from "@/types/api";
 
-export type TShipmentBase = components["schemas"]["ShipmentResponse"];
 export type TShipmentPaginate =
   components["schemas"]["PaginatedShipmentResponse"];
-export type TShipmentUpdate = components["schemas"]["ShipmentUpdate"];
+
 export type TEventCategory = components["schemas"]["EventCategory"];
 export type TShipmentEvent = components["schemas"]["ShipmentEvent"];
-export type TShipmentCreateRequest =
-  components["schemas"]["ShipmentCreateRequest"];
 
-export interface IShipmentFormValues extends Omit<
-  TShipmentCreateRequest,
-  "cliente"
-> {
+export type TShipmentRequest =
+  | components["schemas"]["ConsolidateRequest"]
+  | components["schemas"]["TrailerRequest"];
+
+export type TShipmentResponse =
+  | components["schemas"]["ConsolidateResponse"]
+  | components["schemas"]["TrailerResponse"];
+
+export type TShipmentUpdate =
+  | components["schemas"]["ConsolidateResponse"]
+  | components["schemas"]["TrailerResponse"];
+
+export interface IShipmentFormValues extends Omit<TShipmentRequest, "cliente"> {
   cliente: string | number;
 }
 const PAGE_SIZE = 10;
 
 export function useShipments() {
-  const [shipments, setShipments] = useState<TShipmentBase[]>([]);
+  const [shipments, setShipments] = useState<TShipmentResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -39,7 +45,9 @@ export function useShipments() {
 
       const isArray = Array.isArray(response);
 
-      const newShipments: TShipmentBase[] = isArray ? response : response.data;
+      const newShipments: TShipmentResponse[] = isArray
+        ? response
+        : response.data;
       const canFetchMore = isArray
         ? newShipments.length === PAGE_SIZE
         : Boolean(response.hasNextPage);
@@ -84,19 +92,19 @@ export function useShipments() {
 
   const addShipment = async (
     newShipment: IShipmentFormValues,
-  ): Promise<TShipmentBase> => {
-    const payload: TShipmentCreateRequest = {
-      tracking_number: newShipment.tracking_number,
-      customer_tracking: newShipment.customer_tracking,
-      type_operation: newShipment.type_operation,
-      cliente: Number(newShipment.cliente),
-      origen: newShipment.origen,
-      destination: newShipment.destination,
-      truck: newShipment.truck,
-      trailer: newShipment.trailer,
-    };
+  ): Promise<TShipmentResponse> => {
+    //    const payload: TShipmentRequest = {
+    //      tracking_number: newShipment.tracking_number,
+    //      customer_tracking: newShipment.customer_tracking,
+    //      type_operation: newShipment.type_operation,
+    //      cliente: Number(newShipment.cliente),
+    //      origen: newShipment.origen,
+    //      destination: newShipment.destination,
+    //      truck: newShipment.truck,
+    //      trailer: newShipment.trailer,
+    //    };
 
-    const createdShipment = await shipmentService.insert(payload);
+    const createdShipment = await shipmentService.insert(newShipment);
     setShipments((prev) => [createdShipment, ...prev]);
     return createdShipment;
   };

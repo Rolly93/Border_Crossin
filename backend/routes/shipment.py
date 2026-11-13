@@ -5,7 +5,7 @@ from deps.service import ShipmentSvc
 from schema.shipment_shcema import (
     PaginatedShipmentResponse,
     ServiceTypeUnionRequest,
-    ServiceTypeUnionResquestUpdate,
+    ServiceTypeUnionRequestUpdate,
     ShipmentUpdateResponse,
     UpdateShipment,
 )
@@ -41,7 +41,7 @@ async def create_shipment(
 @router.put("/{id}/update")
 async def update_trip(
     id: int,
-    shipment_data: ServiceTypeUnionResquestUpdate,
+    shipment_data: ServiceTypeUnionRequestUpdate,
     current_user: CurrentUser,
     service: ShipmentSvc,
 ) -> ShipmentUpdateResponse:

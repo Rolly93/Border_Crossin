@@ -130,6 +130,9 @@ class Client(Base):
     email_recipients: Mapped[list[ClientEmailRecipient]] = relationship(
         "ClientEmailRecipient", back_populates="client"
     )
+    consolidates: Mapped[list[Consolidate]] = relationship(
+        "Consolidate", back_populates="client"
+    )
 
 
 class ClientReferenceRule(Base):
@@ -278,17 +281,24 @@ class Trailer(Base):
 class Consolidate(Base):
     __tablename__ = "consolidate"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    client_id: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    client_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("client.id"), nullable=False
+    )
+
+    trip_assigned_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("trip_assigned.id"),
+        nullable=False,
+    )
+
     guide_number: Mapped[str] = mapped_column(String(100), nullable=False)
     pieces: Mapped[int | None] = mapped_column(Integer, nullable=True)
     weight: Mapped[float | None] = mapped_column(Float, nullable=True)
-    request_day: Mapped[DateTime] = mapped_column(
+    request_day: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
-
-    client_assigns: Mapped[list[Client]] = relationship(
-        Client, back_populates="shipment"
-    )
+    client: Mapped[Client] = relationship("Client", back_populates="consolidates")
     trip_assigned: Mapped[ShipmentAssign] = relationship(
         "ShipmentAssign", back_populates="consolidate_guide"
     )

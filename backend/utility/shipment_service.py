@@ -22,7 +22,7 @@ from schema.shipment_shcema import (
     ServiceType,
     ServiceTypeUnionRequest,
     ServiceTypeUnionResponse,
-    ServiceTypeUnionResquestUpdate,
+    ServiceTypeUnionRequestUpdate,
     ShipmentEvent,
     ShipmentUpdate,
     TrailerResponse,
@@ -201,7 +201,7 @@ class ShipmentService:
     def update_shipment(
         self,
         shipment_id: int,
-        shipment_data: ServiceTypeUnionResquestUpdate,
+        shipment_data: ServiceTypeUnionRequestUpdate,
         user_id: int,
     ) -> ShipmentAssign:
         current = self._shipment_db.get_shipment(shipment_id)

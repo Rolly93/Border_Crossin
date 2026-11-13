@@ -8,17 +8,15 @@ import { shipmentService } from "@/features/shipments/service/shipmentService";
 import { useTranslation } from "react-i18next";
 import { EmbarqueModal } from "./EmbarqueModalProps";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
-import { TShipmentBase, TShipmentUpdate } from "../hooks/useShipments";
+import { TShipmentResponse, TShipmentUpdate } from "../hooks/useShipments";
 
 interface ShipmentTableProps {
-  shipments: TShipmentBase[];
+  shipments: TShipmentResponse[];
   loading: boolean;
   error: string | null;
   onUpdateShipment: (id: number, data: TShipmentUpdate) => void;
   onLastElement?: (node: HTMLTableRowElement | null) => void;
 }
-
-
 
 export default function ShipmentTable({
   shipments,
@@ -29,20 +27,17 @@ export default function ShipmentTable({
 }: ShipmentTableProps) {
   const { t } = useTranslation();
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedElement, setSelectedElement] = useState<TShipmentBase | null>(null);
+  const [selectedElement, setSelectedElement] =
+    useState<TShipmentResponse | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleRowDoubleClick = (element: TShipmentBase): void => {
+  const handleRowDoubleClick = (element: TShipmentResponse): void => {
     setSelectedElement(element);
 
     open();
   };
 
-  const handleUpdateSubmit = async (updatedValues: TShipmentBase) => {
-
-
-
-
+  const handleUpdateSubmit = async (updatedValues: TShipmentUpdate) => {
     try {
       setIsSaving(true);
       const payload: TShipmentUpdate = {
@@ -56,8 +51,8 @@ export default function ShipmentTable({
         truck: updatedValues.truck!,
         trailer: updatedValues.trailer!,
         vehicle_type: updatedValues.vehicle_type!,
-        events: updatedValues.events ?? []
-      }
+        events: updatedValues.events ?? [],
+      };
 
       await shipmentService.update(payload.id, payload);
 

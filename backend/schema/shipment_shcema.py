@@ -97,7 +97,7 @@ class ShipmentUpdate(ShipmentResponse): ...
 
 class ConsolidateResponse(ConsolidateRequest):
     id: int
-    events: list[ShipmentEvent | None] | None = None
+    events: list[ShipmentEvent] = Field(default_factory=list)
 
     @field_validator("events", mode="before")
     @classmethod
@@ -170,7 +170,7 @@ ServiceTypeUnionResponse = Annotated[
 ]
 
 
-ServiceTypeUnionResquestUpdate = Annotated[
+ServiceTypeUnionRequestUpdate = Annotated[
     ConsolidateResponse | TrailerResponse, Field(discriminator="service_type")
 ]
 

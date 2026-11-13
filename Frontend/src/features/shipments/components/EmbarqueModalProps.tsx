@@ -1,30 +1,46 @@
-import { Modal, LoadingOverlay, Box } from '@mantine/core';
-import ShipmentUpdateForm from './ShipmentUpdateForm';
-import { useTranslation } from 'react-i18next';
-import { TShipmentBase } from '../hooks/useShipments';
+/** @format */
+
+import { Modal, LoadingOverlay, Box } from "@mantine/core";
+import ShipmentUpdateForm from "./ShipmentUpdateForm";
+import { useTranslation } from "react-i18next";
+import {
+  TShipmentPaginate,
+  TShipmentRequest,
+  TShipmentResponse,
+  TShipmentUpdate,
+} from "../hooks/useShipments";
 
 interface EmbarqueModalProps {
   opened: boolean;
   onClose: () => void;
-  selectedElement: TShipmentBase | null;
-  onSubmit: (formData: TShipmentBase) => Promise<void>
+  selectedElement: TShipmentResponse | null;
+  onSubmit: (formData: TShipmentUpdate) => Promise<void>;
   loading: boolean;
 }
 
-export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, loading }: EmbarqueModalProps) {
-  const { t } = useTranslation()
-  const SubmitShipment = async (formData: TShipmentBase) => {
-    await onSubmit(formData)
-  }
+export function EmbarqueModal({
+  opened,
+  onClose,
+  selectedElement,
+  onSubmit,
+  loading,
+}: EmbarqueModalProps) {
+  const { t } = useTranslation();
+  const SubmitShipment = async (formData: TShipmentUpdate) => {
+    await onSubmit(formData);
+  };
   return (
     <Modal
       opened={opened}
       onClose={onClose}
-      title={selectedElement ? `${t('modal.titles.selectedTrailer')} ${selectedElement.trailer}` : "Form"}
+      title={
+        selectedElement
+          ? `${t("modal.titles.selectedTrailer")} ${selectedElement.trailer}`
+          : "Form"
+      }
       overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
-      size='auto'
-    >
-      <Box style={{ position: 'relative', minHeight: 200 }}>
+      size="auto">
+      <Box style={{ position: "relative", minHeight: 200 }}>
         <LoadingOverlay visible={loading} overlayProps={{ blur: 2 }} />
 
         {selectedElement && (
@@ -34,7 +50,6 @@ export function EmbarqueModal({ opened, onClose, selectedElement, onSubmit, load
               SubmitShipment(updatedValues);
             }}
           />
-
         )}
       </Box>
     </Modal>
