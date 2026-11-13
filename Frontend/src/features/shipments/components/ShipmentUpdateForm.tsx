@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 
 import { notify } from "../../../components/utils/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import { TEventCategory, TShipmentBase } from "../hooks/useShipments";
+import { TConsolidateRequest, TEventCategory, TShipmentResponse } from "../hooks/useShipments";
 interface EventFieldConfig {
   key: TEventCategory;
   showNotes?: boolean;
@@ -49,22 +49,47 @@ export default function ShipmentUpdateForm({
   onSubmit,
   initialShipment,
 }: {
-  onSubmit: (values: TShipmentBase) => void;
-  initialShipment?: TShipmentBase;
+  onSubmit: (values: TShipmentResponse) => void;
+  initialShipment: TShipmentResponse;
 }) {
   const { t } = useTranslation();
-  const form = useForm<TShipmentBase>({
+
+
+  if (initialShipment.service_type === 'consolidated') {
+    const consolidated: TConsolidateRequest = {
+      id: initialShipment.id || 0,
+      tracking_number: initialShipment?.tracking_number || '',
+      customer_tracking: initialShipment?.customer_tracking || '',
+      service_type: initialShipment?.service_type,
+      type_operation: initialShipment?.type_operation,
+      client_id: initialShipment?.client_id,
+      cliente: initialShipment?.cliente,
+      truck: initialShipment?.truck,
+      origen: initialShipment.origen,
+      destination: initialShipment?.destination,
+      guide_number: initialShipment?.guide_number,
+      pices: initialShipment?.pices,
+      weight: initialShipment?.pices,
+      events: ShipmentModel.prepareInitialEvents(initialShipment.events, EXPECTED_CATEGORIES)
+
+    }
+  }
+  if (initialShipment.service_type === 'trailer') { }
+
+  const form = useForm<TShipmentResponse>({
+
     mode: "uncontrolled",
     validateInputOnChange: true,
     initialValues: {
       id: initialShipment?.id || 0,
 
+
       tracking_number: initialShipment?.tracking_number || "",
       customer_tracking: initialShipment?.customer_tracking || "",
-      cliente: initialShipment?.cliente || "",
+      cliente: initialShipment?.cliente,
       truck: initialShipment?.truck || "",
-      vehicle_type: initialShipment?.vehicle_type || "",
-      trailer: initialShipment?.trailer || "",
+      type_operation: initialShipment.type_operation
+      trailer: initialShipment?.,
       origen: initialShipment?.origen || "",
       destination: initialShipment?.destination || "",
       status: initialShipment?.status || "",

@@ -4,8 +4,6 @@ import { Modal, LoadingOverlay, Box } from "@mantine/core";
 import ShipmentUpdateForm from "./ShipmentUpdateForm";
 import { useTranslation } from "react-i18next";
 import {
-  TShipmentPaginate,
-  TShipmentRequest,
   TShipmentResponse,
   TShipmentUpdate,
 } from "../hooks/useShipments";
@@ -35,7 +33,7 @@ export function EmbarqueModal({
       onClose={onClose}
       title={
         selectedElement
-          ? `${t("modal.titles.selectedTrailer")} ${selectedElement.trailer}`
+          ? `${t("modal.titles.selectedTrailer")} ${selectedElement.service_type}`
           : "Form"
       }
       overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}

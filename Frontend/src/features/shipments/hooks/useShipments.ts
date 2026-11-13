@@ -7,6 +7,9 @@ import { components } from "@/types/api";
 export type TShipmentPaginate =
   components["schemas"]["PaginatedShipmentResponse"];
 
+export type TConsolidateRequest = components['schemas']['ConsolidateResponse']
+export type TTrailerRequest = components['schemas']['TrailerRequest']
+
 export type TEventCategory = components["schemas"]["EventCategory"];
 export type TShipmentEvent = components["schemas"]["ShipmentEvent"];
 
