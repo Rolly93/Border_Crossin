@@ -24,8 +24,10 @@ import { useClientReferenceRules } from "@/features/clients/hooks/useClientRefer
 import { notifications } from "@mantine/notifications";
 import { ValidateClientReference } from "@/components/utils/businessRules";
 import { useOperators } from "@/features/employee/hook/useOperators";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { TUnitType } from "@/features/unit/hook/useUnits";
+import { ShipmentModel } from "../domain/shipmentModel";
+import { TShipmentRequest } from "../hooks/useShipments";
 
 export enum TypeOperation {
   NORTHBOUND = "exportacion",
@@ -33,7 +35,7 @@ export enum TypeOperation {
 }
 
 export enum ServiceType {
-  TRAILER = "trailer_53ft",
+  TRAILER = "trailer",
   CONSOLIDATED = "consolidated",
 }
 
@@ -50,30 +52,23 @@ export function ShipmentForm({
 
   const toggleUnit = operators.filter((u) => u.typeUnit === typeUnit);
 
+  const initialFormValues = useMemo(
+    () =>
+      new ShipmentModel(initialData).toCreateFormValues(
+        (initialData as any)?.consolidate_guide,
+      ),
+    [initialData],
+  );
   const { t } = useTranslation();
-  const form = useForm({
+  const form = useForm<TShipmentRequest>({
     mode: "controlled",
     validateInputOnChange: true,
-    initialValues: {
-      tracking_number: initialData?.tracking_number || "",
-      customer_tracking: initialData?.customer_tracking || "",
-      type_operation: initialData?.type_operation || "Exportacion",
-      vehicle_type: (initialData as any)?.vehicle_type || ServiceType.TRAILER,
-      cliente: initialData?.cliente || "",
-      truck: initialData?.truck || "",
-      trailer: initialData?.trailer || "",
-      origen: initialData?.origen || "",
-      destination: initialData?.destination || "",
-      consolidate_guide: (initialData as any)?.consolidate_guide || [
-        { guide_number: "", pieces: 1, weight: 0 },
-      ],
-    },
-
+    initialValues: initialFormValues,
     validate: (values) => {
       const validator = new ShipmentValidator(values);
 
       // Si es trailer_53ft exige el tráiler; si es consolidado no es obligatorio
-      const isConsolidated = values.vehicle_type === ServiceType.CONSOLIDATED;
+      const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
 
       return {
         tracking_number: validator.validateTrackingNumber(),
@@ -89,7 +84,7 @@ export function ShipmentForm({
   setupShipmentWatchers(form);
 
   const operation = form.values.type_operation;
-  const isConsolidated = form.values.vehicle_type === ServiceType.CONSOLIDATED;
+  const isConsolidated = form.values.service_type === ServiceType.CONSOLIDATED;
   const { clients: clientOptions } = useClientsByOperation(operation);
   const { getRules } = useClientReferenceRules();
 
@@ -121,14 +116,7 @@ export function ShipmentForm({
         return;
       }
 
-      // Ajustamos los valores finales según la lógica de la BD
-      const finalPayload = {
-        ...values,
-        trailer: isConsolidated ? "" : values.trailer,
-        consolidate_guide: isConsolidated ? values.consolidate_guide : [],
-      };
-
-      await onSubmit(finalPayload as any);
+      await onSubmit(values);
     } catch (err: any) {
       if (typeof err === "object" && !err.message) {
         form.setErrors(err);
@@ -160,11 +148,11 @@ export function ShipmentForm({
                 label: "Consolidado (3.5t / Rabón)",
               },
             ]}
-            {...form.getInputProps("vehicle_type")}
+            {...form.getInputProps("service_type")}
             onChange={(value) => {
-              form.setFieldValue("vehicle_type", value ?? ServiceType.TRAILER);
+              form.setFieldValue("service_type", value ?? ServiceType.TRAILER);
               if (value === ServiceType.CONSOLIDATED) {
-                form.setFieldValue("trailer", "");
+                form.setFieldValue("trailer_number", "");
               }
             }}
           />
@@ -207,7 +195,7 @@ export function ShipmentForm({
               {...form.getInputProps("type_operation")}
               onChange={(value) => {
                 form.setFieldValue("type_operation", value ?? "");
-                form.setFieldValue("cliente", "");
+                form.setFieldValue("cliente", 0); //check this part
               }}
             />
           </Group>
@@ -268,6 +256,7 @@ export function ShipmentForm({
                   size="xs"
                   onClick={() =>
                     form.insertListItem("consolidate_guide", {
+                      client_id: 0,
                       guide_number: "",
                       pieces: 1,
                       weight: 0,

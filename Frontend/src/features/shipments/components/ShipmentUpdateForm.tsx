@@ -18,22 +18,18 @@ import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
 import EditableTextInput from "../../../components/Input/EditableTextInput";
 
 import { ShipmentValidator } from "../validation/ShipmentValidator";
-import { ShipmentModel } from "../domain/shipmentModel";
+import { EXPECTED_CATEGORIES, ShipmentModel } from "../domain/shipmentModel";
 import { useFormNotifications } from "@/features/notfications/hooks/useNotifications";
 
 import { useTranslation } from "react-i18next";
 
 import { notify } from "../../../components/utils/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
-import { TConsolidateRequest, TEventCategory, TShipmentResponse, TTrailerRequest } from "../hooks/useShipments";
-interface EventFieldConfig {
-  key: TEventCategory;
-  showNotes?: boolean;
-  maxNotesLength?: number;
-  notesLable?: string;
-}
+import { TShipmentResponse } from "../hooks/useShipments";
+import { useMemo } from "react";
+import { EventFieldConfig } from "../types/Shipment";
 
-const EVENT_FIELDS: EventFieldConfig[] = [
+export const EVENT_FIELDS: EventFieldConfig[] = [
   { key: "pick_up" },
   { key: "departure" },
   { key: "delay", showNotes: true, maxNotesLength: 50 },
@@ -44,7 +40,7 @@ const EVENT_FIELDS: EventFieldConfig[] = [
   { key: "safety_yard", showNotes: true, maxNotesLength: 25 },
   { key: "deliver", showNotes: true, maxNotesLength: 25 },
 ];
-const EXPECTED_CATEGORIES = EVENT_FIELDS.map((f) => f.key);
+
 export default function ShipmentUpdateForm({
   onSubmit,
   initialShipment,
@@ -53,57 +49,18 @@ export default function ShipmentUpdateForm({
   initialShipment: TShipmentResponse;
 }) {
   const { t } = useTranslation();
-
-
-  if (initialShipment.service_type === 'consolidated') {
-    const InitialShipmentForm: TConsolidateRequest = {
-      id: initialShipment.id || 0,
-      tracking_number: initialShipment?.tracking_number || '',
-      customer_tracking: initialShipment?.customer_tracking || '',
-      service_type: initialShipment?.service_type,
-      type_operation: initialShipment?.type_operation,
-      client_id: initialShipment?.client_id,
-      cliente: initialShipment?.cliente,
-      truck: initialShipment?.truck,
-      origen: initialShipment.origen,
-      destination: initialShipment?.destination,
-      guide_number: initialShipment?.guide_number,
-      pices: initialShipment?.pices,
-      weight: initialShipment?.pices,
-      events: ShipmentModel.prepareInitialEvents(initialShipment.events, EXPECTED_CATEGORIES)
-
-    }
-  }
-  if (initialShipment.service_type === 'trailer') {
-    const InitialShipmentForm: TTrailerRequest = {}
-  }
+  const shipmentModel = useMemo(
+    () => new ShipmentModel(initialShipment, EXPECTED_CATEGORIES),
+    [initialShipment],
+  );
 
   const form = useForm<TShipmentResponse>({
-
     mode: "uncontrolled",
     validateInputOnChange: true,
-    initialValues: {
-      id: initialShipment?.id || 0,
-
-
-      tracking_number: initialShipment?.tracking_number || "",
-      customer_tracking: initialShipment?.customer_tracking || "",
-      cliente: initialShipment?.cliente,
-      truck: initialShipment?.truck || "",
-      type_operation: initialShipment.type_operation
-      trailer: initialShipment?.,
-      origen: initialShipment?.origen || "",
-      destination: initialShipment?.destination || "",
-      status: initialShipment?.status || "",
-      type_operation: initialShipment?.type_operation || "",
-      events: ShipmentModel.prepareInitialEvents(
-        initialShipment?.events,
-        EXPECTED_CATEGORIES,
-      ),
-    },
+    initialValues: shipmentModel.data,
     validate: (values) => {
       const validator = new ShipmentValidator(values);
-      const eventErrors = validator.validateEventChronology() || {};
+      const eventErrors = validator.validateEventChronology() ?? {};
       return {
         customer_tracking: validator.validateCustomerTracking(),
         tracking_number: validator.validateTrackingNumber(),
@@ -124,7 +81,7 @@ export default function ShipmentUpdateForm({
     title: "Error de Validacion en Evento",
   });
 
-  const handeSubmit = (values: TShipmentBase) => {
+  const handeSubmit = (values: TShipmentResponse) => {
     if (!form.isDirty()) {
       notify.warning(
         "No has realizado ninguna modificación en los datos o fechas.",
@@ -189,7 +146,7 @@ export default function ShipmentUpdateForm({
 
           <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg" maw={900}>
             {EVENT_FIELDS.map((field) => {
-              const events = form.values.events ?? []
+              const events = form.values.events ?? [];
               const eventIndex = events.findIndex(
                 (e) => e.category === field.key,
               );

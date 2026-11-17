@@ -41,24 +41,9 @@ export default function ShipmentTable({
     try {
       setIsSaving(true);
 
+      await shipmentService.update(updatedValues.id, updatedValues);
 
-      const payload: TShipmentUpdate = {
-        id: updatedValues.id,
-        tracking_number: updatedValues.tracking_number,
-        customer_tracking: updatedValues.customer_tracking,
-        type_operation: updatedValues.type_operation,
-        cliente: Number(updatedValues.cliente),
-        origen: updatedValues.origen,
-        destination: updatedValues.destination,
-        truck: updatedValues.truck!,
-        trailer: updatedValues.trailer!,
-        vehicle_type: updatedValues.vehicle_type!,
-        events: updatedValues.events ?? [],
-      };
-
-      await shipmentService.update(payload.id, payload);
-
-      onUpdateShipment(updatedValues.id, payload);
+      onUpdateShipment(updatedValues.id, updatedValues);
 
       close();
     } catch (err) {

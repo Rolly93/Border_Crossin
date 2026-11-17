@@ -730,6 +730,17 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** ConsolidateGuideItem */
+        ConsolidateGuideItem: {
+            /** Client Id */
+            client_id: number | null;
+            /** Guide Number */
+            guide_number: string;
+            /** Pieces */
+            pieces: number;
+            /** Weight */
+            weight: number;
+        };
         /** ConsolidateRequest */
         ConsolidateRequest: {
             /** Tracking Number */
@@ -757,14 +768,8 @@ export interface components {
              * @enum {string}
              */
             service_type: "consolidated";
-            /** Client Id */
-            client_id: number;
-            /** Guide Number */
-            guide_number: string;
-            /** Pices */
-            pices: number;
-            /** Weight */
-            weight: number;
+            /** Consolidate Guide */
+            consolidate_guide: components["schemas"]["ConsolidateGuideItem"][];
         };
         /** ConsolidateResponse */
         ConsolidateResponse: {
@@ -793,14 +798,8 @@ export interface components {
              * @enum {string}
              */
             service_type: "consolidated";
-            /** Client Id */
-            client_id: number;
-            /** Guide Number */
-            guide_number: string;
-            /** Pices */
-            pices: number;
-            /** Weight */
-            weight: number;
+            /** Consolidate Guide */
+            consolidate_guide: components["schemas"]["ConsolidateGuideItem"][];
             /** Id */
             id: number;
             /** Events */

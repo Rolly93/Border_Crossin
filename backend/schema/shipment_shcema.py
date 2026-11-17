@@ -55,6 +55,20 @@ class ShipmentEvent(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ConsolidateGuideItem(BaseModel):
+    client_id: int | None = Field(gt=0)
+    guide_number: toUppercase = Field(min_length=3, max_length=100)
+    pieces: int = Field(gt=0)
+    weight: float = Field(gt=0)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ConsolidateGuideResponse(ConsolidateGuideItem):
+    id: int
+    client_id: str
+
+
 class ShipmentCreateRequest(BaseModel):
     """Cuerpo de POST /shipment/create. Lo que manda el formulario de embarque."""
 
@@ -73,10 +87,7 @@ class ShipmentCreateRequest(BaseModel):
 
 class ConsolidateRequest(ShipmentCreateRequest):
     service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
-    client_id: int = Field(gt=0)
-    guide_number: str = Field(min_length=3, max_length=100)
-    pices: int = Field(gt=0)
-    weight: float = Field(gt=0)
+    consolidate_guide: list[ConsolidateGuideItem] = Field(min_length=1)
 
 
 class TrailerRequest(ShipmentCreateRequest):

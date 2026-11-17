@@ -7,8 +7,8 @@ import { components } from "@/types/api";
 export type TShipmentPaginate =
   components["schemas"]["PaginatedShipmentResponse"];
 
-export type TConsolidateRequest = components['schemas']['ConsolidateResponse']
-export type TTrailerRequest = components['schemas']['TrailerRequest']
+export type TConsolidateRequest = components["schemas"]["ConsolidateRequest"];
+export type TTrailerRequest = components["schemas"]["TrailerRequest"];
 
 export type TEventCategory = components["schemas"]["EventCategory"];
 export type TShipmentEvent = components["schemas"]["ShipmentEvent"];
@@ -25,9 +25,19 @@ export type TShipmentUpdate =
   | components["schemas"]["ConsolidateResponse"]
   | components["schemas"]["TrailerResponse"];
 
-export interface IShipmentFormValues extends Omit<TShipmentRequest, "cliente"> {
-  cliente: string | number;
-}
+export type TConsolidateGuideItemRequest =
+  components["schemas"]["ConsolidateGuideItem"];
+
+export type TShipmentFormVaules = TShipmentResponse & {
+  trailer_number?: string;
+  plates?: string;
+  state?: string;
+  seal?: string;
+  guide_number?: string;
+  pices?: number;
+  weight?: number;
+  vehicle_type?: string;
+};
 const PAGE_SIZE = 10;
 
 export function useShipments() {
@@ -94,19 +104,8 @@ export function useShipments() {
   };
 
   const addShipment = async (
-    newShipment: IShipmentFormValues,
+    newShipment: TShipmentRequest,
   ): Promise<TShipmentResponse> => {
-    //    const payload: TShipmentRequest = {
-    //      tracking_number: newShipment.tracking_number,
-    //      customer_tracking: newShipment.customer_tracking,
-    //      type_operation: newShipment.type_operation,
-    //      cliente: Number(newShipment.cliente),
-    //      origen: newShipment.origen,
-    //      destination: newShipment.destination,
-    //      truck: newShipment.truck,
-    //      trailer: newShipment.trailer,
-    //    };
-
     const createdShipment = await shipmentService.insert(newShipment);
     setShipments((prev) => [createdShipment, ...prev]);
     return createdShipment;

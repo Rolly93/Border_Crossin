@@ -1,6 +1,10 @@
 /** @format */
 
-import { TEventCategory, TShipmentBase } from "../hooks/useShipments";
+import {
+  TEventCategory,
+  TShipmentRequest,
+  TShipmentResponse,
+} from "../hooks/useShipments";
 
 const EVENT_SEQUENCE_ORDER: TEventCategory[] = [
   "pick_up",
@@ -22,8 +26,8 @@ const REQUIERE_EVENTS = new Set<TEventCategory>([
   "deliver",
 ]);
 export class ShipmentValidator {
-  private data: Partial<TShipmentBase>;
-  constructor(formData: Partial<TShipmentBase>) {
+  private data: TShipmentRequest;
+  constructor(formData: TShipmentRequest) {
     this.data = formData;
   }
 
@@ -58,7 +62,7 @@ export class ShipmentValidator {
   }
 
   public validateTrailer(): string | null {
-    return (this.data.trailer?.trim().length || 0) < 3
+    return (this.data.tracking_number?.trim().length || 0) < 3
       ? "Trailer Invalido"
       : null;
   }

@@ -8,7 +8,15 @@ import {
   TShipmentResponse,
   TShipmentUpdate,
   TShipmentRequest,
+  TEventCategory,
 } from "../hooks/useShipments";
+
+export interface EventFieldConfig {
+  key: TEventCategory;
+  showNotes?: boolean;
+  maxNotesLength?: number;
+  notesLable?: string;
+}
 
 export interface IShipmentService extends IBaseService<
   TShipmentResponse,
