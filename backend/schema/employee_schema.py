@@ -17,8 +17,6 @@ class EmployeeBaseRequest(BaseModel):
     role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
     rfc: str
     dateOfBirth: date
-    hireDate: date
-    stillEmployee: bool
 
 
 class EmployeeBaseResponse(EmployeeBaseRequest):

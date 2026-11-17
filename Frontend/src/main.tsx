@@ -7,6 +7,7 @@ import { theme } from "./theme";
 import App from "./App";
 import "./i18n";
 import { queryClient } from "./service/queryClient";
+import '@mantine/dates/styles.css';
 
 import "./styles/fonts.css";
 

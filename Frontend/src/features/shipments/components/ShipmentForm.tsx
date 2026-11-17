@@ -28,6 +28,7 @@ import { useMemo, useState } from "react";
 import { TUnitType } from "@/features/unit/hook/useUnits";
 import { ShipmentModel } from "../domain/shipmentModel";
 import { TShipmentRequest } from "../hooks/useShipments";
+import { TShipmentCreateFormValues } from "../types/Shipment";
 
 export enum TypeOperation {
   NORTHBOUND = "exportacion",
@@ -60,14 +61,12 @@ export function ShipmentForm({
     [initialData],
   );
   const { t } = useTranslation();
-  const form = useForm<TShipmentRequest>({
+  const form = useForm<TShipmentCreateFormValues>({
     mode: "controlled",
     validateInputOnChange: true,
     initialValues: initialFormValues,
     validate: (values) => {
       const validator = new ShipmentValidator(values);
-
-      // Si es trailer_53ft exige el tráiler; si es consolidado no es obligatorio
       const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
 
       return {
@@ -126,7 +125,6 @@ export function ShipmentForm({
       }
     }
   };
-
   return (
     <Paper p="md" withBorder>
       <form
@@ -256,7 +254,7 @@ export function ShipmentForm({
                   size="xs"
                   onClick={() =>
                     form.insertListItem("consolidate_guide", {
-                      client_id: 0,
+                      client_id: form.values.cliente,
                       guide_number: "",
                       pieces: 1,
                       weight: 0,
@@ -280,37 +278,30 @@ export function ShipmentForm({
                   </Text>
                 </Group>
 
-                {/* Renglones dinámicos sin labels */}
-                {form.values.consolidate_guide.map((_: any, index: number) => (
+                {/* Renglones dinámicos sin labels */
+                }{(form.values.consolidate_guide ?? []).map((_: any, index: number) => (
                   <Group key={index} align="center" grow>
                     <TextInput
                       placeholder="Número de Guía"
                       required
-                      {...form.getInputProps(
-                        `consolidate_guide.${index}.guide_number`,
-                      )}
+                      {...form.getInputProps(`consolidate_guide.${index}.guide_number`)}
                     />
                     <NumberInput
                       placeholder="Piezas"
                       min={1}
-                      {...form.getInputProps(
-                        `consolidate_guide.${index}.pieces`,
-                      )}
+                      {...form.getInputProps(`consolidate_guide.${index}.pieces`)}
                     />
                     <NumberInput
                       placeholder="Peso (kg)"
                       decimalScale={2}
-                      {...form.getInputProps(
-                        `consolidate_guide.${index}.weight`,
-                      )}
+                      {...form.getInputProps(`consolidate_guide.${index}.weight`)}
                     />
                     <ActionIcon
                       color="red"
                       variant="subtle"
-                      onClick={() =>
-                        form.removeListItem("consolidate_guide", index)
-                      }
-                      disabled={form.values.consolidate_guide.length === 1}>
+                      onClick={() => form.removeListItem("consolidate_guide", index)}
+                      disabled={(form.values.consolidate_guide?.length ?? 0) <= 1}
+                    >
                       <IconTrash size={18} />
                     </ActionIcon>
                   </Group>

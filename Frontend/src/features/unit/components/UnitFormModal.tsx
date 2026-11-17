@@ -23,7 +23,7 @@ interface UnitFormValues {
 export function UnitFormModal({ opened, unit, onClose, onSubmit }: UnitFormModalProps) {
   const [submitting, setSubmitting] = useState(false);
   const form = useForm<UnitFormValues>({
-    initialValues: { plates: "", unitNumber: "", state: "ACTIVA", tag: "", typeUnit: 'trailer' },
+    initialValues: { plates: "", unitNumber: "", state: "ACTIVA", tag: "", typeUnit: 'trailer_53ft' },
     validate: {
       plates: (v) => (v.trim() ? null : "Requerido"),
       unitNumber: (v) => (v.trim() ? null : "Requerido"),

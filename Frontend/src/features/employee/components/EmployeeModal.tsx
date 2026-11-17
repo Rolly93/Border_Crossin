@@ -2,7 +2,6 @@ import { Alert, Checkbox, Group, Modal, PasswordInput, SegmentedControl, Stack, 
 import { DateInput } from '@mantine/dates';
 import { AtomButton } from '@/components/atoms/AtomButton';
 import { useEmployeeForm } from '../hook/useEmployeeForm';
-import '@mantine/dates/styles.css';
 import { TEmployeeType } from '../hook/useEmployee';
 
 interface EmployeeModalProps {

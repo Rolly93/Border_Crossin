@@ -3,9 +3,10 @@
 import Headers from "@/components/Header/Header";
 import { Container, Stack, Title, Text } from "@mantine/core";
 
-import { IShipmentFormValues, useShipments } from "@/features/shipments/hooks/useShipments";
+import { useShipments } from "@/features/shipments/hooks/useShipments";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ShipmentTable from "@/features/shipments/components/ShipmentTable";
+import { TShipmentCreateFormValues } from "@/features/shipments/types/Shipment";
 
 function DashBoard() {
   const {
@@ -29,9 +30,8 @@ function DashBoard() {
 
     return shipments.filter((shipment) => {
       return (
-        shipment.status?.toString().toLocaleLowerCase().includes(query) ||
         shipment.cliente?.toString().toLocaleLowerCase().includes(query) ||
-        shipment.trailer?.toString().toLocaleLowerCase().includes(query) ||
+        shipment.tracking_number?.toString().toLocaleLowerCase().includes(query) ||
         shipment.truck?.toString().toLocaleLowerCase().includes(query)
       );
     });
@@ -60,7 +60,7 @@ function DashBoard() {
     [loading, hasMore, fetchNextPage, search],
   );
 
-  const handleCreateSubmit = async (newValues: IShipmentFormValues) => {
+  const handleCreateSubmit = async (newValues: TShipmentCreateFormValues) => {
     addShipment(newValues);
   };
 

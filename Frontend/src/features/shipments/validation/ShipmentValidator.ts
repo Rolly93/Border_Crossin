@@ -2,9 +2,9 @@
 
 import {
   TEventCategory,
-  TShipmentRequest,
-  TShipmentResponse,
+  TShipmentEvent,
 } from "../hooks/useShipments";
+import { TShipmentCreateFormValues } from "../types/Shipment";
 
 const EVENT_SEQUENCE_ORDER: TEventCategory[] = [
   "pick_up",
@@ -26,8 +26,8 @@ const REQUIERE_EVENTS = new Set<TEventCategory>([
   "deliver",
 ]);
 export class ShipmentValidator {
-  private data: TShipmentRequest;
-  constructor(formData: TShipmentRequest) {
+  private data: Partial<TShipmentCreateFormValues> & { events?: TShipmentEvent[] };
+  constructor(formData: Partial<TShipmentCreateFormValues> & { events?: TShipmentEvent[] }) {
     this.data = formData;
   }
 

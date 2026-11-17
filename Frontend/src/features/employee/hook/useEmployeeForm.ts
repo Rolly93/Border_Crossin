@@ -137,12 +137,14 @@ export function useEmployeeForm({
   });
 
   const buildPayload = (values: EmployeeFormValues) => {
+
+
     const base = {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
       dateOfBirth: values.dateOfBirth ? toIsoDate(values.dateOfBirth) : undefined,
       rfc: values.rfc.trim().toUpperCase(),
-      role: values.employeeType === "operador" ? "operador" : "cargo",
+      role: values.employeeType === "operador" ? "operador" : "csr",
       employeeType: values.employeeType,
     };
     if (values.employeeType === "csr") {
@@ -172,13 +174,18 @@ export function useEmployeeForm({
     setSubmitError(null);
     setSubmitting(true);
     try {
+
       const payload = buildPayload(form.values);
+
+      console.log(payload);
       const result = await onSubmitAction(payload, initialEmployee?.id);
       if (result) {
         onSuccess?.(result);
       }
       return result;
-    } catch (err) {
+    } catch (err: any) {
+      console.log(err);
+
       setSubmitError(getErrorMessage(err, "No se pudo guardar la información del empleado"));
       return undefined;
     } finally {

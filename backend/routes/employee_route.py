@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query, Request, status
 from deps.auth import (
     CurrentUser,
     OptionalCurrentUser,
+    get_client_ip,
 )
 from deps.service import EmployeeSvc, UserSvc
 from schema import EmployeeResponseUnion
@@ -45,9 +46,9 @@ async def register_employee(
     current_user: OptionalCurrentUser,
 ):
 
-    ip = current_user.client_ip
+    client_ip = get_client_ip(rq)
     new_employee = service.register_employee_service(
-        data=data, ip=ip, current_user=current_user
+        data=data, ip=client_ip, current_user=current_user
     )
     return new_employee
 

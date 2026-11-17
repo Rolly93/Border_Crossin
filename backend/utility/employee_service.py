@@ -183,8 +183,8 @@ class EmployeeService:
 
     def register_employee_service(
         self,
-        data: EmployeeCreateUnion,
         ip: str,
+        data: EmployeeCreateUnion,
         current_user: TokenPayload | InitialTokenPayload,
     ) -> EmployeeRequestDash | BoosttrapAdmin:
 

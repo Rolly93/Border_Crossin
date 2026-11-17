@@ -10,9 +10,9 @@ export const UNIT_STATE_OPTIONS: { value: TUnitStateOptions; label: string }[] =
 ];
 export const UNIT_TYPE: { value: TUnitType; label: string }[] = [
   {
-    value: "trailer", label: "tractor"
+    value: "trailer_53ft", label: "tractor"
   }, {
-    value: "unit truck", label: "Camion"
+    value: "consolidated", label: "Camion"
   }
 ]
 

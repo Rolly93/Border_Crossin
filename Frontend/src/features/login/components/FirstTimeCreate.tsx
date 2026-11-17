@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Paper, Title, Text, Stack, Checkbox, Group, PasswordInput, TextInput, SegmentedControl, Alert } from "@mantine/core";
+import { Container, Paper, Title, Text, Stack, Group, PasswordInput, TextInput, SegmentedControl, Alert } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useEmployee } from "@/features/employee/hook/useEmployee";
 import { useEmployeeForm } from "@/features/employee/hook/useEmployeeForm";
@@ -22,6 +22,10 @@ function FirstTimeLog() {
     }
   });
   const { form, submit, submitError, submitting, clearSubmitError } = employeeForm;
+
+  useEffect(() => {
+    form.setFieldValue("isAdmin", true);
+  }, []);
   useEffect(() => {
     if (isComplete) {
       const timer = setTimeout(() => {
@@ -30,7 +34,6 @@ function FirstTimeLog() {
       return () => clearTimeout(timer)
     }
   }, [isComplete, navigate])
-
   return (
     <Container size="sm" py={50}>
       <Paper withBorder shadow="md" p="xl" radius="md">
@@ -78,7 +81,6 @@ function FirstTimeLog() {
                 <PasswordInput label="Contraseña" required autoComplete="new-password" {...form.getInputProps('password')} />
                 <PasswordInput label="Confirmar contraseña" required autoComplete="new-password" {...form.getInputProps('confirmPassword')} />
               </Group>
-              <Checkbox label="Es administrador" {...form.getInputProps('isAdmin', { type: 'checkbox' })} checked />
             </>
 
             <Group justify="flex-end" mt="md">

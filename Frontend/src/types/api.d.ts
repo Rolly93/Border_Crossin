@@ -823,12 +823,12 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /** Hiredate */
+            hireDate: string | null;
             /**
-             * Hiredate
-             * Format: date
+             * Stillemployee
+             * @default true
              */
-            hireDate: string;
-            /** Stillemployee */
             stillEmployee: boolean;
         };
         /** EmployeeBaseResponse */
@@ -849,12 +849,12 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /** Hiredate */
+            hireDate: string | null;
             /**
-             * Hiredate
-             * Format: date
+             * Stillemployee
+             * @default true
              */
-            hireDate: string;
-            /** Stillemployee */
             stillEmployee: boolean;
             /** Id */
             id: number;
@@ -877,12 +877,12 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /** Hiredate */
+            hireDate: string | null;
             /**
-             * Hiredate
-             * Format: date
+             * Stillemployee
+             * @default true
              */
-            hireDate: string;
-            /** Stillemployee */
             stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -917,12 +917,12 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /** Hiredate */
+            hireDate: string | null;
             /**
-             * Hiredate
-             * Format: date
+             * Stillemployee
+             * @default true
              */
-            hireDate: string;
-            /** Stillemployee */
             stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -1000,12 +1000,12 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /** Hiredate */
+            hireDate: string | null;
             /**
-             * Hiredate
-             * Format: date
+             * Stillemployee
+             * @default true
              */
-            hireDate: string;
-            /** Stillemployee */
             stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -1039,12 +1039,12 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
+            /** Hiredate */
+            hireDate: string | null;
             /**
-             * Hiredate
-             * Format: date
+             * Stillemployee
+             * @default true
              */
-            hireDate: string;
-            /** Stillemployee */
             stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript

@@ -7,6 +7,7 @@ import {
   TShipmentRequest,
   TShipmentResponse,
 } from "../hooks/useShipments";
+import { TShipmentCreateFormValues } from "../types/Shipment";
 
 export interface EventFieldConfig {
   key: TEventCategory;
@@ -128,10 +129,13 @@ export class ShipmentModel {
 
   public toCreateFormValues(
     existingGuides: TConsolidateGuideItemRequest[] = [],
-  ): TShipmentRequest {
+  ): TShipmentCreateFormValues {
     const { data } = this;
+    const isConsolidate = data.service_type === 'consolidated'
+    const guidesFromMode = data.service_type === 'consolidated' ? data.consolidate_guide : [];
+    const resolvedGuides = existingGuides.length > 0 ? existingGuides : guidesFromMode;
 
-    const base = {
+    return {
       tracking_number: data.tracking_number,
       customer_tracking: data.customer_tracking,
       type_operation: data.type_operation,
@@ -139,29 +143,23 @@ export class ShipmentModel {
       truck: data.truck,
       origen: data.origen,
       destination: data.destination,
+      service_type: data.service_type,
+      trailer_number: !isConsolidate ? data.trailer_number : '',
+      seal: !isConsolidate ? data.seal : '',
+      state: !isConsolidate ? data.state : '',
+      plates: !isConsolidate ? data.plates : '',
+      consolidate_guide: resolvedGuides.length > 0 ? resolvedGuides : [
+        {
+          client_id: data.cliente || null,
+          guide_number: '',
+          pieces: 1,
+          weight: 1
+        }
+      ],
     };
 
-    if (data.service_type === "trailer") {
-      return {
-        ...base,
-        service_type: "trailer",
-        trailer_number: data.trailer_number,
-        seal: data.seal,
-        state: data.state,
-        plates: data.plates,
-      };
-    }
 
-    return {
-      ...base,
-      service_type: "consolidated",
-      consolidate_guide: existingGuides.map((guide) => ({
-        client_id: guide.client_id != null ? Number(guide.client_id) : null,
-        guide_number: guide.guide_number,
-        pieces: guide.pieces,
-        weight: guide.weight,
-      })),
-    };
+
   }
 
   public static toCreatePayloads(values: TShipmentRequest): TShipmentRequest {
