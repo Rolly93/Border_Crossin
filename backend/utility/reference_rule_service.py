@@ -3,8 +3,9 @@ from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session
 
 from model.db_model import Client, ClientReferenceRule
+from schema.shipment_shcema import TypeOperation
 
-OPERATIONS = ("importacion", "exportacion")
+OPERATIONS = (TypeOperation.SOUTHBOUND, TypeOperation.NORTHBOUND)
 
 
 def normalize_operation(value: str | None) -> str:

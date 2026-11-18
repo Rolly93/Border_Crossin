@@ -293,8 +293,8 @@ class Consolidate(Base):
     )
 
     guide_number: Mapped[str] = mapped_column(String(100), nullable=False)
-    pieces: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    weight: Mapped[float | None] = mapped_column(Float, nullable=True)
+    pieces: Mapped[int] = mapped_column(Integer, default=1)
+    weight: Mapped[float] = mapped_column(Float, default=1.0)
     request_day: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )

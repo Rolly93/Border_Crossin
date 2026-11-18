@@ -56,17 +56,14 @@ class ShipmentEvent(BaseModel):
 
 
 class ConsolidateGuideItem(BaseModel):
-    client_id: int | None = Field(gt=0)
-    guide_number: toUppercase = Field(min_length=3, max_length=100)
-    pieces: int = Field(gt=0)
-    weight: float = Field(gt=0)
-
-    model_config = ConfigDict(from_attributes=True)
+    client_id: int | str = Field(gt=0)
+    guide_number: str
+    pieces: int
+    weight: float
 
 
-class ConsolidateGuideResponse(ConsolidateGuideItem):
+class ConsolidateGuideItemResponse(ConsolidateGuideItem):
     id: int
-    client_id: str
 
 
 class ShipmentCreateRequest(BaseModel):
@@ -90,6 +87,11 @@ class ConsolidateRequest(ShipmentCreateRequest):
     consolidate_guide: list[ConsolidateGuideItem] = Field(min_length=1)
 
 
+class ConsolidateRespons(ShipmentCreateRequest):
+    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
+    consolidate_guide: list[ConsolidateGuideItemResponse] = Field(min_length=1)
+
+
 class TrailerRequest(ShipmentCreateRequest):
     service_type: Literal[ServiceType.TRAILER] = ServiceType.TRAILER
     trailer_number: str = Field(min_length=2, max_length=50)
@@ -106,7 +108,7 @@ class ShipmentResponse(ShipmentCreateRequest):
 class ShipmentUpdate(ShipmentResponse): ...
 
 
-class ConsolidateResponse(ConsolidateRequest):
+class ConsolidateResponse(ConsolidateRespons):
     id: int
     events: list[ShipmentEvent] = Field(default_factory=list)
 

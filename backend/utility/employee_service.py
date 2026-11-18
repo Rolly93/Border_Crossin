@@ -80,8 +80,7 @@ class EmployeeService:
 
     def _validate_account(self, data: EmployeeCreateUnion) -> None:
         """Valida todo antes de crear el empleado, para no dejar registros a medias."""
-        if data.employeeType == "csr":
-            # Database validations (repo checks)
+        if data.employeeType == CargoTypeEnum.CSR:
             if self._user_repo.get_username(data.username.strip()):
                 raise HTTPException(
                     status_code=400, detail="Ese nombre de usuario ya existe"
@@ -91,7 +90,7 @@ class EmployeeService:
                     status_code=400, detail="Ese correo ya está registrado"
                 )
 
-        elif data.employeeType == "operador":
+        elif data.employeeType == CargoTypeEnum.OPERADOR:
             # Database validations (DB checks)
             if data.licenseExpiration <= date.today():
                 raise HTTPException(
@@ -185,12 +184,12 @@ class EmployeeService:
         self,
         ip: str,
         data: EmployeeCreateUnion,
-        current_user: TokenPayload | InitialTokenPayload,
+        current_user: TokenPayload | InitialTokenPayload | None,
     ) -> EmployeeRequestDash | BoosttrapAdmin:
 
         has_users = bool(self._user_repo.get_all_users())
 
-        if not current_user.is_admin and not has_users:
+        if not current_user or not current_user.is_admin and not has_users:
             new_employee = self.create_employee(data)
             initial_token = self.jwt.create_access_token(
                 sub=data.rfc,

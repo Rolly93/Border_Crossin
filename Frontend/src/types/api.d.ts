@@ -733,13 +733,26 @@ export interface components {
         /** ConsolidateGuideItem */
         ConsolidateGuideItem: {
             /** Client Id */
-            client_id: number | null;
+            client_id: number | string;
             /** Guide Number */
             guide_number: string;
             /** Pieces */
             pieces: number;
             /** Weight */
             weight: number;
+        };
+        /** ConsolidateGuideItemResponse */
+        ConsolidateGuideItemResponse: {
+            /** Client Id */
+            client_id: number | string;
+            /** Guide Number */
+            guide_number: string;
+            /** Pieces */
+            pieces: number;
+            /** Weight */
+            weight: number;
+            /** Id */
+            id: number;
         };
         /** ConsolidateRequest */
         ConsolidateRequest: {
@@ -799,7 +812,7 @@ export interface components {
              */
             service_type: "consolidated";
             /** Consolidate Guide */
-            consolidate_guide: components["schemas"]["ConsolidateGuideItem"][];
+            consolidate_guide: components["schemas"]["ConsolidateGuideItemResponse"][];
             /** Id */
             id: number;
             /** Events */
@@ -823,13 +836,6 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
-            /** Hiredate */
-            hireDate: string | null;
-            /**
-             * Stillemployee
-             * @default true
-             */
-            stillEmployee: boolean;
         };
         /** EmployeeBaseResponse */
         EmployeeBaseResponse: {
@@ -849,15 +855,15 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
-            /** Hiredate */
-            hireDate: string | null;
-            /**
-             * Stillemployee
-             * @default true
-             */
-            stillEmployee: boolean;
             /** Id */
             id: number;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
         };
         /** EmployeeDriverRequest */
         EmployeeDriverRequest: {
@@ -877,13 +883,6 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
-            /** Hiredate */
-            hireDate: string | null;
-            /**
-             * Stillemployee
-             * @default true
-             */
-            stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -917,13 +916,6 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
-            /** Hiredate */
-            hireDate: string | null;
-            /**
-             * Stillemployee
-             * @default true
-             */
-            stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1000,13 +992,6 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
-            /** Hiredate */
-            hireDate: string | null;
-            /**
-             * Stillemployee
-             * @default true
-             */
-            stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1039,13 +1024,6 @@ export interface components {
              * Format: date
              */
             dateOfBirth: string;
-            /** Hiredate */
-            hireDate: string | null;
-            /**
-             * Stillemployee
-             * @default true
-             */
-            stillEmployee: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1753,7 +1731,7 @@ export interface operations {
     clients_by_operation_client_by_operation_get: {
         parameters: {
             query: {
-                /** @description importacion | exportacion */
+                /** @description southbound | northbound */
                 operation_type: string;
                 token?: string | null;
             };

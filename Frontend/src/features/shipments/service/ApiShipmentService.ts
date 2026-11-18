@@ -20,6 +20,8 @@ export class ApiShipmentService extends BaseCrudApiService<
 
   override async insert(data: TShipmentRequest): Promise<TShipmentResponse> {
     try {
+      console.log(data);
+
       const response = await this.api.post<TShipmentResponse>(
         `/${this.resourcePath}/create`,
         data,
@@ -27,6 +29,8 @@ export class ApiShipmentService extends BaseCrudApiService<
 
       return response.data;
     } catch (err) {
+      console.log(err);
+
       throw new Error(getErrorMessage(err, "No se pudo registrar el embarque"));
     }
   }

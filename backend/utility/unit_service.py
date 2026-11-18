@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from schema.employee_schema import TypeUnit
-from schema.unit_schema import AssignmentOut, UnitIn, UnitOut
+from schema.unit_schema import AssignmentOut, UnitIn, UnitOut, UnitState
 
 ACTIVE_STATE = "ACTIVA"
 
@@ -77,11 +77,9 @@ class UnitService:
 
     def list_units(self) -> list[UnitOut]:
         units = self._db.query(UnitTruck).order_by(UnitTruck.unit_number).all()
-
         result: list[UnitOut] = []
         for unit in units:
             latest_assignment = unit.assignments[0] if unit.assignments else None
-
             employee = None
             if latest_assignment and latest_assignment.driver:
                 employee = latest_assignment.driver.employee
@@ -92,7 +90,7 @@ class UnitService:
                     plates=unit.plates,
                     unitNumber=unit.unit_number,
                     typeUnit=TypeUnit(unit.type_unit),
-                    status=unit.state,
+                    status=UnitState(unit.state),
                     tag=unit.tag_id,
                     driverId=latest_assignment.driver_id if latest_assignment else None,
                     driverName=(

@@ -25,8 +25,9 @@ router = APIRouter(
 async def clients_by_operation(
     current_user: CurrentUser,
     service: ReferenceRuleSvc,
-    operation_type: str = Query(..., description="importacion | exportacion"),
+    operation_type: str = Query(..., description="southbound | northbound"),
 ):
+
     return service.clients_for_operation(operation_type)
 
 

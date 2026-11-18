@@ -62,11 +62,15 @@ class DriverRepository(BaseRepository[DriverDetails]):
             # Inicializamos las variables de la unidad de forma limpia
             unit_number: str | None = None
             type_unit_val: TypeUnit | None = None
-
             # Si el outerjoin encontró un camión asignado, extraemos sus datos
             if unit_truck is not None:
                 unit_number = unit_truck.unit_number
-                type_unit_val = TypeUnit(unit_truck.type_unit)
+                print(unit_number)
+                type_unit_val = (
+                    TypeUnit(unit_truck.type_unit)
+                    if unit_truck and unit_truck.type_unit
+                    else None
+                )
 
             result.append(
                 OperatorOptionResponse(
@@ -76,5 +80,6 @@ class DriverRepository(BaseRepository[DriverDetails]):
                     typeUnit=type_unit_val if type_unit_val else None,
                 )
             )
+
 
         return result

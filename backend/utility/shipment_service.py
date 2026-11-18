@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -16,6 +17,7 @@ from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
 from schema.shipment_shcema import (
+    ConsolidateGuideItemResponse,
     ConsolidateResponse,
     EventCategory,
     PaginatedShipmentResponse,
@@ -70,21 +72,26 @@ class ShipmentService:
         service_shipment_data: ServiceTypeUnionResponse | None = None
 
         if s.service_type == ServiceType.CONSOLIDATED:
-            g = s.consolidate_guide[0]
             service_shipment_data = ConsolidateResponse(
                 id=s.id,
                 tracking_number=s.tracking_number,
                 customer_tracking=s.customer_tracking,
                 service_type=ServiceType.CONSOLIDATED,
-                guide_number=g.guide_number,
-                client_id=s.client_id,
-                pices=g.pieces or 0,
-                weight=g.weight or 0,
                 cliente=s.client_id,
                 origen=s.origen,
                 destination=s.destination,
                 truck=str(s.truck),
                 events=events,
+                consolidate_guide=[
+                    ConsolidateGuideItemResponse(
+                        id=g.id,
+                        client_id=g.client_id,
+                        guide_number=g.guide_number,
+                        pieces=g.pieces,
+                        weight=g.weight,
+                    )
+                    for g in s.consolidate_guide
+                ],
             )
         if s.service_type == ServiceType.TRAILER and s.trailer:
             service_shipment_data = TrailerResponse(
@@ -145,51 +152,72 @@ class ShipmentService:
             )
 
         trailer_objt = None
-        consolidate_objt = None
-        if data.service_type == ServiceType.CONSOLIDATED:
-            consolidate_objt = Consolidate(
-                client_id=data.cliente,
-                guide_number=data.guide_number,
-                pieces=int(data.pices),
-                weight=data.weight,
-            )
-            self.db.add(consolidate_objt)
-            self.db.flush()
 
-        elif data.service_type == ServiceType.TRAILER:
+        if data.service_type == ServiceType.TRAILER:
+
             trailer_objt = Trailer(
                 plates=data.plates,
                 trailer_number=data.trailer_number,
                 state=data.state,
                 seal=data.seal,
             )
+
             self.db.add(trailer_objt)
             self.db.flush()
 
-        else:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Tipo de Servicio Invalido")
+        elif data.service_type != ServiceType.CONSOLIDATED:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Tipo de servicio inválido",
+            )
+
+        # =====================================================
+        # CREAR SHIPMENT
+        # =====================================================
 
         shipment = ShipmentAssign(
             tracking_number=data.tracking_number,
             customer_tracking=data.customer_tracking,
             type_operation=data.type_operation,
-            truck=assignment.driver_id,
+            # ESTE ERA TU ERROR
+            driver_id=assignment.driver_id,
             client_id=client.id,
             assigned_by=user_id,
             unit_truck_id=unit.id,
             origen=data.origen,
             destination=data.destination,
+            service_type=data.service_type,
             is_active=True,
             trailer_id=trailer_objt.id if trailer_objt else None,
-            service_type=data.service_type,
         )
 
-        if consolidate_objt:
-            shipment.consolidate_guide.append(consolidate_objt)
-
         self.db.add(shipment)
+        self.db.flush()
+
+        # =====================================================
+        # CONSOLIDATED
+        # =====================================================
+
+        if data.service_type == ServiceType.CONSOLIDATED and data.consolidate_guide:
+
+            consolidates = [
+                Consolidate(
+                    guide_number=item.guide_number,
+                    pieces=item.pieces,
+                    weight=item.weight,
+                    # NO client_id=client
+                    client_id=client.id,
+                    # Asociar al viaje
+                    trip_assigned_id=shipment.id,
+                )
+                for item in data.consolidate_guide
+            ]
+
+            self.db.add_all(consolidates)
+
         self.db.commit()
         self.db.refresh(shipment)
+
         return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:

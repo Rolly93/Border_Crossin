@@ -85,11 +85,15 @@ export class ShipmentModel {
     initialShipment?: TShipmentResponse,
     expectedCategories: TEventCategory[] = EXPECTED_CATEGORIES,
   ): TShipmentResponse {
+    const rawClient = initialShipment?.cliente;
+    const resolvedClient =
+      rawClient !== undefined && rawClient !== null ? Number(rawClient) : 0;
+
     const baseValues = {
       id: initialShipment?.id ?? 0,
       tracking_number: initialShipment?.tracking_number ?? "",
       customer_tracking: initialShipment?.customer_tracking ?? "",
-      cliente: initialShipment?.cliente ?? 0,
+      cliente: resolvedClient,
       truck: initialShipment?.truck ?? "",
       origen: initialShipment?.origen ?? "",
       destination: initialShipment?.destination ?? "",
@@ -108,7 +112,7 @@ export class ShipmentModel {
           initialShipment.consolidate_guide &&
           initialShipment.consolidate_guide.map(
             (guide: TConsolidateGuideItemRequest) => ({
-              client_id: this.data.cliente ? Number(this.data.cliente) : 0,
+              client_id: resolvedClient,
               guide_number: guide.guide_number,
               pieces: guide.pieces,
               weight: guide.weight,
@@ -131,9 +135,11 @@ export class ShipmentModel {
     existingGuides: TConsolidateGuideItemRequest[] = [],
   ): TShipmentCreateFormValues {
     const { data } = this;
-    const isConsolidate = data.service_type === 'consolidated'
-    const guidesFromMode = data.service_type === 'consolidated' ? data.consolidate_guide : [];
-    const resolvedGuides = existingGuides.length > 0 ? existingGuides : guidesFromMode;
+    const isConsolidate = data.service_type === "consolidated";
+    const guidesFromMode =
+      data.service_type === "consolidated" ? data.consolidate_guide : [];
+    const resolvedGuides =
+      existingGuides.length > 0 ? existingGuides : guidesFromMode;
 
     return {
       tracking_number: data.tracking_number,
@@ -144,26 +150,30 @@ export class ShipmentModel {
       origen: data.origen,
       destination: data.destination,
       service_type: data.service_type,
-      trailer_number: !isConsolidate ? data.trailer_number : '',
-      seal: !isConsolidate ? data.seal : '',
-      state: !isConsolidate ? data.state : '',
-      plates: !isConsolidate ? data.plates : '',
-      consolidate_guide: resolvedGuides.length > 0 ? resolvedGuides : [
-        {
-          client_id: data.cliente || null,
-          guide_number: '',
-          pieces: 1,
-          weight: 1
-        }
-      ],
+      trailer_number: !isConsolidate ? data.trailer_number : "",
+      seal: !isConsolidate ? data.seal : "",
+      state: !isConsolidate ? data.state : "",
+      plates: !isConsolidate ? data.plates : "",
+      consolidate_guide:
+        resolvedGuides.length > 0
+          ? resolvedGuides
+          : [
+              {
+                client_id: data.cliente,
+                guide_number: "",
+                pieces: 1,
+                weight: 1,
+              },
+            ],
     };
-
-
-
   }
 
   public static toCreatePayloads(values: TShipmentRequest): TShipmentRequest {
-    const client_id = Number(values.cliente);
+    const client_id =
+      values.cliente !== null && values.cliente !== undefined
+        ? Number(values.cliente)
+        : 0;
+
     if (values.service_type === "consolidated") {
       return {
         tracking_number: values.tracking_number,
