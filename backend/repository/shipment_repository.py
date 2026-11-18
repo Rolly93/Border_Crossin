@@ -3,9 +3,14 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from model.db_model import ShipmentAssign, ShipmentEventModel
+from model.db_model import ShipmentAssign, ShipmentEventModel, Trailer
 from repository.base_repository import BaseRepository
-from schema.shipment_shcema import ServiceTypeUnionRequestUpdate
+from schema.shipment_shcema import (
+    ServiceType,
+    ServiceTypeUnionRequestUpdate,
+    ShipmentCreateRequest,
+)
+import service
 
 
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
@@ -36,8 +41,29 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
 
         return shipment_to_inactive.customer_tracking
 
-    def create(self, shipment_data: ShipmentAssign):
-        self.save(shipment_data)
+    def create(
+        self,
+        data: ShipmentCreateRequest,
+        driver_id: int,
+        service_type: ServiceType,
+        user_id: int,
+        new_trailer: Trailer | None,
+    ) -> ShipmentAssign:
+        new_assgiment_shipment = ShipmentAssign(
+            tracking_number=data.tracking_number,
+            customer_tracking=data.customer_tracking,
+            type_operation=data.type_operation,
+            driver_id=driver_id,
+            client_id=data.cliente,
+            assigned_by=user_id,
+            service_type=service_type,
+            unit_truck_id=int(data.truck),
+            origen=data.origen,
+            destination=data.destination,
+            is_active=True,
+            trailer_id=new_trailer,
+        )
+        return self.save(new_assgiment_shipment)
 
     def get_shipment(self, id: int) -> ShipmentAssign:
         shipment_id = (

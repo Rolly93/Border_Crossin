@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from model.db_model import Trailer
 from repository.base_repository import BaseRepository
+from schema.shipment_shcema import TrailerCreate
 
 
 class TrailerRepository(BaseRepository[Trailer]):
@@ -29,17 +30,18 @@ class TrailerRepository(BaseRepository[Trailer]):
         return self._db.query(Trailer).filter(Trailer.state == state).all()
 
     def create_trailer(
-        self, plates: str, state: str, trailer_number: str, seal: str = "N/A"
+        self,
+        trailer: TrailerCreate,
     ) -> Trailer:
         """Create and save a new trailer instance."""
-        trailer = Trailer(
-            plates=plates,
-            state=state,
-            trailer_number=trailer_number,
-            seal=seal,
+        new_trailer = Trailer(
+            plates=trailer.plates,
+            state=trailer.state,
+            trailer_number=trailer.trailer_number,
+            seal=trailer.seal,
             assigned_day=datetime.now(UTC),
         )
-        return self.save(trailer)  # Inherited from BaseRepository
+        return self.save(new_trailer)
 
     def update_trailer(
         self, trailer: Trailer, data: BaseModel | dict[str, Any]

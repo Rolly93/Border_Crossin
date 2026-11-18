@@ -62,6 +62,13 @@ class ConsolidateGuideItem(BaseModel):
     weight: float
 
 
+class ConsolodateGuideCreate(BaseModel):
+    client_id: int
+    guide_number: str
+    pieces: int
+    weight: float
+
+
 class ConsolidateGuideItemResponse(ConsolidateGuideItem):
     id: int
 
@@ -74,12 +81,12 @@ class ShipmentCreateRequest(BaseModel):
     type_operation: TypeOperation = Field(default=TypeOperation.NORTHBOUND)
     cliente: int = Field(gt=0, description="ID del cliente")
     origen: str = Field(min_length=1, max_length=200)
+    truck: str = Field(min_length=1, max_length=20, description="Operador ID")
     destination: str = Field(
         min_length=1,
         max_length=200,
         validation_alias=AliasChoices("destination", "destino"),
     )
-    truck: str = Field(min_length=1, max_length=20, description="Operador ID")
 
 
 class ConsolidateRequest(ShipmentCreateRequest):
@@ -98,6 +105,13 @@ class TrailerRequest(ShipmentCreateRequest):
     plates: str = Field(min_length=2, max_length=30)
     state: str = Field(min_length=1, max_length=10, default="N/A")
     seal: str = Field(min_length=2, max_length=50)
+
+
+class TrailerCreate(BaseModel):
+    trailer_number: str
+    plates: str
+    state: str
+    seal: str
 
 
 class ShipmentResponse(ShipmentCreateRequest):

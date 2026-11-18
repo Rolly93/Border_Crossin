@@ -52,3 +52,14 @@ class BaseRepository(Generic[T]):
         self._db.commit()
         self._db.refresh(db_obj)
         return db_obj
+
+    def save_all(self, instances: list[T]) -> list[T]:
+        try:
+            self._db.add_all(instances)
+            self._db.commit()
+            for instance in instances:
+                self._db.refresh(instance)
+            return instances
+        except SQLAlchemyError as err:
+            self._db.rollback()
+            raise RuntimeError(f"Database bulk save error: {err}") from err

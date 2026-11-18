@@ -1,6 +1,3 @@
-import select
-
-from fastapi import HTTPException, status
 from sqlalchemy import exists
 from sqlalchemy.orm import Session
 

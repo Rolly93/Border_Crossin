@@ -2,7 +2,6 @@ from select import select
 from typing import override
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
@@ -80,6 +79,5 @@ class DriverRepository(BaseRepository[DriverDetails]):
                     typeUnit=type_unit_val if type_unit_val else None,
                 )
             )
-
 
         return result

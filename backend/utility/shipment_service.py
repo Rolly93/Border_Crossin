@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
@@ -13,20 +12,24 @@ from model.db_model import (
 )
 from repository import ShipmentRepository
 from repository.cliente_repository import ClientServiceType
+from repository.consolidated_repository import ConsolidateRepository
 from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
 from schema.shipment_shcema import (
     ConsolidateGuideItemResponse,
     ConsolidateResponse,
+    ConsolodateGuideCreate,
     EventCategory,
     PaginatedShipmentResponse,
     ServiceType,
     ServiceTypeUnionRequest,
-    ServiceTypeUnionResponse,
     ServiceTypeUnionRequestUpdate,
+    ServiceTypeUnionResponse,
+    ShipmentCreateRequest,
     ShipmentEvent,
     ShipmentUpdate,
+    TrailerCreate,
     TrailerResponse,
 )
 from service.shipment_dispatch_service import ShipmentDispatchService
@@ -44,6 +47,8 @@ class ShipmentService:
         self._reference_rule = ReferenceRuleService(self.db)
         self._unit_repo = UnitRepository(self.db)
         self._trailer_repo = TrailerRepository(self.db)
+        self._consolidate_repo = ConsolidateRepository(self.db)
+        self._trailer_objt: Trailer | None = None
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -151,19 +156,14 @@ class ShipmentService:
                 status.HTTP_404_NOT_FOUND, detail="Falta Caputar el Tipo de Servicio"
             )
 
-        trailer_objt = None
-
         if data.service_type == ServiceType.TRAILER:
-
-            trailer_objt = Trailer(
+            trailer_data = TrailerCreate(
                 plates=data.plates,
+                seal=data.seal,
                 trailer_number=data.trailer_number,
                 state=data.state,
-                seal=data.seal,
             )
-
-            self.db.add(trailer_objt)
-            self.db.flush()
+            self._trailer_objt = self._trailer_repo.create_trailer(trailer_data)
 
         elif data.service_type != ServiceType.CONSOLIDATED:
             raise HTTPException(
@@ -175,49 +175,42 @@ class ShipmentService:
         # CREAR SHIPMENT
         # =====================================================
 
-        shipment = ShipmentAssign(
+        s = ShipmentCreateRequest(
             tracking_number=data.tracking_number,
             customer_tracking=data.customer_tracking,
             type_operation=data.type_operation,
-            # ESTE ERA TU ERROR
-            driver_id=assignment.driver_id,
-            client_id=client.id,
-            assigned_by=user_id,
-            unit_truck_id=unit.id,
+            cliente=data.cliente,
             origen=data.origen,
+            truck=str(unit.id),
             destination=data.destination,
-            service_type=data.service_type,
-            is_active=True,
-            trailer_id=trailer_objt.id if trailer_objt else None,
         )
-
-        self.db.add(shipment)
-        self.db.flush()
 
         # =====================================================
         # CONSOLIDATED
         # =====================================================
-
+        cosolidate_saved = []
         if data.service_type == ServiceType.CONSOLIDATED and data.consolidate_guide:
-
-            consolidates = [
-                Consolidate(
-                    guide_number=item.guide_number,
-                    pieces=item.pieces,
-                    weight=item.weight,
-                    # NO client_id=client
-                    client_id=client.id,
-                    # Asociar al viaje
-                    trip_assigned_id=shipment.id,
+            new_consolidate = [
+                ConsolodateGuideCreate(
+                    client_id=int(g.client_id),
+                    guide_number=g.guide_number,
+                    weight=g.weight,
+                    pieces=g.pieces,
                 )
-                for item in data.consolidate_guide
+                for g in data.consolidate_guide
             ]
 
-            self.db.add_all(consolidates)
+            cosolidate_saved = self._consolidate_repo.create_consolidate(
+                new_consolidate, client=client, assigned_shipment=assignment
+            )
 
-        self.db.commit()
-        self.db.refresh(shipment)
-
+        shipment = self._shipment_db.create(
+            data=s,
+            driver_id=assignment.driver_id,
+            service_type=ServiceType(data.service_type),
+            user_id=user_id,
+            new_trailer=self._trailer_objt,
+        )
         return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:
