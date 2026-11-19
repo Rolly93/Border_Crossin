@@ -9,6 +9,7 @@ import {
   TOperatorOption,
   TPaginatedEmployeeResponse,
 } from "../hook/useEmployee";
+import { log } from "node:console";
 
 export class ApiEmployeeService
   extends BaseCrudApiService<
@@ -76,6 +77,8 @@ export class ApiEmployeeService
       const response = await this.api.get<TOperatorOption[]>(
         `${this.resourcePath}/operators`,
       );
+      console.log(response.data);
+
 
       return response.data;
     } catch (error: any) {

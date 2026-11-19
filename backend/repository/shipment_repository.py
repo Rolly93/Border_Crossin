@@ -3,14 +3,14 @@ from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from model.db_model import ShipmentAssign, ShipmentEventModel, Trailer
+from model.db_model import Consolidate, ShipmentAssign, ShipmentEventModel, Trailer
 from repository.base_repository import BaseRepository
+from routes import shipment
 from schema.shipment_shcema import (
     ServiceType,
     ServiceTypeUnionRequestUpdate,
     ShipmentCreateRequest,
 )
-import service
 
 
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
@@ -48,7 +48,15 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         service_type: ServiceType,
         user_id: int,
         new_trailer: Trailer | None,
+        new_consolidate: list[Consolidate] | Consolidate | None,
     ) -> ShipmentAssign:
+
+        consolidates_list = (
+            new_consolidate
+            if isinstance(new_consolidate, list)
+            else ([new_consolidate] if new_consolidate is not None else [])
+        )
+
         new_assgiment_shipment = ShipmentAssign(
             tracking_number=data.tracking_number,
             customer_tracking=data.customer_tracking,
@@ -61,7 +69,8 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
             origen=data.origen,
             destination=data.destination,
             is_active=True,
-            trailer_id=new_trailer,
+            trailer_id=new_trailer.id if new_trailer else None,
+            consolidate_guide=consolidates_list,
         )
         return self.save(new_assgiment_shipment)
 
@@ -127,4 +136,5 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         query = self._db.query(ShipmentAssign)
         total = query.count()
         shipments = query.offset((page - 1) * limit).limit(limit).all()
+
         return shipments, total

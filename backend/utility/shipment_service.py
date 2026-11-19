@@ -49,6 +49,7 @@ class ShipmentService:
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
         self._trailer_objt: Trailer | None = None
+        self._consolidate_obj: list[Consolidate] | Consolidate | None = None
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -75,7 +76,11 @@ class ShipmentService:
             if e.event_time and e.category in valid_categories
         ]
         service_shipment_data: ServiceTypeUnionResponse | None = None
-
+        truck_value = (
+            getattr(s.truck, "unit_number", None)
+            or getattr(s.truck, "number", None)
+            or (str(s.unit_truck_id) if s.unit_truck_id is not None else "")
+        )
         if s.service_type == ServiceType.CONSOLIDATED:
             service_shipment_data = ConsolidateResponse(
                 id=s.id,
@@ -85,7 +90,7 @@ class ShipmentService:
                 cliente=s.client_id,
                 origen=s.origen,
                 destination=s.destination,
-                truck=str(s.truck),
+                truck=truck_value,
                 events=events,
                 consolidate_guide=[
                     ConsolidateGuideItemResponse(
@@ -111,7 +116,7 @@ class ShipmentService:
                 cliente=s.client_id,
                 origen=s.origen,
                 destination=s.destination,
-                truck=str(s.truck),
+                truck=truck_value,
                 events=events,
             )
         if not service_shipment_data:
@@ -155,7 +160,7 @@ class ShipmentService:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND, detail="Falta Caputar el Tipo de Servicio"
             )
-
+        trailer_obj: Trailer | None = None
         if data.service_type == ServiceType.TRAILER:
             trailer_data = TrailerCreate(
                 plates=data.plates,
@@ -163,13 +168,7 @@ class ShipmentService:
                 trailer_number=data.trailer_number,
                 state=data.state,
             )
-            self._trailer_objt = self._trailer_repo.create_trailer(trailer_data)
-
-        elif data.service_type != ServiceType.CONSOLIDATED:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "Tipo de servicio inválido",
-            )
+            trailer_obj = self._trailer_repo.create_trailer(trailer_data)
 
         # =====================================================
         # CREAR SHIPMENT
@@ -185,14 +184,23 @@ class ShipmentService:
             destination=data.destination,
         )
 
+        shipment = self._shipment_db.create(
+            data=s,
+            driver_id=assignment.driver_id,
+            service_type=ServiceType(data.service_type),
+            user_id=user_id,
+            new_trailer=self._trailer_objt,
+            new_consolidate=[],
+        )
         # =====================================================
         # CONSOLIDATED
         # =====================================================
-        cosolidate_saved = []
+
         if data.service_type == ServiceType.CONSOLIDATED and data.consolidate_guide:
             new_consolidate = [
                 ConsolodateGuideCreate(
                     client_id=int(g.client_id),
+                    trip_assigned_id=shipment.id,
                     guide_number=g.guide_number,
                     weight=g.weight,
                     pieces=g.pieces,
@@ -200,17 +208,11 @@ class ShipmentService:
                 for g in data.consolidate_guide
             ]
 
-            cosolidate_saved = self._consolidate_repo.create_consolidate(
-                new_consolidate, client=client, assigned_shipment=assignment
+            self._consolidate_obj = self._consolidate_repo.create_consolidate(
+                new_consolidate, client=client
             )
+            self.db.refresh(shipment)
 
-        shipment = self._shipment_db.create(
-            data=s,
-            driver_id=assignment.driver_id,
-            service_type=ServiceType(data.service_type),
-            user_id=user_id,
-            new_trailer=self._trailer_objt,
-        )
         return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:

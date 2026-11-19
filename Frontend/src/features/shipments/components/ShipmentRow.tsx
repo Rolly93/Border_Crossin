@@ -17,7 +17,7 @@ interface IShipmentData {
   costumer_tracking: string;
   tracking_Trailer: string;
   trailer: string | null;
-  service_type: "trailer" | "consolidated";
+  service_type: "trailer_53ft" | "consolidated";
   consolidate_guide: TConsolidateGuideItemRequest[];
   truck: string;
   client: string;

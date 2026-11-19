@@ -276,8 +276,6 @@ class Trailer(Base):
 # ==================================================
 # #.- Consolidate Shipment
 # ==================================================
-
-
 class Consolidate(Base):
     __tablename__ = "consolidate"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -285,19 +283,17 @@ class Consolidate(Base):
     client_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("client.id"), nullable=False
     )
-
     trip_assigned_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("trip_assigned.id"),
-        nullable=False,
+        Integer, ForeignKey("trip_assigned.id"), nullable=False
     )
 
     guide_number: Mapped[str] = mapped_column(String(100), nullable=False)
-    pieces: Mapped[int] = mapped_column(Integer, default=1)
-    weight: Mapped[float] = mapped_column(Float, default=1.0)
+    pieces: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    weight: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     request_day: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
+
     client: Mapped[Client] = relationship("Client", back_populates="consolidates")
     trip_assigned: Mapped[ShipmentAssign] = relationship(
         "ShipmentAssign", back_populates="consolidate_guide"
@@ -311,45 +307,19 @@ class ShipmentAssign(Base):
     __tablename__ = "trip_assigned"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-
     tracking_number: Mapped[str] = mapped_column(
         String(100), unique=True, nullable=False
     )
-
     customer_tracking: Mapped[str] = mapped_column(String(100), nullable=False)
-
     type_operation: Mapped[str] = mapped_column(
         String(50), nullable=False, default=TypeOperation.NORTHBOUND
     )
-
     service_type: Mapped[str] = mapped_column(
         String(50), nullable=False, default=ServiceType.TRAILER
     )
-
     driver_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("driver_details.employee_id"), nullable=False
     )
-
-    client_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("client.id"), nullable=False
-    )
-
-    assigned_by: Mapped[int] = mapped_column(
-        Integer, ForeignKey("user.id"), nullable=False
-    )
-
-    trailer_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("trailer.id"), nullable=True
-    )
-
-    unit_truck_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("unit_truck.id"), nullable=True
-    )
-
-    consolidate_guide: Mapped[list[Consolidate]] = relationship(
-        Consolidate, back_populates="trip_assigned", cascade="all, delete-orphan"
-    )
-
     assigned_day: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
@@ -357,19 +327,23 @@ class ShipmentAssign(Base):
     origen: Mapped[str] = mapped_column(String(200), nullable=False)
     destination: Mapped[str] = mapped_column(String(200), nullable=False)
 
+    client_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("client.id"), nullable=False
+    )
+    assigned_by: Mapped[int] = mapped_column(
+        Integer, ForeignKey("user.id"), nullable=False
+    )
+
+    trailer_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("trailer.id"), nullable=True
+    )
+    unit_truck_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("unit_truck.id"), nullable=True
+    )
+
     # Relaciones
-    driver: Mapped[DriverDetails] = relationship(
-        DriverDetails, back_populates="shipment_assigns"
-    )
-    client: Mapped[Client] = relationship("Client", back_populates="shipment_assigns")
-    assigned_by_user: Mapped[User] = relationship(
-        "User", back_populates="shipment_assigns"
-    )
-    trailer: Mapped[Trailer] = relationship(
-        "Trailer", back_populates="shipment_assigns"
-    )
-    truck: Mapped[UnitTruck | None] = relationship(
-        "UnitTruck", back_populates="shipment_assigns"
+    consolidate_guide: Mapped[list[Consolidate]] = relationship(
+        Consolidate, back_populates="trip_assigned", cascade="all, delete-orphan"
     )
 
     events: Mapped[list[ShipmentEventModel]] = relationship(
@@ -377,6 +351,22 @@ class ShipmentAssign(Base):
     )
     email_services: Mapped[list[EmailService]] = relationship(
         "EmailService", back_populates="trip"
+    )
+
+    driver: Mapped[DriverDetails] = relationship(
+        DriverDetails, back_populates="shipment_assigns"
+    )
+    client: Mapped[Client] = relationship("Client", back_populates="shipment_assigns")
+
+    assigned_by_user: Mapped[User] = relationship(
+        "User", back_populates="shipment_assigns"
+    )
+
+    trailer: Mapped[Trailer | None] = relationship(
+        "Trailer", back_populates="shipment_assigns"
+    )
+    truck: Mapped[UnitTruck | None] = relationship(
+        "UnitTruck", back_populates="shipment_assigns"
     )
 
 

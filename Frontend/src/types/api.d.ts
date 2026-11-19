@@ -769,13 +769,13 @@ export interface components {
             cliente: number;
             /** Origen */
             origen: string;
-            /** Destination */
-            destination: string;
             /**
              * Truck
              * @description Operador ID
              */
             truck: string;
+            /** Destination */
+            destination: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -799,13 +799,13 @@ export interface components {
             cliente: number;
             /** Origen */
             origen: string;
-            /** Destination */
-            destination: string;
             /**
              * Truck
              * @description Operador ID
              */
             truck: string;
+            /** Destination */
+            destination: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1250,18 +1250,18 @@ export interface components {
             cliente: number;
             /** Origen */
             origen: string;
-            /** Destination */
-            destination: string;
             /**
              * Truck
              * @description Operador ID
              */
             truck: string;
+            /** Destination */
+            destination: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
-            service_type: "trailer";
+            service_type: "trailer_53ft";
             /** Trailer Number */
             trailer_number: string;
             /** Plates */
@@ -1289,18 +1289,18 @@ export interface components {
             cliente: number;
             /** Origen */
             origen: string;
-            /** Destination */
-            destination: string;
             /**
              * Truck
              * @description Operador ID
              */
             truck: string;
+            /** Destination */
+            destination: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
-            service_type: "trailer";
+            service_type: "trailer_53ft";
             /** Trailer Number */
             trailer_number: string;
             /** Plates */

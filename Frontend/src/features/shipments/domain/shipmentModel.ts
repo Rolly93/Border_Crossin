@@ -123,7 +123,7 @@ export class ShipmentModel {
 
     return {
       ...baseValues,
-      service_type: "trailer",
+      service_type: "trailer_53ft",
       trailer_number: "",
       plates: "",
       state: "",
@@ -198,7 +198,7 @@ export class ShipmentModel {
       tracking_number: values.tracking_number,
       customer_tracking: values.customer_tracking,
       type_operation: values.type_operation,
-      service_type: "trailer",
+      service_type: "trailer_53ft",
       cliente: client_id,
       truck: values.truck,
       origen: values.origen,

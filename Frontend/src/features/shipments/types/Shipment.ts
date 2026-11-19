@@ -23,7 +23,7 @@ export interface TShipmentCreateFormValues {
   tracking_number: string;
   customer_tracking: string;
   type_operation: "northbound" | "southbound";
-  service_type: 'consolidated' | 'trailer'
+  service_type: "consolidated" | "trailer_53ft";
   cliente: number;
   truck: string;
   trailer_number: string;

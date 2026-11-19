@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
-from model.db_model import Client, Consolidate, ShipmentAssign
+from model.db_model import Client, Consolidate
 from repository.base_repository import BaseRepository
 from schema.shipment_shcema import ConsolodateGuideCreate
 
@@ -23,7 +23,7 @@ class ConsolidateRepository(BaseRepository[Consolidate]):
         self,
         consolidate_data: list[ConsolodateGuideCreate] | ConsolodateGuideCreate,
         client: Client,
-        assigned_shipment: ShipmentAssign,
+
     ) -> list[Consolidate] | Consolidate:
         """Create and save a new Consolidate Guide instance."""
         is_single = not isinstance(consolidate_data, list)
@@ -34,10 +34,10 @@ class ConsolidateRepository(BaseRepository[Consolidate]):
             Consolidate(
                 client=client,
                 guide_number=g.guide_number,
+                trip_assigned_id=g.trip_assigned_id ,
                 weight=g.weight,
                 pieces=g.pieces,
                 request_day=datetime.now(UTC),
-                trip_assigned=assigned_shipment,
             )
             for g in items
         ]

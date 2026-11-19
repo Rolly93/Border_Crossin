@@ -34,7 +34,7 @@ export enum TypeOperation {
 }
 
 export enum ServiceType {
-  TRAILER = "trailer",
+  TRAILER = "trailer_53ft",
   CONSOLIDATED = "consolidated",
 }
 
@@ -63,6 +63,7 @@ export function ShipmentForm({
       console.log(values);
 
       const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
+      const trailerErrors = isConsolidated ?{} : validator.validateTrailer
 
       return {
         tracking_number: validator.validateTrackingNumber(),
@@ -70,7 +71,7 @@ export function ShipmentForm({
         origen: validator.validateOrigin(),
         destination: validator.validateDestination(),
         type_operation: validator.validateTypeOperation(),
-        trailer: isConsolidated ? null : validator.validateTrailer(),
+        ...trailerErrors
       };
     },
   });
@@ -139,8 +140,7 @@ export function ShipmentForm({
             data={[
               { value: ServiceType.TRAILER, label: "Tráiler 53 ft (FTL)" },
               {
-                value: ServiceType.CONSOLIDATED,
-                label: "Consolidado (3.5t / Rabón)",
+                value: ServiceType.CONSOLIDATED,                label: "Consolidado (3.5t / Rabón)",
               },
             ]}
             {...form.getInputProps("service_type")}

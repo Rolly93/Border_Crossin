@@ -8,6 +8,7 @@ import {
   TShipmentResponse,
   TShipmentUpdate,
 } from "../hooks/useShipments";
+import { log } from "node:console";
 
 export class ApiShipmentService extends BaseCrudApiService<
   TShipmentResponse,
@@ -26,6 +27,8 @@ export class ApiShipmentService extends BaseCrudApiService<
         `/${this.resourcePath}/create`,
         data,
       );
+      console.log(response.data);
+
 
       return response.data;
     } catch (err) {

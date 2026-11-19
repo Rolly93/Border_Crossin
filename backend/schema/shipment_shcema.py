@@ -25,7 +25,7 @@ class TypeOperation(StrEnum):
 
 
 class ServiceType(StrEnum):
-    TRAILER = "trailer"
+    TRAILER = "trailer_53ft"
     CONSOLIDATED = "consolidated"
 
 
@@ -65,6 +65,7 @@ class ConsolidateGuideItem(BaseModel):
 class ConsolodateGuideCreate(BaseModel):
     client_id: int
     guide_number: str
+    trip_assigned_id: int
     pieces: int
     weight: float
 
