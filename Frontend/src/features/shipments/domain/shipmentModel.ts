@@ -2,6 +2,7 @@
 
 import {
   TConsolidateGuideItemRequest,
+  TConsolidateGuideItemResponse,
   TEventCategory,
   TShipmentEvent,
   TShipmentRequest,
@@ -43,6 +44,7 @@ export class ShipmentModel {
   }
 
   private getEvent(categoryKey: TEventCategory) {
+
     return this.data.events?.find((e) => e.category === categoryKey);
   }
 
@@ -111,7 +113,8 @@ export class ShipmentModel {
         consolidate_guide:
           initialShipment.consolidate_guide &&
           initialShipment.consolidate_guide.map(
-            (guide: TConsolidateGuideItemRequest) => ({
+            (guide: TConsolidateGuideItemResponse) => ({
+              id: guide.id,
               client_id: resolvedClient,
               guide_number: guide.guide_number,
               pieces: guide.pieces,
@@ -134,12 +137,11 @@ export class ShipmentModel {
   public toCreateFormValues(
     existingGuides: TConsolidateGuideItemRequest[] = [],
   ): TShipmentCreateFormValues {
+
     const { data } = this;
     const isConsolidate = data.service_type === "consolidated";
-    const guidesFromMode =
-      data.service_type === "consolidated" ? data.consolidate_guide : [];
-    const resolvedGuides =
-      existingGuides.length > 0 ? existingGuides : guidesFromMode;
+    const guidesFromMode = isConsolidate ? data.consolidate_guide : [];
+    const resolvedGuides = existingGuides.length > 0 ? existingGuides : guidesFromMode;
 
     return {
       tracking_number: data.tracking_number,
@@ -158,13 +160,13 @@ export class ShipmentModel {
         resolvedGuides.length > 0
           ? resolvedGuides
           : [
-              {
-                client_id: data.cliente,
-                guide_number: "",
-                pieces: 1,
-                weight: 1,
-              },
-            ],
+            {
+              client_id: data.cliente,
+              guide_number: "",
+              pieces: 1,
+              weight: 1,
+            },
+          ],
     };
   }
 

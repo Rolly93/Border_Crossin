@@ -1,5 +1,3 @@
-/** @format */
-
 import { useForm } from "@mantine/form";
 import {
   TextInput,
@@ -9,12 +7,7 @@ import {
   Select,
   Title,
   Paper,
-  ActionIcon,
-  NumberInput,
-  Text,
-  Divider,
 } from "@mantine/core";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { ShipmentFormProps } from "@/features/shipments/types/ShipmentFormProps";
 import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
 import { ShipmentValidator } from "../validation/ShipmentValidator";
@@ -27,6 +20,8 @@ import { useMemo } from "react";
 import { ShipmentModel } from "../domain/shipmentModel";
 import { TShipmentCreateFormValues } from "../types/Shipment";
 import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
+import { TrailerFieldsSection } from "./sections/TrailerFieldsSection";
+import { ConsolidatedGuidesSection } from "./sections/ConsolidatedGuidesSection";
 
 export enum TypeOperation {
   NORTHBOUND = "northbound",
@@ -63,7 +58,7 @@ export function ShipmentForm({
       console.log(values);
 
       const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
-      const trailerErrors = isConsolidated ?{} : validator.validateTrailer
+      const trailerErrors = isConsolidated ? {} : validator.validateTrailer
 
       return {
         tracking_number: validator.validateTrackingNumber(),
@@ -83,7 +78,7 @@ export function ShipmentForm({
 
   const isConsolidated = form.values.service_type === ServiceType.CONSOLIDATED;
   const { options, loading, error } = useClientOptions();
-  const { getRules } = useClientReferenceRules();
+  //const { getRules } = useClientReferenceRules();
 
   const handleValidationError = (_errors: typeof form.errors) => {
     notifications.show({
@@ -140,14 +135,33 @@ export function ShipmentForm({
             data={[
               { value: ServiceType.TRAILER, label: "Tráiler 53 ft (FTL)" },
               {
-                value: ServiceType.CONSOLIDATED,                label: "Consolidado (3.5t / Rabón)",
+                value: ServiceType.CONSOLIDATED, label: "Consolidado (3.5t / Rabón)",
               },
             ]}
             {...form.getInputProps("service_type")}
             onChange={(value) => {
-              form.setFieldValue("service_type", value ?? ServiceType.TRAILER);
-              if (value === ServiceType.CONSOLIDATED) {
-                form.setFieldValue("trailer_number", "");
+              const nextType = (value as ServiceType) ?? ServiceType.TRAILER;
+              form.setFieldValue("service_type", nextType);
+
+              if (nextType === ServiceType.CONSOLIDATED) {
+                form.setValues({
+                  trailer_number: "",
+                  seal: "",
+                  plates: "",
+                  state: "",
+                  consolidate_guide:
+                    form.values.consolidate_guide?.length > 0
+                      ? form.values.consolidate_guide
+                      : [
+                        {
+                          id: 0,
+                          client_id: form.values.cliente,
+                          guide_number: "",
+                          pieces: 1,
+                          weight: 0,
+                        },
+                      ],
+                });
               }
             }}
           />
@@ -223,115 +237,10 @@ export function ShipmentForm({
               loading={loading}
             />
 
-            {/* Solo se muestra y requiere la caja de tráiler si NO es servicio consolidado */}
           </Group>
-          {!isConsolidated && (
-            <Stack gap={"xs"}>
-              <Divider label="Servicio 53Ft" labelPosition="center" my="xs" />
-              <Group justify={"space-between"}>
-                <TextInput
-                  label={t("shipment.labels.trailer")}
-                  required
-                  placeholder={t("shipment.placeholders.trailer")}
-                  {...form.getInputProps("trailer")}
-                />
-                <TextInput label="Sello" required placeholder="Sello" />
-                <TextInput
-                  label="placas"
-                  required
-                  placeholder="Placa de Caja"
-                />
-                <TextInput
-                  label="Estado"
-                  required
-                  placeholder="Eje. Mex , USA,.."
-                />
-              </Group>
-            </Stack>
-          )}
-          {/* Si es servicio CONSOLIDADO, desplegamos las guías hijas dinámicas */}
-          {isConsolidated && (
-            <Stack gap="xs">
-              <Divider
-                label="Guías del Consolidado"
-                labelPosition="center"
-                my="xs"
-              />
-              <Group justify="space-between">
-                <Text size="sm" fw={500}>
-                  Números de Guía / Paquetes
-                </Text>
-                <Button
-                  type="button"
-                  variant="default"
-                  size="xs"
-                  onClick={() =>
-                    form.insertListItem("consolidate_guide", {
-                      client_id: form.values.cliente,
-                      guide_number: "",
-                      pieces: 1,
-                      weight: 0,
-                    })
-                  }
-                  leftSection={<IconPlus size={14} />}>
-                  Agregar Guía
-                </Button>
-              </Group>
-              <Stack gap="xs">
-                {/* Encabezado fijo de columnas */}
-                <Group grow align="center" pr={36}>
-                  <Text size="xs" fw={500} c="dimmed">
-                    Número de Guía
-                  </Text>
-                  <Text size="xs" fw={500} c="dimmed">
-                    Piezas
-                  </Text>
-                  <Text size="xs" fw={500} c="dimmed">
-                    Peso (kg)
-                  </Text>
-                </Group>
-
-                {/* Renglones dinámicos sin labels */}
-                {(form.values.consolidate_guide ?? []).map(
-                  (_: any, index: number) => (
-                    <Group key={index} align="center" grow>
-                      <TextInput
-                        placeholder="Número de Guía"
-                        required
-                        {...form.getInputProps(
-                          `consolidate_guide.${index}.guide_number`,
-                        )}
-                      />
-                      <NumberInput
-                        placeholder="Piezas"
-                        min={1}
-                        {...form.getInputProps(
-                          `consolidate_guide.${index}.pieces`,
-                        )}
-                      />
-                      <NumberInput
-                        placeholder="Peso (kg)"
-                        decimalScale={2}
-                        {...form.getInputProps(
-                          `consolidate_guide.${index}.weight`,
-                        )}
-                      />
-                      <ActionIcon
-                        color="red"
-                        variant="subtle"
-                        onClick={() =>
-                          form.removeListItem("consolidate_guide", index)
-                        }
-                        disabled={
-                          (form.values.consolidate_guide?.length ?? 0) <= 1
-                        }>
-                        <IconTrash size={18} />
-                      </ActionIcon>
-                    </Group>
-                  ),
-                )}
-              </Stack>
-            </Stack>
+          {!isConsolidated ? (
+            <TrailerFieldsSection form={form} editable={false} />) : (
+            <ConsolidatedGuidesSection form={form} editable={false} />
           )}
 
           <Group grow>

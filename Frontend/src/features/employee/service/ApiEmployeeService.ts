@@ -9,7 +9,6 @@ import {
   TOperatorOption,
   TPaginatedEmployeeResponse,
 } from "../hook/useEmployee";
-import { log } from "node:console";
 
 export class ApiEmployeeService
   extends BaseCrudApiService<

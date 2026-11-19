@@ -176,8 +176,6 @@ export function useEmployeeForm({
     try {
 
       const payload = buildPayload(form.values);
-
-      console.log(payload);
       const result = await onSubmitAction(payload, initialEmployee?.id);
       if (result) {
         onSuccess?.(result);

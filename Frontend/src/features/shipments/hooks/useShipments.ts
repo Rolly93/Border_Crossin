@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { shipmentService } from "@/features/shipments/service/shipmentService";
 import { components } from "@/types/api";
+import { compileFunction } from "node:vm";
+import { compose } from "node:stream";
 
 export type TShipmentPaginate =
   components["schemas"]["PaginatedShipmentResponse"];
@@ -27,6 +29,9 @@ export type TShipmentUpdate =
 
 export type TConsolidateGuideItemRequest =
   components["schemas"]["ConsolidateGuideItem"];
+
+export type TConsolidateGuideItemResponse = components['schemas']['ConsolidateGuideItemResponse']
+
 
 export type TShipmentFormVaules = TShipmentResponse & {
   trailer_number?: string;

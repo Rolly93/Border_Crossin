@@ -28,6 +28,8 @@ import { AtomButton } from "@/components/atoms/AtomButton";
 import { TShipmentResponse } from "../hooks/useShipments";
 import { useMemo } from "react";
 import { EventFieldConfig } from "../types/Shipment";
+import { TrailerFieldsSection } from "./sections/TrailerFieldsSection";
+import { ConsolidatedGuidesSection } from "./sections/ConsolidatedGuidesSection";
 
 export const EVENT_FIELDS: EventFieldConfig[] = [
   { key: "pick_up" },
@@ -53,7 +55,6 @@ export default function ShipmentUpdateForm({
     () => new ShipmentModel(initialShipment, EXPECTED_CATEGORIES),
     [initialShipment],
   );
-
   const form = useForm<TShipmentResponse>({
     mode: "uncontrolled",
     validateInputOnChange: true,
@@ -73,6 +74,10 @@ export default function ShipmentUpdateForm({
       };
     },
   });
+
+  const values = form.getValues();
+  const isConsolidated = values.service_type === "consolidated";
+  const guides = (values as any).consolidate_guide ?? [];
   setupShipmentWatchers(form);
 
   useFormNotifications({
@@ -124,10 +129,17 @@ export default function ShipmentUpdateForm({
               label={t("shipment.labels.vehicle_type")}
               formProps={form.getInputProps("vehicle_type")}
             />
-            <EditableTextInput
-              label={t("shipment.labels.trailer")}
-              formProps={form.getInputProps("trailer")}
-            />
+
+            {/*Selector de tipo de servicio */}
+
+            {!isConsolidated ? (
+              <TrailerFieldsSection form={form} editable />) : null}
+
+            {isConsolidated && guides.length > 0 && (
+              <ConsolidatedGuidesSection form={form} editable />
+            )}
+
+
             <EditableTextInput
               label={t("shipment.labels.origen")}
               formProps={form.getInputProps("origen")}

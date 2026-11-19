@@ -10,6 +10,7 @@ import {
   TShipmentRequest,
   TEventCategory,
   TConsolidateGuideItemRequest,
+  TConsolidateGuideItemResponse,
 } from "../hooks/useShipments";
 
 export interface EventFieldConfig {
@@ -30,7 +31,7 @@ export interface TShipmentCreateFormValues {
   seal: string;
   plates: string;
   state: string;
-  consolidate_guide: TConsolidateGuideItemRequest[];
+  consolidate_guide: TConsolidateGuideItemResponse[];
   origen: string;
   destination: string;
 }
