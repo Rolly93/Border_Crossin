@@ -7,6 +7,7 @@ import {
   TConsolidateGuideItemRequest,
   TShipmentResponse,
 } from "../hooks/useShipments";
+import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
 
 interface ShipmentRowProps {
   shipment: TShipmentResponse;
@@ -38,13 +39,16 @@ interface IShipmentData {
 }
 
 const displayDataShipment = (model: ShipmentModel): IShipmentData => {
+  const {options , loading} = useClientOptions()
   const { data } = model;
   const isConsolidated = data.service_type === "consolidated";
+const client =
+  options.find((c) => c.id === data.cliente)?.name || "Cliente no encontrado";
   return {
     tracking_Trailer: data.tracking_number,
     costumer_tracking: data.customer_tracking,
     assignation: null, //data.created
-    trailer: data.tracking_number,
+    trailer: !isConsolidated ? data.trailer_number : null,
     service_type: data.service_type,
     consolidate_guide: isConsolidated
       ? data.consolidate_guide.map((guide) => ({
@@ -55,7 +59,7 @@ const displayDataShipment = (model: ShipmentModel): IShipmentData => {
         }))
       : [],
     truck: data.truck,
-    client: data.cliente.toString(),
+    client: client,
     type_operation: data.type_operation,
     origen: data.origen,
     destination: data.destination,
@@ -76,6 +80,7 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
   ({ shipment: rawShipment, onRowDoubleClick }, ref) => {
     const shipmentModel = new ShipmentModel(rawShipment);
     const row = displayDataShipment(shipmentModel);
+    const isConsolidated = row.service_type == 'consolidated'
 
     return (
       <Table.Tr
@@ -86,7 +91,7 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
         <Table.Td>{row.costumer_tracking}</Table.Td>
         <Table.Td>{row.truck}</Table.Td>
         <Table.Td>{row.client}</Table.Td>
-        <Table.Td>{row.trailer}</Table.Td>
+        <Table.Td>{!isConsolidated ? row.trailer : row.consolidate_guide[0].guide_number }</Table.Td>
         <Table.Td>{row.assignation}</Table.Td>
         <Table.Td>{row.type_operation}</Table.Td>
         <Table.Td>{row.origen}</Table.Td>

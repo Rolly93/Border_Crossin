@@ -48,14 +48,12 @@ class ShipmentService:
         self._unit_repo = UnitRepository(self.db)
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
-        self._trailer_objt: Trailer | None = None
-        self._consolidate_obj: list[Consolidate] | Consolidate | None = None
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
     ) -> PaginatedShipmentResponse:
         raw_shipments, total = self._shipment_db.get_all_shipments(page, limit)
-
+        print([self._to_response(s) for s in raw_shipments])
         return PaginatedShipmentResponse(
             data=[self._to_response(s) for s in raw_shipments],
             totalRecords=total,
@@ -81,6 +79,7 @@ class ShipmentService:
             or getattr(s.truck, "number", None)
             or (str(s.unit_truck_id) if s.unit_truck_id is not None else "")
         )
+        print(s)
         if s.service_type == ServiceType.CONSOLIDATED:
             service_shipment_data = ConsolidateResponse(
                 id=s.id,
@@ -189,7 +188,7 @@ class ShipmentService:
             driver_id=assignment.driver_id,
             service_type=ServiceType(data.service_type),
             user_id=user_id,
-            new_trailer=self._trailer_objt,
+            new_trailer=trailer_obj,
             new_consolidate=[],
         )
         # =====================================================

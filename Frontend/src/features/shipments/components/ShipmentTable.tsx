@@ -67,8 +67,8 @@ export default function ShipmentTable({
                 {t("shipment.table.customer_tracking")}
               </Table.Th>
               <Table.Th w={120}>{t("shipment.table.trailer")}</Table.Th>
+              <Table.Th w={120}>Cliente</Table.Th>
               <Table.Th w={100}>Tractor</Table.Th>
-              <Table.Th w={180}>Cliente</Table.Th>
               <Table.Th w={180}>asignacion</Table.Th>
 
               <Table.Th w={140}>Tipo Operacion</Table.Th>

@@ -76,7 +76,6 @@ export class ApiEmployeeService
       const response = await this.api.get<TOperatorOption[]>(
         `${this.resourcePath}/operators`,
       );
-      console.log(response.data);
 
 
       return response.data;

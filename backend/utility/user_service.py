@@ -15,10 +15,8 @@ from schema.employee_schema import (
     EmployeeResponseUnion,
     EmployeeUserResponse,
 )
-from schema.token_schema import InitialTokenPayload, TokenPayload
 from schema.user_schema import LoginRequest, NewUser
 from service.jwt_service import JWTService
-from utility.employee_service import EmployeeService
 
 DUMMY_HASH = "$2b$12$eImiTXuWVxfM37uY4JANjO5E.5R0zJqfG8R6zG1yQ4rZ2gYxK.6Ce"
 
@@ -30,7 +28,6 @@ class UserService:
         self._db = db
         self._user_repo = UserRepository(db)
         self._employee_repo = EmployeeRepository(db)
-        self._employee_service = EmployeeService(db)
         self.jwt = JWTService()
 
     @staticmethod
@@ -117,7 +114,7 @@ class UserService:
                 detail="Employee with this RFC does not exist",
             )
 
-        is_admin = getattr(data, "is_admin", getattr(data, "isAdmin", False))
+        is_admin = getattr(data, "is_admin", False)
 
         new_user = User(
             username=clean_username,
@@ -129,38 +126,6 @@ class UserService:
 
         self._user_repo.create_user(new_user)
         return new_user
-
-    def register_new_user(
-        self,
-        data: NewUser,
-        current_user: TokenPayload | InitialTokenPayload | None,
-    ) -> dict:
-        has_users = self.user_already_exists()
-        is_admin = getattr(current_user, "is_admin", False)
-
-        if has_users and not is_admin:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only administrators can create new users",
-            )
-
-        target_rfc = current_user.sub if not has_users and current_user else data.rfc
-
-        if not target_rfc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="RFC parameter is required for user creation.",
-            )
-
-        created_user = self.create_new_user(
-            data, rfc=target_rfc, is_bootstrap=not has_users
-        )
-
-        return {
-            "status": "201 Created",
-            "detail": "User created successfully",
-            "email": created_user.email,
-        }
 
     def get_employee_info(
         self, id: int, cargoType: Literal["csr", "operador"]

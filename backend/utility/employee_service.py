@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -18,7 +18,10 @@ from schema.employee_schema import (
     PaginatedEmployeeResponse,
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
+from schema.user_schema import NewUser
 from service.jwt_service import JWTService
+from utility.driver_service import DriverService
+from utility.user_service import UserService
 
 
 class EmployeeService:
@@ -28,6 +31,8 @@ class EmployeeService:
         self._employee_repo = EmployeeRepository(db)
         self._user_repo = UserRepository(db)
         self._driver_repo = DriverRepository(db)
+        self._user_service = UserService(self._db)
+        self._driver_service = DriverService(self._db)
         self.jwt = JWTService()
 
     @staticmethod
@@ -116,36 +121,6 @@ class EmployeeService:
                     detail="Ese gafete ya está asignado a otro operador",
                 )
 
-    def _attach_account(
-        self,
-        employee: Employee,
-        data: EmployeeCreateUnion,
-        current_user: TokenPayload | InitialTokenPayload,
-    ) -> None:
-        if data.employeeType == CargoTypeEnum.CSR:
-            from utility.user_service import UserService
-
-            self._db.add(
-                User(
-                    username=data.username.strip(),
-                    email=str(data.email),
-                    hashed_password=UserService.hash_password(data.password),
-                    is_admin=data.isAdmin,
-                    employee_id=employee.id,
-                )
-            )
-        else:
-            self._db.add(
-                DriverDetails(
-                    employee_id=employee.id,
-                    license_number=data.licenseNumber.strip(),
-                    expiration_date=data.licenseExpiration,
-                    hire_by=int(current_user.sub),
-                    gafet_id=data.gafetId.strip() if data.gafetId else None,
-                )
-            )
-        self._db.commit()
-
     def list_operators(self) -> list[OperatorOption] | list[OperatorOptionResponse]:
         drivers: list[OperatorOption] | list[OperatorOptionResponse] = (
             self._driver_repo.get_drivers_list()
@@ -185,37 +160,45 @@ class EmployeeService:
         ip: str,
         data: EmployeeCreateUnion,
         current_user: TokenPayload | InitialTokenPayload | None,
-    ) -> EmployeeRequestDash | BoosttrapAdmin:
+    ) -> EmployeeRequestDash:
 
         has_users = bool(self._user_repo.get_all_users())
+        is_admin = getattr(current_user, "is_admin", False)
 
-        if not current_user or not current_user.is_admin and not has_users:
-            new_employee = self.create_employee(data)
-            initial_token = self.jwt.create_access_token(
-                sub=data.rfc,
-                ip=ip,
-                extra_data={"is_first_time": True},
-                expires_delta=timedelta(minutes=15),
-            )
-            return BoosttrapAdmin(
-                status="201",
-                detail="Employee registered successfully",
-                token=initial_token,
-                name=new_employee.name,
-            )
-
-        if not current_user or not getattr(current_user, "is_admin", False):
+        if has_users and not is_admin:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Authentication required to register additional employees.",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Only administrators can Register CSR or  Employee Resgistration",
+            )
+        target_rfc = current_user.sub if not has_users and current_user else data.rfc
+
+        if target_rfc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="RFC parameters is Requiere for CSR or  Employee Resgistration",
             )
 
         if has_users:
             self._validate_account(data)
 
         new_employee = self.create_employee(data)
-        self._attach_account(new_employee, data, current_user)
-        # Misma forma que un renglón de GET /employees/, para agregarlo a la tabla.
+        if data.employeeType == CargoTypeEnum.CSR:
+
+            new_user = NewUser(
+                rfc=data.rfc,
+                role=data.role,
+                email=data.email,
+                username=data.username,
+                password=data.password,
+            )
+
+            self._user_service.create_new_user(
+                data=new_user, rfc=target_rfc, is_bootstrap=not has_users
+            )
+
+        if data.employeeType == CargoTypeEnum.OPERADOR:
+            self._driver_service.Register_Employee(data)
+
         return EmployeeRequestDash(
             status="201",
             detail="Employee registered successfully",

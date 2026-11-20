@@ -23,7 +23,6 @@ apiClient.interceptors.request.use(
       localStorage.getItem("token");
 
 
-    console.log("Token detectado para la petición:", token)
     if (
       token &&
       token !== "undefined" &&

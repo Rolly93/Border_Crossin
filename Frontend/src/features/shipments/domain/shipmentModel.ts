@@ -107,6 +107,7 @@ export class ShipmentModel {
     };
 
     if (initialShipment?.service_type === "consolidated") {
+
       return {
         ...baseValues,
         service_type: "consolidated",
@@ -123,6 +124,17 @@ export class ShipmentModel {
           ),
       };
     }
+    if (initialShipment?.service_type ==='trailer_53ft'){
+      return{
+        ...baseValues,
+        service_type : 'trailer_53ft',
+        trailer_number: initialShipment.trailer_number,
+        plates:initialShipment.plates,
+        seal:initialShipment.seal,
+        state:initialShipment.plates
+      }
+    }
+
 
     return {
       ...baseValues,
