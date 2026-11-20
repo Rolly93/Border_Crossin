@@ -5,11 +5,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 from stdnum.mx import rfc as rfc_validator
 
-from model.db_model import DriverDetails, Employee, User
+from model.db_model import DriverDetails, Employee
 from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
-    BoosttrapAdmin,
     EmployeeBaseResponse,
     EmployeeCreateUnion,
     EmployeeRequestDash,
