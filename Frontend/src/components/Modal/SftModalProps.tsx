@@ -200,7 +200,7 @@ function SftpForm({ initialData, onSubmit, onDelete, canEdit }: SftpFromsProps) 
                         ) : (
                             <div />
                         )}
-    
+
                         <AtomButton type="submit" color="teal">
                             GUARDAR
                         </AtomButton>

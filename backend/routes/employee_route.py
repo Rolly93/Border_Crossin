@@ -39,17 +39,11 @@ async def list_employees(
     summary="Register Employee",
     status_code=status.HTTP_201_CREATED,
 )
-async def register_employee(
-    rq: Request,
-    data: EmployeeCreateUnion,
-    service: EmployeeSvc,
-    current_user: OptionalCurrentUser,
+async def register_employee(rq: Request,data: EmployeeCreateUnion,service: EmployeeSvc,current_user: OptionalCurrentUser,
 ):
 
     client_ip = get_client_ip(rq)
-    new_employee = service.register_employee_service(
-        data=data, ip=client_ip, current_user=current_user
-    )
+    new_employee = service.register_employee_service(data=data, ip=client_ip, current_user=current_user)
     return new_employee
 
 

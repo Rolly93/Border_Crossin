@@ -107,7 +107,9 @@ def get_user_id(current_user: CurrentUser) -> int:
     return int(current_user.sub)
 
 
-CurrentUser = Annotated[TokenPayload | InitialTokenPayload, Depends(get_current_user)]
+CurrentUser = Annotated[TokenPayload |
+                        InitialTokenPayload,
+                        Depends(get_current_user)]
 
 OptionalCurrentUser = Annotated[
     TokenPayload | InitialTokenPayload | None,

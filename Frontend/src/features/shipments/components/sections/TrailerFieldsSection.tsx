@@ -13,39 +13,38 @@ interface TrailerFieldsSectionProps {
 
 export function TrailerFieldsSection({
   form,
-  editable = true,
+  editable = false,
   disabled = false,
 }: TrailerFieldsSectionProps) {
   const { t } = useTranslation();
 
   return (
     <Stack gap="xs">
-      <Divider label="Servicio 53Ft" labelPosition="center" my="xs" />
       <Group grow align="flex-start">
         {editable ? (
           <>
-            <TextInput
+            <EditableTextInput
               label={t("shipment.labels.trailer")}
               required
               placeholder={t("shipment.placeholders.trailer")}
               disabled={disabled}
               {...form.getInputProps("trailer_number")}
             />
-            <TextInput
+            <EditableTextInput
               label="Sello"
               required
               placeholder="Sello"
               disabled={disabled}
               {...form.getInputProps("seal")}
             />
-            <TextInput
+            <EditableTextInput
               label="Placas"
               required
               placeholder="Placa de Caja"
               disabled={disabled}
               {...form.getInputProps("plates")}
             />
-            <TextInput
+            <EditableTextInput
               label="Estado"
               required
               placeholder="Ej. Mex, USA..."
@@ -56,25 +55,12 @@ export function TrailerFieldsSection({
         ) : (
           <>
             <EditableTextInput
-              label={t("shipment.labels.trailer")}
-              disabled={disabled}
-              formProps={form.getInputProps("trailer_number")}
+              label={t("shipment.labels.trailer") + " sdfe"}
+              {...form.getInputProps("trailer_number")}
             />
-            <EditableTextInput
-              label="Sello"
-              disabled={disabled}
-              formProps={form.getInputProps("seal")}
-            />
-            <EditableTextInput
-              label="Placas"
-              disabled={disabled}
-              formProps={form.getInputProps("plates")}
-            />
-            <EditableTextInput
-              label="Estado"
-              disabled={disabled}
-              formProps={form.getInputProps("state")}
-            />
+            {/*<EditableTextInput label="Sello" formProps={form.getInputProps("seal")}/>*/}
+            {/*<EditableTextInput label="Placas" formProps={form.getInputProps("plates")}/>*/}
+            {/*<EditableTextInput label="Estado" formProps={form.getInputProps("state")}/>*/}
           </>
         )}
       </Group>

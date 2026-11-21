@@ -169,7 +169,10 @@ class EmployeeService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Only administrators can Register CSR or  Employee Resgistration",
             )
-        target_rfc = current_user.sub if not has_users and current_user else data.rfc
+
+        user_sub = getattr(current_user , 'sub', None) if current_user else None
+
+        target_rfc = user_sub or data.rfc
 
         if target_rfc:
             raise HTTPException(

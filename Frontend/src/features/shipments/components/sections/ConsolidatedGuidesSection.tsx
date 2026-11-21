@@ -1,5 +1,6 @@
 /** @format */
 
+import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
 import {
   ActionIcon,
   Badge,
@@ -31,11 +32,13 @@ interface ConsolidatedGuideItem {
 interface ConsolidatedGuidesSectionProps {
   form: UseFormReturnType<any>;
   disabled?: boolean;
+  loading?:boolean
 }
 
 export function ConsolidatedGuidesSection({
   form,
   disabled = false,
+  loading = false
 }: ConsolidatedGuidesSectionProps) {
   const [opened, { open, close }] = useDisclosure(false);
   const [draftGuides, setDraftGuides] = useState<ConsolidatedGuideItem[]>([]);
@@ -52,7 +55,6 @@ export function ConsolidatedGuidesSection({
     0,
   );
 
-  // Al abrir el modal, copiamos las guías actuales al estado temporal
   const handleOpenModal = () => {
     const initialDraft =
       guides.length > 0
@@ -115,8 +117,6 @@ export function ConsolidatedGuidesSection({
 
   return (
     <Stack gap="xs" w="100%">
-      <Divider label="Guías del Consolidado" labelPosition="center" my="xs" />
-
       <Group justify="space-between" align="center">
         <Group gap="xs">
           <Badge variant="light" color="blue">
@@ -153,9 +153,11 @@ export function ConsolidatedGuidesSection({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {guides.length === 0 ? (
+            {loading ? (
+              <TableSkeletonRows rows={2} columns={2} />
+            ) : guides.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={4}>
+                <Table.Td colSpan={2}>
                   <Text size="xs" c="dimmed" ta="center" py="xs">
                     No hay guías registradas aún.
                   </Text>

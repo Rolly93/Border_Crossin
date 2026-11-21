@@ -135,7 +135,8 @@ export function ShipmentForm({
             data={[
               { value: ServiceType.TRAILER, label: "Tráiler 53 ft (FTL)" },
               {
-                value: ServiceType.CONSOLIDATED, label: "Consolidado (3.5t / Rabón)",
+                value: ServiceType.CONSOLIDATED,
+                label: "Consolidado (3.5t / Rabón)",
               },
             ]}
             {...form.getInputProps("service_type")}
@@ -153,14 +154,14 @@ export function ShipmentForm({
                     form.values.consolidate_guide?.length > 0
                       ? form.values.consolidate_guide
                       : [
-                        {
-                          id: 0,
-                          client_id: form.values.cliente,
-                          guide_number: "",
-                          pieces: 1,
-                          weight: 0,
-                        },
-                      ],
+                          {
+                            id: 0,
+                            client_id: form.values.cliente,
+                            guide_number: "",
+                            pieces: 1,
+                            weight: 0,
+                          },
+                        ],
                 });
               }
             }}
@@ -236,11 +237,15 @@ export function ShipmentForm({
               {...form.getInputProps("truck")}
               loading={loading}
             />
-
           </Group>
           {!isConsolidated ? (
-            <TrailerFieldsSection form={form} editable={false} />) : (
-            <ConsolidatedGuidesSection form={form} editable={false} />
+            <TrailerFieldsSection form={form} editable={true} />
+          ) : (
+            <ConsolidatedGuidesSection
+              form={form}
+              disabled={false}
+              loading={loading}
+            />
           )}
 
           <Group grow>

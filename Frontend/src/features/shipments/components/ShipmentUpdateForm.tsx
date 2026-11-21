@@ -26,10 +26,11 @@ import { useTranslation } from "react-i18next";
 import { notify } from "../../../components/utils/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { TShipmentResponse } from "../hooks/useShipments";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { EventFieldConfig } from "../types/Shipment";
 import { TrailerFieldsSection } from "./sections/TrailerFieldsSection";
 import { ConsolidatedGuidesSection } from "./sections/ConsolidatedGuidesSection";
+import EditableDateTimePicker from "@/components/Input/EditableDateTimePicker";
 
 export const EVENT_FIELDS: EventFieldConfig[] = [
   { key: "pick_up" },
@@ -108,46 +109,45 @@ export default function ShipmentUpdateForm({
     <Box p="xs">
       <form onSubmit={form.onSubmit((values) => handeSubmit(values))}>
         <Stack>
-          <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="xl">
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 2 }} spacing="xl">
             <EditableTextInput
               label={t("shipment.labels.trackingNumber")}
-              formProps={form.getInputProps("tracking_number")}
+              {...form.getInputProps("tracking_number")}
             />
             <EditableTextInput
               label={t("shipment.labels.customer_tracking")}
-              formProps={form.getInputProps("customer_tracking")}
+              {...form.getInputProps("customer_tracking")}
             />
             <EditableTextInput
               label={t("shipment.labels.cliente")}
-              formProps={form.getInputProps("cliente")}
+              {...form.getInputProps("cliente")}
             />
             <EditableTextInput
               label={t("shipment.labels.truck")}
-              formProps={form.getInputProps("truck")}
+              {...form.getInputProps("truck")}
             />
             <EditableTextInput
               label={t("shipment.labels.vehicle_type")}
-              formProps={form.getInputProps("vehicle_type")}
+              {...form.getInputProps("vehicle_type")}
+            />
+            <EditableTextInput
+              label={t("shipment.labels.origen")}
+              {...form.getInputProps("origen")}
+            />
+            <EditableTextInput
+              label={t("shipment.labels.destination")}
+              {...form.getInputProps("destination")}
             />
 
             {/*Selector de tipo de servicio */}
 
             {!isConsolidated ? (
-              <TrailerFieldsSection form={form} editable />) : null}
+              <TrailerFieldsSection form={form} disabled />
+            ) : null}
 
             {isConsolidated && guides.length > 0 && (
-              <ConsolidatedGuidesSection form={form} editable />
+              <ConsolidatedGuidesSection form={form} disabled={false} />
             )}
-
-
-            <EditableTextInput
-              label={t("shipment.labels.origen")}
-              formProps={form.getInputProps("origen")}
-            />
-            <EditableTextInput
-              label={t("shipment.labels.destination")}
-              formProps={form.getInputProps("destination")}
-            />
           </SimpleGrid>
 
           <Divider my="sm" />
@@ -165,9 +165,11 @@ export default function ShipmentUpdateForm({
               if (eventIndex === -1) {
                 return null;
               }
+              const hasDateTime = Boolean(events[eventIndex]?.dateTime);
+
               return (
                 <Stack key={field.key}>
-                  <DateTimePicker
+                  <EditableDateTimePicker
                     label={t(`shipment.labels.${field.key}`)}
                     timePickerProps={{
                       withDropdown: true,
@@ -176,13 +178,15 @@ export default function ShipmentUpdateForm({
                     }}
                     placeholder={t("shipment.labels.dateTime")}
                     clearable
+                    lockWhenFilled={!hasDateTime}
                     {...form.getInputProps(`events.${eventIndex}.dateTime`)}
                   />
                   {field.showNotes && (
-                    <TextInput
+                    <EditableTextInput
                       placeholder={t("shipment.labels.inspectionNote")}
                       size="xs"
                       maxLength={field.maxNotesLength || 50}
+                      lockWhenFilled={!hasDateTime}
                       {...form.getInputProps(`events.${eventIndex}.notes`)}
                     />
                   )}
