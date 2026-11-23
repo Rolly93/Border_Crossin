@@ -66,10 +66,10 @@ class EmployeeService:
             data=[
                 EmployeeBaseResponse(
                     id=e.id,
-                    firstName=e.name,
-                    lastName=e.last_name,
+                    firstName=e.name.title(),
+                    lastName=str(e.last_name).title(),
                     role=CargoTypeEnum(e.role),
-                    rfc=e.rfc,
+                    rfc=e.rfc.upper(),
                     hireDate=e.hire_date,
                     stillEmployee=e.still_employee,
                     dateOfBirth=e.date_birth,
@@ -170,11 +170,11 @@ class EmployeeService:
                 detail="Only administrators can Register CSR or  Employee Resgistration",
             )
 
-        user_sub = getattr(current_user , 'sub', None) if current_user else None
+        user_sub = getattr(current_user, "sub", None) if current_user else None
 
         target_rfc = user_sub or data.rfc
 
-        if target_rfc:
+        if not target_rfc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="RFC parameters is Requiere for CSR or  Employee Resgistration",
@@ -201,6 +201,10 @@ class EmployeeService:
         if data.employeeType == CargoTypeEnum.OPERADOR:
             self._driver_service.Register_Employee(data)
 
+        if not data.employeeType in CargoTypeEnum:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Role no Avialabel"
+            )
         return EmployeeRequestDash(
             status="201",
             detail="Employee registered successfully",

@@ -4,7 +4,6 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from model.db_model import (
-    Consolidate,
     SftpSend,
     ShipmentAssign,
     ShipmentEventModel,
@@ -16,6 +15,7 @@ from repository.consolidated_repository import ConsolidateRepository
 from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
+from schema.client_schema import ClienteServiceResponse
 from schema.shipment_shcema import (
     ConsolidateGuideItemResponse,
     ConsolidateResponse,
@@ -48,12 +48,12 @@ class ShipmentService:
         self._unit_repo = UnitRepository(self.db)
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
+        self._dispatchService = ShipmentDispatchService(self.db)
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
     ) -> PaginatedShipmentResponse:
         raw_shipments, total = self._shipment_db.get_all_shipments(page, limit)
-        print([self._to_response(s) for s in raw_shipments])
         return PaginatedShipmentResponse(
             data=[self._to_response(s) for s in raw_shipments],
             totalRecords=total,
@@ -79,11 +79,11 @@ class ShipmentService:
             or getattr(s.truck, "number", None)
             or (str(s.unit_truck_id) if s.unit_truck_id is not None else "")
         )
-        print(s)
         if s.service_type == ServiceType.CONSOLIDATED:
             service_shipment_data = ConsolidateResponse(
                 id=s.id,
                 tracking_number=s.tracking_number,
+                assignation=s.assigned_day,
                 customer_tracking=s.customer_tracking,
                 service_type=ServiceType.CONSOLIDATED,
                 cliente=s.client_id,
@@ -105,6 +105,7 @@ class ShipmentService:
         if s.service_type == ServiceType.TRAILER and s.trailer:
             service_shipment_data = TrailerResponse(
                 id=s.id,
+                assignation=s.assigned_day,
                 service_type=ServiceType.TRAILER,
                 trailer_number=s.trailer.trailer_number,
                 plates=s.trailer.plates,
@@ -211,7 +212,16 @@ class ShipmentService:
                 new_consolidate, client=client
             )
             self.db.refresh(shipment)
+        # =====================================================
+        # Shipment Created
+        # =====================================================
 
+        if client_data := self._client_service.get_client_service(
+            client.id, ClientServiceType.EMAIL
+        ):
+            tag = unit.tag_id
+            gafet = assignment.driver.gafet_id
+            self.email_service(client_data, tag=tag, gafet=gafet)
         return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:
@@ -251,9 +261,25 @@ class ShipmentService:
         if not client_data or not client_data.sftService:
             return []
 
-        scac = SystemConfigRepository(self.db).get_scac()
-        dispatcher = ShipmentDispatchService(self.db, client_data.sftService, scac)
-        return dispatcher.dispatch_events(events)
+        if not (scac := SystemConfigRepository(self.db).get_scac()):
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Scac Code missing")
 
-    def email_service(self, shipment: ShipmentUpdate):
-        pass
+        return self._dispatchService.dispatch_events(
+            events, client_data.sftService, scac
+        )
+
+    def email_service(
+        self,
+        client_service: ClienteServiceResponse,
+        tag: str | None = None,
+        gafet: str | None = None,
+        shipment: ShipmentUpdate | None = None,
+    ):
+
+        if not client_service.emailService and not client_service.sftService:
+            return
+
+        if tag and gafet and client_service.emailService:
+            self._dispatchService.notice_assignation(
+                tag, gafet, client_service.emailService.email
+            )

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum, StrEnum
 from typing import Annotated, Any, Literal, Self
 
@@ -15,7 +15,7 @@ toUppercase = Annotated[
     str, BeforeValidator(lambda v: v.upper().strip() if isinstance(v, str) else v)
 ]
 toCapitalCase = Annotated[
-    str, BeforeValidator(lambda v: v.strip().capitalize() if isinstance(v, str) else v)
+    str, BeforeValidator(lambda v: v.strip().upper() if isinstance(v, str) else v)
 ]
 
 
@@ -126,6 +126,7 @@ class ShipmentUpdate(ShipmentResponse): ...
 class ConsolidateResponse(ConsolidateRespons):
     id: int
     events: list[ShipmentEvent] = Field(default_factory=list)
+    assignation: date
 
     @field_validator("events", mode="before")
     @classmethod
@@ -139,6 +140,7 @@ class ConsolidateResponse(ConsolidateRespons):
 
 class TrailerResponse(TrailerRequest):
     id: int
+    assignation: date
     events: list[ShipmentEvent]
 
 
