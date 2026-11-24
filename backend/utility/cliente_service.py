@@ -16,6 +16,8 @@ from schema.sftp_schema import SftpConfiRequst
 from schema.shipment_shcema import ShipmentCreateRequest
 
 
+
+
 class ClienteService:
 
     def __init__(self, db: Session):

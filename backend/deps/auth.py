@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import os
 from typing import Annotated
 
 import jwt
 from fastapi import Depends, Header, HTTPException, Query, Request, status
 
 from config import Env
+from integrations.aws_lambda_client import AssignationLambdaClient
 from schema.token_schema import InitialTokenPayload, TokenPayload
 from service.jwt_service import JWTService
 from cryptography.fernet import Fernet
@@ -107,11 +109,16 @@ def get_user_id(current_user: CurrentUser) -> int:
     return int(current_user.sub)
 
 
-CurrentUser = Annotated[TokenPayload |
-                        InitialTokenPayload,
-                        Depends(get_current_user)]
+def get_lambda_client() -> AssignationLambdaClient:
+    endpoint_url = getattr(config, "ENDPOINT_AWS", None) or os.environ["ENDPOINT_AWS"]
+    api_key = getattr(config, "APIKEY_AWS", None) or os.environ["APIKEY_AWS"]
+    return AssignationLambdaClient(endpoint_url=endpoint_url , api_key=api_key)
+
+
+CurrentUser = Annotated[TokenPayload | InitialTokenPayload, Depends(get_current_user)]
 
 OptionalCurrentUser = Annotated[
     TokenPayload | InitialTokenPayload | None,
     Depends(get_optional_current_user),
 ]
+LambdaClientDep = Annotated[AssignationLambdaClient , Depends(get_lambda_client)]

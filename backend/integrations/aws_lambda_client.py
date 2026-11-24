@@ -1,24 +1,26 @@
-import json
 import httpx
+
+from schema.email_schema import PayloadAssginationNotificationEvent
 
 
 class AssignationLambdaClient:
-    def __init__(self, function_url: str, api_token: str, timeout: float = 10.0):
-        self.function_url = function_url
-        self.api_token = api_token
+    def __init__(self, endpoint_url: str, api_key: str, timeout: float = 10.0):
+        self.endpoint_url = endpoint_url
+        self.api_key = api_key
         self.timeout = timeout
 
-    def send_assignation(self, tag: str, gafe: str, client_email: list[str]) -> dict:
-        payload = {
-            "tag": tag,
-            "gafe": gafe,
-            "client_email": client_email,
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "x-api-token": self.api_token,
-        }
+    def send_assignation_notice(
+        self, payload:PayloadAssginationNotificationEvent
+    ) -> None:
+        payload = PayloadAssginationNotificationEvent(
+        tag=payload.tag,
+        gafet=payload.gafet,
+        target_email=payload.target_email,
+        reference_clint=payload.reference_clint,
+        tracking_reference=payload.tracking_reference)
+
+
+        headers = {"x-api-key": self.api_key}
         with httpx.Client(timeout=self.timeout) as client:
-            response = client.post(self.function_url, json=payload, headers=headers)
+            response = client.post(self.endpoint_url, json=payload, headers=headers)
             response.raise_for_status()
-            return response.json()

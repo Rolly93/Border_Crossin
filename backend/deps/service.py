@@ -15,7 +15,6 @@ from utility.shipment_service import ShipmentService
 from utility.unit_service import UnitService
 from utility.user_service import UserService
 
-database = ()
 DBSession = Annotated[Session, Depends(dependency=get_db)]
 
 

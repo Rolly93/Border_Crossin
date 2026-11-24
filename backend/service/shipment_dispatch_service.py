@@ -1,7 +1,6 @@
 import logging
 
 from fastapi import HTTPException, status
-from pydantic import EmailStr, TypeAdapter
 from sqlalchemy.orm import Session
 
 from model.db_model import SftpSend, ShipmentEventModel
@@ -10,22 +9,12 @@ from service.sftp_sender import send_batch
 
 logger = logging.getLogger(__name__)
 
-_EMAILS_ADAPTER = TypeAdapter(list[EmailStr])
-
 
 class ShipmentDispatchService:
     """Registra un envío por cada evento nuevo y los transmite con reintentos."""
 
-    def __init__(
-        self,
-        db: Session,
-    ):
+    def __init__(self, db: Session):
         self._db = db
-
-    def notice_assignation(self, tag: str, gafe: str, emails: list[EmailStr]) -> None:
-        email = [str(e) for e in _EMAILS_ADAPTER.validate_python(emails)]
-
-        payload = {"tag": tag, "gafet": gafe, "emails": email}
 
     def dispatch_events(
         self,

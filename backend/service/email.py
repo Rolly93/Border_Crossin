@@ -1,69 +1,87 @@
+import logging
 import os
-from fastapi_mail import MessageSchema, ConnectionConfig, MessageType, FastMail
-from pydantic import EmailStr
-from config.config import EmailConfig
-from jinja2 import Environment, FileSystemLoader
+from typing import Literal
+
+from pydantic import EmailStr, TypeAdapter
+
+from deps.auth import LambdaClientDep
+from integrations.aws_lambda_client import AssignationLambdaClient
+from schema.email_schema import PayloadAssginationNotificationEvent
+
+logger = logging.getLogger(__name__)
+_EMAILS_ADAPTER = TypeAdapter(list[EmailStr])
+
+ShipmentStatusEvent = Literal[
+    "recoleccion",
+    "salida",
+    "modulacion_mex",
+    "modulacion_usa",
+    "entrega",
+]
 
 
-class EmailService:
-    def __init__(self, config: EmailConfig):
-        self.conf = ConnectionConfig(
-            MAIL_USERNAME=config.USERNAME,
-            MAIL_PASSWORD=config.PASSWORD,
-            MAIL_FROM=config.MAIL_FROM,
-            MAIL_PORT=config.PORT,
-            MAIL_SERVER=config.SERVER,
-            MAIL_STARTTLS=False,
-            MAIL_SSL_TLS=False,
-            USE_CREDENTIALS=False,
-            VALIDATE_CERTS=False,
+class EmailNotificationDispatcher:
+    def __init__(
+        self,
+        lambda_client: LambdaClientDep | None = None,
+        timeout: float = 10.0,
+    ) -> None:
+        self._lambda_client = lambda_client
+        self._timeout = timeout
+
+    def _get_client(self) -> AssignationLambdaClient | None:
+        if self._lambda_client is not None:
+            return self._lambda_client
+
+        endpoint_url = os.getenv("ASSIGNATION_LAMBDA_URL")
+        api_key = os.getenv("ASSIGNATION_LAMBDA_API_KEY")
+        if not endpoint_url or not api_key:
+            logger.debug(
+                "Notificación omitida: faltan ASSIGNATION_LAMBDA_URL o ASSIGNATION_LAMBDA_API_KEY."
+            )
+            return None
+
+        self._lambda_client = AssignationLambdaClient(
+            endpoint_url=endpoint_url,
+            api_key=api_key,
+            timeout=self._timeout,
         )
-        template_path = os.path.join(os.path.dirname(__file__), "..", "templates")
-        self.jinja_env = Environment(loader=FileSystemLoader(template_path))
+        return self._lambda_client
 
-    async def send_notification(self, subject: str, recipient: str, body: str):
-        """Notificacion EMAIL
+    @staticmethod
+    def _validate_emails(emails: list[str]) -> list[str]:
+        return [str(e) for e in _EMAILS_ADAPTER.validate_python(emails)]
 
-        Args:
-            subject (str): Email Subject
-            recipient (list): Send to
-            body (dic): track_num , shipment_num , trailer,pick_time
-            departure_time , mex_inspection , mex_clear , usa_inspection
+    def send_assignation(self, payload: PayloadAssginationNotificationEvent) -> None:
+        validated_emails = self._validate_emails(payload.target_email)
+        if not validated_emails:
+            return
 
-        """
+        client = self._get_client()
+        if not client:
+            return
 
-        template = self.jinja_env.get_template("status_email.html")
-        html_content = template.render(body)
-        message = MessageSchema(
-            subject=subject,
-            recipients=[recipient],  # Debe ser una lista
-            body=html_content,
-            subtype=MessageType.html,  # O MessageType.plain
-        )
-
-        fm = FastMail(self.conf)
         try:
-            await fm.send_message(message)
-            print(f"📧 Notificación enviada a {recipient}")
-        except Exception as e:
-            print(f"❌ Error al enviar email: {e}")
+            client.send_assignation_notice(payload)
+        except Exception:
+            logger.exception(
+                "Error al enviar notificación de asignación vía Lambda para tag=%s", payload.tag
+            )
 
+    def send_status(
+        self, reference: str, status_event: ShipmentStatusEvent, emails: list[str]
+    ) -> None:
+        validated_emails = self._validate_emails(emails)
+        if not validated_emails:
+            return
 
-import asyncio
+        client = self._get_client()
+        if not client:
+            return
 
-
-async def send_templated_email():
-    # 1. Simular la configuración
-    config = EmailConfig()  # Asegúrate de que cargue los datos de Mailhog
-
-    # 2. Instanciar el servicio
-    service = EmailService(config)
-
-    shipment = {"track_num": "tr1234567", "shipment_num": "92B1234567"}
-    await service.send_notification(
-        subject="STATUS UPDATE", recipient="rolando@ejemplo.com", body=shipment
-    )
-
-
-if __name__ == "__main__":
-    asyncio.run(send_templated_email())
+        logger.info(
+            "Preparando notificación de estatus '%s' para referencia=%s a %d destinatarios",
+            status_event,
+            reference,
+            len(validated_emails),
+        )

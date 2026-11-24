@@ -1,4 +1,3 @@
-# aws/assignation_notifier/handler.py
 import json
 import os
 import boto3

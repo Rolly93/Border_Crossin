@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class SftpModel(BaseModel):
-    id: Optional[int]
+    id: int|None
 
 
 class SftpRequest(SftpModel):
@@ -58,7 +58,7 @@ class SftpConfigIn(BaseModel):
     host: str = Field(min_length=1, max_length=200)
     port: int = Field(default=22, ge=1, le=65535)
     username: str = Field(min_length=1, max_length=200)
-    password: Optional[str] = None
+    password: str|None = None
     root_folder: str = Field(min_length=1, max_length=200)
     remote_folder: str = Field(min_length=1, max_length=200)
 

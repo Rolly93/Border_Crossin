@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from deps.auth import LambdaClientDep
 from model.db_model import (
     SftpSend,
     ShipmentAssign,
@@ -40,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, aws_client: LambdaClientDep |None = None):
         self.db: Session = db
         self._shipment_db = ShipmentRepository(self.db)
         self._client_service = ClienteService(self.db)
@@ -48,7 +49,7 @@ class ShipmentService:
         self._unit_repo = UnitRepository(self.db)
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
-        self._dispatchService = ShipmentDispatchService(self.db)
+        self._dispatchService = ShipmentDispatchService(self.db, aws_client)
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
