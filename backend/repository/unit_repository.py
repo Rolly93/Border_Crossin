@@ -34,7 +34,7 @@ class UnitRepository(BaseRepository[UnitTruck]):
             .all()
         )
 
-    def get_unit_by_number(self, driver_id: str) -> UnitTruck | None:
+    def get_unit_by_number(self, driver_id: str) -> UnitTruck:
         # self._db.query(UnitTruck).filter(UnitTruck.unit_number == truck).first()
         stmt = (
             select(UnitTruck, DriverDetails)

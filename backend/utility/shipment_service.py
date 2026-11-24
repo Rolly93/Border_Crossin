@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import HTTPException, status
+from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from deps.auth import LambdaClientDep
@@ -17,6 +18,11 @@ from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
 from schema.client_schema import ClienteServiceResponse
+from schema.email_schema import (
+    NotificationType,
+    PayloadAssginationNotificationEvent,
+    UnifyNotification,
+)
 from schema.shipment_shcema import (
     ConsolidateGuideItemResponse,
     ConsolidateResponse,
@@ -32,7 +38,9 @@ from schema.shipment_shcema import (
     ShipmentUpdate,
     TrailerCreate,
     TrailerResponse,
+    TypeOperation,
 )
+from service.email import EmailNotificationDispatcher
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
@@ -41,7 +49,7 @@ logger = logging.getLogger(__name__)
 
 
 class ShipmentService:
-    def __init__(self, db: Session, aws_client: LambdaClientDep |None = None):
+    def __init__(self, db: Session, aws_client: LambdaClientDep | None = None):
         self.db: Session = db
         self._shipment_db = ShipmentRepository(self.db)
         self._client_service = ClienteService(self.db)
@@ -49,7 +57,8 @@ class ShipmentService:
         self._unit_repo = UnitRepository(self.db)
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
-        self._dispatchService = ShipmentDispatchService(self.db, aws_client)
+        self._email_service = EmailNotificationDispatcher(aws_client)
+        self._dispatchService = ShipmentDispatchService(db)
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -217,12 +226,24 @@ class ShipmentService:
         # Shipment Created
         # =====================================================
 
-        if client_data := self._client_service.get_client_service(
-            client.id, ClientServiceType.EMAIL
-        ):
-            tag = unit.tag_id
-            gafet = assignment.driver.gafet_id
-            self.email_service(client_data, tag=tag, gafet=gafet)
+        if (
+            client_data := self._client_service.get_client_service(
+                client.id,
+                ClientServiceType.EMAIL,
+            )
+        ) and client_data.emailService:
+            email: list[EmailStr] = [e for e in client_data.emailService.email]
+            notification_assigment = PayloadAssginationNotificationEvent(
+                target_email=email,
+                reference_client=data.customer_tracking,
+                tracking_reference=data.tracking_number,
+                tipo_operacion=TypeOperation(data.type_operation),
+                tag=unit.tag_id,
+                cfdi=None,
+                gafet=assignment.driver.gafet_id,
+                notification_type=NotificationType.NOTIFACTION,
+            )
+            self.email_service(notification_assigment)
         return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:
@@ -271,16 +292,11 @@ class ShipmentService:
 
     def email_service(
         self,
-        client_service: ClienteServiceResponse,
-        tag: str | None = None,
-        gafet: str | None = None,
-        shipment: ShipmentUpdate | None = None,
+        client_service: UnifyNotification,
     ):
 
-        if not client_service.emailService and not client_service.sftService:
+        if not client_service.notification_type:
             return
 
-        if tag and gafet and client_service.emailService:
-            self._dispatchService.notice_assignation(
-                tag, gafet, client_service.emailService.email
-            )
+        if client_service.notification_type == NotificationType.NOTIFACTION:
+            self._email_service.send_assignation(client_service)

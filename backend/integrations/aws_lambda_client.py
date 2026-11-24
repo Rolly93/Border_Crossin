@@ -10,15 +10,16 @@ class AssignationLambdaClient:
         self.timeout = timeout
 
     def send_assignation_notice(
-        self, payload:PayloadAssginationNotificationEvent
+        self, payload: PayloadAssginationNotificationEvent
     ) -> None:
         payload = PayloadAssginationNotificationEvent(
-        tag=payload.tag,
-        gafet=payload.gafet,
-        target_email=payload.target_email,
-        reference_clint=payload.reference_clint,
-        tracking_reference=payload.tracking_reference)
-
+            tag=payload.tag,
+            gafet=payload.gafet,
+            target_email=payload.target_email,
+            reference_client=payload.reference_client,
+            tracking_reference=payload.tracking_reference,
+            cfdi=payload.cfdi or None,
+        )
 
         headers = {"x-api-key": self.api_key}
         with httpx.Client(timeout=self.timeout) as client:
