@@ -17,7 +17,6 @@ from repository.consolidated_repository import ConsolidateRepository
 from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
-from schema.client_schema import ClienteServiceResponse
 from schema.email_schema import (
     NotificationType,
     PayloadAssginationNotificationEvent,
@@ -35,7 +34,6 @@ from schema.shipment_shcema import (
     ServiceTypeUnionResponse,
     ShipmentCreateRequest,
     ShipmentEvent,
-    ShipmentUpdate,
     TrailerCreate,
     TrailerResponse,
     TypeOperation,
@@ -58,7 +56,7 @@ class ShipmentService:
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
         self._email_service = EmailNotificationDispatcher(aws_client)
-        self._dispatchService = ShipmentDispatchService(db)
+        self._dispatchService = ShipmentDispatchService(db )
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -96,7 +94,7 @@ class ShipmentService:
                 assignation=s.assigned_day,
                 customer_tracking=s.customer_tracking,
                 service_type=ServiceType.CONSOLIDATED,
-                cliente=s.client_id,
+                cliente=s.client.name,
                 origen=s.origen,
                 destination=s.destination,
                 truck=truck_value,
@@ -123,7 +121,7 @@ class ShipmentService:
                 seal=s.trailer.seal,
                 tracking_number=s.tracking_number,
                 customer_tracking=s.customer_tracking,
-                cliente=s.client_id,
+                cliente=s.client.name,
                 origen=s.origen,
                 destination=s.destination,
                 truck=truck_value,
@@ -235,10 +233,10 @@ class ShipmentService:
             email: list[EmailStr] = [e for e in client_data.emailService.email]
             notification_assigment = PayloadAssginationNotificationEvent(
                 target_email=email,
-                reference_client=data.customer_tracking,
-                tracking_reference=data.tracking_number,
-                tipo_operacion=TypeOperation(data.type_operation),
-                tag=unit.tag_id,
+                customer_tracking=data.customer_tracking,
+                tracking_number=data.tracking_number,
+                type_operation=TypeOperation(data.type_operation),
+                tag=unit.tag_id or 'n/a',
                 cfdi=None,
                 gafet=assignment.driver.gafet_id,
                 notification_type=NotificationType.NOTIFACTION,
@@ -260,7 +258,7 @@ class ShipmentService:
     ) -> ShipmentAssign:
         current = self._shipment_db.get_shipment(shipment_id)
         self._reference_rule.validate(
-            client_id=shipment_data.cliente,
+            client_id=current.client_id,
             operation=shipment_data.type_operation or current.type_operation,
             reference=shipment_data.customer_tracking or current.customer_tracking,
         )
@@ -300,3 +298,6 @@ class ShipmentService:
 
         if client_service.notification_type == NotificationType.NOTIFACTION:
             self._email_service.send_assignation(client_service)
+
+        if client_service.notification_type == NotificationType.STATUS:
+            self._email_service.send_status(client_service)

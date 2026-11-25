@@ -1,26 +1,31 @@
 import logging
-from typing import Literal
-
+from pathlib import Path
 from pydantic import EmailStr, TypeAdapter
 
 from deps.auth import LambdaClientDep
-from schema.email_schema import PayloadAssginationNotificationEvent
+from schema.email_schema import (
+    NotificationType,
+    PayloadAssginationNotificationEvent,
+    PayloadStatusConsolidate,
+    PayloadStatusTrailer,
+    UnifyNotification,
+)
+from jinja2 import Environment, FileSystemLoader
+
+from schema.shipment_shcema import EventCategory, TypeOperation
 
 logger = logging.getLogger(__name__)
 _EMAILS_ADAPTER = TypeAdapter(list[EmailStr])
-
-ShipmentStatusEvent = Literal[
-    "recoleccion",
-    "salida",
-    "modulacion_mex",
-    "modulacion_usa",
-    "entrega",
-]
 
 
 class EmailNotificationDispatcher:
     def __init__(self, lambda_client: LambdaClientDep | None = None) -> None:
         self._lambda_client = lambda_client
+
+        template_path = Path(__file__).parent / "templates"
+        self._jinja_env = Environment(
+            loader=FileSystemLoader(template_path), autoescape=True
+        )
 
     @staticmethod
     def _validate_emails(emails: list[str]) -> list[str]:
@@ -30,33 +35,111 @@ class EmailNotificationDispatcher:
 
         return [e for e in _EMAILS_ADAPTER.validate_python(emails)]
 
+    def _type_status(self, typeService: TypeOperation) -> str:
+
+        if typeService == TypeOperation.NORTHBOUND:
+            return "template_export.html"
+        else:
+            return "template_Import.html"
+
+    def _preparate_template(self, data_email: UnifyNotification) -> str:
+        type_template = ""
+
+        match data_email.notification_type:
+            case NotificationType.STATUS:
+                type_template = self._type_status(
+                    TypeOperation(data_email.type_operation)
+                )
+
+            case NotificationType.NOTIFACTION:
+                type_template = "template_assignation.html"
+
+        context = data_email.model_dump(mode="json")
+
+        if isinstance(data_email, (PayloadStatusConsolidate, PayloadStatusTrailer)):
+            events_dates: dict[str, dict[str, str | None] | None] = {
+                EventCategory.PICK_UP.value: None,
+                EventCategory.DEPARTURE.value: None,
+                EventCategory.DELAY.value: None,
+                EventCategory.MEX_INSPECCION.value: None,
+                EventCategory.CLEAR_MEX.value: None,
+                EventCategory.USA_INSPECCION.value: None,
+                EventCategory.CLEAR_USA.value: None,
+                EventCategory.SAFETY_YARD.value: None,
+                EventCategory.DELIVERY.value: None,
+            }
+            for e in data_email.events or []:
+                events_dates[e.category.value] = {
+                    "date": e.dateTime.strftime("%m/%d/%Y %H:%M"),
+                    "notes": e.notes,
+                }
+
+            context["events_dates"] = events_dates
+
+        template = self._jinja_env.get_template(type_template)
+
+        return template.render(**context)
+
     def send_assignation(self, payload: PayloadAssginationNotificationEvent) -> None:
         validated_emails = self._validate_emails(payload.target_email)
         if not validated_emails or self._lambda_client is None:
             return
 
-        sanitized_payload = payload.model_copy(
-            update={"target_email": validated_emails}
+        html_body = self._preparate_template(payload)
+
+        subject = (
+            f"{payload.type_operation}: Assignation Notice: f{payload.tracking_number} "
         )
 
         try:
-            self._lambda_client.send_assignation_notice(sanitized_payload)
-        except Exception:
+            logger.info(
+                "Preparando notificación de asignacion '%s' para referencia=%s a %d destinatarios",
+                payload.type_operation,
+                payload.customer_tracking,
+                len(validated_emails),
+            )
+            self._lambda_client.send_notice(to=validated_emails, subject=subject, html=html_body)
+
+        except Exception as e:
             logger.exception(
                 "Error al enviar notificación de asignación vía Lambda para tag=%s",
                 payload.tag,
             )
+            logger.exception(
+                            "Error:",
+                            e,
+                        )
 
     def send_status(
-        self, reference: str, status_event: ShipmentStatusEvent, emails: list[str]
+        self, payload: PayloadStatusTrailer | PayloadStatusConsolidate
     ) -> None:
-        validated_emails = self._validate_emails(emails)
+        validated_emails = self._validate_emails(payload.target_email)
         if not validated_emails or self._lambda_client is None:
             return
 
-        logger.info(
-            "Preparando notificación de estatus '%s' para referencia=%s a %d destinatarios",
-            status_event,
-            reference,
-            len(validated_emails),
-        )
+        html_body = self._preparate_template(payload)
+
+        subject = f"{payload.type_operation}: Shipment Notice Reference {payload.tracking_number}"
+
+        try:
+
+            logger.info(
+                "Preparando notificación de estatus '%s' para referencia=%s a %d destinatarios",
+                payload.type_operation,
+                payload.customer_tracking,
+                len(validated_emails),
+            )
+
+            self._lambda_client.send_notice(
+                to=validated_emails, subject=subject, html=html_body
+            )
+
+        except Exception as e:
+            logger.exception(
+                "Error sending status notification for tracking=%s",
+                payload.tracking_number,
+            )
+            logger.exception(
+                "Error:",
+                e,
+            )

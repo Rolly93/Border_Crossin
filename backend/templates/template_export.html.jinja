@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Border Crossing Notice</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #334155;
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+            background-color: #f1f5f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Encabezado */
+        .header {
+            background-color: #1e3a8a;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        /* Tabla de Estatus */
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .status-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Columna de Etiquetas */
+        .label {
+            background-color: #f8fafc;
+            font-weight: 600;
+            width: 42%;
+            color: #1e293b;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        /* Columna de Valores */
+        .value {
+            background-color: #ffffff;
+            color: #334155;
+        }
+
+        /* Fila de Alerta / Inspección */
+        .inspection-label {
+            background-color: #fef2f2;
+            color: #991b1b;
+            font-weight: 700;
+            border-right: 1px solid #fecaca;
+        }
+
+        .inspection-value {
+            background-color: #fef2f2;
+            color: #991b1b;
+            font-weight: 600;
+        }
+
+        /* Badge para destacar el Tracking */
+        .badge-track {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        /* Pie de página */
+        .footer {
+            background-color: #f8fafc;
+            padding: 15px 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+{%set pending = 'Pending'%}
+{%set na = 'N/A'%}
+    <div class="container">
+        <div class="header">
+            <h2>Border Crossing Notice</h2>
+            <p>Actualización de Estatus de Embarque</p>
+        </div>
+
+        <div class="content">
+            <table class="status-table">
+                <tr>
+                    <td class="label">Track Number:</td>
+                    <td class="value"><span class="badge-track">{{ tracking_number }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label">Client Reference:</td>
+                    <td class="value"><strong>{{ customer_tracking }}</strong></td>
+                </tr>
+                <tr>
+                    {% if service_type == "trailer_53ft" %}
+                    <td class="label">Trailer / Placa:</td>
+                    <td class="value">{{ trailer_number or "" }}</td>
+                    {% elif service_type =="consolidated"%}
+                    <td class="label">Consolidate Guide:</td>
+
+                    <td class="value">
+                        {% if consolidated_guide %}
+                        {% for g in consolidated_guide %}
+                        <div>{{ g.guide_number }}</div>
+                        {% endfor %}
+                        {% else %}
+                        N/A
+                        {% endif %}
+                     </td>
+                    {%endif%}
+                </tr>
+                <tr>
+                    <td class="label">Pick Up:</td>
+                    <td class="value">{{ events_dates.pick_up.date or default(pending) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Departure:</td>
+                    <td class="value">{{ events_dates.departure.date or default(pending) }}</td>
+                </tr>
+                <tr>
+                    <td class="inspection-label">Mex Inspection:</td>
+                    <td class="inspection-value">{{ events_dates.mex_inspeccion.date | default(na) }}</td>
+                    <td class="inspection-label">Mex New Seal:</td>
+                    <td class="inspection-value">{{ events_dates.mex_inspeccion.notes | default(na) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Mex Clearance:</td>
+                    <td class="value">{{ events_dates.clear_mex.date | default(pending) }}</td>
+                </tr>
+                <tr>
+                    <td class="inspection-label">USA Inspection:</td>
+                    <td class="inspection-value">{{ events_dates.usa_inspeccion.date | default(na) }}</td>
+                    <td class="inspection-label">USA New Seal:</td>
+                    <td class="inspection-value">{{ events_dates.usa_inspeccion.notes | default(na) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">USA Clearance:</td>
+                    <td class="value">{{ events_dates.clear_usa.date | default(pending) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Delivery:</td>
+                    <td class="value">{{ events_dates.deliver | default(pending) }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Receive:</td>
+                    <td class="value">{{ events_dates.notes | default(pending) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            Este es un documento generado automáticamente por el Sistema de Logística.<br>
+            © 2026 - Nuevo Laredo, Tamaulipas.
+        </div>
+    </div>
+</body>
+
+</html>

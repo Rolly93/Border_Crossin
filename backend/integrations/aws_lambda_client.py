@@ -1,6 +1,7 @@
 import httpx
+import logging
 
-from schema.email_schema import PayloadAssginationNotificationEvent
+logger = logging.getLogger(__name__)
 
 
 class AssignationLambdaClient:
@@ -9,19 +10,22 @@ class AssignationLambdaClient:
         self.api_key = api_key
         self.timeout = timeout
 
-    def send_assignation_notice(
-        self, payload: PayloadAssginationNotificationEvent
-    ) -> None:
-        payload = PayloadAssginationNotificationEvent(
-            tag=payload.tag,
-            gafet=payload.gafet,
-            target_email=payload.target_email,
-            reference_client=payload.reference_client,
-            tracking_reference=payload.tracking_reference,
-            cfdi=payload.cfdi or None,
+    def send_notice(self, to: list[str], subject: str, html: str) -> None:
+        payload = {
+            "to": to,
+            "subject": subject,
+            "html": html,
+        }
+
+        logger.info(
+            "Sending email notification to %d recipients",
+            len(to),
         )
 
-        headers = {"x-api-key": self.api_key}
+        headers = {
+            "x-api-key": self.api_key,
+            "Content-Type": "application/json",
+        }
         with httpx.Client(timeout=self.timeout) as client:
             response = client.post(self.endpoint_url, json=payload, headers=headers)
             response.raise_for_status()

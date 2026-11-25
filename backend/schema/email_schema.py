@@ -1,8 +1,9 @@
-from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
+
+from schema.shipment_shcema import ConsolidateResponse, TrailerResponse
 
 
 class NotificationType(StrEnum):
@@ -12,9 +13,9 @@ class NotificationType(StrEnum):
 
 class BaseNotificationShipment(BaseModel):
     target_email: list[str]
-    tracking_reference: str
-    reference_client: str
-    tipo_operacion: str
+    tracking_number: str
+    customer_tracking: str
+    type_operation: str
 
 
 class PayloadAssginationNotificationEvent(BaseNotificationShipment):
@@ -25,14 +26,19 @@ class PayloadAssginationNotificationEvent(BaseNotificationShipment):
     gafet: str
     cfdi: str | None
 
-
-class PayloadStatusNotification(BaseNotificationShipment):
+class PayloadStatusTrailer(TrailerResponse):
+    client_name:str
+    target_email:list[str]
     notification_type: Literal[NotificationType.STATUS] = NotificationType.STATUS
-    status: str
-    dateTime: datetime
 
+class PayloadStatusConsolidate(ConsolidateResponse):
+    client_name: str
+    target_email: list[str]
+    notification_type: Literal[NotificationType.STATUS] = NotificationType.STATUS
 
 UnifyNotification = Annotated[
-    PayloadAssginationNotificationEvent | PayloadStatusNotification,
+    PayloadAssginationNotificationEvent
+    | PayloadStatusConsolidate
+    | PayloadStatusTrailer,
     Field(discriminator="notification_type"),
 ]

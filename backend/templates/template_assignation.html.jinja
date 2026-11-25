@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Assignment Notice</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #334155;
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+            background-color: #f1f5f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Encabezado */
+        .header {
+            background-color: #0f4c81;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #bae6fd;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        /* Tabla de Asignación */
+        .status-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .status-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        .status-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Columna de Etiquetas */
+        .label {
+            background-color: #f8fafc;
+            font-weight: 600;
+            width: 42%;
+            color: #1e293b;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        /* Columna de Valores */
+        .value {
+            background-color: #ffffff;
+            color: #334155;
+        }
+
+        /* Badges */
+        .badge-track {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .badge-op {
+            background-color: #eef2ff;
+            color: #3730a3;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        /* Pie de página */
+        .footer {
+            background-color: #f8fafc;
+            padding: 15px 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Unit Assignment Notice</h2>
+            <p>Notificación de Asignación de Unidad</p>
+        </div>
+
+        <div class="content">
+            <table class="status-table">
+                <tr>
+                    <td class="label">Tracking Number:</td>
+                    <td class="value"><span class="badge-track">{{ tracking_number }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label">Customer Tracking:</td>
+                    <td class="value"><strong>{{ customer_tracking }}</strong></td>
+                </tr>
+                <tr>
+                    <td class="label">Operation Type:</td>
+                    <td class="value"><span class="badge-op">{{ type_operation }}</span></td>
+                </tr>
+                <tr>
+                    <td class="label">Tag:</td>
+                    <td class="value">{{ tag }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Gafet:</td>
+                    <td class="value">{{ gafet }}</td>
+                </tr>
+                <tr>
+                    <td class="label">CFDI:</td>
+                    <td class="value">{{ cfdi if cfdi else 'N/A' }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            Este es un documento generado automáticamente por el Sistema de Logística.<br>
+            © 2026 - Nuevo Laredo, Tamaulipas.
+        </div>
+    </div>
+</body>
+</html>

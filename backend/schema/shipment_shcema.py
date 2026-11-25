@@ -90,14 +90,21 @@ class ShipmentCreateRequest(BaseModel):
     )
 
 
-class ConsolidateRequest(ShipmentCreateRequest):
-    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
-    consolidate_guide: list[ConsolidateGuideItem] = Field(min_length=1)
+class ShipmentResponse(BaseModel):
+    id: int
+    tracking_number: toUppercase = Field(min_length=1, max_length=100)
+    customer_tracking: toUppercase = Field(min_length=1, max_length=100)
+    type_operation: TypeOperation = Field(default=TypeOperation.NORTHBOUND)
+    cliente: str = Field(description="ID del cliente")
+    origen: str = Field(min_length=1, max_length=200)
+    truck: str = Field(min_length=1, max_length=20, description="Operador ID")
+    destination: str = Field(
+        min_length=1,
+        max_length=200,
+        validation_alias=AliasChoices("destination", "destino"),
+    )
 
-
-class ConsolidateRespons(ShipmentCreateRequest):
-    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
-    consolidate_guide: list[ConsolidateGuideItemResponse] = Field(min_length=1)
+    events: list[ShipmentEvent] | None
 
 
 class TrailerRequest(ShipmentCreateRequest):
@@ -115,17 +122,13 @@ class TrailerCreate(BaseModel):
     seal: str
 
 
-class ShipmentResponse(ShipmentCreateRequest):
-    id: int
-    events: list[ShipmentEvent] | None
-
-
 class ShipmentUpdate(ShipmentResponse): ...
 
 
-class ConsolidateResponse(ConsolidateRespons):
+class ConsolidateResponse(ShipmentResponse):
+    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
+    consolidate_guide: list[ConsolidateGuideItemResponse] = Field(min_length=1)
     id: int
-    events: list[ShipmentEvent] = Field(default_factory=list)
     assignation: date
 
     @field_validator("events", mode="before")
@@ -138,10 +141,19 @@ class ConsolidateResponse(ConsolidateRespons):
     model_config = ConfigDict(from_attributes=True)
 
 
-class TrailerResponse(TrailerRequest):
+class ConsolidateRequest(ShipmentCreateRequest):
+    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
+    consolidate_guide: list[ConsolidateGuideItem] = Field(min_length=1)
+
+
+class TrailerResponse(ShipmentResponse):
     id: int
     assignation: date
-    events: list[ShipmentEvent]
+    service_type: Literal[ServiceType.TRAILER] = ServiceType.TRAILER
+    trailer_number: str = Field(min_length=2, max_length=50)
+    plates: str = Field(min_length=2, max_length=30)
+    state: str = Field(min_length=1, max_length=10, default="N/A")
+    seal: str = Field(min_length=2, max_length=50)
 
 
 class EventPayload(BaseModel):
