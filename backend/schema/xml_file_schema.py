@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
 
 from exeption import *
 
@@ -15,7 +15,7 @@ class XmlRequest:
     tracking_number: str
     dateTime: str
     event_code: str
-    notes: Optional[str | None]
+    notes: str | None
 
 
 class EventCode(str, Enum):
@@ -31,7 +31,7 @@ class EventCode(str, Enum):
 
 class BaseXMLTransformer(ABC):
     @abstractmethod
-    def transform_event(self, data: EventPayload) -> Dict[str, Any]:
+    def transform_event(self, data: EventPayload) -> dict[str, Any]:
         """Converts internal event data to the client's expected XML dictionary structure."""
         pass
 
@@ -43,7 +43,7 @@ class BaseXMLTransformer(ABC):
 class ExpeditorsXMLService(BaseXMLTransformer):
 
     def validate_reference(self, reference: str | None) -> str:
-        if not reference or not isinstance(reference, str):
+        if not reference :
             raise InvalidReferenceError(
                 "Customer tracking reference is required and cannot be empty or None."
             )
@@ -65,7 +65,7 @@ class ExpeditorsXMLService(BaseXMLTransformer):
 
         return reference.upper()
 
-    def _format_datetime(self, dt: datetime) -> str:
+    def _format_datetime(self, dt: datetime | None) -> str:
 
         if not dt:
             raise InvalidEventDateTimeError("Event dateTime is required but was None.")
@@ -73,7 +73,7 @@ class ExpeditorsXMLService(BaseXMLTransformer):
         return dt.strftime("%Y-%m-%dT%H:%M:%S")
 
     def _event_code(self, event: EventCategory) -> str:
-        raw_event = event.value if isinstance(event, Enum) else event
+        raw_event = event.value
         match raw_event:
             case "pick_up":
                 return EventCode.AFS.name

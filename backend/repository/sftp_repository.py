@@ -4,8 +4,9 @@ from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from model.db_model import SftpSend, SftpService, ShipmentAssign, ShipmentEventModel
+from model.db_model import SftpSend, SftpService
 from repository.base_repository import BaseRepository
+from repository.sftp_send_repository import Sftp_Send_Repository
 from schema import SftpConfigurationRequest, SftpConfiRequst
 from schema.sftp_schema import SftpConfigIn
 from utility.encryption import decrypt_password, encrypt_password
@@ -15,6 +16,7 @@ class SftpRepository(BaseRepository[SftpService]):
     def __init__(self, db: Session):
         super().__init__(db, SftpService)
         self._db = db
+        self._sftp_files_repo = Sftp_Send_Repository(self._db)
 
     def get_sftp_data(self, client_id: int) -> SftpConfigurationRequest | None:
         raw_sftp_config = (
@@ -63,27 +65,9 @@ class SftpRepository(BaseRepository[SftpService]):
         reference: str | None = None,
         status: str | None = None,
     ) -> list[SftpSend]:
-        query = (
-            self._db.query(SftpSend)
-            .join(SftpService, SftpSend.sent_to == SftpService.id)
-            .join(
-                ShipmentEventModel, SftpSend.shipment_event_id == ShipmentEventModel.id
-            )
-            .join(
-                ShipmentAssign, ShipmentEventModel.trip_assigned_id == ShipmentAssign.id
-            )
-        )
-        if client_id is not None:
-            query = query.filter(SftpService.client_id == client_id)
-        if reference:
-            query = query.filter(
-                ShipmentAssign.customer_tracking.icontains(
-                    reference.strip(), autoescape=True
-                )
-            )
-        if status:
-            query = query.filter(SftpSend.status == status)
-        return query.order_by(SftpSend.id.desc()).all()
+
+        return self._sftp_files_repo.sftp_get_list_files(client_id,reference,status   ,         )
+
 
     def get_sends_by_ids(self, send_ids: list[int]) -> list[SftpSend]:
         return self._db.query(SftpSend).filter(SftpSend.id.in_(send_ids)).all()

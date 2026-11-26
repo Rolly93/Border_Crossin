@@ -1,4 +1,3 @@
-from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -92,3 +91,12 @@ class SftpConfigOut(BaseModel):
     password: str = ""
     root_folder: str
     remote_folder: str
+
+class Sftp_Files_Response:
+    id:int
+    clientName:str
+    fileName:str
+    status:str
+    retries:int
+    sfpt_log:str
+    remote_folder:str

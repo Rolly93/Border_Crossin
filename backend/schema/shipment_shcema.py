@@ -106,6 +106,15 @@ class ShipmentResponse(BaseModel):
 
     events: list[ShipmentEvent] | None
 
+    @field_validator("events", mode="before")
+    @classmethod
+    def clean_events(cls, v: Any) -> Any:
+        if isinstance(v, list):
+            return [item for item in v if item is not None]
+        return v
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 class TrailerRequest(ShipmentCreateRequest):
     service_type: Literal[ServiceType.TRAILER] = ServiceType.TRAILER
@@ -125,25 +134,16 @@ class TrailerCreate(BaseModel):
 class ShipmentUpdate(ShipmentResponse): ...
 
 
+class ConsolidateRequest(ShipmentCreateRequest):
+    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
+    consolidate_guide: list[ConsolidateGuideItem] = Field(min_length=1)
+
+
 class ConsolidateResponse(ShipmentResponse):
     service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
     consolidate_guide: list[ConsolidateGuideItemResponse] = Field(min_length=1)
     id: int
     assignation: date
-
-    @field_validator("events", mode="before")
-    @classmethod
-    def clean_events(cls, v: Any) -> list[Any | None]:
-        if isinstance(v, list):
-            return [item for item in v if item is not None]
-        return v
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class ConsolidateRequest(ShipmentCreateRequest):
-    service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
-    consolidate_guide: list[ConsolidateGuideItem] = Field(min_length=1)
 
 
 class TrailerResponse(ShipmentResponse):
@@ -159,7 +159,7 @@ class TrailerResponse(ShipmentResponse):
 class EventPayload(BaseModel):
     tracking_number: toUppercase | None
     customer_tracking: toUppercase | None
-    cliente: int
+    cliente: toUppercase | None
     truck: toUppercase | None
     vehicle_type: toUppercase | None
     trailer: toUppercase | None

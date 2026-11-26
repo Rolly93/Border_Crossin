@@ -24,9 +24,14 @@ def build_event_xml(send: SftpSend, scac: str, root_folder: str) -> str:
     trip = event.trip
     payload = EventPayload(
         customer_tracking=trip.customer_tracking,
-        cliente=trip.client_id,
+        cliente=trip.client.name,
+        truck='',
+        trailer='',
+        vehicle_type=trip.service_type,
         tracking_number=trip.tracking_number,
         type_operation=trip.type_operation,
+        origen=trip.origen,
+        destination=trip.destination,
         scac_code=scac,
         event=EventCategory(event.category),
         dateTime=event.event_time,

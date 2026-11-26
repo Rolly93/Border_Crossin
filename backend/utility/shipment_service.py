@@ -1,27 +1,19 @@
 import logging
 
 from fastapi import HTTPException, status
-from pydantic.networks import EmailStr
 from sqlalchemy.orm import Session
 
 from deps.auth import LambdaClientDep
 from model.db_model import (
-    SftpSend,
     ShipmentAssign,
-    ShipmentEventModel,
     Trailer,
 )
 from repository import ShipmentRepository
 from repository.cliente_repository import ClientServiceType
 from repository.consolidated_repository import ConsolidateRepository
-from repository.system_config_repository import SystemConfigRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
-from schema.email_schema import (
-    NotificationType,
-    PayloadAssginationNotificationEvent,
-    UnifyNotification,
-)
+
 from schema.shipment_shcema import (
     ConsolidateGuideItemResponse,
     ConsolidateResponse,
@@ -36,9 +28,7 @@ from schema.shipment_shcema import (
     ShipmentEvent,
     TrailerCreate,
     TrailerResponse,
-    TypeOperation,
 )
-from service.email import EmailNotificationDispatcher
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
@@ -55,8 +45,7 @@ class ShipmentService:
         self._unit_repo = UnitRepository(self.db)
         self._trailer_repo = TrailerRepository(self.db)
         self._consolidate_repo = ConsolidateRepository(self.db)
-        self._email_service = EmailNotificationDispatcher(aws_client)
-        self._dispatchService = ShipmentDispatchService(db )
+        self._dispatchService = ShipmentDispatchService(db, aws_client)
 
     def get_all_shipments(
         self, page: int = 1, limit: int = 10
@@ -72,7 +61,6 @@ class ShipmentService:
 
     @staticmethod
     def _to_response(s: ShipmentAssign) -> ServiceTypeUnionResponse:
-        # truck y trailer son relaciones ORM; el esquema espera su texto (número / placas).
         valid_categories = {c.value for c in EventCategory}
         events = [
             ShipmentEvent(
@@ -133,6 +121,20 @@ class ShipmentService:
             )
 
         return service_shipment_data
+
+    def _build_service_response(
+        self, shipment: ShipmentAssign
+    ) -> TrailerResponse | ConsolidateResponse:
+        events_sources =  shipment.events
+
+        if shipment.service_type == ServiceType.TRAILER:
+            return TrailerResponse.model_validate(shipment).model_copy(
+                update={"events": events_sources}
+            )
+
+        if shipment.service_type == ServiceType.CONSOLIDATED:
+            return ConsolidateResponse.model_validate(shipment).model_copy(update={'events':events_sources})
+        raise ValueError (f'Unsppported service type: {shipment.service_type}')
 
     def create_shipment(
         self, data: ServiceTypeUnionRequest, user_id: int
@@ -230,18 +232,14 @@ class ShipmentService:
                 ClientServiceType.EMAIL,
             )
         ) and client_data.emailService:
-            email: list[EmailStr] = [e for e in client_data.emailService.email]
-            notification_assigment = PayloadAssginationNotificationEvent(
-                target_email=email,
-                customer_tracking=data.customer_tracking,
-                tracking_number=data.tracking_number,
-                type_operation=TypeOperation(data.type_operation),
-                tag=unit.tag_id or 'n/a',
-                cfdi=None,
-                gafet=assignment.driver.gafet_id,
-                notification_type=NotificationType.NOTIFACTION,
+
+            self._dispatchService.notify_assigment(
+                emails=client_data.emailService.email,
+                data=shipment,
+                unit=data_unit,
+                assigment=assignment,
             )
-            self.email_service(notification_assigment)
+
         return shipment
 
     def delete_shipmnet(self, id: int, user: int) -> str | None:
@@ -256,6 +254,7 @@ class ShipmentService:
         shipment_data: ServiceTypeUnionRequestUpdate,
         user_id: int,
     ) -> ShipmentAssign:
+
         current = self._shipment_db.get_shipment(shipment_id)
         self._reference_rule.validate(
             client_id=current.client_id,
@@ -266,38 +265,20 @@ class ShipmentService:
         shipment, new_events = self._shipment_db.update_shipment(
             shipment_id, shipment_data, user_id
         )
-        self.sftp_service(shipment, new_events)
+
+        if (
+            service := self._client_service.get_client_service(
+                shipment.client_id,
+                ClientServiceType.SFTP,
+            )
+        ) and service.sftService:
+            self._dispatchService.dispatch_events(new_events, service.sftService)
+        if service.emailService:
+            either_trailer_consolidate = self._build_service_response(shipment=shipment)
+            self._dispatchService.notify_status(
+                emails=service.emailService.email,
+                client_name=shipment.client.name,
+                shipment_response=either_trailer_consolidate
+            )
+
         return shipment
-
-    def sftp_service(
-        self, shipment: ShipmentAssign, events: list[ShipmentEventModel]
-    ) -> list[SftpSend]:
-        if not events:
-            return []
-
-        client_data = self._client_service.get_client_service(
-            shipment.client_id, ClientServiceType.SFTP
-        )
-        if not client_data or not client_data.sftService:
-            return []
-
-        if not (scac := SystemConfigRepository(self.db).get_scac()):
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Scac Code missing")
-
-        return self._dispatchService.dispatch_events(
-            events, client_data.sftService, scac
-        )
-
-    def email_service(
-        self,
-        client_service: UnifyNotification,
-    ):
-
-        if not client_service.notification_type:
-            return
-
-        if client_service.notification_type == NotificationType.NOTIFACTION:
-            self._email_service.send_assignation(client_service)
-
-        if client_service.notification_type == NotificationType.STATUS:
-            self._email_service.send_status(client_service)

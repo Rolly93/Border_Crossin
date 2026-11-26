@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from model.db_model import Consolidate, ShipmentAssign, ShipmentEventModel, Trailer
 from repository.base_repository import BaseRepository
-from routes import shipment
 from schema.shipment_shcema import (
     ServiceType,
     ServiceTypeUnionRequestUpdate,
@@ -87,7 +86,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
 
     def update_shipment(
         self, id: int, shipment_data: ServiceTypeUnionRequestUpdate, user_id: int
-    ):
+    ) -> tuple[ShipmentAssign, list[ShipmentEventModel]]:
 
         shipment = self.get_shipment(id)
 
