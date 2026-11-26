@@ -1,5 +1,7 @@
 import logging
 from pathlib import Path
+
+from jinja2 import Environment, FileSystemLoader
 from pydantic import EmailStr, TypeAdapter
 
 from deps.auth import LambdaClientDep
@@ -10,8 +12,6 @@ from schema.email_schema import (
     PayloadStatusTrailer,
     UnifyNotification,
 )
-from jinja2 import Environment, FileSystemLoader
-
 from schema.shipment_shcema import EventCategory, TypeOperation
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,9 @@ class EmailNotificationDispatcher:
                 payload.customer_tracking,
                 len(validated_emails),
             )
-            self._lambda_client.send_notice(to=validated_emails, subject=subject, html=html_body)
+            self._lambda_client.send_notice(
+                to=validated_emails, subject=subject, html=html_body
+            )
 
         except Exception as e:
             logger.exception(
@@ -106,9 +108,9 @@ class EmailNotificationDispatcher:
                 payload.tag,
             )
             logger.exception(
-                            "Error:",
-                            e,
-                        )
+                "Error:",
+                e,
+            )
 
     def send_status(
         self, payload: PayloadStatusTrailer | PayloadStatusConsolidate

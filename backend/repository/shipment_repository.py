@@ -1,11 +1,13 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time
 
 from fastapi import HTTPException, status
+from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.orm import Session
 
 from model.db_model import Consolidate, ShipmentAssign, ShipmentEventModel, Trailer
 from repository.base_repository import BaseRepository
 from schema.shipment_shcema import (
+    EventCategory,
     ServiceType,
     ServiceTypeUnionRequestUpdate,
     ShipmentCreateRequest,
@@ -130,10 +132,83 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         return shipment, new_events
 
     def get_all_shipments(
-        self, page: int = 1, limit: int = 10
+        self, page: int = 1, limit: int = 10, delivered_event_type: str = "DELIVERED"
+    ) -> tuple[list[ShipmentAssign], int]:
+
+        today = datetime.combine(datetime.now().date(), time.min)
+        is_completed = exists(
+            select(ShipmentEventModel.id).where(
+                and_(
+                    ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
+                    ShipmentEventModel.is_active.is_(True),
+                    ShipmentEventModel.event_type == delivered_event_type,
+                )
+            )
+        )
+        completed_today = exists(
+            select(ShipmentEventModel.id).where(
+                and_(
+                    ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
+                    ShipmentEventModel.is_active.is_(True) == delivered_event_type,
+                    ShipmentEventModel.captured_at >= today,
+                )
+            )
+        )
+
+        query = self._db.query(ShipmentAssign).filter(
+            ShipmentAssign.is_active.is_(True), or_(is_completed, completed_today)
+        )
+
+        total = query.count()
+        shipments = (
+            query.order_by(ShipmentAssign.assigned_day.desc(), ShipmentAssign.id.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+            .all()
+        )
+
+        return shipments, total
+
+    def get_shipments_history(
+        self,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        client_name: int | None = None,
+        driver_name: str | None = None,
+        only_delivered: bool | None = None,
+        delivered_event_type: str = EventCategory.DELIVERY.value,
+        page: int = 1,
+        limit: int = 20,
     ) -> tuple[list[ShipmentAssign], int]:
         query = self._db.query(ShipmentAssign)
+
+        if date_from is not None:
+            query = query.filter(ShipmentAssign.assigned_day >= date_from)
+        if date_to is not None:
+            query = query.filter(ShipmentAssign.assigned_day <= date_to)
+        if client_name is not None:
+            query = query.filter(ShipmentAssign.client_id == client_name)
+        if driver_name is not None:
+            query = query.filter(ShipmentAssign.driver_id == driver_name)
+
+        if only_delivered is not None:
+            has_delivered = exists(
+                select(ShipmentEventModel.id).where(
+                    and_(
+                        ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
+                        ShipmentEventModel.is_active.is_(True),
+                        ShipmentEventModel.event_type == delivered_event_type,
+                    )
+                )
+            )
+            query = query.filter(has_delivered if only_delivered else ~has_delivered)
+
         total = query.count()
-        shipments = query.offset((page - 1) * limit).limit(limit).all()
+        shipments = (
+            query.order_by(ShipmentAssign.assigned_day.desc(), ShipmentAssign.id.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
+            .all()
+        )
 
         return shipments, total

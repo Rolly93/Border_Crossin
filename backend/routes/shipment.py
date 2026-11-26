@@ -57,11 +57,10 @@ async def update_trip(
     )
 
 
-@router.patch("/{id}/delete")
+@router.patch("/{id}/delete", status_code=status.HTTP_202_ACCEPTED)
 async def delete_shipment(
     id: int,
     current_user: CurrentUser,
     service: ShipmentSvc,
 ):
-    shipment_deleted = service.delete_shipmnet(id, int(current_user.sub))
-    return {"status": "success", "data": shipment_deleted}
+    service.delete_shipmnet(id, int(current_user.sub))
