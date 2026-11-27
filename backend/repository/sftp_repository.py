@@ -72,6 +72,9 @@ class SftpRepository(BaseRepository[SftpService]):
     def get_sends_by_ids(self, send_ids: list[int]) -> list[SftpSend]:
         return self._db.query(SftpSend).filter(SftpSend.id.in_(send_ids)).all()
 
+    def reset_retries(self, sends: list[SftpSend]) -> list[SftpSend]:
+        return self._sftp_files_repo.reset_retries(sends)
+
     def get_active_config(self, client_id: int) -> SftpService | None:
         return (
             self._db.query(SftpService)

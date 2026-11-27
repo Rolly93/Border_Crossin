@@ -221,7 +221,7 @@ class ShipmentService:
             self._consolidate_obj = self._consolidate_repo.create_consolidate(
                 new_consolidate, client=client
             )
-            self.db.refresh(shipment)
+            self._shipment_db.refresh(shipment)
         # =====================================================
         # Shipment Created
         # =====================================================

@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
-from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session
 
-from model.db_model import Client, ClientReferenceRule
+from model.db_model import ClientReferenceRule
+from repository.reference_rules_repository import ClientRuleRepository
 from schema.shipment_shcema import TypeOperation
 
 OPERATIONS = (TypeOperation.SOUTHBOUND, TypeOperation.NORTHBOUND)
@@ -27,34 +27,14 @@ class ReferenceRuleService:
     """
 
     def __init__(self, db: Session):
-        self._db = db
+        self._repo = ClientRuleRepository(db)
 
     def rules_for_client(self, client_id: int) -> list[ClientReferenceRule]:
-        return (
-            self._db.query(ClientReferenceRule)
-            .filter(ClientReferenceRule.client_id == client_id)
-            .order_by(ClientReferenceRule.operation_type, ClientReferenceRule.prefix)
-            .all()
-        )
+        return self._repo.get_rules_for_client(client_id)
 
-    def clients_for_operation(self, operation: str) -> list[dict[str, str]]:
+    def clients_for_operation(self, operation: str) -> list[dict[str, str | int]]:
         op = normalize_operation(operation)
-
-        has_rule_for_op = exists().where(
-            ClientReferenceRule.client_id == Client.id,
-            ClientReferenceRule.operation_type == op,
-        )
-        has_any_rule = exists().where(ClientReferenceRule.client_id == Client.id)
-
-        stmt = (
-            select(Client.id, Client.name)
-            .where(Client.still_active.is_(True))
-            .where(or_(has_rule_for_op, ~has_any_rule))
-            .order_by(Client.name)
-        )
-        return [
-            {"id": row.id, "name": row.name} for row in self._db.execute(stmt).all()
-        ]
+        return self._repo.clients_for_operation(op)
 
     def validate(self, client_id: int, operation: str, reference: str) -> None:
         rules = self.rules_for_client(client_id)

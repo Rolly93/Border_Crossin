@@ -75,6 +75,10 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         )
         return self.save(new_assgiment_shipment)
 
+    def refresh(self, shipment: ShipmentAssign) -> ShipmentAssign:
+        self._db.refresh(shipment)
+        return shipment
+
     def get_shipment(self, id: int) -> ShipmentAssign:
         shipment_id = (
             self._db.query(ShipmentAssign).filter(ShipmentAssign.id == id).first()

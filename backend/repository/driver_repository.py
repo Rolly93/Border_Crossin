@@ -1,8 +1,8 @@
-from select import select
 from typing import override
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
 from repository.base_repository import BaseRepository
@@ -29,6 +29,34 @@ class DriverRepository(BaseRepository[DriverDetails]):
                 detail="Operador no esta en la Base de datos",
             )
         return driver
+
+    def get_driver_with_employee(
+        self, employee_id: int
+    ) -> tuple[DriverDetails, Employee]:
+        stmt = (
+            select(DriverDetails)
+            .options(joinedload(DriverDetails.employee))
+            .join(DriverDetails.employee)
+            .where(Employee.id == employee_id, Employee.still_employee.is_(True))
+        )
+        driver = self._db.execute(stmt).scalars().first()
+        if not driver:
+            raise ValueError(f"Driver with {employee_id} not found")
+        return driver, driver.employee
+
+    def find_by_license_number(self, license_number: str) -> DriverDetails | None:
+        return (
+            self._db.query(DriverDetails)
+            .filter(DriverDetails.license_number == license_number)
+            .first()
+        )
+
+    def find_by_gafet_id(self, gafet_id: str) -> DriverDetails | None:
+        return (
+            self._db.query(DriverDetails)
+            .filter(DriverDetails.gafet_id == gafet_id)
+            .first()
+        )
 
     def get_full_data(self, employee: Employee) -> DriverDetails:
         stmt = select(DriverDetails).where(DriverDetails.employee_id == employee.id)

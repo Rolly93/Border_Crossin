@@ -65,6 +65,14 @@ class ClienteRepository(BaseRepository[Client]):
     def get_client_by_id(self, id_val: int) -> Client | None:
         return self.get_by_id(id_val)
 
+    def get_active_emails(self, client_id: int) -> list[str]:
+        client = self.get_client_by_id(client_id)
+        if not client:
+            return []
+        return [
+            rec.email for rec in client.email_recipients if rec.is_active
+        ]
+
     def toggle_service(
         self, client_id: int, service: ClientServiceType, is_active: bool = False
     ) -> Client:

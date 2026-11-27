@@ -1,90 +1,105 @@
 # AGENTS.md — Border_Crossin
 
-## Quick Start
+## Layout
+
+- Monorepo: `backend/` FastAPI + `Frontend/` React/TypeScript/Vite. No root JS workspace.
+- Backend layered `routes/` → `service/` / `utility/` → `repository/` → `model/`; `deps/auth.py`; `schema/`. Run backend from `backend/`; imports are `from database import engine`, `from config.config import Env`. `main.py` `Base.metadata.create_all` + `upgrade_unit_schema`.
+- Frontend feature-based `Frontend/src/features/` + `pages/` + `components/`; package `mantine-vite-template`; React 19, TS 6, Vite 8, Mantine. `Frontend/src/mocks/` + `VITE_USE_MOCK=true`; `Frontend/src/types/api.d.ts` generated.
+- SQLAlchemy DB. No `.github/workflows`; no repo-local OpenCode config. This `AGENTS.md` + `PROJECT_CONTEXT.md` are repo instructions/context; `README.md` XML schema; `erDiagram.mmd` ER.
+
+## Setup
+
+Backend (from `backend/`):
 
 ```bash
-# Backend (from backend/)
+python -m venv .venv
+# Windows: .venv\Scripts\activate ; POSIX: source .venv/bin/activate
 pip install -r requirements.txt
+pip install bcrypt   # scripts.init_db imports bcrypt; not listed in requirements.txt
+cp .env.example .env
+# set JWT_SECRET_KEY + FERNET_KEY; don't commit .env
+python -m scripts.init_db
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-# Frontend (from Frontend/)
-npm install
-npm run dev
-
-# Docker (from root)
-docker-compose up --build
 ```
 
-## Architecture
+`config.config` loads `backend/.env`; `database.py` also `load_dotenv()`. `.env*` gitignored. Python 3.11+. No known `requirements.txt` conflicts.
 
-- **Monorepo**: `backend/` (FastAPI) + `Frontend/` (React + Vite)
-- **Backend**: Layered — routes → services → models (SQLAlchemy)
-- **Frontend**: Feature-based — `features/`, `pages/`, `components/`
-- **Database**: SQLAlchemy with multi-backend support (SQLite default, MySQL, Postgres, Supabase)
-- **Auth**: JWT (HS256), admin required for SFTP config mutations
+Frontend (from `Frontend/`):
 
-## Key Commands
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
 
-| Task | Command | Dir |
-|------|---------|-----|
-| Run backend dev | `uvicorn main:app --host 0.0.0.0 --port 8000 --reload` | `backend/` |
-| Run frontend dev | `npm run dev` | `Frontend/` |
-| Type-check frontend | `npm run typecheck` | `Frontend/` |
-| Lint frontend | `npm run lint` | `Frontend/` |
-| Full test suite (frontend) | `npm run test` | `Frontend/` |
-| Build frontend | `npm run build` | `Frontend/` |
-| Init DB (dev) | `python -m scripts.init_db` | `backend/` |
-| Docker up | `docker-compose up --build` | root |
+`VITE_API_URL`; `VITE_USE_MOCK=true` mock. `npm run prepare` installs husky; `lint-staged`. 
 
-## Environment
+Docker (root): `cp .env.example .env`; set `MYSQL_*`, `JWT_SECRET_KEY`, `FERNET_KEY`; `docker-compose up --build`. Backend `env_file: .env`, `DB_HOST=mysql`, `DB_PORT=3306`, `DB_DRIVER=mysql+pymysql`, `DB_NAME=$MYSQL_DATABASE`, `DB_USER`, `DB_PASSWORD`; MySQL healthcheck; `python -m scripts.init_db && uvicorn main:app ...`. No `sleep 5`.
 
-- **Backend `.env`**: Copy from `.env.example`, set `DATABASE_URL` or `DB_BACKEND` + credentials
-- **Frontend `.env`**: `VITE_API_URL`, `VITE_USE_MOCK=true` for local mock data
-- **Required for SFTP**: `SECRET_KEY` (Fernet key, generate with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`)
-- **Docker**: Uses `.env` at root for MySQL credentials (`MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, etc.)
+## Commands
 
-## Database
+Backend from `backend/`:
 
-- Default: SQLite at `./bordercrossing.db` (no config needed)
-- Switch via `DB_BACKEND=mysql|postgres|supabase` + `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
-- Or set `DATABASE_URL` directly (takes precedence)
-- Tables auto-created on startup (`Base.metadata.create_all` in `main.py`)
-- Run `python -m scripts.init_db` to seed default client (Expeditors) + admin user
+- `uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
+- `python -m scripts.init_db`: create tables + seed `Expeditors` + admin from `USER_EMAIL`/`USER_PASSWORD` (defaults `admin@test.com`/`1234`; set real values); seeds reference rules via `scripts.seed_reference_rules`. Existing tables skip `create_all`. 
+- `alembic` (`alembic.ini`, `migrations/`); `get_database_url()` for alembic. No backend test suite in repo.
 
-## SFTP & XML Processing
+Frontend from `Frontend/`:
 
-- Per-client SFTP config stored in DB (`SftpService` table), passwords encrypted with Fernet (`SECRET_KEY`)
-- XML events: AFS, DPU, EXR, ECC, ILR, CLR, ST1, TSC
-- Filename convention: `SCAC_REFERENCIA_EVENTO_YYYYMMDDHHMMSS.xml`
-- Incoming: SFTP → parse XML → create `ShipmentEventModel` → queue `SftpSend` for outbound
-- Outbound: `SftpSendService` processes pending sends, retries on failure
+- `npm run dev`, `npm run preview`
+- `npm run typecheck` (`tsc --noEmit`)
+- `npm run lint` = `oxlint .` + `stylelint '**/*.css' --cache`; `npm run oxlint`, `npm run stylelint`
+- `npm run format:test`, `npm run format:write`
+- `npm run vitest`, `npm run vitest:watch`; **no test files currently**; single test `npx vitest run src/path/file.test.ts`; Vitest `jsdom`, `vitest.setup.mjs`, MSW
+- `npm run build` = `tsc && vite build`; `npx vite build` skips typecheck
+- `npm test` = `typecheck && format:test && lint && vitest && build`; no CI to enforce; currently not guaranteed green
+- `npm run generate:api` (backend `:8000/openapi.json` → `src/types/api.d.ts`)
+- `npm run storybook`, `npm run storybook:build`
 
-## Frontend Quirks
+## Environment / security
 
-- `VITE_USE_MOCK=true` enables mock data (`src/mocks/`) — disable for real API
-- Oxlint + Stylelint + oxfmt for lint/format (`npm run lint`, `npm run format:write`)
-- Vitest for unit tests (`npm run vitest`)
-- Storybook available (`npm run storybook`)
+- `backend/.env`: `JWT_SECRET_KEY`, `FERNET_KEY`, `ALGORITHM=HS256`, `ACCESS_TOKEN_EXPIRE_MINUTES=30`, `DATABASE_URL`, `DB_*`, `USER_EMAIL`, `USER_PASSWORD`, SFTP/mail, `SQLITE_PATH`. `backend/.env.example`. 
+- JWT secret = `JWT_SECRET_KEY` or legacy `SECRET_KEY`. Fernet = `FERNET_KEY` or legacy `SECRET_KEY`. `SECRET_KEY` deprecated. Surrounding quotes stripped. Required for JWT + SFTP password encryption. Don’t print secrets. 
+- `FERNET_KEY` generate `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. `JWT_SECRET_KEY` generate `python -c "import secrets; print(secrets.token_urlsafe(32))"`. 
+- `DATABASE_URL` always wins. Else `DB_BACKEND=sqlite|mysql|postgres|supabase`; `postgresql`→`postgres`. `DB_HOST` required for server DBs; `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT`, `DB_DRIVER`, `DB_SSLMODE`. Supabase `sslmode=require`. `DB_BACKEND` unset + `DB_HOST`→mysql else sqlite. SQLite `SQLITE_PATH`; example `./bordercrossing.db`; relative to backend cwd; empty `DATABASE_URL` treated unset. `*.env.example` allowed. 
+- JWT HS256; `sub` stringified; `get_user_id()` in `backend/deps/auth.py` rejects non-numeric `sub` with 403. `require_admin`. Admin for SFTP config mutations. 
 
-## Common Gotchas
+## SFTP & XML
 
-1. **Requirements.txt has merge conflicts** — fix before `pip install`
-2. **Backend runs from `backend/` dir** — imports are relative (`from database import engine`)
-3. **Docker backend command** runs `sleep 5 && python -m scripts.init_db && uvicorn...` — waits for MySQL healthcheck
-4. **Frontend Docker** builds with Vite, serves via nginx — API calls proxy to backend container
-5. **JWT sub claim** may be RFC (string) not user ID — see `sftp_route.py:_user_id()`
-6. **Port mapping**: Frontend 5173→80 (nginx), Backend 8000, MySQL 3307→3306, SFTP 2222, MailHog 8025
+- **SFTP is outbound-only.** `backend/service/sftp_service.py` `SFTPService` opens paramiko SFTP; `upload_file(local_path)` → `sftp.put` to `remote_folder/<basename>`, returns remote path. No incoming SFTP server; no reading/listing/downloading XML; no incoming-XML parsing. `delete_file`; `RejectPolicy`; `~/.ssh/known_hosts`. 
+- Per-client `SftpService`; `SftpConfigurationRequest`; Fernet password `decrypt_password`. `root_folder`, `remote_folder`. 
+- `XMLService.create_event_file` writes **local** XML; not reads. `XMLServiceFactory` only `ExpeditorsXMLService`; root `<AvisoEventos>`. `SCAC` from `SystemConfigRepository.get_scac()`, required. 
+- `ShipmentEventModel` created in-app. On shipment update, if client has SFTP `SftpService`, `ShipmentDispatchService.dispatch_events(new_events, service.sftService)` → `SftpSend(pending)` → `send_batch`. `sftp_sender.build_event_xml` regenerates XML if `local_path` missing → `SFTPService.upload_file`. `SftpSendService.list_sends`; `POST /sftp/resend` only `failed`; statuses `pending/sent/failed`; `retries`; `sftp_log`; `MAX_RETRIES=3` = **4 attempts**. No SCAC → failed. 
+- `/sftp/sends`, `/sftp/resend`, `/sftp/connection`, `/sftp/create`, `/sftp/update/{config_id}`, `/sftp/delete/{config_id}`. 
+- Events `AFS,DPU,EXR,ECC,ILR,CLR,ST1,TSC`. Internal `EventCategory` mapping `pick_up→AFS`, `departure→DPU`, `mex_inspeccion→EXR`, `clear_mex→ECC`, `usa_inspeccion→ILR`, `clear_usa→CLR`, `safety_yard→ST1`, `deliver→TSC`; `delay` internal. `<AvisoEventos ReferenciaExpd TipoOperacion CodigoTransportista ReferenciaTransportista CodigoEvento FechaHoraEvento Comentarios>`. 
+- `SCAC_REFERENCIA_EVENTO_YYYYMMDDHHMMSS.xml`. `ExpeditorsXMLService`: `customer_tracking` required len 10 starts `82B`/`92B` suffix digits; `FechaHoraEvento` `YYYY-MM-DDTHH:MM:SS`; event time required; `CodigoEvento`; `CodigoTransportista=SCAC`; `TipoOperacion`. 
+- `backend/api/upload.py` not included in `main.py`; stale/incompatible (`SFTPService()` no config; `upload_file(local, remote)` vs `upload_file(local_path)`); don’t use. `README`/old `AGENTS.md` “incoming SFTP” stale. Optional Docker `sftp` test server `2222:22` + `sftp_data`, not app incoming-XML. 
 
-## Project Status
+## Email notifications
 
-- Phase 1 (Backend core) ✓
-- Phase 2 (Frontend dashboard) ✓
-- Phase 3 (Docker/Containerization) — in progress (docker-compose works)
-- Phase 4 (CI/CD) — planned
+- **Assignment:** `ShipmentService.create_shipment` calls `ShipmentDispatchService.notify_assigment(...)` (misspelled) when client has `ClientServiceType.EMAIL` + active recipients. `NotificationType.NOTIFACTION` = `"notification"`; `PayloadAssginationNotificationEvent`; `dispatch_service` → `EmailNotificationDispatcher.send_assignation`. 
+- **Updated status:** `ShipmentService.update_shipment` calls `notify_status(...)` when `service.emailService`; `NotificationType.STATUS`; `PayloadStatusTrailer`/`PayloadStatusConsolidate`; `send_status`. `notify_status` selects `template_export.html` for `northbound`, `template_Import.html` otherwise. 
+- `EmailNotificationDispatcher` uses Jinja + `AssignationLambdaClient.send_notice(to, subject, html)`, not `fastapi-mail`; `send_notice` POSTs `{to,subject,html}` to `ENDPOINT_AWS`, header `x-api-key=$APIKEY_AWS`, `Content-Type=application/json`, `httpx`, timeout 10. `get_lambda_client` returns `None` without `ENDPOINT_AWS`+`APIKEY_AWS`; `send_assignation`/`send_status` no-op if no valid emails or lambda `None`. `send_notice` errors logged, not re-raised inside try. 
+- `ClientEmailRecipient.is_active`; active `EmailConfigurationRequest.email` list. `backend/service/__init__.py` exports `EmailNotificationDispatcher`; `ShipmentDispatchService` lazy-imports it to avoid the `deps.auth` ↔ `service.email` cycle. Worktree is synced to `10ceb24`. 
+- **Services do not query directly.** `utility/*_service.py` and `service/*` orchestrate; `repository/*` owns SQLAlchemy queries/commits/refreshes. `ClientRuleRepository` owns reference-rule queries; `DriverRepository` owns driver lookups; `UnitRepository` owns unit/assignment writes; `Sftp_Send_Repository` owns send status commits; `ShipmentRepository.refresh` refreshes shipments. 
+- **Source-level works ≠ runtime-verified.** `ClienteService.get_client_service` uses `ClientServiceType.SFTP` / `ClientServiceType.EMAIL` and `ClienteRepository.get_active_emails`. Email template path is `backend/service/templates`, but actual templates are `backend/templates` + `.html.jinja`, while code asks `.html`; `_preparate_template` runs before `try`. `_validate_emails` builds `cleaned` but validates original `emails`. `update_shipment` accesses `service.emailService` and dispatches SFTP in same `service` path. `NotificationManager` `/events/stream` SSE is separate from email. 
+
+## Shipment domain
+
+- `ShipmentAssign` + `ShipmentEventModel`. `tracking_number`, `customer_tracking`, `cliente`, `origen`, `destination`, `truck`, `assignation`, `type_operation=northbound|southbound`, `service_type=trailer_53ft|consolidated`. `schema/shipment_shcema.py` (misspelled). 
+- `POST /shipment/create`, `GET /shipment/`, `PUT /shipment/{id}/update`, `PATCH /shipment/{id}/delete`. Current JWT required. `POST` duplicate `tracking_number` 409; client reference validation; `customer_tracking` + `tracking_number`. 
+- Active `UnitTruck` `state="ACTIVA"` + open `UnitAssignment` operator; `driver`; `unit_number`. `trailer_53ft` creates `Trailer`; `consolidated` + `consolidate_guide`. `ClientReferenceRule`. 
+
+## Gotchas
+
+1. Backend from `backend/`; `.env` `backend/.env`; venv; `pip install -r requirements.txt`; `init_db` needs `bcrypt`; `main.py` auto-creates tables; `init_db` seeds. 
+2. `DATABASE_URL` > `DB_BACKEND`; `SQLITE_PATH`; `DB_NAME`; `DB_DRIVER`; empty env unset; `DATABASE_URL=` empty. `get_database_url` alembic `hide_password=False`; startup prints `hide_password=True`. 
+3. `npm test` chains; `npm run build` fails if `tsc` fails; `npx vite build` can build despite TS; no Vitest tests → Vitest exits 1; no stylelint/oxfmt config currently; `stylelint-config-standard-scss` installed but no config. `npm run stylelint` quoted `**/*.css` can fail on Windows/npm-cmd; `npx stylelint **/*.css` checks. 
+4. `oxlint` `Frontend/oxlint.config.ts`: `no-console`, `curly`, `eqeqeq`, `no-unused-vars`, `no-alert`, `prefer-template`; `no-console` off `*.story.tsx`. `oxfmt` `*.{ts,tsx,css}`; `format:write` mutates. 
+5. `npm run generate:api` needs backend; `VITE_USE_MOCK`; `VITE_API_URL`. 
+6. Docker `name=border_crossin`; `docker-compose`; root `.env`; MySQL `3307:3306`, backend `8000`, frontend `5173:80`, SFTP `2222:22`, MailHog `1025`+`8025`; MySQL init `./backend/scripts`; frontend nginx proxy. `CORS_ORIGINS`, `LOG_LEVEL`, `JSON_LOGS`. 
+7. `npm install` package lock; `packageManager=npm@10.8.2`. `husky`. `.env`, `.venv`, `node_modules`, `dist`, `*.db`, logs, `sftp_data` not source. 
 
 ## References
 
-- `README.md` — XML schema, event codes, file naming
-- `erDiagram.mmd` — Database ER diagram
-- `backend/.env.example` — All supported env vars
-- `docker-compose.yml` — Full local stack
+`PROJECT_CONTEXT.md`, `README.md`, `backend/.env.example`, `Frontend/.env.example`, `docker-compose.yml`, `erDiagram.mmd`, `Frontend/oxlint.config.ts`, `Frontend/vitest.setup.mjs`, `Frontend/nginx.conf`, `backend/alembic.ini`, `backend/main.py`, `backend/model/db_model.py`.

@@ -65,9 +65,7 @@ class SftpSendService:
                 encrypted_password=decrypt_password(service_row.encrypted_password),
             )
             # Reenvío manual: cada envío recibe de nuevo sus 3 reintentos.
-            for send in group:
-                send.retries = 0
-            self._db.commit()
+            self._repo.reset_retries(group)
             send_batch(self._db, config, group, scac)
 
         return [self._to_dict(s) for s in sends]

@@ -74,20 +74,29 @@ class UnitRepository(BaseRepository[UnitTruck]):
             .first()
         )
 
-    def find_by_unit_number(self, unit_number: str) -> UnitTruck | None:
-        return (
-            self._db.query(UnitTruck)
-            .filter(UnitTruck.unit_number == unit_number)
-            .first()
+    def find_by_unit_number(
+        self, unit_number: str, exclude_id: int | None = None
+    ) -> UnitTruck | None:
+        query = self._db.query(UnitTruck).filter(
+            UnitTruck.unit_number == unit_number
         )
+        if exclude_id is not None:
+            query = query.filter(UnitTruck.id != exclude_id)
+        return query.first()
 
-    def find_by_tag_id(self, tag_id: str) -> UnitTruck | None:
-        return self._db.query(UnitTruck).filter(UnitTruck.tag_id == tag_id).first()
+    def find_by_tag_id(
+        self, tag_id: str, exclude_id: int | None = None
+    ) -> UnitTruck | None:
+        query = self._db.query(UnitTruck).filter(UnitTruck.tag_id == tag_id)
+        if exclude_id is not None:
+            query = query.filter(UnitTruck.id != exclude_id)
+        return query.first()
 
     def create(self, data: UnitIn) -> UnitTruck:
         unit = UnitTruck(
             plates=data.plates,
             unit_number=data.unitNumber,
+            type_unit=data.typeUnit,
             state=data.state,
             tag_id=data.tag,
         )
@@ -96,18 +105,41 @@ class UnitRepository(BaseRepository[UnitTruck]):
         self._db.refresh(unit)
         return unit
 
-    def update_unit(self, unit: UnitTruck, data: UnitIn) -> UnitTruck:
+    def update_unit(
+        self,
+        unit: UnitTruck,
+        data: UnitIn,
+        release_open_assignment: bool = False,
+    ) -> UnitTruck:
         unit.plates = data.plates
         unit.unit_number = data.unitNumber
         unit.state = data.state
         unit.tag_id = data.tag
+        unit.type_unit = data.typeUnit
+        if release_open_assignment:
+            open_assignment = self.get_open_assignment(unit.id)
+            if open_assignment:
+                open_assignment.released_at = datetime.now()
         self._db.commit()
         self._db.refresh(unit)
         return unit
 
-    def create_assignment(
+    def release_assignment(
+        self, assignment: UnitAssignment, when: datetime | None = None
+    ) -> UnitAssignment:
+        assignment.released_at = when or datetime.now()
+        self._db.commit()
+        self._db.refresh(assignment)
+        return assignment
+
+    def assign_driver(
         self, unit_id: int, driver_id: int, assigned_by: int, now: datetime
     ) -> UnitAssignment:
+        if previous := self.get_open_assignment(unit_id):
+            if previous.driver_id == driver_id:
+                return previous
+            previous.released_at = now
+
         assignment = UnitAssignment(
             unit_id=unit_id,
             driver_id=driver_id,

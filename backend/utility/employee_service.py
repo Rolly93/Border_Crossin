@@ -1,8 +1,7 @@
 from datetime import date
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from stdnum.mx import rfc as rfc_validator
 
 from model.db_model import DriverDetails, Employee
@@ -45,17 +44,7 @@ class EmployeeService:
         return clean_rfc
 
     def get_driver_by_id(self, id: int) -> tuple[DriverDetails, Employee]:
-
-        stmt = (
-            select(DriverDetails)
-            .options(joinedload(DriverDetails.employee_id))
-            .join(target=DriverDetails.employee)
-            .where(Employee.id == id, Employee.still_employee.is_(True))
-        )
-        if not (result := self._db.execute(statement=stmt).first()):
-            raise ValueError(f"Driver with {id} not found")
-        driver_details, employee = result
-        return driver_details, employee
+        return self._driver_repo.get_driver_with_employee(id)
 
     def get_all_employees(
         self, page: int = 1, limit: int = 10
@@ -101,20 +90,14 @@ class EmployeeService:
                     status_code=400, detail="La licencia del operador está vencida"
                 )
 
-            if (
-                self._db.query(DriverDetails)
-                .filter(DriverDetails.license_number == data.licenseNumber.strip())
-                .first()
+            if self._driver_repo.find_by_license_number(
+                data.licenseNumber.strip()
             ):
                 raise HTTPException(
                     status_code=400, detail="Ese número de licencia ya está registrado"
                 )
 
-            if (
-                self._db.query(DriverDetails)
-                .filter(DriverDetails.gafet_id == data.gafetId.strip())
-                .first()
-            ):
+            if self._driver_repo.find_by_gafet_id(data.gafetId.strip()):
                 raise HTTPException(
                     status_code=400,
                     detail="Ese gafete ya está asignado a otro operador",

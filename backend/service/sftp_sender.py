@@ -4,6 +4,7 @@ import os
 from sqlalchemy.orm import Session
 
 from model.db_model import SftpSend
+from repository.sftp_send_repository import Sftp_Send_Repository
 from schema.sftp_schema import SftpConfigurationRequest
 from schema.shipment_shcema import EventCategory, EventPayload
 from service.sftp_service import SFTPService
@@ -48,16 +49,17 @@ def send_batch(
     scac: str,
 ) -> None:
     """Genera el XML si falta, lo sube por una sola conexión y actualiza cada envío."""
+    repo = Sftp_Send_Repository(db)
     sftp = SFTPService(config)
     try:
         for send in sends:
-            _send_one(db, sftp, send, scac, config.root_folder)
+            _send_one(repo, sftp, send, scac, config.root_folder)
     finally:
         sftp.close()
 
 
 def _send_one(
-    db: Session,
+    repo: Sftp_Send_Repository,
     sftp: SFTPService,
     send: SftpSend,
     scac: str,
@@ -67,25 +69,24 @@ def _send_one(
     for attempt in range(total_attempts):
         try:
             # Si el XML no existe (no se generó o falló antes), se genera de nuevo.
-            if not send.local_path or not os.path.exists(send.local_path):
-                send.local_path = build_event_xml(send, scac, root_folder)
-                send.filename = os.path.basename(send.local_path)
-                db.commit()
+            if not send.local_path or not os.path.isfile(send.local_path):
+                local_path = build_event_xml(send, scac, root_folder)
+                repo.save_generated_xml(
+                    send, local_path, os.path.basename(local_path)
+                )
 
             if sftp.sftp is None:
                 sftp.connect()
             sftp.upload_file(send.local_path)
 
-            send.status = "sent"
-            send.sftp_log = None
-            db.commit()
+            repo.mark_sent(send)
             return
         except Exception as err:
-            send.status = "failed"
-            send.sftp_log = str(getattr(err, "detail", err))
-            if attempt < total_attempts - 1:
-                send.retries += 1
-            db.commit()
+            repo.mark_failed(
+                send,
+                str(getattr(err, "detail", err)),
+                increment_retries=attempt < total_attempts - 1,
+            )
             logger.warning(
                 "Envío %s falló (intento %s/%s): %s",
                 send.id,

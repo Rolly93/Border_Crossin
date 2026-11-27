@@ -1,15 +1,13 @@
-from sqlalchemy import exists
+from sqlalchemy import exists, or_, select
 from sqlalchemy.orm import Session
 
 from model.db_model import Client, ClientReferenceRule
-from repository import EmployeeRepository
 from repository.base_repository import BaseRepository
 
 
 class ClientRuleRepository(BaseRepository[ClientReferenceRule]):
     def __init__(self, db: Session):
         super().__init__(db, ClientReferenceRule)
-        self._rule_reference_repo = EmployeeRepository(db)
 
     def get_rules_for_client(self, client_id: int) -> list[ClientReferenceRule]:
         return (
@@ -19,10 +17,19 @@ class ClientRuleRepository(BaseRepository[ClientReferenceRule]):
             .all()
         )
 
-    def client_for_operation(self, operation: str) -> list[ClientReferenceRule] | None:
+    def clients_for_operation(self, operation: str) -> list[dict[str, str | int]]:
         has_rule_for_op = exists().where(
-            ClientReferenceRule.id == Client.id,
+            ClientReferenceRule.client_id == Client.id,
             ClientReferenceRule.operation_type == operation,
         )
         has_any_rule = exists().where(ClientReferenceRule.client_id == Client.id)
-        return None
+
+        stmt = (
+            select(Client.id, Client.name)
+            .where(Client.still_active.is_(True))
+            .where(or_(has_rule_for_op, ~has_any_rule))
+            .order_by(Client.name)
+        )
+        return [
+            {"id": row.id, "name": row.name} for row in self._db.execute(stmt).all()
+        ]

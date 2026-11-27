@@ -3,7 +3,8 @@ from datetime import datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
+from model.db_model import UnitAssignment, UnitTruck
+from repository.unit_repository import UnitRepository
 from schema.employee_schema import TypeUnit
 from schema.unit_schema import AssignmentOut, UnitIn, UnitOut, UnitState
 
@@ -17,45 +18,30 @@ def _error(code: int, detail: str) -> HTTPException:
 class UnitService:
 
     def __init__(self, db: Session):
-        self._db = db
+        self._repo = UnitRepository(db)
 
     # ---------- helpers ----------
     def _get_unit(self, unit_id: int) -> UnitTruck:
-        if not (unit := self._db.get(UnitTruck, unit_id)):
+        if not (unit := self._repo.get_by_id(unit_id)):
             raise _error(status.HTTP_404_NOT_FOUND, "Unidad no encontrada")
         return unit
 
     def _open_assignment(self, unit_id: int) -> UnitAssignment | None:
-        return (
-            self._db.query(UnitAssignment)
-            .filter(
-                UnitAssignment.unit_id == unit_id, UnitAssignment.released_at.is_(None)
-            )
-            .first()
-        )
+        return self._repo.get_open_assignment(unit_id)
 
     def _driver_name(self, driver_id: int) -> str:
-        employee = self._db.get(Employee, driver_id)
+        employee = self._repo.get_employee(driver_id)
         return f"{employee.name} {employee.last_name}" if employee else ""
 
     def _validate_unique(self, data: UnitIn, exclude_id: int | None = None) -> None:
-        number_q = self._db.query(UnitTruck).filter(
-            UnitTruck.unit_number == data.unitNumber
-        )
-        if exclude_id:
-            number_q = number_q.filter(UnitTruck.id != exclude_id)
-        if number_q.first():
+        if self._repo.find_by_unit_number(data.unitNumber, exclude_id=exclude_id):
             raise _error(status.HTTP_400_BAD_REQUEST, "Ese número de unidad ya existe")
 
-        if data.tag:
-            tag_q = self._db.query(UnitTruck).filter(UnitTruck.tag_id == data.tag)
-            if exclude_id:
-                tag_q = tag_q.filter(UnitTruck.id != exclude_id)
-            if tag_q.first():
-                raise _error(
-                    status.HTTP_400_BAD_REQUEST,
-                    "Ese tag ya está asignado a otra unidad",
-                )
+        if data.tag and self._repo.find_by_tag_id(data.tag, exclude_id=exclude_id):
+            raise _error(
+                status.HTTP_400_BAD_REQUEST,
+                "Ese tag ya está asignado a otra unidad",
+            )
 
     # ---------- queries ----------
     def get_out(self, unit_id: int) -> UnitOut:
@@ -63,7 +49,7 @@ class UnitService:
 
     def history_item(self, assignment_id: int) -> AssignmentOut:
 
-        if not (assignment := self._db.get(UnitAssignment, assignment_id)):
+        if not (assignment := self._repo.get_assignment_by_id(assignment_id)):
             raise _error(status.HTTP_404_NOT_FOUND, "Asignación no encontrada")
 
         return AssignmentOut(
@@ -76,7 +62,7 @@ class UnitService:
         )
 
     def list_units(self) -> list[UnitOut]:
-        units = self._db.query(UnitTruck).order_by(UnitTruck.unit_number).all()
+        units = self._repo.get_all()
         result: list[UnitOut] = []
         for unit in units:
             latest_assignment = unit.assignments[0] if unit.assignments else None
@@ -105,12 +91,7 @@ class UnitService:
 
     def history(self, unit_id: int) -> list[AssignmentOut]:
         self._get_unit(unit_id)
-        rows = (
-            self._db.query(UnitAssignment)
-            .filter(UnitAssignment.unit_id == unit_id)
-            .order_by(UnitAssignment.assigned_at.desc(), UnitAssignment.id.desc())
-            .all()
-        )
+        rows = self._repo.get_unit_history(unit_id)
         return [
             AssignmentOut(
                 id=r.id,
@@ -126,33 +107,14 @@ class UnitService:
     # ---------- commands ----------
     def create(self, data: UnitIn) -> UnitTruck:
         self._validate_unique(data=data)
-        unit = UnitTruck(
-            plates=data.plates,
-            unit_number=data.unitNumber,
-            type_unit=data.typeUnit,
-            state=data.state,
-            tag_id=data.tag,
-        )
-        self._db.add(unit)
-        self._db.commit()
-        self._db.refresh(unit)
-        return unit
+        return self._repo.create(data)
 
     def update(self, unit_id: int, data: UnitIn) -> UnitTruck:
         unit = self._get_unit(unit_id)
         self._validate_unique(data, exclude_id=unit_id)
-
-        unit.plates = data.plates
-        unit.unit_number = data.unitNumber
-        unit.state = data.state
-        unit.tag_id = data.tag
-        unit.type_unit = data.typeUnit
-        if data.state != ACTIVE_STATE and (open_a := self._open_assignment(unit_id)):
-            open_a.released_at = datetime.now()
-
-        self._db.commit()
-        self._db.refresh(unit)
-        return unit
+        return self._repo.update_unit(
+            unit, data, release_open_assignment=data.state != ACTIVE_STATE
+        )
 
     def assign(self, unit_id: int, driver_id: int, assigned_by: int) -> UnitAssignment:
         unit = self._get_unit(unit_id)
@@ -162,41 +124,20 @@ class UnitService:
                 f"Solo se pueden asignar unidades activas (estado actual: {unit.state})",
             )
 
-        driver = self._db.get(DriverDetails, driver_id)
+        driver = self._repo.get_driver_details(driver_id)
         if not driver or not driver.employee or not driver.employee.still_employee:
             raise _error(status.HTTP_404_NOT_FOUND, "Operador no encontrado o inactivo")
 
-        driver_busy = (
-            self._db.query(UnitAssignment)
-            .filter(
-                UnitAssignment.driver_id == driver_id,
-                UnitAssignment.released_at.is_(None),
-            )
-            .first()
-        )
+        driver_busy = self._repo.get_open_driver_assignment(driver_id)
         if driver_busy and driver_busy.unit_id != unit_id:
             raise _error(
                 status.HTTP_409_CONFLICT,
                 "El operador ya tiene una unidad asignada. Libérala primero.",
             )
 
-        now = datetime.now()
-
-        if previous := self._open_assignment(unit_id):
-            if previous.driver_id == driver_id:
-                return previous  # ya está asignada a este operador
-            previous.released_at = now
-
-        new_assignment = UnitAssignment(
-            unit_id=unit_id,
-            driver_id=driver_id,
-            assigned_by=assigned_by,
-            assigned_at=now,
+        return self._repo.assign_driver(
+            unit_id, driver_id, assigned_by, datetime.now()
         )
-        self._db.add(new_assignment)
-        self._db.commit()
-        self._db.refresh(new_assignment)
-        return new_assignment
 
     def release(self, unit_id: int) -> None:
         self._get_unit(unit_id)
@@ -205,5 +146,4 @@ class UnitService:
             raise _error(
                 status.HTTP_409_CONFLICT, "La unidad no tiene operador asignado"
             )
-        open_a.released_at = datetime.now()
-        self._db.commit()
+        self._repo.release_assignment(open_a)

@@ -77,17 +77,15 @@ class ClienteService:
         sftp_service: SftpConfigurationRequest | None = None
         email_service: EmailConfigurationRequest | None = None
 
-        if service_type == ClientServiceType("sftp_service"):
+        if service_type == ClientServiceType.SFTP:
             sftp_data = self._sftp_service.get_sftp_data(client.id)
             if sftp_data:
                 sftp_service = SftpConfigurationRequest.model_validate(
                     sftp_data.model_dump()
                 )
 
-        if service_type == ClientServiceType("email_service"):
-            active_emails = [
-                rec.email for rec in client.email_recipients if rec.is_active
-            ]
+        if service_type == ClientServiceType.EMAIL:
+            active_emails = self._db.get_active_emails(client.id)
             email_service = EmailConfigurationRequest(email=active_emails)
 
         return ClienteServiceResponse(

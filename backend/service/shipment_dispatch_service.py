@@ -116,9 +116,9 @@ class ShipmentDispatchService:
 
         if not self._scac:
             # Queda visible y reenviable manualmente una vez configurado el SCAC.
-            for send in sends:
-                send.status = "failed"
-                send.sftp_log = "Sin SCAC configurado en el sistema"
+            self._sftp_repo.mark_failed_bulk(
+                sends, "Sin SCAC configurado en el sistema"
+            )
             logger.error("Sin SCAC: %s envíos marcados como failed", len(sends))
             return sends
 

@@ -4,3 +4,4 @@ from .employee_repository import EmployeeRepository
 from .sftp_repository import SftpRepository
 from .cliente_repository import ClienteRepository
 from .driver_repository import DriverRepository
+from .reference_rules_repository import ClientRuleRepository
