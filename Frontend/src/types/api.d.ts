@@ -786,6 +786,8 @@ export interface components {
         };
         /** ConsolidateResponse */
         ConsolidateResponse: {
+            /** Id */
+            id: number;
             /** Tracking Number */
             tracking_number: string;
             /** Customer Tracking */
@@ -796,7 +798,7 @@ export interface components {
              * Cliente
              * @description ID del cliente
              */
-            cliente: number;
+            cliente: string;
             /** Origen */
             origen: string;
             /**
@@ -806,6 +808,8 @@ export interface components {
             truck: string;
             /** Destination */
             destination: string;
+            /** Events */
+            events: components["schemas"]["ShipmentEvent"][] | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -813,10 +817,11 @@ export interface components {
             service_type: "consolidated";
             /** Consolidate Guide */
             consolidate_guide: components["schemas"]["ConsolidateGuideItemResponse"][];
-            /** Id */
-            id: number;
-            /** Events */
-            events?: components["schemas"]["ShipmentEvent"][];
+            /**
+             * Assignation
+             * Format: date
+             */
+            assignation: string;
         };
         /** EmployeeBaseRequest */
         EmployeeBaseRequest: {
@@ -1276,6 +1281,8 @@ export interface components {
         };
         /** TrailerResponse */
         TrailerResponse: {
+            /** Id */
+            id: number;
             /** Tracking Number */
             tracking_number: string;
             /** Customer Tracking */
@@ -1286,7 +1293,7 @@ export interface components {
              * Cliente
              * @description ID del cliente
              */
-            cliente: number;
+            cliente: string;
             /** Origen */
             origen: string;
             /**
@@ -1296,6 +1303,13 @@ export interface components {
             truck: string;
             /** Destination */
             destination: string;
+            /** Events */
+            events: components["schemas"]["ShipmentEvent"][] | null;
+            /**
+             * Assignation
+             * Format: date
+             */
+            assignation: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1312,10 +1326,6 @@ export interface components {
             state: string;
             /** Seal */
             seal: string;
-            /** Id */
-            id: number;
-            /** Events */
-            events: components["schemas"]["ShipmentEvent"][];
         };
         /**
          * TypeOperation
@@ -1689,7 +1699,7 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };

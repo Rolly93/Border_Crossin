@@ -44,7 +44,6 @@ export class ShipmentModel {
   }
 
   private getEvent(categoryKey: TEventCategory) {
-
     return this.data.events?.find((e) => e.category === categoryKey);
   }
 
@@ -89,7 +88,7 @@ export class ShipmentModel {
   ): TShipmentResponse {
     const rawClient = initialShipment?.cliente;
     const resolvedClient =
-      rawClient !== undefined && rawClient !== null ? Number(rawClient) : 0;
+      rawClient !== undefined && rawClient !== null ? String(rawClient) : "";
 
     const baseValues = {
       id: initialShipment?.id ?? 0,
@@ -100,6 +99,7 @@ export class ShipmentModel {
       origen: initialShipment?.origen ?? "",
       destination: initialShipment?.destination ?? "",
       type_operation: initialShipment?.type_operation ?? "northbound",
+
       events: ShipmentModel.prepareInitialEvents(
         initialShipment?.events,
         expectedCategories,
@@ -107,9 +107,9 @@ export class ShipmentModel {
     };
 
     if (initialShipment?.service_type === "consolidated") {
-
       return {
         ...baseValues,
+        assignation: initialShipment.assignation,
         service_type: "consolidated",
         consolidate_guide:
           initialShipment.consolidate_guide &&
@@ -124,20 +124,23 @@ export class ShipmentModel {
           ),
       };
     }
-    if (initialShipment?.service_type ==='trailer_53ft'){
-      return{
+    if (initialShipment?.service_type === "trailer_53ft") {
+      return {
         ...baseValues,
-        service_type : 'trailer_53ft',
-        trailer_number: initialShipment.trailer_number,
-        plates:initialShipment.plates,
-        seal:initialShipment.seal,
-        state:initialShipment.plates
-      }
-    }
+        service_type: "trailer_53ft",
 
+        assignation: initialShipment.assignation,
+        trailer_number: initialShipment.trailer_number,
+        plates: initialShipment.plates,
+        seal: initialShipment.seal,
+        state: initialShipment.plates,
+      };
+    }
 
     return {
       ...baseValues,
+
+      assignation: "",
       service_type: "trailer_53ft",
       trailer_number: "",
       plates: "",
@@ -149,11 +152,11 @@ export class ShipmentModel {
   public toCreateFormValues(
     existingGuides: TConsolidateGuideItemRequest[] = [],
   ): TShipmentCreateFormValues {
-
     const { data } = this;
     const isConsolidate = data.service_type === "consolidated";
     const guidesFromMode = isConsolidate ? data.consolidate_guide : [];
-    const resolvedGuides = existingGuides.length > 0 ? existingGuides : guidesFromMode;
+    const resolvedGuides =
+      existingGuides.length > 0 ? existingGuides : guidesFromMode;
 
     return {
       tracking_number: data.tracking_number,
@@ -172,13 +175,14 @@ export class ShipmentModel {
         resolvedGuides.length > 0
           ? resolvedGuides
           : [
-            {
-              client_id: data.cliente,
-              guide_number: "",
-              pieces: 1,
-              weight: 1,
-            },
-          ],
+              {
+                client_id: data.cliente,
+                guide_number: "",
+                pieces: 1,
+                weight: 1,
+                id: 1,
+              },
+            ],
     };
   }
 

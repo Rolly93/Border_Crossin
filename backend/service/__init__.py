@@ -1,4 +1,4 @@
-from .email import EmailService
+from .email import EmailNotificationDispatcher
 from .jwt_service import JWTService
 from .notification_manager import manager
 from .sftp_service import SFTPService

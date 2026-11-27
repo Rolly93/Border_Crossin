@@ -1,17 +1,8 @@
 /** @format */
 
 import { useForm } from "@mantine/form";
-import {
-  TextInput,
-  SimpleGrid,
-  Group,
-  Stack,
-  Text,
-  Divider,
-  Box,
-} from "@mantine/core";
+import { SimpleGrid, Group, Stack, Text, Divider, Box } from "@mantine/core";
 import "@mantine/notifications/styles.css";
-import { DateTimePicker } from "@mantine/dates";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import { setupShipmentWatchers } from "../validation/ShipmentFormRules";

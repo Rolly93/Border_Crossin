@@ -9,7 +9,6 @@ import {
   TShipmentUpdate,
   TShipmentRequest,
   TEventCategory,
-  TConsolidateGuideItemRequest,
   TConsolidateGuideItemResponse,
 } from "../hooks/useShipments";
 
@@ -25,7 +24,7 @@ export interface TShipmentCreateFormValues {
   customer_tracking: string;
   type_operation: "northbound" | "southbound";
   service_type: "consolidated" | "trailer_53ft";
-  cliente: number;
+  cliente: string;
   truck: string;
   trailer_number: string;
   seal: string;
@@ -35,10 +34,6 @@ export interface TShipmentCreateFormValues {
   origen: string;
   destination: string;
 }
-
-
-
-
 
 export interface IShipmentService extends IBaseService<
   TShipmentResponse,

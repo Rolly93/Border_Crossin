@@ -1,3 +1,5 @@
+/** @format */
+
 import { useForm } from "@mantine/form";
 import {
   TextInput,
@@ -58,7 +60,7 @@ export function ShipmentForm({
       console.log(values);
 
       const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
-      const trailerErrors = isConsolidated ? {} : validator.validateTrailer
+      const trailerErrors = isConsolidated ? {} : validator.validateTrailer;
 
       return {
         tracking_number: validator.validateTrackingNumber(),
@@ -66,7 +68,7 @@ export function ShipmentForm({
         origen: validator.validateOrigin(),
         destination: validator.validateDestination(),
         type_operation: validator.validateTypeOperation(),
-        ...trailerErrors
+        ...trailerErrors,
       };
     },
   });

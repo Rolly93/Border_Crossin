@@ -2,8 +2,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from model.db_model import Client, SftpService
+from repository.cliente_repository import ClienteRepository
 from repository.sftp_repository import SftpRepository
 from schema.sftp_schema import SftpConfigIn, SftpConfigOut
+from utility.cliente_service import ClienteService
 
 
 def _to_out(row: SftpService) -> SftpConfigOut:
@@ -23,18 +25,21 @@ class SftpConfigService:
     def __init__(self, db: Session):
         self._db = db
         self._repo = SftpRepository(db)
+        self._client_service = ClienteRepository(self._db)
 
     def get_for_client(self, client_id: int) -> SftpConfigOut | None:
         row = self._repo.get_active_config(client_id)
         return _to_out(row) if row else None
 
     def create(self, data: SftpConfigIn, user_id: int) -> SftpConfigOut:
-        if self._db.get(Client, data.idClient) is None:
+
+        if not (client := self._client_service.get_by_id(data.idClient)):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Cliente no encontrado",
             )
-        if self._repo.get_active_config(data.idClient):
+
+        if self._repo.get_active_config(client.id):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="El cliente ya tiene una configuración SFTP activa",

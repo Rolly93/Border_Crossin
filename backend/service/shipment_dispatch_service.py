@@ -26,7 +26,6 @@ from schema.shipment_shcema import (
     TrailerResponse,
     TypeOperation,
 )
-from service.email import EmailNotificationDispatcher
 from service.sftp_sender import send_batch
 
 logger = logging.getLogger(__name__)
@@ -35,12 +34,13 @@ logger = logging.getLogger(__name__)
 class ShipmentDispatchService:
     """Registra un envío por cada evento nuevo y los transmite con reintentos."""
 
-    def __init__(self, db: Session, aws_client: LambdaClientDep | None = None):
+    def __init__(self, db: Session, aws_client: LambdaClientDep):
+        from service.email import EmailNotificationDispatcher
+
         self._db = db
         self._email_service = EmailNotificationDispatcher(aws_client)
         self._scac = SystemConfigRepository(self._db).get_scac()
         self._sftp_repo = Sftp_Send_Repository(self._db)
-
 
     def notify_assigment(
         self,
@@ -107,8 +107,9 @@ class ShipmentDispatchService:
         sftp_config: SftpConfigurationRequest,
     ) -> list[SftpSend]:
 
-        sends =self._sftp_repo.create(
-                event=events,filename='',status='pending',sftp_config=sftp_config)
+        sends = self._sftp_repo.create(
+            event=events, filename="", status="pending", sftp_config=sftp_config
+        )
 
         if not sends:
             return sends

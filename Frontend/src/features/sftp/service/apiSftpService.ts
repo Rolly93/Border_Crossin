@@ -1,37 +1,44 @@
-import { BaseCrudApiService } from '@/components/service/BaseCrudApiService';
-import { ISftpConfiguration, ISftpSend, SftpSendFilters } from '@/features/clients/types/Cliente';
+/** @format */
 
+import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
+import {
+  ISftpConfiguration,
+  ISftpSend,
+  SftpSendFilters,
+} from "@/features/clients/types/Cliente";
 
-export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration, Partial<ISftpConfiguration>> {
+export class ApiSftpService extends BaseCrudApiService<
+  ISftpConfiguration,
+  Partial<ISftpConfiguration>
+> {
   constructor() {
-    super('sftp');
+    super("sftp");
   }
 
   async getConnection(clientId: number): Promise<ISftpConfiguration | null> {
     try {
       const response = await this.api.get<ISftpConfiguration | null>(
         `/${this.resourcePath}/connection`,
-        { params: { client_id: clientId } }
+        { params: { client_id: clientId } },
       );
       return response.data;
-
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 
-  async update(id: number, data: Partial<ISftpConfiguration>): Promise<ISftpConfiguration> {
+  async update(
+    id: number,
+    data: Partial<ISftpConfiguration>,
+  ): Promise<ISftpConfiguration> {
     try {
       const response = await this.api.put<ISftpConfiguration>(
         `/${this.resourcePath}/update/${id}`,
-        data
+        data,
       );
       return response.data;
-
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 
@@ -50,13 +57,11 @@ export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration, Parti
 
       const response = await this.api.get<ISftpSend[]>(
         `/${this.resourcePath}/sends`,
-        { params }
+        { params },
       );
       return response.data;
-
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 
@@ -64,13 +69,11 @@ export class ApiSftpService extends BaseCrudApiService<ISftpConfiguration, Parti
     try {
       const response = await this.api.post<ISftpSend[]>(
         `/${this.resourcePath}/resend`,
-        { send_ids: sendIds }
+        { send_ids: sendIds },
       );
       return response.data;
-
-
     } catch (error: any) {
-      throw error.message
+      throw error.message;
     }
   }
 }

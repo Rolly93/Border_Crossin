@@ -1,6 +1,18 @@
+/** @format */
+
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Alert, Badge, Button, Group, Loader, Stack, Table, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Badge,
+  Button,
+  Group,
+  Loader,
+  Stack,
+  Table,
+  Text,
+  Title,
+} from "@mantine/core";
 import SftModal from "@/components/Modal/SftModalProps";
 import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
 
@@ -14,7 +26,6 @@ export function SftpClientList() {
     setOpened(true);
   };
 
-  // Si llega ?client=ID (desde el aviso al crear un cliente), abre su configuración.
   const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     const requested = Number(searchParams.get("client"));
@@ -24,7 +35,6 @@ export function SftpClientList() {
     }
   }, [clients, searchParams, setSearchParams]);
 
-  // Al cerrar el modal se recarga el estado, por si se creó o eliminó una configuración.
   const closeConfig = () => {
     setOpened(false);
     reload();
@@ -41,12 +51,12 @@ export function SftpClientList() {
       ) : clients.length === 0 ? (
         <Text c="dimmed">No hay clientes activos.</Text>
       ) : (
-        <Table striped highlightOnHover >
+        <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Cliente</Table.Th>
               <Table.Th>Estado SFTP</Table.Th>
-              <Table.Th >Opciones</Table.Th>
+              <Table.Th>Opciones</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -54,12 +64,17 @@ export function SftpClientList() {
               <Table.Tr key={client.id}>
                 <Table.Td>{client.name}</Table.Td>
                 <Table.Td>
-                  <Badge color={client.has_sftp ? "green" : "gray"} variant="light">
+                  <Badge
+                    color={client.has_sftp ? "green" : "gray"}
+                    variant="light">
                     {client.has_sftp ? "Configurado" : "Sin configurar"}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Button size="xs" variant="light" onClick={() => openConfig(client.id)}>
+                  <Button
+                    size="xs"
+                    variant="light"
+                    onClick={() => openConfig(client.id)}>
                     {client.has_sftp ? "Editar" : "Configurar"}
                   </Button>
                 </Table.Td>

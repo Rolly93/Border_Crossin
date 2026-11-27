@@ -25,7 +25,7 @@
             "Frontend": true,
             ".agents": true,
             ".fastapicloud": true,
-            ".opencode": true,
+
             ".firebase": true,
             "backend": true,
             "aws": true

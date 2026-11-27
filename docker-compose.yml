@@ -67,13 +67,13 @@ services:
   # SFTP Server (optional - for testing)
   sftp:
     image: atmoz/sftp:latest
-    container_name: border_crossing_sftp
+    container_name: sftp_server-test
     environment:
-      SFTP_USERS: "testSFTP:testSFTP93X:1001"
+      SFTP_USERS: "sftp_test:hunterX0369*:1001:100:upload"
     ports:
       - "2222:22"
     volumes:
-      - sftp_data:/home/testSFTP
+      - ./sftp_data:/home/sftp_test/upload
     networks:
       - border_network
 
