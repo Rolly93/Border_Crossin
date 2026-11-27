@@ -1,6 +1,7 @@
 from datetime import date
 from enum import StrEnum
 from typing import Annotated, Literal
+
 from pydantic import BaseModel, EmailStr, Field
 
 from schema.cargo_schema import CargoTypeEnum
@@ -15,13 +16,14 @@ class EmployeeBaseRequest(BaseModel):
     lastName: str
     role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
     rfc: str
+    hireDate: date
+    stillEmployee: bool
     dateOfBirth: date
 
 
 class EmployeeBaseResponse(EmployeeBaseRequest):
     id: int
     hireDate: date
-    stillEmployee: bool
 
 
 class BoosttrapAdmin(BaseModel):
@@ -36,7 +38,6 @@ class EmployeeRequestDash(EmployeeBaseRequest):
     status: str
     detail: str
     hireDate: date
-    stillEmployee: bool
 
 
 class EmployeeUserRequest(EmployeeBaseRequest):

@@ -15,7 +15,7 @@ from schema.employee_schema import (
     EmployeeResponseUnion,
     EmployeeUserResponse,
 )
-from schema.user_schema import LoginRequest, NewUser
+from schema.user_schema import LoginRequest, LoginResponse, NewUser
 from service.jwt_service import JWTService
 
 DUMMY_HASH = "$2b$12$eImiTXuWVxfM37uY4JANjO5E.5R0zJqfG8R6zG1yQ4rZ2gYxK.6Ce"
@@ -79,7 +79,7 @@ class UserService:
 
         return user
 
-    def login(self, data: LoginRequest, ip: str) -> dict:
+    def login(self, data: LoginRequest, ip: str) -> LoginResponse:
         user = self.authenticate(data)
 
         token = self.jwt.create_access_token(
@@ -92,13 +92,13 @@ class UserService:
             },
             expires_delta=timedelta(hours=8),
         )
-        return {
-            "status": "200 Success",
-            "detail": "Login successful",
-            "access_token": token,
-            "token_type": "bearer",
-            "isAdmin": user.is_admin,
-        }
+        return LoginResponse(
+            status="200 Success",
+            detail="Login successful",
+            access_token=token,
+            token_type="bearer",
+            isAdmin=user.is_admin,
+        )
 
     def create_new_user(
         self, data: NewUser, rfc: str, is_bootstrap: bool = False

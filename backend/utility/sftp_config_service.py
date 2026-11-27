@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from model.db_model import SftpService
 from repository.cliente_repository import ClienteRepository
 from repository.sftp_repository import SftpRepository
-from schema.sftp_schema import SftpConfigIn, SftpConfigOut
+from schema.sftp_schema import Sftp_Response_Delte, SftpConfigIn, SftpConfigOut
 
 
 def _to_out(row: SftpService) -> SftpConfigOut:
@@ -59,7 +59,7 @@ class SftpConfigService:
         row = self._repo.update_config(row, data, data.password)
         return _to_out(row)
 
-    def delete(self, config_id: int) -> dict:
+    def delete(self, config_id: int) -> Sftp_Response_Delte:
         row = self._repo.get_config(config_id)
         if not row or not row.is_active:
             raise HTTPException(
@@ -67,4 +67,4 @@ class SftpConfigService:
                 detail="Configuración SFTP no encontrada",
             )
         self._repo.deactivate_config(row)
-        return {"id": config_id, "is_active": False}
+        return Sftp_Response_Delte(id=config_id, is_active=False)

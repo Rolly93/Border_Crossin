@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from model.db_model import ShipmentAssign, ShipmentEventModel, SftpSend, SftpService
+from model.db_model import SftpSend, SftpService, ShipmentAssign, ShipmentEventModel
 from repository.base_repository import BaseRepository
 from schema.sftp_schema import SftpConfigurationRequest
 

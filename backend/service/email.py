@@ -4,7 +4,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 from pydantic import EmailStr, TypeAdapter
 
-from deps.auth import LambdaClientDep
+from integrations.deps.aws_dep import LambdaClientDep
 from schema.email_schema import (
     NotificationType,
     PayloadAssginationNotificationEvent,

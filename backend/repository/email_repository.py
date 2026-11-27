@@ -32,7 +32,7 @@ class EmailRepository(BaseRepository[ClientEmailRecipient]):
         for email, record in existing_emails.items():
             if email not in incoming_emails:
                 self._db.delete(record)
-        new_records = []
+        new_records: list[ClientEmailRecipient] = []
         for email in incoming_emails:
             if email not in existing_emails:
                 new_record = ClientEmailRecipient(client_id=client_id, email=email)

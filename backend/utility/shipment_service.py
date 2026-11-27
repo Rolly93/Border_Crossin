@@ -3,7 +3,7 @@ import logging
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from deps.auth import LambdaClientDep
+from integrations.deps.aws_dep import LambdaClientDep
 from model.db_model import (
     ShipmentAssign,
     Trailer,
@@ -13,7 +13,6 @@ from repository.cliente_repository import ClientServiceType
 from repository.consolidated_repository import ConsolidateRepository
 from repository.trailer_repository import TrailerRepository
 from repository.unit_repository import UnitRepository
-
 from schema.shipment_shcema import (
     ConsolidateGuideItemResponse,
     ConsolidateResponse,
@@ -125,7 +124,7 @@ class ShipmentService:
     def _build_service_response(
         self, shipment: ShipmentAssign
     ) -> TrailerResponse | ConsolidateResponse:
-        events_sources =  shipment.events
+        events_sources = shipment.events
 
         if shipment.service_type == ServiceType.TRAILER:
             return TrailerResponse.model_validate(shipment).model_copy(
@@ -133,8 +132,10 @@ class ShipmentService:
             )
 
         if shipment.service_type == ServiceType.CONSOLIDATED:
-            return ConsolidateResponse.model_validate(shipment).model_copy(update={'events':events_sources})
-        raise ValueError (f'Unsppported service type: {shipment.service_type}')
+            return ConsolidateResponse.model_validate(shipment).model_copy(
+                update={"events": events_sources}
+            )
+        raise ValueError(f"Unsppported service type: {shipment.service_type}")
 
     def create_shipment(
         self, data: ServiceTypeUnionRequest, user_id: int
@@ -278,7 +279,7 @@ class ShipmentService:
             self._dispatchService.notify_status(
                 emails=service.emailService.email,
                 client_name=shipment.client.name,
-                shipment_response=either_trailer_consolidate
+                shipment_response=either_trailer_consolidate,
             )
 
         return shipment

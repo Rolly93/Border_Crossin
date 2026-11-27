@@ -3,7 +3,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from deps.auth import LambdaClientDep
+from integrations.deps.aws_dep import LambdaClientDep
 from model.db_model import (
     SftpSend,
     ShipmentAssign,

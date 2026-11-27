@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from model.db_model import SftpSend
 from repository.sftp_repository import SftpRepository
 from repository.system_config_repository import SystemConfigRepository
-from schema.sftp_schema import SftpConfigurationRequest
+from schema.sftp_schema import Sftp_Resend_Response, SftpConfigurationRequest
 from service.sftp_sender import send_batch
 from utility.encryption import decrypt_password
 
@@ -19,11 +19,11 @@ class SftpSendService:
         client_id: int | None,
         reference: str | None,
         status_filter: str | None,
-    ) -> list[dict]:
+    ) -> list[Sftp_Resend_Response]:
         rows = self._repo.list_sends(client_id, reference, status_filter)
         return [self._to_dict(row) for row in rows]
 
-    def resend(self, send_ids: list[int]) -> list[dict]:
+    def resend(self, send_ids: list[int]) -> list[Sftp_Resend_Response]:
         scac = SystemConfigRepository(self._db).get_scac()
         if not scac:
             raise HTTPException(
@@ -70,15 +70,15 @@ class SftpSendService:
 
         return [self._to_dict(s) for s in sends]
 
-    def _to_dict(self, send: SftpSend) -> dict:
-        return {
-            "id": send.id,
-            "filename": send.filename,
-            "status": send.status,
-            "retries": send.retries,
-            "sftp_log": send.sftp_log,
-            "sent_to": send.sent_to,
-            "client_id": send.service.client_id,
-            "reference": send.shipment_event.trip.customer_tracking,
-            "shipment_event_id": send.shipment_event_id,
-        }
+    def _to_dict(self, send: SftpSend) -> Sftp_Resend_Response:
+        return Sftp_Resend_Response(
+            id=send.id,
+            filename=send.filename,
+            status=send.status,
+            retries=send.retries,
+            sftp_log=send.sftp_log,
+            sent_to=send.sent_to,
+            client_id=send.service.client_id,
+            reference=send.shipment_event.trip.customer_tracking,
+            shipment_event_id=send.shipment_event_id,
+        )

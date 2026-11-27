@@ -1,9 +1,13 @@
 import os
 import time
 
-from database import engine
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
+from database import engine
 from model.db_model import Base
 from routes.client_route import router as client_router
 from routes.employee_route import router as employee_router
@@ -15,9 +19,6 @@ from routes.system_route import router as system_router
 from routes.unit_route import router as unit_router
 from routes.user import router as user_router
 from service.logging_config import get_logger, setup_logging
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from utility.schema_upgrade import upgrade_unit_schema
 
 # Configure structured logging early

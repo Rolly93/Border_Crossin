@@ -21,23 +21,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user/create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** New User */
-        post: operations["new_user_user_create_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/user/logout": {
         parameters: {
             query?: never;
@@ -49,23 +32,6 @@ export interface paths {
         put?: never;
         /** Logout */
         post: operations["logout_user_logout_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/userdelete/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Erease Employee by ID */
-        post: operations["delete_employee_by_id_userdelete__id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -823,25 +789,6 @@ export interface components {
              */
             assignation: string;
         };
-        /** EmployeeBaseRequest */
-        EmployeeBaseRequest: {
-            /** Firstname */
-            firstName: string;
-            /** Lastname */
-            lastName: string;
-            /**
-             * Role
-             * @enum {string}
-             */
-            role: "operador" | "csr";
-            /** Rfc */
-            rfc: string;
-            /**
-             * Dateofbirth
-             * Format: date
-             */
-            dateOfBirth: string;
-        };
         /** EmployeeBaseResponse */
         EmployeeBaseResponse: {
             /** Firstname */
@@ -856,19 +803,19 @@ export interface components {
             /** Rfc */
             rfc: string;
             /**
-             * Dateofbirth
-             * Format: date
-             */
-            dateOfBirth: string;
-            /** Id */
-            id: number;
-            /**
              * Hiredate
              * Format: date
              */
             hireDate: string;
             /** Stillemployee */
             stillEmployee: boolean;
+            /**
+             * Dateofbirth
+             * Format: date
+             */
+            dateOfBirth: string;
+            /** Id */
+            id: number;
         };
         /** EmployeeDriverRequest */
         EmployeeDriverRequest: {
@@ -883,6 +830,13 @@ export interface components {
             role: "operador" | "csr";
             /** Rfc */
             rfc: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
             /**
              * Dateofbirth
              * Format: date
@@ -916,6 +870,13 @@ export interface components {
             role: "operador" | "csr";
             /** Rfc */
             rfc: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
             /**
              * Dateofbirth
              * Format: date
@@ -993,6 +954,13 @@ export interface components {
             /** Rfc */
             rfc: string;
             /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
+            /**
              * Dateofbirth
              * Format: date
              */
@@ -1024,6 +992,13 @@ export interface components {
             role: "operador" | "csr";
             /** Rfc */
             rfc: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /** Stillemployee */
+            stillEmployee: boolean;
             /**
              * Dateofbirth
              * Format: date
@@ -1086,39 +1061,6 @@ export interface components {
             emailService: number;
             /** Sftpservice */
             sftpService: number;
-        };
-        /** NewUser */
-        NewUser: {
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Username */
-            username: string;
-            /** Password */
-            password: string;
-            /** Role */
-            role: string;
-            /**
-             * Isadmin
-             * @default false
-             */
-            isAdmin: boolean;
-            /** Rfc */
-            rfc: string;
-        };
-        /** NewUserResponse */
-        NewUserResponse: {
-            /**
-             * Status
-             * @default success
-             */
-            status: string;
-            /** Detail */
-            detail: string;
-            /** Token */
-            token: string | null;
         };
         /** OperatorOption */
         OperatorOption: {
@@ -1447,43 +1389,6 @@ export interface operations {
             };
         };
     };
-    new_user_user_create_post: {
-        parameters: {
-            query?: {
-                token?: string | null;
-            };
-            header?: {
-                authorization?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["NewUser"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NewUserResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     logout_user_logout_post: {
         parameters: {
             query?: {
@@ -1504,41 +1409,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    delete_employee_by_id_userdelete__id__post: {
-        parameters: {
-            query?: {
-                token?: string | null;
-            };
-            header?: {
-                authorization?: string | null;
-            };
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmployeeBaseRequest"];
                 };
             };
             /** @description Validation Error */
