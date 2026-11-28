@@ -1,21 +1,14 @@
 from datetime import timedelta
-from typing import Literal
 
 import bcrypt
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from stdnum.mx import rfc as rfc_validator
 
 from config.config import Env
-from model.db_model import DriverDetails, User
-from repository import EmployeeRepository, UserRepository
-from schema.cargo_schema import CargoTypeEnum
-from schema.employee_schema import (
-    EmployeeDriverResponse,
-    EmployeeResponseUnion,
-    EmployeeUserResponse,
-)
-from schema.user_schema import LoginRequest, LoginResponse, NewUser
+from model.db_model import Employee, User
+from repository import UserRepository
+from schema.employee_schema import EmployeeUserRequest
+from schema.user_schema import LoginRequest, LoginResponse
 from service.jwt_service import JWTService
 
 DUMMY_HASH = "$2b$12$eImiTXuWVxfM37uY4JANjO5E.5R0zJqfG8R6zG1yQ4rZ2gYxK.6Ce"
@@ -25,20 +18,8 @@ class UserService:
 
     def __init__(self, db: Session):
         self._env = Env()
-        self._db = db
         self._user_repo = UserRepository(db)
-        self._employee_repo = EmployeeRepository(db)
         self.jwt = JWTService()
-
-    @staticmethod
-    def validate_rfc(rfc_value: str) -> str:
-        clean_rfc = rfc_value.strip().upper()
-        if not rfc_validator.validate(clean_rfc):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid RFC format: {rfc_value}",
-            )
-        return clean_rfc
 
     @staticmethod
     def hash_password(password: str) -> str:
@@ -51,17 +32,8 @@ class UserService:
             plain_password.encode("utf-8"), hashed_password.encode("utf-8")
         )
 
-    def _validate_unique_email(self, email: str) -> str:
-        clean_email = email.strip().lower()
-        if self._user_repo.get_email(clean_email):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already registered",
-            )
-        return clean_email
-
     def user_already_exists(self) -> bool:
-        return bool(self._user_repo.get_all_users())
+        return self._user_repo.has_any()
 
     def authenticate(self, data: LoginRequest) -> User:
         username = data.username.strip()
@@ -101,69 +73,19 @@ class UserService:
         )
 
     def create_new_user(
-        self, data: NewUser, rfc: str, is_bootstrap: bool = False
+        self, data: EmployeeUserRequest, employee: Employee, is_bootstrap: bool = False
     ) -> User:
-        clean_rfc = self.validate_rfc(rfc)
-        clean_email = self._validate_unique_email(data.email)
-        clean_username = data.username.strip()
+        """Crea la cuenta del empleado, sin confirmar (lo hace quien llama).
 
-        employee = self._employee_repo.get_employee(clean_rfc)
-        if not employee and not is_bootstrap:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Employee with this RFC does not exist",
+        La primera cuenta del sistema (alta inicial) siempre es administrador.
+        La unicidad de usuario/correo ya se validó antes de crear al empleado.
+        """
+        return self._user_repo.add(
+            User(
+                username=data.username.strip(),
+                email=data.email.strip().lower(),
+                hashed_password=self.hash_password(data.password),
+                is_admin=bool(data.isAdmin) or is_bootstrap,
+                employee_id=employee.id,
             )
-
-        is_admin = getattr(data, "is_admin", False)
-
-        new_user = User(
-            username=clean_username,
-            email=clean_email,
-            hashed_password=self.hash_password(data.password),
-            is_admin=is_admin,
-            employee_id=employee.id if employee else None,
-        )
-
-        self._user_repo.create_user(new_user)
-        return new_user
-
-    def get_employee_info(
-        self, id: int, cargoType: Literal["csr", "operador"]
-    ) -> EmployeeResponseUnion:
-        data, e = self._user_repo.get_data_by_id(id)
-
-        if cargoType == "csr" and isinstance(data, User):
-            return EmployeeUserResponse(
-                id=e.id,
-                username=data.username,
-                email=data.email,
-                isAdmin=data.is_admin,
-                password="*******",
-                firstName=e.name,
-                lastName=e.last_name,
-                role=CargoTypeEnum(e.role),
-                rfc=e.rfc,
-                dateOfBirth=e.date_birth,
-                hireDate=e.hire_date,
-                stillEmployee=e.still_employee,
-            )
-
-        if cargoType == "operador" and isinstance(data, DriverDetails):
-
-            return EmployeeDriverResponse(
-                id=e.id,
-                firstName=e.name,
-                lastName=e.last_name,
-                role=CargoTypeEnum(e.role),
-                rfc=e.rfc,
-                dateOfBirth=e.date_birth,
-                hireDate=e.hire_date,
-                stillEmployee=e.still_employee,
-                licenseNumber=data.license_number,
-                licenseExpiration=data.expiration_date,
-                gafetId=data.gafet_id,
-            )
-
-        raise ValueError(
-            f"Invalid request: cargoType '{cargoType}' does not match record type {type(data)}"
         )

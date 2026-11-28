@@ -1,23 +1,25 @@
 from datetime import date
+from typing import Literal
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from stdnum.mx import rfc as rfc_validator
 
-from model.db_model import DriverDetails, Employee
+from model.db_model import Employee
 from repository import DriverRepository, EmployeeRepository, UserRepository
 from schema.cargo_schema import CargoTypeEnum
 from schema.employee_schema import (
     EmployeeBaseResponse,
     EmployeeCreateUnion,
+    EmployeeDriverResponse,
     EmployeeRequestDash,
-    OperatorOption,
+    EmployeeResponseUnion,
+    EmployeeUserResponse,
     OperatorOptionResponse,
     PaginatedEmployeeResponse,
+    TypeUnit,
 )
 from schema.token_schema import InitialTokenPayload, TokenPayload
-from schema.user_schema import NewUser
-from service.jwt_service import JWTService
 from utility.driver_service import DriverService
 from utility.user_service import UserService
 
@@ -25,13 +27,11 @@ from utility.user_service import UserService
 class EmployeeService:
 
     def __init__(self, db: Session):
-        self._db = db
         self._employee_repo = EmployeeRepository(db)
         self._user_repo = UserRepository(db)
         self._driver_repo = DriverRepository(db)
-        self._user_service = UserService(self._db)
-        self._driver_service = DriverService(self._db)
-        self.jwt = JWTService()
+        self._user_service = UserService(db)
+        self._driver_service = DriverService(db)
 
     @staticmethod
     def validate_rfc(rfc_value: str) -> str:
@@ -43,8 +43,9 @@ class EmployeeService:
             )
         return clean_rfc
 
-    def get_driver_by_id(self, id: int) -> tuple[DriverDetails, Employee]:
-        return self._driver_repo.get_driver_with_employee(id)
+    # ------------------------------------------------------------------
+    # Consultas
+    # ------------------------------------------------------------------
 
     def get_all_employees(
         self, page: int = 1, limit: int = 10
@@ -71,122 +72,189 @@ class EmployeeService:
             limit=limit,
         )
 
-    def _validate_account(self, data: EmployeeCreateUnion) -> None:
-        """Valida todo antes de crear el empleado, para no dejar registros a medias."""
-        if data.employeeType == CargoTypeEnum.CSR:
-            if self._user_repo.get_username(data.username.strip()):
-                raise HTTPException(
-                    status_code=400, detail="Ese nombre de usuario ya existe"
-                )
-            if self._user_repo.get_email(str(data.email)):
-                raise HTTPException(
-                    status_code=400, detail="Ese correo ya está registrado"
-                )
+    def get_employee_info(
+        self, id: int, cargoType: Literal["csr", "operador"]
+    ) -> EmployeeResponseUnion:
+        if not (employee := self._employee_repo.get_active_by_id(id)):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Empleado no encontrado"
+            )
+        if employee.role != cargoType:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"El empleado {id} no es de tipo '{cargoType}'",
+            )
 
-        elif data.employeeType == CargoTypeEnum.OPERADOR:
-            # Database validations (DB checks)
-            if data.licenseExpiration <= date.today():
+        if cargoType == CargoTypeEnum.CSR:
+            if not (user := self._user_repo.get_by_employee_id(employee.id)):
                 raise HTTPException(
-                    status_code=400, detail="La licencia del operador está vencida"
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="El empleado no tiene cuenta de usuario",
                 )
+            return EmployeeUserResponse(
+                id=employee.id,
+                username=user.username,
+                email=user.email,
+                isAdmin=user.is_admin,
+                password="*******",
+                firstName=employee.name,
+                lastName=employee.last_name,
+                role=CargoTypeEnum(employee.role),
+                rfc=employee.rfc,
+                dateOfBirth=employee.date_birth,
+                hireDate=employee.hire_date,
+                stillEmployee=employee.still_employee,
+            )
 
-            if self._driver_repo.find_by_license_number(
-                data.licenseNumber.strip()
-            ):
-                raise HTTPException(
-                    status_code=400, detail="Ese número de licencia ya está registrado"
-                )
+        if not (driver := self._driver_repo.get_by_employee_id(employee.id)):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Operador no encontrado",
+            )
+        return EmployeeDriverResponse(
+            id=employee.id,
+            firstName=employee.name,
+            lastName=employee.last_name,
+            role=CargoTypeEnum(employee.role),
+            rfc=employee.rfc,
+            dateOfBirth=employee.date_birth,
+            hireDate=employee.hire_date,
+            stillEmployee=employee.still_employee,
+            licenseNumber=driver.license_number,
+            licenseExpiration=driver.expiration_date,
+            gafetId=driver.gafet_id,
+        )
 
-            if self._driver_repo.find_by_gafet_id(data.gafetId.strip()):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Ese gafete ya está asignado a otro operador",
-                )
-
-    def list_operators(self) -> list[OperatorOption] | list[OperatorOptionResponse]:
+    def list_operators(self) -> list[OperatorOptionResponse]:
         # Sin operadores es un estado válido (lista vacía), no un 404: el
         # formulario de embarque muestra el aviso.
-        return self._driver_repo.get_drivers_list()
+        return [
+            OperatorOptionResponse(
+                id=employee.id,
+                firstName=f"{employee.name} {employee.last_name}",
+                unit=unit.unit_number if unit else None,
+                typeUnit=TypeUnit(unit.type_unit) if unit and unit.type_unit else None,
+            )
+            for employee, unit in self._driver_repo.get_active_operators_with_unit()
+        ]
 
-    def create_employee(self, data: EmployeeCreateUnion) -> Employee:
-        clean_rfc = self.validate_rfc(data.rfc)
+    # ------------------------------------------------------------------
+    # Alta de empleados
+    # ------------------------------------------------------------------
 
+    def _validate_account(self, data: EmployeeCreateUnion, clean_rfc: str) -> None:
+        """Valida todo antes de escribir, para no dejar registros a medias."""
         if self._employee_repo.get_employee(clean_rfc):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="An employee with this RFC is already registered",
+                detail="Ya existe un empleado con ese RFC",
             )
 
-        new_employee = Employee(
-            name=data.firstName,
-            last_name=data.lastName,
-            role=data.role,
-            rfc=clean_rfc,
-            still_employee=True,
-        )
-        self._employee_repo.create_employee(new_employee)
-        return new_employee
+        if data.employeeType == CargoTypeEnum.CSR:
+            if self._user_repo.get_username(data.username.strip()):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Ese nombre de usuario ya existe",
+                )
+            if self._user_repo.get_email(data.email.strip().lower()):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Ese correo ya está registrado",
+                )
+            return
+
+        if data.licenseExpiration <= date.today():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La licencia del operador está vencida",
+            )
+        if self._driver_repo.find_by_license_number(data.licenseNumber.strip()):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ese número de licencia ya está registrado",
+            )
+        if self._driver_repo.find_by_gafet_id(data.gafetId.strip()):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Ese gafete ya está asignado a otro operador",
+            )
 
     def register_employee_service(
         self,
         ip: str,
         data: EmployeeCreateUnion,
         current_user: TokenPayload | InitialTokenPayload | None,
+        created_by_id: int | None = None,
     ) -> EmployeeRequestDash:
+        # Alta inicial: mientras no exista ningún usuario se permite, sin sesión,
+        # crear la primera cuenta, que siempre es administrador. En cuanto se
+        # guarda, ya hay usuarios y este camino queda cerrado para siempre.
+        is_bootstrap = not self._user_repo.has_any()
 
-        has_users = bool(self._user_repo.get_all_users())
-        is_admin = getattr(current_user, "is_admin", False)
-
-        if has_users and not is_admin:
+        if is_bootstrap:
+            if data.employeeType != CargoTypeEnum.CSR:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="La primera cuenta debe ser un administrador (CSR) con usuario",
+                )
+        elif not getattr(current_user, "is_admin", False):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Only administrators can Register CSR or  Employee Resgistration",
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Solo un administrador puede registrar empleados",
             )
 
-        user_sub = getattr(current_user, "sub", None) if current_user else None
+        clean_rfc = self.validate_rfc(data.rfc)
+        self._validate_account(data, clean_rfc)
 
-        target_rfc = user_sub or data.rfc
-
-        if not target_rfc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="RFC parameters is Requiere for CSR or  Employee Resgistration",
+        try:
+            employee = self._employee_repo.add(
+                Employee(
+                    name=data.firstName.strip(),
+                    last_name=data.lastName.strip(),
+                    role=data.employeeType.value,
+                    rfc=clean_rfc,
+                    date_birth=data.dateOfBirth,
+                    hire_date=data.hireDate,
+                    still_employee=data.stillEmployee,
+                )
             )
 
-        if has_users:
-            self._validate_account(data)
+            if data.employeeType == CargoTypeEnum.CSR:
+                self._user_service.create_new_user(
+                    data=data, employee=employee, is_bootstrap=is_bootstrap
+                )
+            else:
+                # Un operador nunca tiene cuenta ni privilegios; lo registra un admin.
+                if created_by_id is None:
+                    raise HTTPException(
+                        status_code=status.HTTP_403_FORBIDDEN,
+                        detail="Inicia sesión como administrador para registrar operadores",
+                    )
+                self._driver_service.create_driver(
+                    data=data, employee=employee, hired_by=created_by_id
+                )
 
-        new_employee = self.create_employee(data)
-        if data.employeeType == CargoTypeEnum.CSR:
+            # Dos altas iniciales simultáneas: solo la primera se confirma.
+            if is_bootstrap and self._user_repo.count_users() > 1:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="El administrador inicial ya fue creado",
+                )
 
-            new_user = NewUser(
-                rfc=data.rfc,
-                role=data.role,
-                email=data.email,
-                username=data.username,
-                password=data.password,
-            )
+            self._employee_repo.commit()
+        except Exception:
+            self._employee_repo.rollback()
+            raise
 
-            self._user_service.create_new_user(
-                data=new_user, rfc=target_rfc, is_bootstrap=not has_users
-            )
-
-        if data.employeeType == CargoTypeEnum.OPERADOR:
-            self._driver_service.Register_Employee(data)
-
-        if not data.employeeType in CargoTypeEnum:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Role no Avialabel"
-            )
         return EmployeeRequestDash(
             status="201",
             detail="Employee registered successfully",
-            id=new_employee.id,
-            firstName=new_employee.name,
-            lastName=new_employee.last_name,
-            role=CargoTypeEnum(new_employee.role),
-            hireDate=new_employee.hire_date,
-            stillEmployee=new_employee.still_employee,
-            rfc=new_employee.rfc,
-            dateOfBirth=new_employee.date_birth,
+            id=employee.id,
+            firstName=employee.name,
+            lastName=employee.last_name,
+            role=CargoTypeEnum(employee.role),
+            hireDate=employee.hire_date,
+            stillEmployee=employee.still_employee,
+            rfc=employee.rfc,
+            dateOfBirth=employee.date_birth,
         )

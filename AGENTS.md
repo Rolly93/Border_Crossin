@@ -41,7 +41,7 @@ Docker (root): `cp .env.example .env`; set `MYSQL_*`, `JWT_SECRET_KEY`, `FERNET_
 Backend from `backend/`:
 
 - `uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
-- `python -m scripts.init_db`: create tables + seed `Expeditors` + admin from `USER_EMAIL`/`USER_PASSWORD` (defaults `admin@test.com`/`1234`; set real values); seeds reference rules via `scripts.seed_reference_rules`. Existing tables skip `create_all`. 
+- `python -m scripts.init_db`: create tables + seed `Expeditors` + reference rules via `scripts.seed_reference_rules`. Existing tables skip `create_all`. **Seeds no admin**: with no users, `/onetime` → `POST /employees/create` (no token) creates the first account, CSR only, always admin, works once (closed once any user exists). 
 - `alembic` (`alembic.ini`, `migrations/`); `get_database_url()` for alembic. No backend test suite in repo.
 
 Frontend from `Frontend/`:
@@ -58,7 +58,7 @@ Frontend from `Frontend/`:
 
 ## Environment / security
 
-- `backend/.env`: `JWT_SECRET_KEY`, `FERNET_KEY`, `ALGORITHM=HS256`, `ACCESS_TOKEN_EXPIRE_MINUTES=30`, `DATABASE_URL`, `DB_*`, `USER_EMAIL`, `USER_PASSWORD`, SFTP/mail, `SQLITE_PATH`. `backend/.env.example`. 
+- `backend/.env`: `JWT_SECRET_KEY`, `FERNET_KEY`, `ALGORITHM=HS256`, `ACCESS_TOKEN_EXPIRE_MINUTES=30`, `DATABASE_URL`, `DB_*`, SFTP/mail, `SQLITE_PATH`. `backend/.env.example`. 
 - JWT secret = `JWT_SECRET_KEY` or legacy `SECRET_KEY`. Fernet = `FERNET_KEY` or legacy `SECRET_KEY`. `SECRET_KEY` deprecated. Surrounding quotes stripped. Required for JWT + SFTP password encryption. Don’t print secrets. 
 - `FERNET_KEY` generate `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. `JWT_SECRET_KEY` generate `python -c "import secrets; print(secrets.token_urlsafe(32))"`. 
 - `DATABASE_URL` always wins. Else `DB_BACKEND=sqlite|mysql|postgres|supabase`; `postgresql`→`postgres`. `DB_HOST` required for server DBs; `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT`, `DB_DRIVER`, `DB_SSLMODE`. Supabase `sslmode=require`. `DB_BACKEND` unset + `DB_HOST`→mysql else sqlite. SQLite `SQLITE_PATH`; example `./bordercrossing.db`; relative to backend cwd; empty `DATABASE_URL` treated unset. `*.env.example` allowed. 

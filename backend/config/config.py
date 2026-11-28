@@ -18,9 +18,7 @@ class Env:
 
     VITE_API_URL = os.getenv("VITE_API_URL", "http://localhost:8000")
     PORT = int(os.getenv("PORT", 8000))
-    USER_EMAIL = os.getenv("USER_EMAIL", "admin@test.com")
-    USER_PASSWORD = os.getenv("USER_PASSWORD", "1234")
-    
+
     # Separate keys for JWT and Fernet (security best practice)
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "").strip('"').strip("'")
     FERNET_KEY = os.getenv("FERNET_KEY", "").strip('"').strip("'")

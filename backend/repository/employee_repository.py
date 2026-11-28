@@ -2,26 +2,24 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from model.db_model import Employee
+from repository.base_repository import BaseRepository
 
 
-class EmployeeRepository:
+class EmployeeRepository(BaseRepository[Employee]):
     def __init__(self, db: Session):
-        self._db = db
+        super().__init__(db, Employee)
 
     def get_employee(self, rfc: str) -> Employee | None:
-
         return self._db.query(Employee).filter(Employee.rfc == rfc).first()
 
+    def get_active_by_id(self, employee_id: int) -> Employee | None:
+        stmt = select(Employee).where(
+            Employee.id == employee_id, Employee.still_employee.is_(True)
+        )
+        return self._db.execute(stmt).scalar_one_or_none()
+
     def create_employee(self, data: Employee) -> Employee:
-        self._db.add(data)
-        self._db.commit()
-
-        self._db.refresh(data)
-
-        return data
-
-    def get_all_users(self) -> list[Employee] | None:
-        return self._db.query(Employee).all()
+        return self.save(data)
 
     def get_paginated(
         self, page: int = 1, limit: int = 10

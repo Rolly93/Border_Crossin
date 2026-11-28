@@ -347,23 +347,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/employees/register_driver": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Register Driver */
-        post: operations["resgister_driver_employees_register_driver_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/employees/{id}": {
         parameters: {
             query?: never;
@@ -807,7 +790,10 @@ export interface components {
              * Format: date
              */
             hireDate: string;
-            /** Stillemployee */
+            /**
+             * Stillemployee
+             * @default true
+             */
             stillEmployee: boolean;
             /**
              * Dateofbirth
@@ -834,8 +820,11 @@ export interface components {
              * Hiredate
              * Format: date
              */
-            hireDate: string;
-            /** Stillemployee */
+            hireDate?: string;
+            /**
+             * Stillemployee
+             * @default true
+             */
             stillEmployee: boolean;
             /**
              * Dateofbirth
@@ -899,46 +888,40 @@ export interface components {
             /** Id */
             id: number;
         };
-        /** EmployeeRequest */
-        EmployeeRequest: {
-            /** Id */
-            id?: number | null;
+        /** EmployeeRequestDash */
+        EmployeeRequestDash: {
             /** Firstname */
             firstName: string;
             /** Lastname */
             lastName: string;
-            /** Role */
-            role: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "operador" | "csr";
             /** Rfc */
             rfc: string;
+            /**
+             * Hiredate
+             * Format: date
+             */
+            hireDate: string;
+            /**
+             * Stillemployee
+             * @default true
+             */
+            stillEmployee: boolean;
             /**
              * Dateofbirth
              * Format: date
              */
             dateOfBirth: string;
-            /**
-             * Employeetype
-             * @default csr
-             * @enum {string}
-             */
-            employeeType: "operador" | "csr";
-            /** Username */
-            username: string | null;
-            /** Email */
-            email: string | null;
-            /** Password */
-            password: string | null;
-            /**
-             * Isadmin
-             * @default false
-             */
-            isAdmin: boolean;
-            /** Licensenumber */
-            licenseNumber: string | null;
-            /** Licenseexpiration */
-            licenseExpiration: string | null;
-            /** Gafetid */
-            gafetId: string | null;
+            /** Id */
+            id: number;
+            /** Status */
+            status: string;
+            /** Detail */
+            detail: string;
         };
         /** EmployeeUserRequest */
         EmployeeUserRequest: {
@@ -957,8 +940,11 @@ export interface components {
              * Hiredate
              * Format: date
              */
-            hireDate: string;
-            /** Stillemployee */
+            hireDate?: string;
+            /**
+             * Stillemployee
+             * @default true
+             */
             stillEmployee: boolean;
             /**
              * Dateofbirth
@@ -1061,16 +1047,6 @@ export interface components {
             emailService: number;
             /** Sftpservice */
             sftpService: number;
-        };
-        /** OperatorOption */
-        OperatorOption: {
-            /** Id */
-            id: number;
-            /** Firstname */
-            firstName: string;
-            /** Unit */
-            unit: string | null;
-            typeUnit: components["schemas"]["TypeUnit"];
         };
         /** OperatorOptionResponse */
         OperatorOptionResponse: {
@@ -1983,7 +1959,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["EmployeeRequestDash"];
                 };
             };
             /** @description Validation Error */
@@ -2016,44 +1992,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OperatorOption"][] | components["schemas"]["OperatorOptionResponse"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    resgister_driver_employees_register_driver_post: {
-        parameters: {
-            query?: {
-                token?: string | null;
-            };
-            header?: {
-                authorization?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EmployeeRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OperatorOptionResponse"][];
                 };
             };
             /** @description Validation Error */

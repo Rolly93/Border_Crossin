@@ -14,7 +14,14 @@ export type TEmployeeCreateUnionResponse =
   | components["schemas"]["EmployeeUserResponse"]
   | components["schemas"]["EmployeeDriverResponse"];
 
-export type TEmployeeAllRequest = components["schemas"]["EmployeeRequest"];
+// Empleado existente que abre el formulario (respuesta de GET /employees/{id}):
+// trae los campos de usuario o los de operador según employeeType.
+export type TEmployeeAllRequest = Partial<
+  Omit<components["schemas"]["EmployeeUserResponse"], "employeeType">
+> &
+  Partial<Omit<components["schemas"]["EmployeeDriverResponse"], "employeeType">> & {
+    employeeType?: components["schemas"]["CargoTypeEnum"];
+  };
 export type TEmployeeUserRequest = components["schemas"]["EmployeeUserRequest"];
 export type TEmployeeUserResponse =
   components["schemas"]["EmployeeUserResponse"];

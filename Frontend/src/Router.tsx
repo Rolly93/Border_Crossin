@@ -14,6 +14,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'));
 const FirstTimeLog = lazy(() => import('./features/login/components/FirstTimeCreate'));
 const EmployeePage = lazy(() => import('./pages/EmployeePage'));
 const UnitPage = lazy(() => import('./pages/UnitPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const router = createBrowserRouter([
   {
@@ -91,6 +92,15 @@ const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    // Cualquier ruta no declarada arriba (con o sin sesión).
+    path: '*',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <NotFoundPage />
+      </Suspense>
+    ),
   },
 ]);
 

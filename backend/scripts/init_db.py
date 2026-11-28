@@ -7,8 +7,6 @@ Creates all tables and seeds initial data.
 import os
 import sys
 
-import bcrypt
-
 # Add the parent directory to the path so we can import from the app
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -16,13 +14,7 @@ from sqlalchemy import func, inspect, select
 from sqlalchemy.orm import Session
 
 from database import engine
-from model.db_model import Base, Client, Employee, User
-
-
-def hash_password(password: str) -> str:
-    """Hash a password using bcrypt."""
-    salt = bcrypt.gensalt()
-    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+from model.db_model import Base, Client, User
 
 
 def init_database():
@@ -58,46 +50,13 @@ def init_database():
         else:
             print(f"Client 'Expeditors' already exists (ID: {client.id})")
 
-        # Create admin user if not exists
-        from config.config import Env
-
-        env = Env()
-        admin_user = db.scalar(select(User).where(User.username == env.USER_EMAIL))
-        if admin_user is None:
-            print("Creating admin user...")
-            # Check if admin employee exists
-            admin_employee = db.scalar(
-                select(Employee).where(Employee.rfc == "ADMIN000000000")
-            )
-            if admin_employee is None:
-                admin_employee = Employee(
-                    name="Admin",
-                    last_name="User",
-                    role="administrator",
-                    rfc="ADMIN000000000",
-                    still_employee=True,
-                )
-                db.add(admin_employee)
-                db.commit()
-                db.refresh(admin_employee)
-
-            # Hash password directly without importing UserService (avoids circular import)
-            hashed_password = hash_password(env.USER_PASSWORD)
-
-            admin_user = User(
-                username=env.USER_EMAIL,
-                email=env.USER_EMAIL,
-                hashed_password=hashed_password,
-                is_admin=True,
-                employee_id=admin_employee.id,
-            )
-            db.add(admin_user)
-            db.commit()
-            print(f"Admin user created: {env.USER_EMAIL}")
+        # El administrador NO se crea aquí: la primera cuenta se registra una sola
+        # vez desde la pantalla de alta inicial (/onetime) mientras no haya usuarios.
+        users = db.scalar(select(func.count()).select_from(User)) or 0
+        if users == 0:
+            print("No users yet: create the first admin from the /onetime screen.")
         else:
-            print(f"Admin user already exists: {admin_user.username}")
-
-        db.commit()
+            print(f"Users already exist ({users}); first-time setup is closed.")
 
     except Exception as e:
         print(f"Warning: Could not seed initial data: {e}")

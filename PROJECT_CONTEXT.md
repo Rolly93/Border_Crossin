@@ -18,7 +18,7 @@ A “shipment” / `ShipmentAssign` is the central object. The app tracks refere
 
 ## Who it works for
 
-- **Operations company:** admins, CSRs (`csr`), operators (`operador`), dispatchers, employees, authenticated users. JWT login; `User.is_admin`; admin-only SFTP configuration. `init_db` seeds admin `USER_EMAIL`/`USER_PASSWORD` (default `admin@test.com`/`1234`) + `Expeditors`. 
+- **Operations company:** admins, CSRs (`csr`), operators (`operador`), dispatchers, employees, authenticated users. JWT login; `User.is_admin`; admin-only SFTP configuration. `init_db` seeds `Expeditors` only, no admin. First admin: `/onetime` screen, once, while no users exist (CSR, always admin). Later only admins create employees: operators (no login, no privileges) or CSR users (`isAdmin` chosen). 
 - **Logistics clients/customers:** `cliente` companies whose shipments are tracked. Per-client reference rules, email recipients, optional SFTP service. `Expeditors` built-in/default; current XML generator is `ExpeditorsXMLService`. 
 - **Operating capacity:** `UnitTruck`, `UnitAssignment`, `DriverDetails`; active `ACTIVA` unit + open operator assignment required for shipment creation. 
 - **Downstream client servers/integrators:** SFTP target receiving `<AvisoEventos>` XML in `remote_folder`. They don’t push incoming XML to this app. 

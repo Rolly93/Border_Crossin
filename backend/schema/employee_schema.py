@@ -16,8 +16,9 @@ class EmployeeBaseRequest(BaseModel):
     lastName: str
     role: Literal[CargoTypeEnum.OPERADOR, CargoTypeEnum.CSR]
     rfc: str
-    hireDate: date
-    stillEmployee: bool
+    # El formulario de alta no captura estos dos: por defecto, alta hoy y activo.
+    hireDate: date = Field(default_factory=date.today)
+    stillEmployee: bool = True
     dateOfBirth: date
 
 
@@ -102,10 +103,15 @@ class PaginatedEmployeeResponse(BaseModel):
 
 class EmployeeUserResponse(EmployeeUserRequest):
     id: int
+    # En la respuesta siempre vienen (el default solo aplica al alta).
+    hireDate: date
+    stillEmployee: bool
 
 
 class EmployeeDriverResponse(EmployeeDriverRequest):
     id: int
+    hireDate: date
+    stillEmployee: bool
 
 
 EmployeeResponseUnion = Annotated[

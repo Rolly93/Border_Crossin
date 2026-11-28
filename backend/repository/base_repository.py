@@ -27,6 +27,22 @@ class BaseRepository(Generic[T]):
             self._db.rollback()
             raise RuntimeError(f"Database save error: {err}") from err
 
+    def add(self, instance: T) -> T:
+        """Agrega sin confirmar (flush asigna el id). Confirmar con commit()."""
+        self._db.add(instance)
+        self._db.flush()
+        return instance
+
+    def commit(self) -> None:
+        try:
+            self._db.commit()
+        except SQLAlchemyError as err:
+            self._db.rollback()
+            raise RuntimeError(f"Database commit error: {err}") from err
+
+    def rollback(self) -> None:
+        self._db.rollback()
+
     def delete(self, instance: T) -> None:
         self._db.delete(instance)
         self._db.commit()
