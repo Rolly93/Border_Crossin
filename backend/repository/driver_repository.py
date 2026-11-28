@@ -92,7 +92,6 @@ class DriverRepository(BaseRepository[DriverDetails]):
             # Si el outerjoin encontró un camión asignado, extraemos sus datos
             if unit_truck is not None:
                 unit_number = unit_truck.unit_number
-                print(unit_number)
                 type_unit_val = (
                     TypeUnit(unit_truck.type_unit)
                     if unit_truck and unit_truck.type_unit

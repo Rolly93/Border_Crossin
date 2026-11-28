@@ -1,7 +1,8 @@
 /** @format */
 
 import { useState } from "react";
-import { Table } from "@mantine/core";
+import { Alert, Table, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import { ShipmentRow } from "./ShipmentRow";
 import { useTranslation } from "react-i18next";
@@ -20,7 +21,7 @@ interface ShipmentTableProps {
 export default function ShipmentTable({
   shipments,
   loading,
-  error: _error,
+  error,
   onUpdateShipment,
   onLastElement,
 }: ShipmentTableProps) {
@@ -43,13 +44,26 @@ export default function ShipmentTable({
       await onUpdateShipment(updatedValues.id, updatedValues);
       close();
     } catch (err) {
+      notifications.show({
+        title: "No se pudo actualizar el embarque",
+        message: err instanceof Error ? err.message : "Ocurrió un error",
+        color: "red",
+      });
     } finally {
       setIsSaving(false);
     }
   };
 
+  const COLUMN_COUNT = 19;
+  const isEmpty = !loading && !error && shipments.length === 0;
+
   return (
     <>
+      {error && (
+        <Alert color="red" title="No se pudieron cargar los embarques" mb="sm">
+          {error}
+        </Alert>
+      )}
       <Table.ScrollContainer minWidth={1400} maxHeight={500} h={500}>
         <Table
           highlightOnHover
@@ -104,6 +118,15 @@ export default function ShipmentTable({
             )}
             {loading && shipments.length > 0 && (
               <TableSkeletonRows rows={3} columns={15} />
+            )}
+            {isEmpty && (
+              <Table.Tr>
+                <Table.Td colSpan={COLUMN_COUNT}>
+                  <Text size="sm" c="dimmed" ta="center" py="md">
+                    No hay embarques activos.
+                  </Text>
+                </Table.Td>
+              </Table.Tr>
             )}
           </Table.Tbody>
         </Table>

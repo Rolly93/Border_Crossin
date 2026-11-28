@@ -35,3 +35,60 @@ export function getErrorMessage(err: any, fallback = "Ocurrió un error"): strin
 
   return fallback;
 }
+
+/**
+ * Error de API con el mensaje general y, si el backend respondió 422, los
+ * errores por campo listos para `form.setErrors`.
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly fieldErrors: Record<string, string> = {},
+    public readonly status?: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+/**
+ * Convierte el `detail` de un 422 de FastAPI en `{ "campo.ruta": mensaje }`.
+ * `loc` viene como ["body", <tag>?, ...campo]; `skipSegments` quita los tags
+ * de uniones discriminadas (p. ej. "trailer_53ft", "consolidated").
+ */
+export function getFieldErrors(
+  err: any,
+  skipSegments: readonly string[] = [],
+): Record<string, string> {
+  const detail = err?.response?.data?.detail;
+  if (!Array.isArray(detail)) {
+    return {};
+  }
+
+  const errors: Record<string, string> = {};
+  for (const item of detail) {
+    if (!Array.isArray(item?.loc)) {
+      continue;
+    }
+    const path = item.loc
+      .filter((seg: unknown, i: number) => !(i === 0 && seg === "body"))
+      .filter((seg: unknown) => !skipSegments.includes(String(seg)))
+      .join(".");
+    if (path && !errors[path]) {
+      errors[path] = String(item?.msg ?? "Valor inválido");
+    }
+  }
+  return errors;
+}
+
+export function toApiError(
+  err: any,
+  fallback: string,
+  skipSegments: readonly string[] = [],
+): ApiError {
+  return new ApiError(
+    getErrorMessage(err, fallback),
+    getFieldErrors(err, skipSegments),
+    err?.response?.status,
+  );
+}

@@ -144,9 +144,13 @@ class ShipmentService:
             reference=data.customer_tracking,
         )
 
-        # La unidad debe estar activa y tener un operador vigente: el operador es quien maneja.
-        if not (data_unit := (self._unit_repo.get_unit_by_number(data.truck))):
-            raise HTTPException(status.HTTP_404_NOT_FOUND, "Unidad no encontrada")
+        # El formulario manda en `truck` el ID del operador; su unidad debe estar
+        # activa y con la asignación abierta: el operador es quien maneja.
+        if not (data_unit := self._unit_repo.get_unit_by_driver(data.truck)):
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND,
+                "El operador seleccionado no tiene una unidad asignada",
+            )
         unit = data_unit
         if unit.state != "ACTIVA":
             raise HTTPException(

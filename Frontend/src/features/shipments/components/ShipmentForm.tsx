@@ -14,9 +14,8 @@ import { ShipmentFormProps } from "@/features/shipments/types/ShipmentFormProps"
 import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
 import { ShipmentValidator } from "../validation/ShipmentValidator";
 import { useTranslation } from "react-i18next";
-import { useClientReferenceRules } from "@/features/clients/hooks/useClientReferenceRules";
 import { notifications } from "@mantine/notifications";
-import { ValidateClientReference } from "@/components/utils/businessRules";
+import { ApiError } from "@/components/utils/errorMessage";
 import { useOperators } from "@/features/employee/hook/useOperators";
 import { useMemo } from "react";
 import { ShipmentModel } from "../domain/shipmentModel";
@@ -41,7 +40,11 @@ export function ShipmentForm({
   onCancel,
   opened,
 }: ShipmentFormProps) {
-  const { operators } = useOperators(opened);
+  const {
+    operators,
+    loading: operatorsLoading,
+    error: operatorsError,
+  } = useOperators(opened);
 
   const initialFormValues = useMemo(
     () =>
@@ -55,20 +58,16 @@ export function ShipmentForm({
     mode: "controlled",
     validateInputOnChange: true,
     initialValues: initialFormValues,
+    // Solo chequeos baratos; las reglas de tráiler/consolidado las valida el
+    // backend y sus errores se muestran por campo en handleSubmit.
     validate: (values) => {
       const validator = new ShipmentValidator(values);
-      console.log(values);
-
-      const isConsolidated = values.service_type === ServiceType.CONSOLIDATED;
-      const trailerErrors = isConsolidated ? {} : validator.validateTrailer;
-
       return {
         tracking_number: validator.validateTrackingNumber(),
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
         destination: validator.validateDestination(),
         type_operation: validator.validateTypeOperation(),
-        ...trailerErrors,
       };
     },
   });
@@ -79,8 +78,7 @@ export function ShipmentForm({
   );
 
   const isConsolidated = form.values.service_type === ServiceType.CONSOLIDATED;
-  const { options, loading, error } = useClientOptions();
-  //const { getRules } = useClientReferenceRules();
+  const { options, loading } = useClientOptions();
 
   const handleValidationError = (_errors: typeof form.errors) => {
     notifications.show({
@@ -93,31 +91,25 @@ export function ShipmentForm({
 
   const handleSubmit = async (values: typeof form.values) => {
     try {
-      const clientId = Number(values.cliente);
-      const selectedClient = options.find((c) => c.id === clientId);
-      //      const clientName = selectedClient?.name || "";
-      //      const rules = clientId ? await getRules(clientId) : [];
-
-      //      const { isValid, field, error } = ValidateClientReference({
-      //        onClientName: clientName,
-      //        onReferenceClient: values.customer_tracking,
-      //        onTypeOperation: values.type_operation,
-      //        rules,
-      //      });
-      //
-      //      if (!isValid && field && error) {
-      //        form.setFieldError(field, error);
-      //        return;
-      //      }
-
       await onSubmit(values);
-    } catch (err: any) {
-      if (typeof err === "object" && !err.message) {
-        form.setErrors(err);
-      } else if (err.message) {
-        console.log(err);
-        form.setFieldError("customer_tracking", err.message);
+    } catch (err) {
+      // 422: errores por campo (p. ej. "plates", "consolidate_guide.0.guide_number").
+      const fieldErrors = err instanceof ApiError ? err.fieldErrors : {};
+      const hasFieldErrors = Object.keys(fieldErrors).length > 0;
+      if (hasFieldErrors) {
+        form.setErrors(fieldErrors);
       }
+      // 404/409/400 (unidad sin operador, embarque duplicado, referencia
+      // inválida...) no traen campo: se muestran como notificación.
+      notifications.show({
+        title: "No se pudo registrar el embarque",
+        message: hasFieldErrors
+          ? "Revisa los campos marcados en rojo."
+          : err instanceof Error
+            ? err.message
+            : "Ocurrió un error",
+        color: "red",
+      });
     }
   };
   return (
@@ -198,14 +190,14 @@ export function ShipmentForm({
               loading={loading}
               {...form.getInputProps("cliente")}
               onChange={(value) => {
-                const numericId = value ? Number(value) : null;
-                console.log(numericId);
-
-                form.setFieldValue("cliente", numericId);
+                // El Select trabaja con strings; toCreatePayloads lo convierte
+                // a número al enviar.
+                const clientId = value ?? "";
+                form.setFieldValue("cliente", clientId);
                 form.values.consolidate_guide.forEach((_, index) => {
                   form.setFieldValue(
                     `consolidate_guide.${index}.client_id`,
-                    numericId,
+                    clientId,
                   );
                 });
               }}
@@ -236,12 +228,18 @@ export function ShipmentForm({
                 label: o.unit,
               }))}
               placeholder={t("shipment.placeholders.truck")}
+              description={
+                operatorsError ??
+                (!operatorsLoading && toggleUnit.length === 0
+                  ? "No hay operadores con unidad asignada para este tipo de servicio"
+                  : undefined)
+              }
               {...form.getInputProps("truck")}
-              loading={loading}
+              loading={operatorsLoading}
             />
           </Group>
           {!isConsolidated ? (
-            <TrailerFieldsSection form={form} editable={true} />
+            <TrailerFieldsSection form={form} editable />
           ) : (
             <ConsolidatedGuidesSection
               form={form}

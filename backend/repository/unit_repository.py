@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from model.db_model import DriverDetails, Employee, UnitAssignment, UnitTruck
@@ -34,18 +33,20 @@ class UnitRepository(BaseRepository[UnitTruck]):
             .all()
         )
 
-    def get_unit_by_number(self, driver_id: str) -> UnitTruck:
-        # self._db.query(UnitTruck).filter(UnitTruck.unit_number == truck).first()
-        stmt = (
-            select(UnitTruck, DriverDetails)
+    def get_unit_by_driver(self, driver_id: int | str) -> UnitTruck | None:
+        """Unidad que el operador tiene asignada actualmente (asignación abierta)."""
+        if not str(driver_id).strip().isdigit():
+            return None
+        return (
+            self._db.query(UnitTruck)
             .join(UnitTruck.assignments)
-            .join(UnitAssignment.driver)
-            .where(DriverDetails.employee_id == driver_id)
+            .filter(
+                UnitAssignment.driver_id == int(driver_id),
+                UnitAssignment.released_at.is_(None),
+            )
             .order_by(UnitAssignment.assigned_at.desc())
+            .first()
         )
-        u, d = self._db.execute(stmt).first()
-
-        return u
 
     def get_assignment_by_id(self, assignment_id: int) -> UnitAssignment | None:
         return self._db.get(UnitAssignment, assignment_id)

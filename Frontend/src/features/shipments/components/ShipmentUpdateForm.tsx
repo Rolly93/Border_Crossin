@@ -9,7 +9,11 @@ import { setupShipmentWatchers } from "../validation/ShipmentFormRules";
 import EditableTextInput from "../../../components/Input/EditableTextInput";
 
 import { ShipmentValidator } from "../validation/ShipmentValidator";
-import { EXPECTED_CATEGORIES, ShipmentModel } from "../domain/shipmentModel";
+import {
+  EXPECTED_CATEGORIES,
+  ShipmentModel,
+  getEventFields,
+} from "../domain/shipmentModel";
 import { useFormNotifications } from "@/features/notfications/hooks/useNotifications";
 
 import { useTranslation } from "react-i18next";
@@ -17,23 +21,10 @@ import { useTranslation } from "react-i18next";
 import { notify } from "../../../components/utils/notifications";
 import { AtomButton } from "@/components/atoms/AtomButton";
 import { TShipmentResponse } from "../hooks/useShipments";
-import { useMemo, useState } from "react";
-import { EventFieldConfig } from "../types/Shipment";
+import { useMemo } from "react";
 import { TrailerFieldsSection } from "./sections/TrailerFieldsSection";
 import { ConsolidatedGuidesSection } from "./sections/ConsolidatedGuidesSection";
 import EditableDateTimePicker from "@/components/Input/EditableDateTimePicker";
-
-export const EVENT_FIELDS: EventFieldConfig[] = [
-  { key: "pick_up" },
-  { key: "departure" },
-  { key: "delay", showNotes: true, maxNotesLength: 50 },
-  { key: "mex_inspeccion", showNotes: true, maxNotesLength: 25 },
-  { key: "clear_mex" },
-  { key: "usa_inspeccion", showNotes: true, maxNotesLength: 25 },
-  { key: "clear_usa" },
-  { key: "safety_yard", showNotes: true, maxNotesLength: 25 },
-  { key: "deliver", showNotes: true, maxNotesLength: 25 },
-];
 
 export default function ShipmentUpdateForm({
   onSubmit,
@@ -60,7 +51,6 @@ export default function ShipmentUpdateForm({
         truck: validator.validateTruck(),
         origen: validator.validateOrigin(),
         destination: validator.validateDestination(),
-        trailer: validator.validateTrailer(),
         type_operation: validator.validateTypeOperation(),
         ...eventErrors,
       };
@@ -69,6 +59,8 @@ export default function ShipmentUpdateForm({
 
   const values = form.getValues();
   const isConsolidated = values.service_type === "consolidated";
+  // Southbound (USA → MEX) muestra primero la aduana americana.
+  const eventFields = getEventFields(values.type_operation);
   const guides = (values as any).consolidate_guide ?? [];
   setupShipmentWatchers(form);
 
@@ -148,7 +140,7 @@ export default function ShipmentUpdateForm({
           </Text>
 
           <SimpleGrid cols={{ base: 2, sm: 2, md: 3 }} spacing="lg" maw={900}>
-            {EVENT_FIELDS.map((field) => {
+            {eventFields.map((field) => {
               const events = form.values.events ?? [];
               const eventIndex = events.findIndex(
                 (e) => e.category === field.key,

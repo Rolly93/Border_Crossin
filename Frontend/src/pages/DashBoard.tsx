@@ -7,6 +7,7 @@ import { useShipments } from "@/features/shipments/hooks/useShipments";
 import { useCallback, useMemo, useRef, useState } from "react";
 import ShipmentTable from "@/features/shipments/components/ShipmentTable";
 import { TShipmentCreateFormValues } from "@/features/shipments/types/Shipment";
+import { ShipmentModel } from "@/features/shipments/domain/shipmentModel";
 
 function DashBoard() {
   const {
@@ -18,7 +19,7 @@ function DashBoard() {
     hasMore,
     fetchNextPage,
   } = useShipments();
-  const [isCreating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [search, setSearch] = useState("");
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -60,8 +61,15 @@ function DashBoard() {
     [loading, hasMore, fetchNextPage, search],
   );
 
+  // Se espera la respuesta: si el backend rechaza, el error sube hasta el
+  // formulario (que lo muestra) y el modal no se cierra.
   const handleCreateSubmit = async (newValues: TShipmentCreateFormValues) => {
-    addShipment(newValues);
+    setIsCreating(true);
+    try {
+      await addShipment(ShipmentModel.toCreatePayloads(newValues));
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (

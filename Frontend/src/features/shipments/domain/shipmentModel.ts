@@ -9,6 +9,9 @@ import {
   TShipmentResponse,
 } from "../hooks/useShipments";
 import { TShipmentCreateFormValues } from "../types/Shipment";
+import { components } from "@/types/api";
+
+type TTypeOperation = components["schemas"]["TypeOperation"];
 
 export interface EventFieldConfig {
   key: TEventCategory;
@@ -17,17 +20,44 @@ export interface EventFieldConfig {
   notesLabel?: string;
 }
 
-export const EVENT_FIELDS: EventFieldConfig[] = [
-  { key: "pick_up" },
-  { key: "departure" },
-  { key: "delay", showNotes: true, maxNotesLength: 50 },
+const MEX_CUSTOMS: EventFieldConfig[] = [
   { key: "mex_inspeccion", showNotes: true, maxNotesLength: 25 },
   { key: "clear_mex" },
+];
+const USA_CUSTOMS: EventFieldConfig[] = [
   { key: "usa_inspeccion", showNotes: true, maxNotesLength: 25 },
   { key: "clear_usa" },
-  { key: "safety_yard", showNotes: true, maxNotesLength: 25 },
-  { key: "deliver", showNotes: true, maxNotesLength: 25 },
 ];
+
+/**
+ * Orden cronológico de los eventos según el sentido del cruce:
+ * northbound (MEX → USA) pasa primero aduana mexicana; southbound
+ * (USA → MEX) pasa primero aduana americana.
+ */
+export function getEventFields(
+  typeOperation: TTypeOperation | string | null | undefined,
+): EventFieldConfig[] {
+  const customs =
+    typeOperation === "southbound"
+      ? [...USA_CUSTOMS, ...MEX_CUSTOMS]
+      : [...MEX_CUSTOMS, ...USA_CUSTOMS];
+  return [
+    { key: "pick_up" },
+    { key: "departure" },
+    { key: "delay", showNotes: true, maxNotesLength: 50 },
+    ...customs,
+    { key: "safety_yard", showNotes: true, maxNotesLength: 25 },
+    { key: "deliver", showNotes: true, maxNotesLength: 25 },
+  ];
+}
+
+export function getEventSequence(
+  typeOperation: TTypeOperation | string | null | undefined,
+): TEventCategory[] {
+  return getEventFields(typeOperation).map((f) => f.key);
+}
+
+export const EVENT_FIELDS: EventFieldConfig[] = getEventFields("northbound");
 
 export const EXPECTED_CATEGORIES: TEventCategory[] = EVENT_FIELDS.map(
   (f) => f.key,
@@ -155,8 +185,11 @@ export class ShipmentModel {
     const { data } = this;
     const isConsolidate = data.service_type === "consolidated";
     const guidesFromMode = isConsolidate ? data.consolidate_guide : [];
-    const resolvedGuides =
-      existingGuides.length > 0 ? existingGuides : guidesFromMode;
+    // Las guías nuevas aún no tienen id: se usa el índice como id local.
+    const resolvedGuides: TConsolidateGuideItemResponse[] =
+      existingGuides.length > 0
+        ? existingGuides.map((g, index) => ({ id: index, ...g }))
+        : guidesFromMode;
 
     return {
       tracking_number: data.tracking_number,
@@ -186,11 +219,11 @@ export class ShipmentModel {
     };
   }
 
-  public static toCreatePayloads(values: TShipmentRequest): TShipmentRequest {
-    const client_id =
-      values.cliente !== null && values.cliente !== undefined
-        ? Number(values.cliente)
-        : 0;
+  /** Valores del formulario de alta → cuerpo de POST /shipment/create. */
+  public static toCreatePayloads(
+    values: TShipmentCreateFormValues,
+  ): TShipmentRequest {
+    const client_id = values.cliente ? Number(values.cliente) : 0;
 
     if (values.service_type === "consolidated") {
       return {
@@ -203,7 +236,7 @@ export class ShipmentModel {
         origen: values.origen,
         destination: values.destination,
         consolidate_guide: values.consolidate_guide.map(
-          (guide: TConsolidateGuideItemRequest) => ({
+          (guide: TConsolidateGuideItemResponse) => ({
             client_id: client_id,
             guide_number: guide.guide_number,
             pieces: guide.pieces,
@@ -223,7 +256,9 @@ export class ShipmentModel {
       destination: values.destination,
       plates: values.plates,
       seal: values.seal,
-      state: values.state,
+      // Estado es opcional para el usuario; el backend exige ≥1 carácter y su
+      // valor por defecto es "N/A".
+      state: values.state?.trim() || "N/A",
       trailer_number: values.trailer_number,
     };
   }

@@ -2,12 +2,24 @@
 
 import { BaseCrudApiService } from "@/components/service/BaseCrudApiService";
 import { PaginatedResponse } from "@/components/service/IBaseService";
-import { getErrorMessage } from "@/components/utils/errorMessage";
+import { getErrorMessage, toApiError } from "@/components/utils/errorMessage";
 import {
   TShipmentRequest,
   TShipmentResponse,
   TShipmentUpdate,
 } from "../hooks/useShipments";
+
+type TServiceType = TShipmentRequest["service_type"];
+
+// api.d.ts solo aporta tipos (no existen en runtime). El Record obliga a listar
+// exactamente los service_type generados: si el backend agrega uno y se corre
+// `generate:api`, esto deja de compilar hasta agregarlo.
+const SERVICE_TYPE_TAGS_MAP: Record<TServiceType, true> = {
+  trailer_53ft: true,
+  consolidated: true,
+};
+// Tags de la unión discriminada por service_type que FastAPI mete en `loc`.
+const SERVICE_TYPE_TAGS = Object.keys(SERVICE_TYPE_TAGS_MAP) as TServiceType[];
 
 export class ApiShipmentService extends BaseCrudApiService<
   TShipmentResponse,
@@ -20,19 +32,13 @@ export class ApiShipmentService extends BaseCrudApiService<
 
   override async insert(data: TShipmentRequest): Promise<TShipmentResponse> {
     try {
-      console.log(data);
-
       const response = await this.api.post<TShipmentResponse>(
         `/${this.resourcePath}/create`,
         data,
       );
-      console.log(response.data);
-
       return response.data;
     } catch (err) {
-      console.log(err);
-
-      throw new Error(getErrorMessage(err, "No se pudo registrar el embarque"));
+      throw toApiError(err, "No se pudo registrar el embarque", SERVICE_TYPE_TAGS);
     }
   }
 
@@ -45,19 +51,11 @@ export class ApiShipmentService extends BaseCrudApiService<
         `/${this.resourcePath}/`,
         { params: { page, limit } },
       );
-      if (response.status === 200) {
-        return response.data;
-      }
-      return {
-        page: response.data.page,
-        hasNextPage: response.data.hasNextPage,
-        totalRecords: response.data.totalRecords,
-        limit: response.data.limit,
-        data: response.data.data,
-      };
-    } catch (error: any) {
-      console.log(error);
-      throw error.message;
+      return response.data;
+    } catch (err) {
+      throw new Error(
+        getErrorMessage(err, "No se pudieron cargar los embarques"),
+      );
     }
   }
 
@@ -78,9 +76,8 @@ export class ApiShipmentService extends BaseCrudApiService<
         payload,
       );
       return response.data;
-    } catch (error: any) {
-      console.log(error);
-      throw error.message;
+    } catch (err) {
+      throw toApiError(err, "No se pudo actualizar el embarque", SERVICE_TYPE_TAGS);
     }
   }
 
@@ -91,9 +88,8 @@ export class ApiShipmentService extends BaseCrudApiService<
         `/${this.resourcePath}/${id}/delete`,
       );
       return response.data;
-    } catch (error: any) {
-      console.log(error);
-      throw error.message;
+    } catch (err) {
+      throw new Error(getErrorMessage(err, "No se pudo eliminar el embarque"));
     }
   }
 }

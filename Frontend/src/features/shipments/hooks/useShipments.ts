@@ -73,7 +73,9 @@ export function useShipments() {
         currentPage === 1 ? newShipments : [...prev, ...newShipments],
       );
     } catch (err) {
-      setError("Failed to load shipments");
+      setError(
+        err instanceof Error ? err.message : "No se pudieron cargar los embarques",
+      );
     } finally {
       setLoading(false);
     }

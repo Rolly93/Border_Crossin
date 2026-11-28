@@ -104,19 +104,9 @@ class EmployeeService:
                 )
 
     def list_operators(self) -> list[OperatorOption] | list[OperatorOptionResponse]:
-        drivers: list[OperatorOption] | list[OperatorOptionResponse] = (
-            self._driver_repo.get_drivers_list()
-        )
-
-        if not drivers:
-            raise (
-                HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Not Units Assgined yet!",
-                )
-            )
-
-        return drivers
+        # Sin operadores es un estado válido (lista vacía), no un 404: el
+        # formulario de embarque muestra el aviso.
+        return self._driver_repo.get_drivers_list()
 
     def create_employee(self, data: EmployeeCreateUnion) -> Employee:
         clean_rfc = self.validate_rfc(data.rfc)

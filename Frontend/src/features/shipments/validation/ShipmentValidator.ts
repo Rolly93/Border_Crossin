@@ -1,18 +1,7 @@
 /** @format */
 
+import { getEventSequence } from "../domain/shipmentModel";
 import { TEventCategory, TShipmentEvent } from "../hooks/useShipments";
-import { TShipmentCreateFormValues } from "../types/Shipment";
-const EVENT_SEQUENCE_ORDER: TEventCategory[] = [
-  "pick_up",
-  "departure",
-  "delay",
-  "mex_inspeccion",
-  "clear_mex",
-  "usa_inspeccion",
-  "clear_usa",
-  "safety_yard",
-  "deliver",
-];
 
 const REQUIERE_EVENTS = new Set<TEventCategory>([
   "pick_up",
@@ -21,16 +10,25 @@ const REQUIERE_EVENTS = new Set<TEventCategory>([
   "clear_usa",
   "deliver",
 ]);
+type TValidatorInput = {
+  tracking_number?: string;
+  customer_tracking?: string;
+  truck?: string;
+  origen?: string;
+  destination?: string;
+  type_operation?: string;
+  events?: TShipmentEvent[] | null;
+};
+
 export class ShipmentValidator {
-  private data: Partial<TShipmentCreateFormValues> & {
-    events?: TShipmentEvent[];
-  };
-  constructor(
-    formData: Partial<TShipmentCreateFormValues> & {
-      events?: TShipmentEvent[];
-    },
-  ) {
+  private data: TValidatorInput;
+  constructor(formData: TValidatorInput) {
     this.data = formData;
+  }
+
+  /** Orden cronológico esperado: depende del sentido (north/southbound). */
+  private get eventSequence(): TEventCategory[] {
+    return getEventSequence(this.data.type_operation);
   }
 
   public validateTrackingNumber(): string | null {
@@ -46,7 +44,7 @@ export class ShipmentValidator {
   }
 
   public validateTruck(): string | null {
-    return (this.data.truck?.trim().length || 0) == 0
+    return (this.data.truck?.trim().length || 0) === 0
       ? "Undiad Invalida"
       : null;
   }
@@ -60,12 +58,6 @@ export class ShipmentValidator {
   public validateDestination(): string | null {
     return (this.data.destination?.trim().length || 0) < 3
       ? "Destino Invalido"
-      : null;
-  }
-
-  public validateTrailer(): string | null {
-    return (this.data.tracking_number?.trim().length || 0) < 3
-      ? "Trailer Invalido"
       : null;
   }
 
@@ -97,12 +89,9 @@ export class ShipmentValidator {
           !!event.dateTime && !!event.category,
       )
       .sort((a, b) => {
-        const indexA = EVENT_SEQUENCE_ORDER.indexOf(
-          a.category as TEventCategory,
-        );
-        const indexB = EVENT_SEQUENCE_ORDER.indexOf(
-          b.category as TEventCategory,
-        );
+        const sequence = this.eventSequence;
+        const indexA = sequence.indexOf(a.category as TEventCategory);
+        const indexB = sequence.indexOf(b.category as TEventCategory);
         return indexA - indexB;
       });
 
@@ -146,9 +135,10 @@ export class ShipmentValidator {
       eventMap.set(event.category, dateVal);
     }
 
+    const sequence = this.eventSequence;
     let latestFillIndex = -1;
-    for (let i = EVENT_SEQUENCE_ORDER.length - 1; i >= 0; i--) {
-      const category = EVENT_SEQUENCE_ORDER[i];
+    for (let i = sequence.length - 1; i >= 0; i--) {
+      const category = sequence[i];
       if (eventMap.get(category)) {
         latestFillIndex = i;
         break;
@@ -157,12 +147,12 @@ export class ShipmentValidator {
 
     if (latestFillIndex !== -1) {
       for (let i = 0; i < latestFillIndex; i++) {
-        const category = EVENT_SEQUENCE_ORDER[i];
+        const category = sequence[i];
         const isRequire = REQUIERE_EVENTS.has(category);
         const hasDate = !!eventMap.get(category);
 
         if (isRequire && !hasDate) {
-          const latestCategoryFilled = EVENT_SEQUENCE_ORDER[latestFillIndex];
+          const latestCategoryFilled = sequence[latestFillIndex];
           const realIndex = currentEvents.findIndex(
             (e) => e.category === latestCategoryFilled,
           );

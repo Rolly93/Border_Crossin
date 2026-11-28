@@ -1,10 +1,11 @@
 import { ShipmentForm } from "@/features/shipments/components/ShipmentForm";
+import { TShipmentCreateFormValues } from "@/features/shipments/types/Shipment";
 import { Group, Input, Modal, LoadingOverlay, Box } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { AtomButton } from "../atoms/AtomButton";
 
 interface HeadersProps {
-  onAddShipment: (data: any) => Promise<void>;
+  onAddShipment: (data: TShipmentCreateFormValues) => Promise<void>;
   isCreating: boolean;
   searchValue: string;
   onSearchChange: (value: string) => void;
@@ -13,7 +14,8 @@ interface HeadersProps {
 export default function Headers({ onAddShipment, isCreating, searchValue, onSearchChange }: HeadersProps) {
   const [opened, { open, close }] = useDisclosure(false);
 
-  const handleFormSubmit = async (data: any) => {
+  // Si onAddShipment lanza, el modal queda abierto y ShipmentForm muestra el error.
+  const handleFormSubmit = async (data: TShipmentCreateFormValues) => {
     await onAddShipment(data);
     close();
   };
