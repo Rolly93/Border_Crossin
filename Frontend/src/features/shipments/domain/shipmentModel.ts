@@ -116,7 +116,7 @@ export class ShipmentModel {
           initialShipment.consolidate_guide.map(
             (guide: TConsolidateGuideItemResponse) => ({
               id: guide.id,
-              client_id: resolvedClient,
+              client_id: guide.client_id,
               guide_number: guide.guide_number,
               pieces: guide.pieces,
               weight: guide.weight,
@@ -133,7 +133,7 @@ export class ShipmentModel {
         trailer_number: initialShipment.trailer_number,
         plates: initialShipment.plates,
         seal: initialShipment.seal,
-        state: initialShipment.plates,
+        state: initialShipment.state,
       };
     }
 

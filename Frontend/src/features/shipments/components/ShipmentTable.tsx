@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Table } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ShipmentRow } from "./ShipmentRow";
-import { shipmentService } from "@/features/shipments/service/shipmentService";
 import { useTranslation } from "react-i18next";
 import { EmbarqueModal } from "./EmbarqueModalProps";
 import { TableSkeletonRows } from "@/components/ui/TableSkeletonRows";
@@ -14,7 +13,7 @@ interface ShipmentTableProps {
   shipments: TShipmentResponse[];
   loading: boolean;
   error: string | null;
-  onUpdateShipment: (id: number, data: TShipmentUpdate) => void;
+  onUpdateShipment: (id: number, data: TShipmentUpdate) => Promise<unknown>;
   onLastElement?: (node: HTMLTableRowElement | null) => void;
 }
 
@@ -41,10 +40,7 @@ export default function ShipmentTable({
     try {
       setIsSaving(true);
 
-      await shipmentService.update(updatedValues.id, updatedValues);
-
-      onUpdateShipment(updatedValues.id, updatedValues);
-
+      await onUpdateShipment(updatedValues.id, updatedValues);
       close();
     } catch (err) {
     } finally {

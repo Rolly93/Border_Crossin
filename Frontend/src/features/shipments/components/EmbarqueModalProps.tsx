@@ -3,10 +3,7 @@
 import { Modal, LoadingOverlay, Box } from "@mantine/core";
 import ShipmentUpdateForm from "./ShipmentUpdateForm";
 import { useTranslation } from "react-i18next";
-import {
-  TShipmentResponse,
-  TShipmentUpdate,
-} from "../hooks/useShipments";
+import { TShipmentResponse, TShipmentUpdate } from "../hooks/useShipments";
 
 interface EmbarqueModalProps {
   opened: boolean;

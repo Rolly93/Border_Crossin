@@ -15,15 +15,15 @@ const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; //http
 type JsonBody = Record<string, unknown>;
 
 // Mock data
-interface MockClient extends TClientResponse { }
+interface MockClient extends TClientResponse {}
 
-interface MockShipment extends TShipmentBase { }
+interface MockShipment extends TShipmentBase {}
 
 interface MockSftpConfig extends ISftpConfiguration {
   is_active: boolean;
 }
 
-interface MockSftpSend extends ISftpFileStatus { }
+interface MockSftpSend extends ISftpFileStatus {}
 
 interface MockUnit {
   id: number;
@@ -74,28 +74,28 @@ const mockShipments: MockShipment[] = [
     tracking_number: "TRK001",
     customer_tracking: "92B1234567",
     type_operation: "importacion",
-    vehicle_type: "trailer",
+    service_type: "trailer",
     cliente: "1",
     origen: "Shanghai",
     destination: "Los Angeles",
     truck: "TRUCK-001",
     trailer: "TRL-001",
     events: [],
-    status: 'in-transit'
+    status: "in-transit",
   },
   {
     id: 2,
     tracking_number: "TRK002",
     customer_tracking: "CUST002",
     type_operation: "exportacion",
-    vehicle_type: "unit truck",
+    service_type: "unit truck",
     cliente: "2",
     origen: "Los Angeles",
     destination: "Shanghai",
     truck: "TRUCK-002",
     trailer: "TRL-002",
     events: [],
-    status: 'in-transit'
+    status: "in-transit",
   },
 ];
 
@@ -174,7 +174,7 @@ const mockEmployees: MockEmployee[] = [
     dateOfBirth: "10/15/1993",
     hireDate: "10/15/2010",
     employeeType: "csr",
-    stillEmployee: true
+    stillEmployee: true,
   },
 
   {
@@ -190,7 +190,7 @@ const mockEmployees: MockEmployee[] = [
     hireDate: "10/15/2005",
     dateOfBirth: "11/20/1998",
     employeeType: "csr",
-    stillEmployee: true
+    stillEmployee: true,
   },
 
   {
@@ -205,7 +205,7 @@ const mockEmployees: MockEmployee[] = [
     licenseNumber: "LIC-12345",
     licenseExpiration: "2030-01-01",
     gafetId: "ANAMGETR2025062500000001",
-    stillEmployee: true
+    stillEmployee: true,
   },
 
   {
@@ -220,7 +220,7 @@ const mockEmployees: MockEmployee[] = [
     licenseNumber: "LIC-12345",
     licenseExpiration: "2030-01-01",
     gafetId: "ANAMGETR2025062500000001",
-    stillEmployee: true
+    stillEmployee: true,
   },
 ];
 
@@ -438,7 +438,7 @@ export const handlers = [
         customer_tracking: s.customer_tracking,
         cliente: thisclient ? thisclient.name : s.cliente,
         truck: s.truck,
-        vehicle_type: s.vehicle_type,
+        service_type: s.service_type,
         trailer: s.trailer,
         origen: s.origen,
         destination: s.destination,
@@ -469,7 +469,7 @@ export const handlers = [
       id: mockShipments.length + 1,
       tracking_number: (body.tracking_number ?? "") as string,
       customer_tracking: (body.customer_tracking ?? "") as string,
-      vehicle_type: "trailer",
+      service_type: "trailer",
       type_operation: (body.type_operation ?? "") as string,
       cliente: (body.cliente ?? "") as string,
       origen: (body.origen ?? "") as string,
@@ -477,7 +477,7 @@ export const handlers = [
       truck: (body.truck ?? "") as string,
       trailer: (body.trailer ?? "") as string,
       events: [],
-      status: "in-transit"
+      status: "in-transit",
     };
     mockShipments.push(newShipment);
     return HttpResponse.json(newShipment);

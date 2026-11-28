@@ -80,6 +80,7 @@ class ShipmentService:
                 tracking_number=s.tracking_number,
                 assignation=s.assigned_day,
                 customer_tracking=s.customer_tracking,
+                type_operation=s.type_operation,
                 service_type=ServiceType.CONSOLIDATED,
                 cliente=s.client.name,
                 origen=s.origen,
@@ -108,6 +109,7 @@ class ShipmentService:
                 seal=s.trailer.seal,
                 tracking_number=s.tracking_number,
                 customer_tracking=s.customer_tracking,
+                type_operation=s.type_operation,
                 cliente=s.client.name,
                 origen=s.origen,
                 destination=s.destination,
@@ -124,18 +126,7 @@ class ShipmentService:
     def _build_service_response(
         self, shipment: ShipmentAssign
     ) -> TrailerResponse | ConsolidateResponse:
-        events_sources = shipment.events
-
-        if shipment.service_type == ServiceType.TRAILER:
-            return TrailerResponse.model_validate(shipment).model_copy(
-                update={"events": events_sources}
-            )
-
-        if shipment.service_type == ServiceType.CONSOLIDATED:
-            return ConsolidateResponse.model_validate(shipment).model_copy(
-                update={"events": events_sources}
-            )
-        raise ValueError(f"Unsppported service type: {shipment.service_type}")
+        return self._to_response(shipment)
 
     def create_shipment(
         self, data: ServiceTypeUnionRequest, user_id: int

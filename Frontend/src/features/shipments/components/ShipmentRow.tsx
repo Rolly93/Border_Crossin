@@ -3,11 +3,7 @@
 import { Table } from "@mantine/core";
 import { ShipmentModel } from "../domain/shipmentModel";
 import { forwardRef } from "react";
-import {
-  TConsolidateGuideItemRequest,
-  TShipmentResponse,
-} from "../hooks/useShipments";
-import { useClientOptions } from "@/features/clients/hooks/useClientOptions";
+import { TShipmentResponse } from "../hooks/useShipments";
 
 interface ShipmentRowProps {
   shipment: TShipmentResponse;
@@ -17,13 +13,11 @@ interface ShipmentRowProps {
 interface IShipmentData {
   costumer_tracking: string;
   tracking_Trailer: string;
-  trailer: string | null;
-  service_type: "trailer_53ft" | "consolidated";
-  consolidate_guide: TConsolidateGuideItemRequest[];
+  trailerOrGuide: string;
   truck: string;
   client: string;
   type_operation: "northbound" | "southbound";
-  assignation: string | null;
+  assignation: string;
   origen: string;
   destination: string;
   pickup: string;
@@ -39,27 +33,20 @@ interface IShipmentData {
 }
 
 const displayDataShipment = (model: ShipmentModel): IShipmentData => {
-  const {options , loading} = useClientOptions()
   const { data } = model;
-  const isConsolidated = data.service_type === "consolidated";
-const client =
-  options.find((c) => c.id === data.cliente)?.name || "Cliente no encontrado";
+  const trailerOrGuide =
+    data.service_type === "consolidated"
+      ? (data.consolidate_guide?.[0]?.guide_number ?? "--")
+      : data.trailer_number || "--";
+
   return {
     tracking_Trailer: data.tracking_number,
     costumer_tracking: data.customer_tracking,
-    assignation: null, //data.created
-    trailer: !isConsolidated ? data.trailer_number : null,
-    service_type: data.service_type,
-    consolidate_guide: isConsolidated
-      ? data.consolidate_guide.map((guide) => ({
-          client_id: Number(data.cliente),
-          guide_number: guide.guide_number,
-          pieces: guide.pieces,
-          weight: guide.weight,
-        }))
-      : [],
+    assignation: data.assignation || "--",
+    trailerOrGuide,
     truck: data.truck,
-    client: client,
+    // El backend ya envía el nombre del cliente como texto.
+    client: data.cliente || "--",
     type_operation: data.type_operation,
     origen: data.origen,
     destination: data.destination,
@@ -70,7 +57,7 @@ const client =
     mex_seal: model.getNotes("mex_inspeccion"),
     usa_inspection: model.getEventDate("usa_inspeccion"),
     usa_seal: model.getNotes("usa_inspeccion"),
-    clear_usa: model.getNotes("clear_usa"),
+    clear_usa: model.getEventDate("clear_usa"),
     deliver: model.getEventDate("deliver"),
     deliver_notes: model.getNotes("deliver"),
   };
@@ -78,9 +65,7 @@ const client =
 
 export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
   ({ shipment: rawShipment, onRowDoubleClick }, ref) => {
-    const shipmentModel = new ShipmentModel(rawShipment);
-    const row = displayDataShipment(shipmentModel);
-    const isConsolidated = row.service_type == 'consolidated'
+    const row = displayDataShipment(new ShipmentModel(rawShipment));
 
     return (
       <Table.Tr
@@ -89,26 +74,22 @@ export const ShipmentRow = forwardRef<HTMLTableRowElement, ShipmentRowProps>(
         style={{ cursor: "pointer" }}>
         <Table.Td>{row.tracking_Trailer}</Table.Td>
         <Table.Td>{row.costumer_tracking}</Table.Td>
-        <Table.Td>{row.truck}</Table.Td>
+        <Table.Td>{row.trailerOrGuide}</Table.Td>
         <Table.Td>{row.client}</Table.Td>
-        <Table.Td>{!isConsolidated ? row.trailer : row.consolidate_guide[0].guide_number }</Table.Td>
+        <Table.Td>{row.truck}</Table.Td>
         <Table.Td>{row.assignation}</Table.Td>
         <Table.Td>{row.type_operation}</Table.Td>
         <Table.Td>{row.origen}</Table.Td>
         <Table.Td>{row.destination}</Table.Td>
         <Table.Td c="dimmed">{row.pickup}</Table.Td>
         <Table.Td c="dimmed">{row.departure}</Table.Td>
-        <Table.Td c="dimmed">{row.mex_inspection}</Table.Td>
-
-        <Table.Td c="dimmed">{row.mex_seal}</Table.Td>
         <Table.Td c="dimmed">{row.clear_mex}</Table.Td>
-
+        <Table.Td c="dimmed">{row.mex_inspection}</Table.Td>
+        <Table.Td c="dimmed">{row.mex_seal}</Table.Td>
+        <Table.Td c="dimmed">{row.clear_usa}</Table.Td>
         <Table.Td c="dimmed">{row.usa_inspection}</Table.Td>
         <Table.Td c="dimmed">{row.usa_seal}</Table.Td>
-
-        <Table.Td c="dimmed">{row.clear_mex}</Table.Td>
         <Table.Td c="dimmed">{row.deliver}</Table.Td>
-
         <Table.Td c="dimmed">{row.deliver_notes}</Table.Td>
       </Table.Tr>
     );

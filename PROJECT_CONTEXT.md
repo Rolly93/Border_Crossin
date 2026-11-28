@@ -46,8 +46,10 @@ A “shipment” / `ShipmentAssign` is the central object. The app tracks refere
 - **Recipients:** `ClientEmailRecipient.is_active`; `EmailConfigurationRequest.email:list[EmailStr]`; `EmailRepository.sync_client_emails`; `ClientServiceType.EMAIL=emailService`. 
 - **Gating:** `_validate_emails`; `send_assignation`/`send_status` return if no validated emails or `_lambda_client is None`. `get_lambda_client` needs `ENDPOINT_AWS` + `APIKEY_AWS`; else no-op. `send_notice` exceptions are logged, not re-raised inside `try`. 
 - **Templates:** `notify_status` `_type_status`: `northbound→template_export.html`, else `template_Import.html`; assignment `template_assignation.html`. 
-- **Current worktree state:** synced to commit `10ceb24`; `backend/service/__init__.py` exports `EmailNotificationDispatcher`; `ShipmentDispatchService.__init__` lazy-imports it; `aws_client` required; SFTP send formatting applied. 
-- **Source-level vs runtime:** implemented, but not proven end-to-end. `ClienteService.get_client_service` now uses valid `ClientServiceType.SFTP`/`.EMAIL` and `ClienteRepository.get_active_emails`. Remaining blockers: `EmailNotificationDispatcher` template path `backend/service/templates`, actual `backend/templates`, code `.html`, files `.html.jinja`; `_preparate_template` before `try`; `_validate_emails` validates `emails`, not `cleaned`; `update_shipment` `service` handling. `NotificationManager` SSE ≠ email. 
+- **Wiring:** `backend/service/__init__.py` exports `EmailNotificationDispatcher`; `ShipmentDispatchService.__init__` lazy-imports it; `aws_client` required; SFTP send formatting applied. 
+- **Source-level vs runtime:** implemented, but not proven end-to-end. `ClienteService.get_client_service` now uses valid `ClientServiceType.SFTP`/`.EMAIL` and `ClienteRepository.get_active_emails`. Remaining blockers: `EmailNotificationDispatcher` template path `backend/service/templates`, actual `backend/templates`, code `.html`, files `.html.jinja`; `_preparate_template` before `try`; `_validate_emails` validates `emails`, not `cleaned`; assignment subject typo `f{payload.tracking_number}`. `NotificationManager` SSE ≠ email. 
+- **Status emails never send:** `update_shipment` calls `get_client_service(..., ClientServiceType.SFTP)` only, so `service.emailService` is always `None`; needs a separate `ClientServiceType.EMAIL` lookup. 
+- **Lambda contract mismatch:** `aws/assignation_notifier/handler.py` (boto3 SES, `SES_SENDER_EMAIL`, `LAMBDA_API_TOKEN`) requires header `x-api-token` and body `{tag, gafe, client_email}`, sends plain text. Backend `AssignationLambdaClient` sends `x-api-key` + `{to, subject, html}` → 403/400 as written. Align one side before any email test. 
 
 ## SFTP / XML correction
 
@@ -71,6 +73,7 @@ A “shipment” / `ShipmentAssign` is the central object. The app tracks refere
 
 - **Backend `backend/`:** FastAPI; layered `routes` → `service`/`utility` → `repository` → `model`; services orchestrate, repositories own ORM queries/commits/refreshes; Pydantic `schema`; `deps/auth`; `api`; `integrations`; `migrations`. Run from `backend/`. `main.py`. `schema/shipment_shcema.py` misspelling. `backend/.env`. `JWT_SECRET_KEY`, `FERNET_KEY`, legacy `SECRET_KEY`, `ALGORITHM=HS256`. Fernet SFTP passwords. `DATABASE_URL`. `bcrypt` `init_db`. 
 - **Frontend `Frontend/`:** React 19 + TS 6 + Vite 8 + Mantine; feature modules `shipments`, `sftp`, `clients`, `employee`, `unit`, `login`, `notfications`, `system`, `update`; `pages`; `components`; `mocks`; `types/api.d.ts`; i18n; generated API. 
+- **AWS `aws/`:** `assignation_notifier/handler.py` Lambda that receives the backend's email POST and sends via Amazon SES. See Lambda contract mismatch above.
 - **Infra:** Docker Compose `border_crossin`, MySQL, backend, frontend nginx, optional SFTP test, MailHog; SQLite default outside Docker; `.env`; `docker-compose`. No CI in repo. 
 - **Instruction/context files:** `AGENTS.md` operational rules; this `PROJECT_CONTEXT.md` stable project summary. 
 
@@ -87,7 +90,7 @@ Prefer executable/config over prose. Key files:
 
 ## Current repo state / stale notes
 
-- Working copy we operate in: git worktree `.../border_crossin-setup`, branch `setup`, synced to `10ceb24`, plus `M AGENTS.md` + `?? PROJECT_CONTEXT.md`; original repo untouched. `.env`, `node_modules`, `.venv`, `dist` not source. 
+- Branch/commit not pinned here (it goes stale); check `git status` / `git log`. `.env`, `node_modules`, `.venv`, `dist` not source. 
 - Repository ownership: services orchestrate; repositories own SQLAlchemy queries, commits, refreshes. `ClientRuleRepository`, `DriverRepository`, `UnitRepository`, `Sftp_Send_Repository`, `SftpRepository`, `ShipmentRepository`, `ClienteRepository` cover the former service-layer queries. 
 - Existing `AGENTS.md` had stale items: `requirements.txt` merge conflicts; `SECRET_KEY` only for SFTP; `sleep 5`; `sftp_route.py:_user_id()`; incoming SFTP; `SftpSendService` naming; README React 18/TS5/Mantine vs actual React19/TS6; Docker status drift. 
 - `README` says incoming SFTP; source is outbound. `api/upload.py` stale. `package.json` `mantine-vite-template`. No repo-local OpenCode config, CI, Vitest tests, stylelint config, oxfmt config. `npm test` not guaranteed green. 

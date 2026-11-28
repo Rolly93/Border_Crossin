@@ -6,7 +6,7 @@
       "customer_tracking": "Referencia",
       "cliente": "Cliente",
       "truck": "Tractor",
-      "vehicle_type": "Tipo de Vehiculo",
+      "service_type": "Tipo de Vehiculo",
       "trailer": "Trailer",
       "origen": "Origen",
       "destination": "Destino",
@@ -28,7 +28,7 @@
       "customer_tracking": "Referencia del cliente",
       "cliente": "Cliente",
       "truck": "Num. Unidad",
-      "vehicle_type": "Tractor /  Unidad",
+      "service_type": "Tractor /  Unidad",
       "trailer": "Trailer",
       "origen": "Origen",
       "destination": "Destino",
@@ -40,7 +40,7 @@
       "customer_tracking": "No. Embarque",
       "cliente": "Cliente",
       "truck": "Tractor",
-      "vehicle_type": "Tipo de Vehiculo",
+      "service_type": "Tipo de Vehiculo",
       "trailer": "Trailer",
       "origen": "Origen",
       "destination": "Destino",
@@ -83,17 +83,10 @@
     }
   },
   "common": {
-    "buttons": {
-      "newShipment": "Nuevo Embarque"
-    },
+    "buttons": { "newShipment": "Nuevo Embarque" },
     "search": {
-      "labels": {
-        "shipment": "Buscar Embarque"
-      },
-      "placeholders": {
-        "shipment": ".. / Referencia /  trailer"
-      }
+      "labels": { "shipment": "Buscar Embarque" },
+      "placeholders": { "shipment": ".. / Referencia /  trailer" }
     }
-
   }
 }

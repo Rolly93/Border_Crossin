@@ -17,6 +17,10 @@ toUppercase = Annotated[
 toCapitalCase = Annotated[
     str, BeforeValidator(lambda v: v.strip().upper() if isinstance(v, str) else v)
 ]
+# trip_assigned.assigned_day es DATETIME; la API expone solo la fecha.
+AssignationDate = Annotated[
+    date, BeforeValidator(lambda v: v.date() if isinstance(v, datetime) else v)
+]
 
 
 class TypeOperation(StrEnum):
@@ -143,12 +147,12 @@ class ConsolidateResponse(ShipmentResponse):
     service_type: Literal[ServiceType.CONSOLIDATED] = ServiceType.CONSOLIDATED
     consolidate_guide: list[ConsolidateGuideItemResponse] = Field(min_length=1)
     id: int
-    assignation: date
+    assignation: AssignationDate
 
 
 class TrailerResponse(ShipmentResponse):
     id: int
-    assignation: date
+    assignation: AssignationDate
     service_type: Literal[ServiceType.TRAILER] = ServiceType.TRAILER
     trailer_number: str = Field(min_length=2, max_length=50)
     plates: str = Field(min_length=2, max_length=30)

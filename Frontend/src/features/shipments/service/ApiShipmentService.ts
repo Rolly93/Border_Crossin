@@ -8,7 +8,6 @@ import {
   TShipmentResponse,
   TShipmentUpdate,
 } from "../hooks/useShipments";
-import { log } from "node:console";
 
 export class ApiShipmentService extends BaseCrudApiService<
   TShipmentResponse,
@@ -28,7 +27,6 @@ export class ApiShipmentService extends BaseCrudApiService<
         data,
       );
       console.log(response.data);
-
 
       return response.data;
     } catch (err) {
@@ -69,9 +67,15 @@ export class ApiShipmentService extends BaseCrudApiService<
     data: TShipmentUpdate,
   ): Promise<TShipmentResponse> {
     try {
+      // El formulario rellena las 9 categorías; las vacías no son eventos y el
+      // backend las rechaza (dateTime es obligatorio).
+      const payload = {
+        ...data,
+        events: (data.events ?? []).filter((e) => Boolean(e.dateTime)),
+      };
       const response = await this.api.put<TShipmentResponse>(
-        `/${this.resourcePath}/${data.id}/update`,
-        data,
+        `/${this.resourcePath}/${id}/update`,
+        payload,
       );
       return response.data;
     } catch (error: any) {

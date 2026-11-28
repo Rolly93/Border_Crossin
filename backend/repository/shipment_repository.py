@@ -13,6 +13,15 @@ from schema.shipment_shcema import (
     ShipmentCreateRequest,
 )
 
+_EDITABLE_FIELDS = {
+    "tracking_number",
+    "customer_tracking",
+    "type_operation",
+    "origen",
+    "destination",
+}
+_TRAILER_FIELDS = {"trailer_number", "plates", "state", "seal"}
+
 
 class ShipmentRepository(BaseRepository[ShipmentAssign]):
     def __init__(self, db: Session):
@@ -96,18 +105,25 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
 
         shipment = self.get_shipment(id)
 
-        column_map = {"cliente": "client_id"}
-
-        shipment_events = shipment_data.model_dump(
-            exclude={"events"}, exclude_unset=True
+        # La respuesta trae cliente/truck como texto para mostrar (nombre, número
+        # de unidad) y consolidate_guide como dicts: no se pueden asignar a las
+        # columnas/relaciones, así que solo se actualizan campos escalares.
+        changes = shipment_data.model_dump(
+            include=_EDITABLE_FIELDS | _TRAILER_FIELDS, exclude_unset=True
         )
-        for field, value in shipment_events.items():
-            column = column_map.get(field, field)
-            if value is not None and hasattr(shipment, column):
-                setattr(shipment, column, value)
+        for field, value in changes.items():
+            target = shipment.trailer if field in _TRAILER_FIELDS else shipment
+            if value is not None and target is not None:
+                setattr(target, field, value)
 
         # Los eventos se AGREGAN al historial (no se reemplazan): sftp_send
         # referencia eventos existentes y el cascade borraría su historial.
+        # El formulario reenvía todos los eventos; solo se agregan los nuevos.
+        existing = {
+            (e.category, e.event_time.replace(tzinfo=None, microsecond=0))
+            for e in shipment.events
+            if e.is_active and e.event_time
+        }
 
         events = (
             shipment_data.events
@@ -118,6 +134,9 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         new_events: list[ShipmentEventModel] = []
         for e in events:
             if e is None:
+                continue
+            key = (e.category.value, e.dateTime.replace(tzinfo=None, microsecond=0))
+            if key in existing:
                 continue
             new_event = ShipmentEventModel(
                 category=e.category.value,
@@ -136,31 +155,25 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
         return shipment, new_events
 
     def get_all_shipments(
-        self, page: int = 1, limit: int = 10, delivered_event_type: str = "DELIVERED"
+        self, page: int = 1, limit: int = 10
     ) -> tuple[list[ShipmentAssign], int]:
+        """Dashboard: embarques sin entregar + los entregados hoy."""
 
         today = datetime.combine(datetime.now().date(), time.min)
-        is_completed = exists(
-            select(ShipmentEventModel.id).where(
-                and_(
-                    ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
-                    ShipmentEventModel.is_active.is_(True),
-                    ShipmentEventModel.event_type == delivered_event_type,
-                )
-            )
+        delivered = and_(
+            ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
+            ShipmentEventModel.is_active.is_(True),
+            ShipmentEventModel.category == EventCategory.DELIVERY.value,
         )
-        completed_today = exists(
+        is_delivered = exists(select(ShipmentEventModel.id).where(delivered))
+        delivered_today = exists(
             select(ShipmentEventModel.id).where(
-                and_(
-                    ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
-                    ShipmentEventModel.is_active.is_(True) == delivered_event_type,
-                    ShipmentEventModel.captured_at >= today,
-                )
+                delivered, ShipmentEventModel.event_time >= today
             )
         )
 
         query = self._db.query(ShipmentAssign).filter(
-            ShipmentAssign.is_active.is_(True), or_(is_completed, completed_today)
+            ShipmentAssign.is_active.is_(True), or_(~is_delivered, delivered_today)
         )
 
         total = query.count()
@@ -201,7 +214,7 @@ class ShipmentRepository(BaseRepository[ShipmentAssign]):
                     and_(
                         ShipmentEventModel.trip_assigned_id == ShipmentAssign.id,
                         ShipmentEventModel.is_active.is_(True),
-                        ShipmentEventModel.event_type == delivered_event_type,
+                        ShipmentEventModel.category == delivered_event_type,
                     )
                 )
             )

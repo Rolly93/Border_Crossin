@@ -118,8 +118,8 @@ export default function ShipmentUpdateForm({
               {...form.getInputProps("truck")}
             />
             <EditableTextInput
-              label={t("shipment.labels.vehicle_type")}
-              {...form.getInputProps("vehicle_type")}
+              label={t("shipment.labels.service_type")}
+              {...form.getInputProps("service_type")}
             />
             <EditableTextInput
               label={t("shipment.labels.origen")}

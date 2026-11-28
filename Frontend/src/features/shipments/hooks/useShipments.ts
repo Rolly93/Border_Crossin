@@ -39,7 +39,7 @@ export type TShipmentFormVaules = TShipmentResponse & {
   guide_number?: string;
   pices?: number;
   weight?: number;
-  vehicle_type?: string;
+  service_type?: string;
 };
 const PAGE_SIZE = 10;
 
@@ -91,12 +91,14 @@ export function useShipments() {
     }
   }, [loading, hasMore, page, fetchShipments]);
 
+  // PUT /shipment/{id}/update responde {status, data:{id,...}}, no el embarque,
+  // así que la fila se actualiza con los valores enviados.
   const updateShipment = async (id: number, shipmentData: TShipmentUpdate) => {
-    const updated = await shipmentService.update(id, shipmentData);
+    await shipmentService.update(id, shipmentData);
     setShipments((prev) =>
-      prev.map((item) => (item.id === updated.id ? updated : item)),
+      prev.map((item) => (item.id === id ? shipmentData : item)),
     );
-    return updated;
+    return shipmentData;
   };
 
   const deleteShipment = async (id: number) => {
@@ -106,12 +108,12 @@ export function useShipments() {
     return result;
   };
 
-  const addShipment = async (
-    newShipment: TShipmentRequest,
-  ): Promise<TShipmentResponse> => {
-    const createdShipment = await shipmentService.insert(newShipment);
-    setShipments((prev) => [createdShipment, ...prev]);
-    return createdShipment;
+  // POST /shipment/create no devuelve el embarque (cuerpo null): se recarga
+  // la primera página en lugar de insertar la respuesta en la lista.
+  const addShipment = async (newShipment: TShipmentRequest): Promise<void> => {
+    await shipmentService.insert(newShipment);
+    setPage(1);
+    await fetchShipments(1);
   };
 
   return {
