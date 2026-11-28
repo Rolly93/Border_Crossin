@@ -26,6 +26,24 @@ export function decodeJwtPayload(token: string | null): JwtClaims | null {
 }
 
 /**
+ * Milisegundos hasta que expira el token (claim `exp`), o null si no trae `exp`.
+ * Un valor ≤ 0 significa que ya expiró.
+ */
+export function getTokenMsUntilExpiry(token: string | null): number | null {
+  const exp = decodeJwtPayload(token)?.exp;
+  return typeof exp === 'number' ? exp * 1000 - Date.now() : null;
+}
+
+/** Hay token y no ha expirado. Solo para la interfaz: el backend siempre valida. */
+export function isTokenUsable(token: string | null): boolean {
+  if (!token || token === 'undefined' || token === 'null') {
+    return false;
+  }
+  const msLeft = getTokenMsUntilExpiry(token);
+  return msLeft === null || msLeft > 0;
+}
+
+/**
  * Verifica si el token tiene un 'sub' numérico (user ID) vs RFC (string).
  * El backend requiere sub numérico para operaciones de admin (SFTP config, etc.)
  */

@@ -5,7 +5,10 @@ import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { TEmployeeCreateUnionResponse } from "@/features/employee/hook/useEmployee";
 
 import { ISftpFileStatus } from "@/features/sftp/types/ISftpSend";
-import { TShipmentBase } from "@/features/shipments/hooks/useShipments";
+import {
+  TShipmentRequest,
+  TShipmentResponse,
+} from "@/features/shipments/hooks/useShipments";
 import { TUnitStateOptions, TUnitType } from "@/features/unit/hook/useUnits";
 import { http, HttpResponse, delay, PathParams } from "msw";
 
@@ -17,7 +20,8 @@ type JsonBody = Record<string, unknown>;
 // Mock data
 interface MockClient extends TClientResponse {}
 
-interface MockShipment extends TShipmentBase {}
+// Mismo contrato que GET /shipment/ (cliente = nombre, truck = número de unidad).
+type MockShipment = TShipmentResponse;
 
 interface MockSftpConfig extends ISftpConfiguration {
   is_active: boolean;
@@ -73,31 +77,82 @@ const mockShipments: MockShipment[] = [
     id: 1,
     tracking_number: "TRK001",
     customer_tracking: "92B1234567",
-    type_operation: "importacion",
-    service_type: "trailer",
-    cliente: "1",
-    origen: "Shanghai",
-    destination: "Los Angeles",
+    type_operation: "northbound",
+    service_type: "trailer_53ft",
+    cliente: "Expeditors",
+    origen: "Nuevo Laredo",
+    destination: "Laredo TX",
     truck: "TRUCK-001",
-    trailer: "TRL-001",
-    events: [],
-    status: "in-transit",
+    assignation: "2026-01-15",
+    trailer_number: "TRL-001",
+    plates: "ABC-123",
+    state: "TAMPS",
+    seal: "SEAL-001",
+    events: [
+      { category: "pick_up", dateTime: "2026-01-15T08:00:00", notes: null },
+      { category: "departure", dateTime: "2026-01-15T09:30:00", notes: null },
+    ],
   },
   {
     id: 2,
     tracking_number: "TRK002",
-    customer_tracking: "CUST002",
-    type_operation: "exportacion",
-    service_type: "unit truck",
-    cliente: "2",
-    origen: "Los Angeles",
-    destination: "Shanghai",
+    customer_tracking: "12B7654321",
+    type_operation: "southbound",
+    service_type: "consolidated",
+    cliente: "DHL",
+    origen: "Laredo TX",
+    destination: "Monterrey",
     truck: "TRUCK-002",
-    trailer: "TRL-002",
+    assignation: "2026-01-16",
+    consolidate_guide: [
+      { id: 1, client_id: 2, guide_number: "GUIA-001", pieces: 3, weight: 120.5 },
+    ],
     events: [],
-    status: "in-transit",
   },
 ];
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+// POST /shipment/create recibe el ID del cliente y el ID del operador en `truck`.
+const toMockShipment = (id: number, body: TShipmentRequest): MockShipment => {
+  const clientName =
+    mockClients.find((c) => c.id === Number(body.cliente))?.name ?? String(body.cliente);
+  const unitNumber =
+    mockUnits.find((u) => u.driver_id === Number(body.truck))?.unitNumber ?? body.truck;
+  const base = {
+    id,
+    tracking_number: body.tracking_number,
+    customer_tracking: body.customer_tracking,
+    type_operation: body.type_operation,
+    cliente: clientName,
+    origen: body.origen,
+    destination: body.destination,
+    truck: unitNumber,
+    assignation: today(),
+    events: [],
+  };
+  if (body.service_type === "consolidated") {
+    return {
+      ...base,
+      service_type: "consolidated",
+      consolidate_guide: body.consolidate_guide.map((g, index) => ({
+        id: index + 1,
+        client_id: g.client_id,
+        guide_number: g.guide_number,
+        pieces: g.pieces,
+        weight: g.weight,
+      })),
+    };
+  }
+  return {
+    ...base,
+    service_type: "trailer_53ft",
+    trailer_number: body.trailer_number,
+    plates: body.plates,
+    state: body.state,
+    seal: body.seal,
+  };
+};
 
 const mockSftpConfigs: MockSftpConfig[] = [
   {
@@ -145,7 +200,7 @@ const mockUnits: MockUnit[] = [
     tag: "ANAM2022L0001T0000000001",
     is_active: true,
     status: "ACTIVA",
-    typeUnit: "trailer",
+    typeUnit: "trailer_53ft",
   },
 
   {
@@ -156,7 +211,7 @@ const mockUnits: MockUnit[] = [
     tag: "ANAM2022L0001T0000000001",
     is_active: true,
     status: "MANTENIMIENTO",
-    typeUnit: "unit truck",
+    typeUnit: "consolidated",
   },
 ];
 
@@ -424,36 +479,19 @@ export const handlers = [
   }),
 
   // Shipments
-  http.get(`${BASE_URL}/shipment`, async ({ request }) => {
+  http.get(`${BASE_URL}/shipment/`, async ({ request }) => {
     await delay(300);
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const limit = parseInt(url.searchParams.get("limit") || "10", 10);
-
-    const shipment: MockShipment[] = mockShipments.map((s) => {
-      const thisclient = mockClients.find((c) => c.id === s.id);
-      return {
-        id: s.id,
-        tracking_number: s.tracking_number,
-        customer_tracking: s.customer_tracking,
-        cliente: thisclient ? thisclient.name : s.cliente,
-        truck: s.truck,
-        service_type: s.service_type,
-        trailer: s.trailer,
-        origen: s.origen,
-        destination: s.destination,
-        type_operation: s.type_operation,
-        events: s.events,
-        status: s.status,
-      };
-    });
+    const start = (page - 1) * limit;
 
     return HttpResponse.json({
-      data: shipment,
+      data: mockShipments.slice(start, start + limit),
       page,
       limit,
       totalRecords: mockShipments.length,
-      hasNextPage: false,
+      hasNextPage: start + limit < mockShipments.length,
     });
   }),
 
@@ -462,48 +500,52 @@ export const handlers = [
     return HttpResponse.json(mockClients);
   }),
 
+  // Igual que el backend: 201 sin cuerpo; 409 si el número de embarque ya existe.
   http.post(`${BASE_URL}/shipment/create`, async ({ request }) => {
     await delay(500);
-    const body = await getJsonBody(request);
-    const newShipment: MockShipment = {
-      id: mockShipments.length + 1,
-      tracking_number: (body.tracking_number ?? "") as string,
-      customer_tracking: (body.customer_tracking ?? "") as string,
-      service_type: "trailer",
-      type_operation: (body.type_operation ?? "") as string,
-      cliente: (body.cliente ?? "") as string,
-      origen: (body.origen ?? "") as string,
-      destination: (body.destination ?? "") as string,
-      truck: (body.truck ?? "") as string,
-      trailer: (body.trailer ?? "") as string,
-      events: [],
-      status: "in-transit",
-    };
-    mockShipments.push(newShipment);
-    return HttpResponse.json(newShipment);
+    const body = (await getJsonBody(request)) as unknown as TShipmentRequest;
+    if (mockShipments.some((s) => s.tracking_number === body.tracking_number)) {
+      return HttpResponse.json(
+        { detail: "Ese número de embarque ya existe" },
+        { status: 409 },
+      );
+    }
+    const nextId = Math.max(0, ...mockShipments.map((s) => s.id)) + 1;
+    mockShipments.unshift(toMockShipment(nextId, body));
+    return HttpResponse.json(null, { status: 201 });
   }),
 
+  // Igual que el backend: responde {status, data:{id, tracking_number, events_total}}.
   http.put(`${BASE_URL}/shipment/:id/update`, async ({ params, request }) => {
     await delay(500);
-    const body = await getJsonBody(request);
+    const body = (await getJsonBody(request)) as unknown as MockShipment;
     const id = parseInt(getPathId(params), 10);
     const idx = mockShipments.findIndex((s) => s.id === id);
-    if (idx >= 0) {
-      mockShipments[idx] = { ...mockShipments[idx], ...body } as MockShipment;
-      return HttpResponse.json(mockShipments[idx]);
+    if (idx < 0) {
+      return HttpResponse.json({ detail: `Shipment with ${id} not found` }, { status: 404 });
     }
-    return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    const updated = { ...mockShipments[idx], ...body, id } as MockShipment;
+    mockShipments[idx] = updated;
+    return HttpResponse.json({
+      status: "success",
+      data: {
+        id,
+        tracking_number: updated.tracking_number,
+        events_total: updated.events?.length ?? 0,
+      },
+    });
   }),
 
+  // Igual que el backend: borrado lógico, 202 sin cuerpo.
   http.patch(`${BASE_URL}/shipment/:id/delete`, async ({ params }) => {
     await delay(500);
     const id = parseInt(getPathId(params), 10);
     const idx = mockShipments.findIndex((s) => s.id === id);
-    if (idx >= 0) {
-      const deleted = mockShipments.splice(idx, 1)[0];
-      return HttpResponse.json(deleted);
+    if (idx < 0) {
+      return HttpResponse.json({ detail: `Shipment with ${id} not found` }, { status: 404 });
     }
-    return HttpResponse.json({ detail: "Not found" }, { status: 404 });
+    mockShipments.splice(idx, 1);
+    return HttpResponse.json(null, { status: 202 });
   }),
 
   // SFTP

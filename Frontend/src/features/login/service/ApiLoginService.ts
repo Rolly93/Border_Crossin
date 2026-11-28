@@ -1,51 +1,37 @@
+/** @format */
+
 import { BaseApiService } from "@/components/service/BaseApiService";
-import { ILoginService, TSignInPayload } from "../type/ILoginService";
+import { ILoginService } from "../type/ILoginService";
 import { TLoginRequest, TLoginResponse } from "../hook/useLoginForm";
-
-
 
 export class AuthService extends BaseApiService implements ILoginService {
   constructor() {
-    super('user')
+    super("user");
   }
 
   async login(credentials: TLoginRequest): Promise<TLoginResponse> {
     try {
-
       const response = await this.api.post<TLoginResponse>(
         `${this.resourcePath}/login`,
-        credentials
+        credentials,
       );
       return response.data;
-
-
     } catch (error: any) {
       console.log(error);
-      throw error.message
+      throw error.message;
     }
   }
 
   async logout(): Promise<void> {
     try {
-      await this.api.post(`${this.resourcePath}/logout`)
+      await this.api.post(`${this.resourcePath}/logout`);
     } catch (error: any) {
       console.log(error);
-      throw error.message
+      throw error.message;
     } finally {
-      localStorage.removeItem('jwt_token')
-    }
-
-  }
-  async signIn(credentials: TSignInPayload): Promise<void> {
-    try {
-      await this.api.post(`${this.resourcePath}/create`, credentials);
-
-
-    } catch (error: any) {
-      console.log(error);
-      throw error.message
+      localStorage.removeItem("jwt_token");
     }
   }
 }
 
-export const authService = new AuthService()
+export const authService = new AuthService();

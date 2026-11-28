@@ -14,17 +14,23 @@ export type TEmployeeCreateUnionResponse =
   | components["schemas"]["EmployeeUserResponse"]
   | components["schemas"]["EmployeeDriverResponse"];
 
-export type TEmployeeAllRequest = components['schemas']['EmployeeRequest']
-export type TEmployeeUserRequest = components['schemas']['EmployeeUserRequest']
-export type TEmployeeUserResponse = components['schemas']['EmployeeUserResponse']
-export type TEmployeeDriverResponse = components["schemas"]["EmployeeDriverResponse"]
-export type TEmployeeDriverRequest = components["schemas"]["EmployeeDriverRequest"]
+export type TEmployeeAllRequest = components["schemas"]["EmployeeRequest"];
+export type TEmployeeUserRequest = components["schemas"]["EmployeeUserRequest"];
+export type TEmployeeUserResponse =
+  components["schemas"]["EmployeeUserResponse"];
+export type TEmployeeDriverResponse =
+  components["schemas"]["EmployeeDriverResponse"];
+export type TEmployeeDriverRequest =
+  components["schemas"]["EmployeeDriverRequest"];
 export type TEmployeeType = components["schemas"]["CargoTypeEnum"];
-export type TEmployeeBaseRequest = components["schemas"]["EmployeeBaseRequest"];
-export type TEmployeeBaseResponse = components["schemas"]["EmployeeBaseResponse"];
+export type TEmployeeBaseRequest =
+  components["schemas"]["EmployeeBaseResponse"];
+export type TEmployeeBaseResponse =
+  components["schemas"]["EmployeeBaseResponse"];
 
-export type TPaginatedEmployeeResponse = components['schemas']['PaginatedEmployeeResponse']
-export type TOperatorOption = components['schemas']['OperatorOptionResponse']
+export type TPaginatedEmployeeResponse =
+  components["schemas"]["PaginatedEmployeeResponse"];
+export type TOperatorOption = components["schemas"]["OperatorOptionResponse"];
 
 export function useEmployee() {
   const fetchFn = useCallback(
@@ -47,7 +53,6 @@ export function useEmployee() {
     id: number,
     updatedData: TEmployeeCreateUnionResponse,
   ): Promise<TEmployeeCreateUnionResponse> => {
-
     const updated = await employeeService.update(id, updatedData);
     setEmployeeData((prev) => prev.map((c) => (c.id === id ? updated : c)));
     return updated;
@@ -61,7 +66,9 @@ export function useEmployee() {
     return employeeData as TEmployeeCreateUnionResponse;
   };
 
-  const deleteEmployee = async (id: number): Promise<TEmployeeCreateUnionResponse> => {
+  const deleteEmployee = async (
+    id: number,
+  ): Promise<TEmployeeCreateUnionResponse> => {
     const data = await employeeService.delete(id);
     setEmployeeData((prev) => prev.filter((c) => c.id !== data.id));
     return data;
