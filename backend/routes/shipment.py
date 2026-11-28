@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, BackgroundTasks, status
 
 from deps.auth import CurrentUser, get_user_id
 from deps.service import ShipmentSvc
@@ -9,6 +9,7 @@ from schema.shipment_shcema import (
     ShipmentUpdateResponse,
     UpdateShipment,
 )
+from service.sftp_dispatcher import process_sends
 
 router = APIRouter(
     prefix="/shipment",
@@ -44,8 +45,14 @@ async def update_trip(
     shipment_data: ServiceTypeUnionRequestUpdate,
     current_user: CurrentUser,
     service: ShipmentSvc,
+    background: BackgroundTasks,
 ) -> ShipmentUpdateResponse:
-    updated = service.update_shipment(id, shipment_data, int(current_user.sub))
+    updated, pending_send_ids = service.update_shipment(
+        id, shipment_data, int(current_user.sub)
+    )
+    if pending_send_ids:
+        # Los XML se suben después de responder (4 intentos con espera).
+        background.add_task(process_sends, pending_send_ids)
 
     return ShipmentUpdateResponse(
         status="success",

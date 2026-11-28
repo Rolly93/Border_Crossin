@@ -12,7 +12,15 @@ export interface ISftpSend {
   client_id: number;
   reference: string;
   shipment_event_id: number;
+  last_attempt_at?: string | null;
 }
+
+export interface ISftpTestResult {
+  ok: boolean;
+  message: string;
+  fingerprint: string | null;
+}
+
 export interface ISftpFileStatus {
   filename: string;
   reference: string

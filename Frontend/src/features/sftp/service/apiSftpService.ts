@@ -6,6 +6,8 @@ import {
   ISftpSend,
   SftpSendFilters,
 } from "@/features/clients/types/Cliente";
+import { ISftpTestResult } from "../types/ISftpSend";
+import { getErrorMessage } from "@/components/utils/errorMessage";
 
 export class ApiSftpService extends BaseCrudApiService<
   ISftpConfiguration,
@@ -62,6 +64,18 @@ export class ApiSftpService extends BaseCrudApiService<
       return response.data;
     } catch (error: any) {
       throw error.message;
+    }
+  }
+
+  // Backend: POST /sftp/test/{id}. La primera prueba exitosa guarda la llave del servidor.
+  async testConnection(id: number): Promise<ISftpTestResult> {
+    try {
+      const response = await this.api.post<ISftpTestResult>(
+        `/${this.resourcePath}/test/${id}`,
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(getErrorMessage(error, "No se pudo probar la conexión"));
     }
   }
 

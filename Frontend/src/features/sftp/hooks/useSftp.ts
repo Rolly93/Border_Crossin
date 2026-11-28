@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { ISftpConfiguration } from "@/features/clients/types/Cliente";
 import { sftpService } from "../service/sftpService";
+import { ISftpTestResult } from "../types/ISftpSend";
 
 
 export function useSftp() {
@@ -53,12 +54,22 @@ export function useSftp() {
     setSftpConfig(null)
   }
 
+  // Tras una prueba exitosa se recarga para mostrar la huella guardada.
+  const testSftpConfig = async (config: ISftpConfiguration): Promise<ISftpTestResult> => {
+    const result = await sftpService.testConnection(config.id!)
+    if (result.ok) {
+      setSftpConfig({ ...config, host_key_fingerprint: result.fingerprint })
+    }
+    return result
+  }
+
   return {
     sftpConfig,
     getSftpConfig,
     updateSftpConfig,
     createSftpConfig,
     deleteSftpConfig,
+    testSftpConfig,
     loading,
     error,
   };

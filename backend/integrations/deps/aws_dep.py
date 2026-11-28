@@ -7,8 +7,6 @@ from fastapi import Depends
 from config import Env
 from integrations.aws_lambda_client import AssignationLambdaClient
 
-config = Env()
-
 logger = logging.getLogger(__name__)
 config = Env()
 

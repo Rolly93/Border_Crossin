@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from repository.system_config_repository import SystemConfigRepository
+from utility.app_error_service import AppErrorService
 from utility.cliente_service import ClienteService
 from utility.employee_service import EmployeeService
 from utility.reference_rule_service import ReferenceRuleService
@@ -60,3 +61,4 @@ SystemConfigService = Annotated[
 ReferenceRuleSvc = Annotated[
     ReferenceRuleService, Depends(get_service(ReferenceRuleService))
 ]
+AppErrorSvc = Annotated[AppErrorService, Depends(get_service(AppErrorService))]

@@ -1,6 +1,9 @@
 /** @format */
 
 import {
+  Alert,
+  Code,
+  Divider,
   Drawer,
   Group,
   LoadingOverlay,
@@ -8,6 +11,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { ISftpTestResult } from "@/features/sftp/types/ISftpSend";
 import { useForm } from "@mantine/form";
 import { AtomTextInput } from "../atoms/AtomTextInput";
 import { useSftp } from "@/features/sftp/hooks/useSftp";
@@ -63,15 +67,41 @@ export default function SftModal({
     updateSftpConfig,
     createSftpConfig,
     deleteSftpConfig,
+    testSftpConfig,
   } = useSftp();
   const [localError, setLocalError] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<ISftpTestResult | null>(null);
 
   useEffect(() => {
     if (opened && clientId !== undefined) {
       setLocalError(null);
+      setTestResult(null);
       getSftpConfig(clientId);
     }
   }, [opened, clientId, getSftpConfig]);
+
+  const isInactive = sftpConfig?.is_active === false;
+  const canTest = isAdmin && Boolean(sftpConfig?.id) && !isInactive;
+
+  const handleTest = async () => {
+    if (!sftpConfig?.id) {
+      return;
+    }
+    setTesting(true);
+    setTestResult(null);
+    try {
+      setTestResult(await testSftpConfig(sftpConfig));
+    } catch (err) {
+      setTestResult({
+        ok: false,
+        message: getErrorMessage(err, "No se pudo probar la conexión"),
+        fingerprint: null,
+      });
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const handelDelete = async () => {
     if (!sftpConfig?.id) {
@@ -100,10 +130,17 @@ export default function SftModal({
       remote_folder: values.remote_folder.trim(),
     };
     try {
-      if (sftpConfig?.id) {
-        await updateSftpConfig(payload);
-      } else {
-        await createSftpConfig(payload);
+      const saved = sftpConfig?.id
+        ? await updateSftpConfig(payload)
+        : await createSftpConfig(payload);
+      if (!saved.host_key_fingerprint) {
+        // Sin verificar no se envía nada: se deja abierto para probar la conexión.
+        setTestResult({
+          ok: true,
+          message: "Guardado. Ahora usa 'Probar conexión' para habilitar los envíos.",
+          fingerprint: null,
+        });
+        return;
       }
       onClose();
     } catch (err: any) {
@@ -125,14 +162,44 @@ export default function SftModal({
         </div>
       )}
 
+      {!loading && isInactive && (
+        <Alert color="yellow" mb="md" title="Configuración desactivada">
+          Se conservan los datos anteriores. Guardar la reactivará; deja la
+          contraseña vacía para conservar la actual.
+        </Alert>
+      )}
+
       {!loading && (
         <SftpForm
-          key={`${clientId}-${sftpConfig?.id || "empty"}`}
+          key={`${clientId}-${sftpConfig?.id || "empty"}-${sftpConfig?.is_active}`}
           initialData={sftpConfig || DEFAULT_SFTP_CONFIG}
           onSubmit={handelSubmit}
-          onDelete={handelDelete}
+          onDelete={isInactive ? undefined : handelDelete}
           canEdit={isAdmin}
         />
+      )}
+
+      {!loading && canTest && (
+        <Stack gap="xs" mt="xl">
+          <Divider label="Verificación del servidor" labelPosition="left" />
+          <Text size="sm" c="dimmed">
+            {sftpConfig?.host_key_fingerprint ? (
+              <>
+                Llave del servidor verificada: <Code>{sftpConfig.host_key_fingerprint}</Code>
+              </>
+            ) : (
+              "Aún no se ha probado la conexión. Los envíos no saldrán hasta que se pruebe con éxito."
+            )}
+          </Text>
+          <Group>
+            <AtomButton variant="light" onClick={handleTest} loading={testing}>
+              Probar conexión
+            </AtomButton>
+          </Group>
+          {testResult && (
+            <Alert color={testResult.ok ? "green" : "red"}>{testResult.message}</Alert>
+          )}
+        </Stack>
       )}
     </Drawer>
   );

@@ -20,13 +20,11 @@ from schema.email_schema import (
     PayloadStatusTrailer,
     UnifyNotification,
 )
-from schema.sftp_schema import SftpConfigurationRequest
 from schema.shipment_shcema import (
     ConsolidateResponse,
     TrailerResponse,
     TypeOperation,
 )
-from service.sftp_sender import send_batch
 
 logger = logging.getLogger(__name__)
 
@@ -104,23 +102,24 @@ class ShipmentDispatchService:
     def dispatch_events(
         self,
         events: list[ShipmentEventModel],
-        sftp_config: SftpConfigurationRequest,
+        config_id: int,
+        unavailable_reason: str | None = None,
     ) -> list[SftpSend]:
+        """Registra un envío pendiente por evento. El envío real lo hace
+        `service.sftp_dispatcher.process_sends` en segundo plano.
 
+        Con `unavailable_reason` (p. ej. la configuración no se puede descifrar) los
+        envíos quedan fallidos de una vez, visibles para reenvío manual.
+        """
         sends = self._sftp_repo.create(
-            event=events, filename="", status="pending", sftp_config=sftp_config
+            event=events, filename="", status="pending", config_id=config_id
         )
-
         if not sends:
             return sends
 
-        if not self._scac:
-            # Queda visible y reenviable manualmente una vez configurado el SCAC.
-            self._sftp_repo.mark_failed_bulk(
-                sends, "Sin SCAC configurado en el sistema"
-            )
-            logger.error("Sin SCAC: %s envíos marcados como failed", len(sends))
-            return sends
-
-        send_batch(self._db, sftp_config, sends, self._scac)
+        reason = unavailable_reason or (None if self._scac else "Sin SCAC configurado en el sistema")
+        if reason:
+            # Queda visible y reenviable manualmente una vez corregido.
+            self._sftp_repo.mark_failed_bulk(sends, reason)
+            logger.error("%s: %s envíos marcados como failed", reason, len(sends))
         return sends

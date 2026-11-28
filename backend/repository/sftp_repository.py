@@ -1,79 +1,46 @@
-from typing import Any
-
-from fastapi import HTTPException, status
-from pydantic import BaseModel
+from cryptography.fernet import InvalidToken
 from sqlalchemy.orm import Session
 
-from model.db_model import SftpSend, SftpService
+from exeption.sftp_exception import SftpConfigUnreadable
+from model.db_model import SftpService
 from repository.base_repository import BaseRepository
-from repository.sftp_send_repository import Sftp_Send_Repository
-from schema import SftpConfigurationRequest, SftpConfiRequst
-from schema.sftp_schema import SftpConfigIn
-from utility.encryption import decrypt_password, encrypt_password
+from schema.sftp_schema import SftpConfigIn, SftpConfigurationRequest
+from utility.encryption import decrypt_value, encrypt_value
 
 
 class SftpRepository(BaseRepository[SftpService]):
+    """Único lugar que cifra/descifra host, usuario y contraseña SFTP."""
+
     def __init__(self, db: Session):
         super().__init__(db, SftpService)
-        self._db = db
-        self._sftp_files_repo = Sftp_Send_Repository(self._db)
+
+    # ------------------------------------------------------------------
+    # Lectura
+    # ------------------------------------------------------------------
+
+    def to_connection(self, row: SftpService) -> SftpConfigurationRequest:
+        """Datos de conexión descifrados (solo para usar en memoria)."""
+        try:
+            return SftpConfigurationRequest(
+                id=row.id,
+                client_id=row.client_id,
+                host=decrypt_value(row.host),
+                username=decrypt_value(row.username),
+                password=decrypt_value(row.encrypted_password),
+                port=row.port,
+                root_folder=row.root_folder,
+                remote_folder=row.remote_folder,
+                host_key=row.host_key,
+            )
+        except (InvalidToken, ValueError) as err:
+            raise SftpConfigUnreadable(row.id) from err
 
     def get_sftp_data(self, client_id: int) -> SftpConfigurationRequest | None:
-        raw_sftp_config = (
-            self._db.query(SftpService)
-            .filter(SftpService.client_id == client_id, SftpService.is_active.is_(True))
-            .first()
-        )
-        if not raw_sftp_config:
-            return None
-        return SftpConfigurationRequest(
-            id=raw_sftp_config.id,
-            client_id=raw_sftp_config.client_id,
-            host=raw_sftp_config.host,
-            username=raw_sftp_config.username,
-            port=raw_sftp_config.port,
-            root_folder=raw_sftp_config.root_folder,
-            remote_folder=raw_sftp_config.remote_folder,
-            encrypted_password=decrypt_password(raw_sftp_config.encrypted_password),
-        )
-
-    def update(self, id_val: int, obj_in: BaseModel | dict[str, Any]) -> SftpService:
-        db_obj = super().update(id_val, obj_in)
-
-        if not db_obj:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Connection not Found"
-            )
-        return db_obj
+        row = self.get_active_config(client_id)
+        return self.to_connection(row) if row else None
 
     def get_all_sftp_data(self) -> list[SftpService]:
-        sftp_data: list[SftpService] = (
-            self._db.query(SftpService).filter(SftpService.is_active.is_(True)).all()
-        )
-        return sftp_data
-
-    def insert_sftp_service(self, sftp_data: SftpConfiRequst) -> SftpService:
-        encrypt_paswd = encrypt_password(sftp_data.encrypted_password)
-        sftp_data.encrypted_password = encrypt_paswd
-        data_dict = sftp_data.model_dump(exclude_unset=True)
-        new_seftp_service = SftpService(**data_dict)
-        return self.save(new_seftp_service)
-
-    def list_sends(
-        self,
-        client_id: int | None = None,
-        reference: str | None = None,
-        status: str | None = None,
-    ) -> list[SftpSend]:
-
-        return self._sftp_files_repo.sftp_get_list_files(client_id,reference,status   ,         )
-
-
-    def get_sends_by_ids(self, send_ids: list[int]) -> list[SftpSend]:
-        return self._db.query(SftpSend).filter(SftpSend.id.in_(send_ids)).all()
-
-    def reset_retries(self, sends: list[SftpSend]) -> list[SftpSend]:
-        return self._sftp_files_repo.reset_retries(sends)
+        return self._db.query(SftpService).filter(SftpService.is_active.is_(True)).all()
 
     def get_active_config(self, client_id: int) -> SftpService | None:
         return (
@@ -82,18 +49,31 @@ class SftpRepository(BaseRepository[SftpService]):
             .first()
         )
 
+    def get_latest_config(self, client_id: int) -> SftpService | None:
+        """La activa si existe; si no, la última desactivada (para reutilizarla)."""
+        return (
+            self._db.query(SftpService)
+            .filter(SftpService.client_id == client_id)
+            .order_by(SftpService.is_active.desc(), SftpService.id.desc())
+            .first()
+        )
+
     def get_config(self, config_id: int) -> SftpService | None:
         return self._db.query(SftpService).filter(SftpService.id == config_id).first()
+
+    # ------------------------------------------------------------------
+    # Escritura
+    # ------------------------------------------------------------------
 
     def create_config(
         self, data: SftpConfigIn, password: str, configure_by_id: int
     ) -> SftpService:
         row = SftpService(
             client_id=data.idClient,
-            host=data.host,
+            host=encrypt_value(data.host),
             port=data.port,
-            username=data.username,
-            encrypted_password=encrypt_password(password),
+            username=encrypt_value(data.username),
+            encrypted_password=encrypt_value(password),
             root_folder=data.root_folder,
             remote_folder=data.remote_folder,
             configure_by_id=configure_by_id,
@@ -102,21 +82,36 @@ class SftpRepository(BaseRepository[SftpService]):
         return self.save(row)
 
     def update_config(
-        self, row: SftpService, data: SftpConfigIn, password: str | None
+        self,
+        row: SftpService,
+        data: SftpConfigIn,
+        password: str | None,
+        current_host: str,
+        reactivate: bool = False,
     ) -> SftpService:
-        row.host = data.host
+        """Actualiza (y opcionalmente reactiva) una configuración.
+
+        Si cambia el host, la llave guardada ya no aplica y hay que volver a probar.
+        """
+        if data.host != current_host:
+            row.host_key = None
+        row.host = encrypt_value(data.host)
         row.port = data.port
-        row.username = data.username
+        row.username = encrypt_value(data.username)
         row.root_folder = data.root_folder
         row.remote_folder = data.remote_folder
         # Contraseña vacía en la edición = conservar la actual.
         if password:
-            row.encrypted_password = encrypt_password(password)
-        self._db.commit()
-        self._db.refresh(row)
-        return row
+            row.encrypted_password = encrypt_value(password)
+        if reactivate:
+            row.is_active = True
+        return self.save(row)
+
+    def save_host_key(self, row: SftpService, host_key: str) -> SftpService:
+        row.host_key = host_key
+        return self.save(row)
 
     def deactivate_config(self, row: SftpService) -> None:
-        # Desactivar en lugar de borrar: sftp_send referencia esta configuración.
+        # Borrado lógico: sftp_send referencia esta configuración y se puede reactivar.
         row.is_active = False
-        self._db.commit()
+        self.save(row)

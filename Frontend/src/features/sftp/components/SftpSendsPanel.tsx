@@ -1,6 +1,6 @@
 import { Alert, Badge, Button, Checkbox, Group, Loader, Select, Stack, Table, Text, TextInput, Title } from '@mantine/core';
 import { useClientOptions } from '@/features/clients/hooks/useClientOptions';
-import { MAX_AUTO_RETRIES, useSftpSends } from '../hooks/useSftpSends';
+import { MAX_AUTO_ATTEMPTS, useSftpSends } from '../hooks/useSftpSends';
 import { SftpSendStatus } from '../types/ISftpSend';
 
 const STATUS_OPTIONS = [
@@ -21,7 +21,9 @@ export function SftpSendsPanel() {
     <Stack>
       <Title order={3}>Envíos XML</Title>
       <Text size="sm" c="dimmed">
-        Archivos generados por evento. Reintentos automáticos: {MAX_AUTO_RETRIES}. Después se reintentan aquí manualmente.
+        Archivos generados por evento. Se hacen {MAX_AUTO_ATTEMPTS} intentos automáticos con espera entre
+        ellos; si no se logra, se reenvían aquí manualmente (un intento inmediato). También se pueden
+        reenviar los pendientes atorados más de 10 minutos.
       </Text>
 
       <Group align="flex-end" grow>
@@ -66,14 +68,14 @@ export function SftpSendsPanel() {
             disabled={failedCount === 0 || resending}
             loading={resending}
           >
-            Reintentar fallidos
+            Reintentar fallidos y atorados
           </Button>
         </Group>
       </Group>
 
       {selection.skippedCount > 0 && (
         <Alert color="yellow">
-          {selection.skippedCount} seleccionado(s) no están fallidos y se omitirán al reintentar.
+          {selection.skippedCount} seleccionado(s) no se pueden reenviar (enviados o aún en sus intentos automáticos) y se omitirán.
         </Alert>
       )}
 
@@ -99,7 +101,7 @@ export function SftpSendsPanel() {
               <Table.Th>Cliente</Table.Th>
               <Table.Th>Referencia</Table.Th>
               <Table.Th>Estado</Table.Th>
-              <Table.Th>Reintentos</Table.Th>
+              <Table.Th>Intentos fallidos</Table.Th>
               <Table.Th>Último error</Table.Th>
             </Table.Tr>
           </Table.Thead>
@@ -121,7 +123,7 @@ export function SftpSendsPanel() {
                     {STATUS_LABEL[send.status] ?? send.status}
                   </Badge>
                 </Table.Td>
-                <Table.Td>{send.retries} / {MAX_AUTO_RETRIES}</Table.Td>
+                <Table.Td>{send.retries} / {MAX_AUTO_ATTEMPTS}</Table.Td>
                 <Table.Td>
                   <Text size="sm" lineClamp={2} title={send.sftp_log ?? ""}>
                     {send.sftp_log ?? "—"}

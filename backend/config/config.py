@@ -1,4 +1,5 @@
 import os
+import socket
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -31,6 +32,16 @@ class Env:
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
     )
     DATABASE_URL = os.getenv("DATABASE_URL", "")
+
+    # Alertas de errores del servidor a soporte (email vía Lambda + WhatsApp Cloud API).
+    INSTALLATION_NAME = os.getenv("INSTALLATION_NAME", "") or socket.gethostname()
+    ALERT_EMAILS = [e.strip() for e in os.getenv("ALERT_EMAILS", "").split(",") if e.strip()]
+    ALERT_WHATSAPP_TO = os.getenv("ALERT_WHATSAPP_TO", "").strip()
+    WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN", "").strip()
+    WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "").strip()
+    WHATSAPP_TEMPLATE = os.getenv("WHATSAPP_TEMPLATE", "").strip()
+    WHATSAPP_TEMPLATE_LANG = os.getenv("WHATSAPP_TEMPLATE_LANG", "es_MX").strip()
+    WHATSAPP_API_VERSION = os.getenv("WHATSAPP_API_VERSION", "").strip()
 
 
 @dataclass(frozen=True)

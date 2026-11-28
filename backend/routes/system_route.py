@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 
 from database import engine
-from deps.auth import CurrentUser, get_current_user
-from deps.service import SystemConfigService
+from deps.auth import CurrentUser, get_current_user, require_admin
+from deps.service import AppErrorSvc, SystemConfigService
+from utility.app_error_service import AppErrorOut
 
 # Health check router (no auth required)
 health_router = APIRouter(tags=["health"])
@@ -42,6 +43,18 @@ class ScacRequest(BaseModel):
         if not value.isalpha():
             raise ValueError("El SCAC solo puede contener letras")
         return value
+
+
+@router.get(
+    "/errors",
+    response_model=list[AppErrorOut],
+    dependencies=[Depends(require_admin)],
+)
+def list_server_errors(
+    service: AppErrorSvc, limit: int = Query(default=50, ge=1, le=500)
+) -> list[AppErrorOut]:
+    """Últimos errores del servidor registrados (los que se alertan a soporte)."""
+    return service.list_latest(limit)
 
 
 @router.get("/config")

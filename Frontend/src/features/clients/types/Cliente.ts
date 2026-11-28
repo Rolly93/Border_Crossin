@@ -16,6 +16,10 @@ export interface ISftpConfiguration {
     password: string;
     root_folder?: string;
     remote_folder?: string;
+    /** false = desactivada; guardarla la reactiva. */
+    is_active?: boolean;
+    /** Huella de la llave del servidor; null = falta "Probar conexión". */
+    host_key_fingerprint?: string | null;
 }
 
 export type { ISftpSend, SftpSendFilters, SftpSendStatus };

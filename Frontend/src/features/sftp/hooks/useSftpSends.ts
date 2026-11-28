@@ -5,7 +5,21 @@ import { sftpService } from '../service/sftpService';
 import { ISftpSend, SftpSendStatus, SftpSendFilters } from '../types/ISftpSend';
 import { getErrorMessage } from '@/components/utils/errorMessage';
 
-export const MAX_AUTO_RETRIES = 3;
+// Intentos automáticos del backend (1 + 3 reintentos con espera). `retries` = intentos fallidos.
+export const MAX_AUTO_ATTEMPTS = 4;
+// Un "pending" sin intentos en este tiempo está atorado y se puede reenviar (igual que el backend).
+const STUCK_AFTER_MS = 10 * 60 * 1000;
+
+const isResendable = (send: ISftpSend): boolean => {
+  if (send.status === 'failed') {
+    return true;
+  }
+  if (send.status !== 'pending') {
+    return false;
+  }
+  const last = send.last_attempt_at ? new Date(send.last_attempt_at).getTime() : 0;
+  return Date.now() - last > STUCK_AFTER_MS;
+};
 
 export function useSftpSends() {
   const [clientId, setClientId] = useState<string | null>(null);
@@ -43,7 +57,7 @@ export function useSftpSends() {
   }, [load]);
 
   const failedIds = useMemo(
-    () => sends.filter((s) => s.status === 'failed').map((s) => s.id),
+    () => sends.filter(isResendable).map((s) => s.id),
     [sends]
   );
   const selectedFailed = useMemo(

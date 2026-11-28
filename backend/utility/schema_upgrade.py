@@ -29,6 +29,76 @@ def _normalize_state(raw: str | None) -> str:
     return "ACTIVA"
 
 
+SFTP_WIDE_COLUMNS = ("host", "username", "encrypted_password")
+
+
+def _is_encrypted(value: str | None) -> bool:
+    from cryptography.fernet import InvalidToken
+
+    from utility.encryption import decrypt_password
+
+    if not value:
+        return False
+    try:
+        decrypt_password(value)
+        return True
+    except (InvalidToken, ValueError):
+        return False
+
+
+def upgrade_sftp_schema(engine: Engine) -> None:
+    """Columnas nuevas de SFTP y cifrado de host/username guardados en texto plano.
+
+    Idempotente: un valor que ya descifra con FERNET_KEY no se vuelve a cifrar.
+    """
+    from utility.encryption import encrypt_password
+
+    inspector = inspect(engine)
+    tables = inspector.get_table_names()
+    dialect = engine.dialect.name
+
+    if "sftp_send" in tables:
+        send_columns = {c["name"] for c in inspector.get_columns("sftp_send")}
+        if "last_attempt_at" not in send_columns:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE sftp_send ADD COLUMN last_attempt_at TIMESTAMP NULL"))
+            logger.info("Esquema: columna sftp_send.last_attempt_at agregada")
+
+    if "sftp_service" not in tables:
+        return
+
+    columns = {c["name"]: c for c in inspector.get_columns("sftp_service")}
+    with engine.begin() as conn:
+        if "host_key" not in columns:
+            conn.execute(text("ALTER TABLE sftp_service ADD COLUMN host_key VARCHAR(1024) NULL"))
+            logger.info("Esquema: columna sftp_service.host_key agregada")
+
+        # Los valores cifrados ocupan ~2x; SQLite no limita el largo de VARCHAR.
+        for name in SFTP_WIDE_COLUMNS:
+            length = getattr(columns.get(name, {}).get("type"), "length", None)
+            if length is not None and length < 512:
+                if dialect == "mysql":
+                    conn.execute(text(f"ALTER TABLE sftp_service MODIFY {name} VARCHAR(512) NOT NULL"))
+                elif dialect == "postgresql":
+                    conn.execute(text(f"ALTER TABLE sftp_service ALTER COLUMN {name} TYPE VARCHAR(512)"))
+                logger.info("Esquema: columna sftp_service.%s ampliada a 512", name)
+
+        rows = conn.execute(text("SELECT id, host, username FROM sftp_service")).fetchall()
+        for row_id, host, username in rows:
+            changes = {}
+            if host and not _is_encrypted(host):
+                changes["host"] = encrypt_password(host)
+            if username and not _is_encrypted(username):
+                changes["username"] = encrypt_password(username)
+            if changes:
+                sets = ", ".join(f"{k} = :{k}" for k in changes)
+                conn.execute(
+                    text(f"UPDATE sftp_service SET {sets} WHERE id = :id"),
+                    {**changes, "id": row_id},
+                )
+                logger.info("Esquema: sftp_service %s cifrado (%s)", row_id, ", ".join(changes))
+
+
 def upgrade_unit_schema(engine: Engine) -> None:
     inspector = inspect(engine)
     if "unit_truck" not in inspector.get_table_names():

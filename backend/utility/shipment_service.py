@@ -3,6 +3,7 @@ import logging
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from exeption.sftp_exception import SftpConfigUnreadable
 from integrations.deps.aws_dep import LambdaClientDep
 from model.db_model import (
     ShipmentAssign,
@@ -28,6 +29,7 @@ from schema.shipment_shcema import (
     TrailerCreate,
     TrailerResponse,
 )
+from service import alerting
 from service.shipment_dispatch_service import ShipmentDispatchService
 from utility.cliente_service import ClienteService
 from utility.reference_rule_service import ReferenceRuleService
@@ -249,7 +251,10 @@ class ShipmentService:
         shipment_id: int,
         shipment_data: ServiceTypeUnionRequestUpdate,
         user_id: int,
-    ) -> ShipmentAssign:
+    ) -> tuple[ShipmentAssign, list[int]]:
+        """Actualiza el embarque. Devuelve también los ids de envíos SFTP pendientes,
+        que quien llama debe procesar en segundo plano (`sftp_dispatcher.process_sends`).
+        """
 
         current = self._shipment_db.get_shipment(shipment_id)
         self._reference_rule.validate(
@@ -262,13 +267,21 @@ class ShipmentService:
             shipment_id, shipment_data, user_id
         )
 
-        if (
-            service := self._client_service.get_client_service(
+        pending_send_ids: list[int] = []
+        try:
+            service = self._client_service.get_client_service(
                 shipment.client_id,
                 ClientServiceType.SFTP,
             )
-        ) and service.sftService:
-            self._dispatchService.dispatch_events(new_events, service.sftService)
+        except SftpConfigUnreadable as err:
+            # El embarque ya se guardó: los envíos quedan fallidos y se alerta a soporte.
+            alerting.report("sftp_config_unreadable", str(err), location=f"sftp_config:{err.config_id}")
+            self._dispatchService.dispatch_events(new_events, err.config_id, unavailable_reason=str(err))
+            return shipment, pending_send_ids
+
+        if service.sftService:
+            sends = self._dispatchService.dispatch_events(new_events, service.sftService.id)
+            pending_send_ids = [s.id for s in sends if s.status == "pending"]
         if service.emailService:
             either_trailer_consolidate = self._build_service_response(shipment=shipment)
             self._dispatchService.notify_status(
@@ -277,4 +290,4 @@ class ShipmentService:
                 shipment_response=either_trailer_consolidate,
             )
 
-        return shipment
+        return shipment, pending_send_ids

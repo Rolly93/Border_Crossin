@@ -21,3 +21,8 @@ def encrypt_password(plain_password: str) -> str:
 def decrypt_password(encrypted_password: str) -> str:
     decrypted_bytes = fernet.decrypt(encrypted_password.encode("utf-8"))
     return decrypted_bytes.decode("utf-8")
+
+
+# Nombres genéricos: también se cifran host y usuario SFTP, no solo contraseñas.
+encrypt_value = encrypt_password
+decrypt_value = decrypt_password

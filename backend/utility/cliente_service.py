@@ -12,7 +12,6 @@ from schema import (
     SftpConfigurationRequest,
 )
 from schema.client_schema import MetricsClientResponse
-from schema.sftp_schema import SftpConfiRequst
 from schema.shipment_shcema import ShipmentCreateRequest
 
 
@@ -34,10 +33,6 @@ class ClienteService:
                 status.HTTP_404_NOT_FOUND, "Cliente no encontrado o inactivo"
             )
         return client
-
-    def config_sftp(self, sftp_data: SftpConfigurationRequest):
-        new_connection = SftpConfiRequst(**sftp_data.model_dump())
-        return self._sftp_service.insert_sftp_service(new_connection)
 
     def create_client(self, data: ClientRequest) -> Client:
         new_client = self._db.create_new_client(data)
@@ -78,11 +73,8 @@ class ClienteService:
         email_service: EmailConfigurationRequest | None = None
 
         if service_type == ClientServiceType.SFTP:
-            sftp_data = self._sftp_service.get_sftp_data(client.id)
-            if sftp_data:
-                sftp_service = SftpConfigurationRequest.model_validate(
-                    sftp_data.model_dump()
-                )
+            # Ya viene descifrada; puede lanzar SftpConfigUnreadable (lo maneja quien despacha).
+            sftp_service = self._sftp_service.get_sftp_data(client.id)
 
         if service_type == ClientServiceType.EMAIL:
             active_emails = self._db.get_active_emails(client.id)

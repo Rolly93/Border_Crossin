@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 from deps.auth import CurrentUser, get_current_user, require_admin
 from deps.service import SftpServiceConfigSvc, SftpServiceSend
-from schema.sftp_schema import SftpConfigIn
+from schema.sftp_schema import SftpConfigIn, SftpTestResult
 
 router = APIRouter(
     prefix="/sftp", tags=["sftp"], dependencies=[Depends(get_current_user)]
@@ -60,6 +60,16 @@ def update_connection(
     service: SftpServiceConfigSvc,
 ):
     return service.update(config_id, data)
+
+
+@router.post(
+    "/test/{config_id}",
+    response_model=SftpTestResult,
+    dependencies=[Depends(require_admin)],
+)
+def test_connection(config_id: int, service: SftpServiceConfigSvc) -> SftpTestResult:
+    """Prueba la conexión; la primera vez guarda la llave del servidor (requisito para enviar)."""
+    return service.test_connection(config_id)
 
 
 @router.delete("/delete/{config_id}", dependencies=[Depends(require_admin)])

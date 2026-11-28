@@ -449,6 +449,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sftp/test/{config_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Connection
+         * @description Prueba la conexión; la primera vez guarda la llave del servidor (requisito para enviar).
+         */
+        post: operations["test_connection_sftp_test__config_id__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sftp/delete/{config_id}": {
         parameters: {
             query?: never;
@@ -461,6 +481,26 @@ export interface paths {
         post?: never;
         /** Delete Connection */
         delete: operations["delete_connection_sftp_delete__config_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Server Errors
+         * @description Últimos errores del servidor registrados (los que se alertan a soporte).
+         */
+        get: operations["list_server_errors_system_errors_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -590,6 +630,33 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AppErrorOut */
+        AppErrorOut: {
+            /** Id */
+            id: number;
+            /** Kind */
+            kind: string;
+            /** Title */
+            title: string;
+            /** Path */
+            path: string | null;
+            /** Method */
+            method: string | null;
+            /** Count */
+            count: number;
+            /**
+             * First Seen
+             * Format: date-time
+             */
+            first_seen: string;
+            /**
+             * Last Seen
+             * Format: date-time
+             */
+            last_seen: string;
+            /** Notified At */
+            notified_at: string | null;
+        };
         /** AssignIn */
         AssignIn: {
             /** Driverid */
@@ -1140,6 +1207,15 @@ export interface components {
             root_folder: string;
             /** Remote Folder */
             remote_folder: string;
+        };
+        /** SftpTestResult */
+        SftpTestResult: {
+            /** Ok */
+            ok: boolean;
+            /** Message */
+            message: string;
+            /** Fingerprint */
+            fingerprint?: string | null;
         };
         /** ShipmentEvent */
         ShipmentEvent: {
@@ -2226,6 +2302,41 @@ export interface operations {
             };
         };
     };
+    test_connection_sftp_test__config_id__post: {
+        parameters: {
+            query?: {
+                token?: string | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path: {
+                config_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SftpTestResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     delete_connection_sftp_delete__config_id__delete: {
         parameters: {
             query?: {
@@ -2248,6 +2359,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_server_errors_system_errors_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                token?: string | null;
+            };
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AppErrorOut"][];
                 };
             };
             /** @description Validation Error */

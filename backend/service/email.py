@@ -18,6 +18,14 @@ logger = logging.getLogger(__name__)
 _EMAILS_ADAPTER = TypeAdapter(list[EmailStr])
 
 
+def _report_email_failure(err: Exception, what: str) -> None:
+    """El correo a clientes falló (Lambda/SES): es un error del servidor, se alerta."""
+    from service import alerting
+
+    title, detail, _ = alerting.describe_exception(err)
+    alerting.report("email_failed", f"Correo de {what} no enviado: {title}", detail, location="email:lambda")
+
+
 class EmailNotificationDispatcher:
     def __init__(self, lambda_client: LambdaClientDep | None = None) -> None:
         self._lambda_client = lambda_client
@@ -107,10 +115,7 @@ class EmailNotificationDispatcher:
                 "Error al enviar notificación de asignación vía Lambda para tag=%s",
                 payload.tag,
             )
-            logger.exception(
-                "Error:",
-                e,
-            )
+            _report_email_failure(e, f"asignación {payload.tracking_number}")
 
     def send_status(
         self, payload: PayloadStatusTrailer | PayloadStatusConsolidate
@@ -141,7 +146,4 @@ class EmailNotificationDispatcher:
                 "Error sending status notification for tracking=%s",
                 payload.tracking_number,
             )
-            logger.exception(
-                "Error:",
-                e,
-            )
+            _report_email_failure(e, f"estatus {payload.tracking_number}")

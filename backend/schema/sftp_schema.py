@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -35,6 +37,8 @@ class SftpInactivateRequest(SftpResponse):
 
 
 class SftpConfigurationRequest(BaseModel):
+    """Datos de conexión YA DESCIFRADOS (solo en memoria; nunca se devuelven al frontend)."""
+
     id: int
     host: str
     client_id: int
@@ -42,7 +46,8 @@ class SftpConfigurationRequest(BaseModel):
     port: int
     root_folder: str
     remote_folder: str
-    encrypted_password: str
+    password: str
+    host_key: str | None = None
 
 
 class sftpSendFile(SftpResponse):
@@ -90,6 +95,16 @@ class SftpConfigOut(BaseModel):
     password: str = ""
     root_folder: str
     remote_folder: str
+    # False = configuración desactivada; guardarla la reactiva.
+    is_active: bool = True
+    # Huella SHA256 de la llave del servidor, si ya se probó la conexión.
+    host_key_fingerprint: str | None = None
+
+
+class SftpTestResult(BaseModel):
+    ok: bool
+    message: str
+    fingerprint: str | None = None
 
 
 class Sftp_Files_Response:
@@ -113,6 +128,7 @@ class Sftp_Resend_Response(BaseModel):
     client_id: int
     reference: str
     shipment_event_id: int
+    last_attempt_at: datetime | None = None
 
 
 class Sftp_Response_Delte(BaseModel):

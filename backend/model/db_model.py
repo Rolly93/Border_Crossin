@@ -173,9 +173,12 @@ class SftpService(Base):
     __tablename__ = "sftp_service"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    host: Mapped[str] = mapped_column(String(200), nullable=False)
-    username: Mapped[str] = mapped_column(String(200), nullable=False)
-    encrypted_password: Mapped[str] = mapped_column(String(200), nullable=False)
+    # host, username y password se guardan cifrados (Fernet); ver SftpRepository.
+    host: Mapped[str] = mapped_column(String(512), nullable=False)
+    username: Mapped[str] = mapped_column(String(512), nullable=False)
+    encrypted_password: Mapped[str] = mapped_column(String(512), nullable=False)
+    # Llave pública del servidor ("<tipo> <base64>"), guardada en la primera prueba exitosa.
+    host_key: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     port: Mapped[int] = mapped_column(Integer, nullable=False, default=22)
     root_folder: Mapped[str] = mapped_column(String(200), nullable=False)
     remote_folder: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -444,12 +447,32 @@ class SftpSend(Base):
     )
     sftp_log: Mapped[str | None] = mapped_column(Text, nullable=True)
     retries: Mapped[int] = mapped_column(Integer, default=0)
+    last_attempt_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relaciones
     service: Mapped[SftpService] = relationship("SftpService", back_populates="sends")
     shipment_event: Mapped[ShipmentEventModel] = relationship(
         "ShipmentEventModel", back_populates="sftp_sends"
     )
+
+
+class AppError(Base):
+    """Errores del servidor (no de usuario) registrados y notificados a soporte."""
+
+    __tablename__ = "app_error"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    kind: Mapped[str] = mapped_column(String(50), nullable=False)
+    fingerprint: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(300), nullable=False)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    path: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    method: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    user_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    first_seen: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    notified_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class SystemConfig(Base):
